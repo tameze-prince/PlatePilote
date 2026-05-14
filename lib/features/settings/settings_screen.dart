@@ -1,45 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/color_tokens.dart';
 import '../../app/theme/spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
+import '../../core/providers/theme_provider.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final items = [
-      const _SettingsItem(
-        icon: Icons.people_outline,
-        title: 'Household',
-        subtitle: '2 people - balanced portions',
-      ),
-      const _SettingsItem(
-        icon: Icons.payments_outlined,
-        title: 'Budget',
-        subtitle: r'$400 weekly grocery cap',
-      ),
-      const _SettingsItem(
-        icon: Icons.no_food_outlined,
-        title: 'Dietary Constraints',
-        subtitle: 'High protein, low waste',
-      ),
-      const _SettingsItem(
-        icon: Icons.notifications_outlined,
-        title: 'Notifications',
-        subtitle: 'Pantry alerts and plan reminders',
-      ),
-      const _SettingsItem(
-        icon: Icons.dark_mode_outlined,
-        title: 'Theme',
-        subtitle: 'Follows system appearance',
-      ),
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final isDark = themeMode == ThemeMode.dark;
+    final isSystem = themeMode == ThemeMode.system;
+
+    String themeLabel;
+    if (isSystem) {
+      themeLabel = 'Follows system appearance';
+    } else if (isDark) {
+      themeLabel = 'Dark mode';
+    } else {
+      themeLabel = 'Light mode';
+    }
 
     return PlateScaffold(
       title: 'PlatePilot',
@@ -76,10 +63,63 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          ...items.map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-              child: item,
+          _SettingsItem(
+            icon: Icons.people_outline,
+            title: 'Household',
+            subtitle: '2 people - balanced portions',
+          ),
+          _SettingsItem(
+            icon: Icons.payments_outlined,
+            title: 'Budget',
+            subtitle: r'$400 weekly grocery cap',
+          ),
+          _SettingsItem(
+            icon: Icons.no_food_outlined,
+            title: 'Dietary Constraints',
+            subtitle: 'High protein, low waste',
+          ),
+          _SettingsItem(
+            icon: Icons.notifications_outlined,
+            title: 'Notifications',
+            subtitle: 'Pantry alerts and plan reminders',
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          AppCard(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              children: [
+                Icon(
+                  isDark ? Icons.dark_mode : Icons.light_mode,
+                  color: context.colors.primary,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Theme',
+                        style: context.text.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(themeLabel, style: context.text.bodyMedium),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: isDark,
+                  activeTrackColor: ColorTokens.primaryGreen,
+                  onChanged: (_) {
+                    final next = switch (themeMode) {
+                      ThemeMode.light => ThemeMode.dark,
+                      ThemeMode.dark => ThemeMode.system,
+                      ThemeMode.system => ThemeMode.light,
+                    };
+                    ref.read(themeModeProvider.notifier).set(next);
+                  },
+                ),
+              ],
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -107,28 +147,31 @@ class _SettingsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Row(
-        children: [
-          Icon(icon, color: context.colors.primary),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: context.text.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      child: AppCard(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          children: [
+            Icon(icon, color: context.colors.primary),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: context.text.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-                Text(subtitle, style: context.text.bodyMedium),
-              ],
+                  Text(subtitle, style: context.text.bodyMedium),
+                ],
+              ),
             ),
-          ),
-          const Icon(Icons.chevron_right),
-        ],
+            const Icon(Icons.chevron_right),
+          ],
+        ),
       ),
     );
   }
