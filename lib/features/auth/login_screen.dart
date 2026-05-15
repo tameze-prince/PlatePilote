@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/color_tokens.dart';
 import '../../app/theme/spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
+import '../../core/providers/app_session_provider.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/primary_button.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return _AuthShell(
       title: 'Welcome back',
       subtitle: 'Sign in to keep your weekly plan and grocery list in sync.',
       action: 'Sign In',
       footer: 'Create Account',
-      onAction: () => context.go('/home'),
+      onAction: () async {
+        await ref.read(appSessionProvider.notifier).signIn();
+        if (context.mounted) {
+          context.go('/home');
+        }
+      },
       onFooter: () => context.go('/signup'),
     );
   }

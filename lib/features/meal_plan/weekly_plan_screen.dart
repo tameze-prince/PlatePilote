@@ -56,10 +56,13 @@ class WeeklyPlanScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          ...demoMeals.map(
-            (meal) => Padding(
+          ...demoMeals.indexed.map(
+            (entry) => Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: MealCard(meal: meal),
+              child: MealCard(
+                meal: entry.$2,
+                onTap: () => context.push('/recipe/${entry.$1}'),
+              ),
             ),
           ),
           AppCard(

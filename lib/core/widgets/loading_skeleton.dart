@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../app/theme/color_tokens.dart';
 import '../../app/theme/radius.dart';
@@ -12,14 +13,46 @@ class LoadingSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: height,
-      width: width,
-      decoration: BoxDecoration(
-        color: context.isDark
-            ? ColorTokens.darkElevatedSurface
-            : ColorTokens.surfaceContainer,
-        borderRadius: BorderRadius.circular(AppRadius.small),
+    final baseColor = context.isDark
+        ? ColorTokens.darkElevatedSurface
+        : ColorTokens.surfaceContainer;
+    final highlightColor = context.isDark
+        ? ColorTokens.darkBorder
+        : ColorTokens.surfaceContainerHigh;
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Container(
+        height: height,
+        width: width,
+        decoration: BoxDecoration(
+          color: baseColor,
+          borderRadius: BorderRadius.circular(AppRadius.small),
+        ),
+      ),
+    );
+  }
+}
+
+class LoadingSkeletonCard extends StatelessWidget {
+  const LoadingSkeletonCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: context.isDark
+          ? ColorTokens.darkElevatedSurface
+          : ColorTokens.surfaceContainer,
+      highlightColor: context.isDark
+          ? ColorTokens.darkBorder
+          : ColorTokens.surfaceContainerHigh,
+      child: Container(
+        height: 96,
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
       ),
     );
   }

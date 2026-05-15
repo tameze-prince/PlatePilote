@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
+import '../../core/providers/app_session_provider.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/primary_button.dart';
 
-class SignupScreen extends StatelessWidget {
+class SignupScreen extends ConsumerWidget {
   const SignupScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -48,7 +50,12 @@ class SignupScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.lg),
                     PrimaryButton(
                       label: 'Create Account',
-                      onPressed: () => context.go('/home'),
+                      onPressed: () async {
+                        await ref.read(appSessionProvider.notifier).signIn();
+                        if (context.mounted) {
+                          context.go('/home');
+                        }
+                      },
                     ),
                     Center(
                       child: TextButton(

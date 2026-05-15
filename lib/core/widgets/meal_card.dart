@@ -7,14 +7,21 @@ import '../../shared/models/demo_data.dart';
 import 'app_card.dart';
 
 class MealCard extends StatelessWidget {
-  const MealCard({required this.meal, this.compact = false, super.key});
+  const MealCard({
+    required this.meal,
+    this.compact = false,
+    this.onTap,
+    super.key,
+  });
 
   final Meal meal;
   final bool compact;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return AppCard(
+      onTap: onTap,
       child: Row(
         children: [
           Container(

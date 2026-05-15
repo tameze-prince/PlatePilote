@@ -97,7 +97,11 @@ class HomeScreen extends StatelessWidget {
                 ...todayMeals.map(
                   (meal) => Padding(
                     padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                    child: MealCard(meal: meal, compact: true),
+                    child: MealCard(
+                      meal: meal,
+                      compact: true,
+                      onTap: () => context.push('/recipe/0'),
+                    ),
                   ),
                 ),
               ],

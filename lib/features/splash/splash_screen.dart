@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,31 +5,8 @@ import '../../app/theme/color_tokens.dart';
 import '../../app/theme/spacing.dart';
 import '../../core/widgets/primary_button.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer(const Duration(milliseconds: 950), () {
-      if (mounted) {
-        context.go('/onboarding');
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               const SizedBox(height: AppSpacing.xxl),
               PrimaryButton(
-                label: 'Start planning',
+                label: 'Get Started',
                 onPressed: () => context.go('/onboarding'),
               ),
             ],
