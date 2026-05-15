@@ -12,6 +12,9 @@ class PremiumUpgradeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
+
     return PlateScaffold(
       title: 'Premium',
       showBack: true,
@@ -53,26 +56,60 @@ class PremiumUpgradeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          const _PremiumFeature(
-            icon: Icons.auto_awesome,
-            title: 'AI plan regeneration',
-            subtitle: 'Swap meals while preserving budget and nutrition.',
-          ),
-          const _PremiumFeature(
-            icon: Icons.document_scanner_outlined,
-            title: 'Unlimited pantry scans',
-            subtitle: 'Receipt, barcode, and camera-driven pantry capture.',
-          ),
-          const _PremiumFeature(
-            icon: Icons.savings_outlined,
-            title: 'Savings intelligence',
-            subtitle: 'Track waste reduction and best-value substitutions.',
-          ),
+          if (isTablet)
+            Row(
+              children: const [
+                Expanded(
+                  child: _PremiumFeature(
+                    icon: Icons.auto_awesome,
+                    title: 'AI plan regeneration',
+                    subtitle: 'Swap meals while preserving budget and nutrition.',
+                  ),
+                ),
+                SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  child: _PremiumFeature(
+                    icon: Icons.document_scanner_outlined,
+                    title: 'Unlimited pantry scans',
+                    subtitle: 'Receipt, barcode, and camera-driven pantry capture.',
+                  ),
+                ),
+                SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  child: _PremiumFeature(
+                    icon: Icons.savings_outlined,
+                    title: 'Savings intelligence',
+                    subtitle: 'Track waste reduction and best-value substitutions.',
+                  ),
+                ),
+              ],
+            )
+          else ...[
+            const _PremiumFeature(
+              icon: Icons.auto_awesome,
+              title: 'AI plan regeneration',
+              subtitle: 'Swap meals while preserving budget and nutrition.',
+            ),
+            const _PremiumFeature(
+              icon: Icons.document_scanner_outlined,
+              title: 'Unlimited pantry scans',
+              subtitle: 'Receipt, barcode, and camera-driven pantry capture.',
+            ),
+            const _PremiumFeature(
+              icon: Icons.savings_outlined,
+              title: 'Savings intelligence',
+              subtitle: 'Track waste reduction and best-value substitutions.',
+            ),
+          ],
           const SizedBox(height: AppSpacing.lg),
           PrimaryButton(
             label: 'Start Premium Trial',
             icon: Icons.arrow_forward,
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Premium trial started!')),
+              );
+            },
           ),
         ],
       ),

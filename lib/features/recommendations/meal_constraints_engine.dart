@@ -1,5 +1,6 @@
 import '../../shared/models/demo_data.dart';
 
+@Deprecated('No longer used. Will be removed in a future version.')
 class MealRecommendationConstraints {
   const MealRecommendationConstraints({
     required this.weeklyBudget,
@@ -28,6 +29,7 @@ class MealRecommendationConstraints {
   final bool groceryAdditionsAcceptable;
 }
 
+@Deprecated('No longer used. Will be removed in a future version.')
 class RankedMeal {
   const RankedMeal({
     required this.meal,
@@ -42,6 +44,7 @@ class RankedMeal {
   final int pantryMatchCount;
 }
 
+@Deprecated('No longer used. Will be removed in a future version.')
 class MealConstraintsEngine {
   const MealConstraintsEngine();
 

@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/providers/preferences_provider.dart';
 import '../../features/onboarding/onboarding_state.dart';
 
 class EditablePreferences {
@@ -44,11 +47,51 @@ class EditablePreferences {
       preferredCuisines: preferredCuisines ?? this.preferredCuisines,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'householdSize': householdSize,
+    'cookingSkill': cookingSkill,
+    'weeklyBudget': weeklyBudget,
+    'cookingTime': cookingTime,
+    'dietaryPreferences': dietaryPreferences.toList(),
+    'allergies': allergies.toList(),
+    'goals': goals.toList(),
+    'preferredCuisines': preferredCuisines.toList(),
+  };
+
+  factory EditablePreferences.fromJson(Map<String, dynamic> json) {
+    return EditablePreferences(
+      householdSize: json['householdSize'] as String? ?? '2',
+      cookingSkill: json['cookingSkill'] as String? ?? 'Balanced',
+      weeklyBudget: json['weeklyBudget'] as String? ?? r'$120',
+      cookingTime: json['cookingTime'] as String? ?? '30 min',
+      dietaryPreferences: (json['dietaryPreferences'] as List<dynamic>?)
+              ?.cast<String>().toSet() ??
+          const {'High protein'},
+      allergies: (json['allergies'] as List<dynamic>?)
+              ?.cast<String>().toSet() ??
+          const {},
+      goals: (json['goals'] as List<dynamic>?)?.cast<String>().toSet() ??
+          const {'Save money'},
+      preferredCuisines: (json['preferredCuisines'] as List<dynamic>?)
+              ?.cast<String>().toSet() ??
+          const {'Mediterranean'},
+    );
+  }
 }
 
 class PreferencesNotifier extends Notifier<EditablePreferences> {
+  static const _preferencesKey = 'preferences.editable';
+
   @override
   EditablePreferences build() {
+    final prefs = ref.watch(sharedPreferencesProvider);
+    final stored = prefs.getString(_preferencesKey);
+    if (stored != null) {
+      return EditablePreferences.fromJson(
+        json.decode(stored) as Map<String, dynamic>,
+      );
+    }
     final onboarding = ref.watch(onboardingProvider);
     return EditablePreferences(
       householdSize: onboarding.householdSize ?? '2',
@@ -62,40 +105,54 @@ class PreferencesNotifier extends Notifier<EditablePreferences> {
     );
   }
 
-  void setHouseholdSize(String value) {
+  Future<void> setHouseholdSize(String value) async {
     state = state.copyWith(householdSize: value);
+    await _persist();
   }
 
-  void setCookingSkill(String value) {
+  Future<void> setCookingSkill(String value) async {
     state = state.copyWith(cookingSkill: value);
+    await _persist();
   }
 
-  void setWeeklyBudget(String value) {
+  Future<void> setWeeklyBudget(String value) async {
     state = state.copyWith(weeklyBudget: value);
+    await _persist();
   }
 
-  void setCookingTime(String value) {
+  Future<void> setCookingTime(String value) async {
     state = state.copyWith(cookingTime: value);
+    await _persist();
   }
 
-  void toggleDietaryPreference(String value) {
+  Future<void> toggleDietaryPreference(String value) async {
     state = state.copyWith(
       dietaryPreferences: _toggle(state.dietaryPreferences, value),
     );
+    await _persist();
   }
 
-  void toggleAllergy(String value) {
+  Future<void> toggleAllergy(String value) async {
     state = state.copyWith(allergies: _toggle(state.allergies, value));
+    await _persist();
   }
 
-  void toggleGoal(String value) {
+  Future<void> toggleGoal(String value) async {
     state = state.copyWith(goals: _toggle(state.goals, value));
+    await _persist();
   }
 
-  void toggleCuisine(String value) {
+  Future<void> toggleCuisine(String value) async {
     state = state.copyWith(
       preferredCuisines: _toggle(state.preferredCuisines, value),
     );
+    await _persist();
+  }
+
+  Future<void> _persist() async {
+    await ref
+        .read(sharedPreferencesProvider)
+        .setString(_preferencesKey, json.encode(state.toJson()));
   }
 
   Set<String> _toggle(Set<String> values, String value) {

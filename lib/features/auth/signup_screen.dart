@@ -13,13 +13,16 @@ class SignupScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
+
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.md),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
+              constraints: BoxConstraints(maxWidth: isTablet ? 560 : 440),
               child: AppCard(
                 padding: const EdgeInsets.all(AppSpacing.xl),
                 child: Column(

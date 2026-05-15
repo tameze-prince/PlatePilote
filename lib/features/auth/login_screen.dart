@@ -49,6 +49,9 @@ class _AuthShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -59,16 +62,16 @@ class _AuthShell extends StatelessWidget {
               child: Column(
                 children: [
                   Container(
-                    width: 64,
-                    height: 64,
+                    width: isTablet ? 80 : 64,
+                    height: isTablet ? 80 : 64,
                     decoration: BoxDecoration(
                       color: ColorTokens.primaryGreen,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(isTablet ? 24 : 20),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.restaurant_menu,
                       color: Colors.white,
-                      size: 34,
+                      size: isTablet ? 44 : 34,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),

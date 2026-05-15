@@ -5,10 +5,23 @@ import '../../core/extensions/theme_extensions.dart';
 import '../../shared/models/demo_data.dart';
 import 'app_card.dart';
 
-class GroceryItemTile extends StatelessWidget {
+class GroceryItemTile extends StatefulWidget {
   const GroceryItemTile({required this.item, super.key});
 
   final GroceryItem item;
+
+  @override
+  State<GroceryItemTile> createState() => _GroceryItemTileState();
+}
+
+class _GroceryItemTileState extends State<GroceryItemTile> {
+  late bool _checked;
+
+  @override
+  void initState() {
+    super.initState();
+    _checked = widget.item.checked;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,19 +32,36 @@ class GroceryItemTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Checkbox(value: item.checked, onChanged: (_) {}),
+          Checkbox(
+            value: _checked,
+            onChanged: (v) => setState(() => _checked = v ?? false),
+          ),
           const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.name, style: context.text.bodyLarge),
-                Text('Qty: ${item.quantity}', style: context.text.bodyMedium),
+                Text(
+                  widget.item.name,
+                  style: context.text.bodyLarge?.copyWith(
+                    decoration:
+                        _checked ? TextDecoration.lineThrough : null,
+                    color: _checked ? context.text.bodyMedium?.color : null,
+                  ),
+                ),
+                Text(
+                  'Qty: ${widget.item.quantity}',
+                  style: context.text.bodyMedium?.copyWith(
+                    decoration:
+                        _checked ? TextDecoration.lineThrough : null,
+                    color: _checked ? context.text.bodyMedium?.color : null,
+                  ),
+                ),
               ],
             ),
           ),
           Text(
-            item.price,
+            widget.item.price,
             style: context.text.bodyLarge?.copyWith(
               fontWeight: FontWeight.w700,
             ),

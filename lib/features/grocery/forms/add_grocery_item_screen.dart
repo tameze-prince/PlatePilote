@@ -3,57 +3,99 @@ import 'package:flutter/material.dart';
 import '../../../shared/widgets/form_page.dart';
 import '../../../shared/widgets/plate_scaffold.dart';
 
-class AddGroceryItemScreen extends StatelessWidget {
+class AddGroceryItemScreen extends StatefulWidget {
   const AddGroceryItemScreen({super.key});
 
   @override
+  State<AddGroceryItemScreen> createState() => _AddGroceryItemScreenState();
+}
+
+class _AddGroceryItemScreenState extends State<AddGroceryItemScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _quantityController = TextEditingController();
+  final _unitController = TextEditingController();
+  final _costController = TextEditingController();
+  String _category = 'Produce';
+  String _priority = 'Normal';
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _quantityController.dispose();
+    _unitController.dispose();
+    _costController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    debugPrint('GroceryItem added: ${_nameController.text}, '
+        'qty: ${_quantityController.text} ${_unitController.text}, '
+        'category: $_category, '
+        'priority: $_priority, '
+        'cost: \$${_costController.text}');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Grocery item added!')),
+    );
+    Navigator.of(context).pop();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const PlateScaffold(
+    return PlateScaffold(
       title: 'Add Grocery Item',
       showBack: true,
       child: FormPage(
+        formKey: _formKey,
         submitLabel: 'Add grocery item',
+        onSubmit: _submit,
         children: [
-          TextField(decoration: InputDecoration(labelText: 'Item name')),
-          TextField(decoration: InputDecoration(labelText: 'Quantity')),
-          TextField(decoration: InputDecoration(labelText: 'Unit')),
-          _CategoryDropdown(),
-          _PriorityDropdown(),
-          TextField(decoration: InputDecoration(labelText: 'Estimated cost')),
+          TextFormField(
+            controller: _nameController,
+            decoration: const InputDecoration(labelText: 'Item name'),
+            validator: (v) => v?.isEmpty == true ? 'Required' : null,
+          ),
+          TextFormField(
+            controller: _quantityController,
+            decoration: const InputDecoration(labelText: 'Quantity'),
+            keyboardType: TextInputType.number,
+            validator: (v) => v?.isEmpty == true ? 'Required' : null,
+          ),
+          TextFormField(
+            controller: _unitController,
+            decoration: const InputDecoration(labelText: 'Unit'),
+          ),
+          DropdownButtonFormField<String>(
+            initialValue: _category,
+            items: const [
+              'Produce',
+              'Dairy & Eggs',
+              'Protein',
+              'Pantry Staples',
+            ].map(
+              (v) => DropdownMenuItem(value: v, child: Text(v)),
+            ).toList(),
+            onChanged: (v) => setState(() => _category = v!),
+            decoration: const InputDecoration(labelText: 'Category'),
+          ),
+          DropdownButtonFormField<String>(
+            initialValue: _priority,
+            items: const ['Low', 'Normal', 'High'].map(
+              (v) => DropdownMenuItem(value: v, child: Text(v)),
+            ).toList(),
+            onChanged: (v) => setState(() => _priority = v!),
+            decoration: const InputDecoration(labelText: 'Priority'),
+          ),
+          TextFormField(
+            controller: _costController,
+            decoration: const InputDecoration(
+              labelText: 'Estimated cost',
+              prefixText: r'$ ',
+            ),
+            keyboardType: TextInputType.number,
+          ),
         ],
       ),
-    );
-  }
-}
-
-class _CategoryDropdown extends StatelessWidget {
-  const _CategoryDropdown();
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      initialValue: 'Produce',
-      items: const ['Produce', 'Dairy & Eggs', 'Protein', 'Pantry Staples']
-          .map((value) => DropdownMenuItem(value: value, child: Text(value)))
-          .toList(),
-      onChanged: (_) {},
-      decoration: const InputDecoration(labelText: 'Category'),
-    );
-  }
-}
-
-class _PriorityDropdown extends StatelessWidget {
-  const _PriorityDropdown();
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      initialValue: 'Normal',
-      items: const ['Low', 'Normal', 'High']
-          .map((value) => DropdownMenuItem(value: value, child: Text(value)))
-          .toList(),
-      onChanged: (_) {},
-      decoration: const InputDecoration(labelText: 'Priority'),
     );
   }
 }

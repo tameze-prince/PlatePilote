@@ -157,53 +157,63 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     title: 'No notifications',
                     message: 'Everything is calm for now.',
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                    ),
-                    itemCount: visible.length,
-                    itemBuilder: (context, index) {
-                      final notification = visible[index];
-                      return Dismissible(
-                        key: ValueKey(notification.id),
-                        onDismissed: (_) => ref
-                            .read(notificationsProvider.notifier)
-                            .delete(notification.id),
-                        background: Container(
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.only(right: AppSpacing.lg),
-                          color: ColorTokens.error,
-                          child: const Icon(Icons.delete, color: Colors.white),
-                        ),
-                        child: ListTile(
-                          leading: Icon(
-                            _categoryIcon(notification.category),
-                            color: notification.isRead
-                                ? context.text.bodyMedium?.color
-                                : context.colors.primary,
-                          ),
-                          title: Text(
-                            notification.title,
-                            style: context.text.bodyLarge?.copyWith(
-                              fontWeight: notification.isRead
-                                  ? FontWeight.w500
-                                  : FontWeight.w800,
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      await Future.delayed(const Duration(seconds: 1));
+                    },
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                      ),
+                      itemCount: visible.length,
+                      itemBuilder: (context, index) {
+                        final notification = visible[index];
+                        return Dismissible(
+                          key: ValueKey(notification.id),
+                          onDismissed: (_) => ref
+                              .read(notificationsProvider.notifier)
+                              .delete(notification.id),
+                          background: Container(
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(
+                              right: AppSpacing.lg,
+                            ),
+                            color: ColorTokens.error,
+                            child: const Icon(
+                              Icons.delete,
+                              color: Colors.white,
                             ),
                           ),
-                          subtitle: Text(notification.message),
-                          trailing: notification.isRead
-                              ? null
-                              : const Icon(
-                                  Icons.circle,
-                                  size: 10,
-                                  color: ColorTokens.primaryGreen,
-                                ),
-                          onTap: () => ref
-                              .read(notificationsProvider.notifier)
-                              .toggleRead(notification.id),
-                        ),
-                      );
-                    },
+                          child: ListTile(
+                            leading: Icon(
+                              _categoryIcon(notification.category),
+                              color: notification.isRead
+                                  ? context.text.bodyMedium?.color
+                                  : context.colors.primary,
+                            ),
+                            title: Text(
+                              notification.title,
+                              style: context.text.bodyLarge?.copyWith(
+                                fontWeight: notification.isRead
+                                    ? FontWeight.w500
+                                    : FontWeight.w800,
+                              ),
+                            ),
+                            subtitle: Text(notification.message),
+                            trailing: notification.isRead
+                                ? null
+                                : const Icon(
+                                    Icons.circle,
+                                    size: 10,
+                                    color: ColorTokens.primaryGreen,
+                                  ),
+                            onTap: () => ref
+                                .read(notificationsProvider.notifier)
+                                .toggleRead(notification.id),
+                          ),
+                        );
+                      },
+                    ),
                   ),
           ),
         ],

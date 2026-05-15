@@ -11,97 +11,160 @@ import '../../core/widgets/secondary_button.dart';
 import '../../shared/models/demo_data.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 
-class WeeklyPlanScreen extends StatelessWidget {
+class WeeklyPlanScreen extends StatefulWidget {
   const WeeklyPlanScreen({super.key});
 
   @override
+  State<WeeklyPlanScreen> createState() => _WeeklyPlanScreenState();
+}
+
+class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
+  Future<void> _onRefresh() async {
+    await Future.delayed(const Duration(seconds: 1));
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
+
     return PlateScaffold(
       title: 'PlatePilot',
       trailing: IconButton(
         onPressed: () {},
         icon: const Icon(Icons.calendar_month_outlined),
       ),
-      child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        children: [
-          Text('Your Week', style: context.text.headlineLarge),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            '7 balanced meals selected for your household.',
-            style: context.text.bodyMedium,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              Expanded(
-                child: _ActionTile(
-                  title: 'Quick Meal',
-                  subtitle: 'Express mode',
-                  icon: Icons.bolt,
-                  color: ColorTokens.primaryGreen,
-                  onTap: () => context.push('/quick-meal'),
-                ),
+      child: RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: ListView(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          children: [
+            Text('Your Week', style: context.text.headlineLarge),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              '7 balanced meals selected for your household.',
+              style: context.text.bodyMedium,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            if (isTablet && screenWidth >= 900)
+              Row(
+                children: [
+                  Expanded(
+                    child: _ActionTile(
+                      title: 'Quick Meal',
+                      subtitle: 'Express mode',
+                      icon: Icons.bolt,
+                      color: ColorTokens.primaryGreen,
+                      onTap: () => context.push('/quick-meal'),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: _ActionTile(
+                      title: 'Grocery List',
+                      subtitle: 'Ready to buy',
+                      icon: Icons.shopping_cart_outlined,
+                      color: ColorTokens.accentAmber,
+                      onTap: () => context.go('/grocery'),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: _ActionTile(
+                      title: 'Regenerate',
+                      subtitle: 'Refresh plan',
+                      icon: Icons.refresh,
+                      color: ColorTokens.accentBlue,
+                      onTap: () {},
+                    ),
+                  ),
+                ],
+              )
+            else
+              Row(
+                children: [
+                  Expanded(
+                    child: _ActionTile(
+                      title: 'Quick Meal',
+                      subtitle: 'Express mode',
+                      icon: Icons.bolt,
+                      color: ColorTokens.primaryGreen,
+                      onTap: () => context.push('/quick-meal'),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: _ActionTile(
+                      title: 'Grocery List',
+                      subtitle: 'Ready to buy',
+                      icon: Icons.shopping_cart_outlined,
+                      color: ColorTokens.accentAmber,
+                      onTap: () => context.go('/grocery'),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _ActionTile(
-                  title: 'Grocery List',
-                  subtitle: 'Ready to buy',
-                  icon: Icons.shopping_cart_outlined,
-                  color: ColorTokens.accentAmber,
-                  onTap: () => context.go('/grocery'),
+            const SizedBox(height: AppSpacing.lg),
+            ...demoMeals.indexed.map(
+              (entry) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: MealCard(
+                  meal: entry.$2,
+                  onTap: () => context.push('/recipe/${entry.$1}'),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          ...demoMeals.indexed.map(
-            (entry) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: MealCard(
-                meal: entry.$2,
-                onTap: () => context.push('/recipe/${entry.$1}'),
               ),
             ),
-          ),
-          AppCard(
-            color: context.isDark
-                ? ColorTokens.darkElevatedSurface
-                : ColorTokens.surfaceContainerLow,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Estimated Budget', style: context.text.headlineSmall),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  r'$142.85 for 24 grocery items, including 8 pantry ingredients already on hand.',
-                  style: context.text.bodyMedium,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: SecondaryButton(
-                        label: 'Replace',
-                        icon: Icons.swap_horiz,
-                        onPressed: () {},
+            AppCard(
+              color: context.isDark
+                  ? ColorTokens.darkElevatedSurface
+                  : ColorTokens.surfaceContainerLow,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Estimated Budget',
+                    style: context.text.headlineSmall,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    r'$142.85 for 24 grocery items, including 8 pantry ingredients already on hand.',
+                    style: context.text.bodyMedium,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SecondaryButton(
+                          label: 'Replace',
+                          icon: Icons.swap_horiz,
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Meal replaced')),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Expanded(
-                      child: PrimaryButton(
-                        label: 'Regenerate',
-                        icon: Icons.refresh,
-                        onPressed: () {},
+                      const SizedBox(width: AppSpacing.xs),
+                      Expanded(
+                        child: PrimaryButton(
+                          label: 'Regenerate',
+                          icon: Icons.refresh,
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Weekly plan regenerated!'),
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -14,6 +14,9 @@ class QuickMealScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
+
     return PlateScaffold(
       title: 'Quick Meal',
       showBack: true,
@@ -47,7 +50,7 @@ class QuickMealScreen extends StatelessWidget {
           Text('Best Matches', style: context.text.headlineMedium),
           const SizedBox(height: AppSpacing.md),
           ...demoMeals
-              .take(3)
+              .take(isTablet ? demoMeals.length : 3)
               .map(
                 (meal) => Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -83,15 +86,28 @@ class QuickMealScreen extends StatelessWidget {
                               child: SecondaryButton(
                                 label: 'Swap',
                                 icon: Icons.swap_horiz,
-                                onPressed: () {},
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content:
+                                            Text('Swapping meal suggestion...'),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: AppSpacing.xs),
-                            Expanded(
-                              child: PrimaryButton(
-                                label: 'Cook',
-                                icon: Icons.restaurant,
-                                onPressed: () {},
+                              const SizedBox(width: AppSpacing.xs),
+                              Expanded(
+                                child: PrimaryButton(
+                                  label: 'Cook',
+                                  icon: Icons.restaurant,
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Starting quick meal...'),
+                                      ),
+                                    );
+                                  },
                               ),
                             ),
                           ],

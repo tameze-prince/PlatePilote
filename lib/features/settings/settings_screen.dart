@@ -15,6 +15,8 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
     final themeMode = ref.watch(themeModeProvider);
     final isDark = themeMode == ThemeMode.dark;
     final isSystem = themeMode == ThemeMode.system;
@@ -63,36 +65,90 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          _SettingsItem(
-            icon: Icons.people_outline,
-            title: 'Profile & Preferences',
-            subtitle: 'Household, goals, cuisines, allergies',
-            onTap: () => context.push('/preferences'),
-          ),
-          _SettingsItem(
-            icon: Icons.payments_outlined,
-            title: 'Budget Management',
-            subtitle: r'$400 weekly grocery cap',
-            onTap: () => context.push('/budget'),
-          ),
-          _SettingsItem(
-            icon: Icons.language,
-            title: 'Language',
-            subtitle: 'English / Français',
-            onTap: () => context.push('/language'),
-          ),
-          _SettingsItem(
-            icon: Icons.notifications_outlined,
-            title: 'Notifications',
-            subtitle: 'Pantry alerts and plan reminders',
-            onTap: () => context.push('/notification-preferences'),
-          ),
-          _SettingsItem(
-            icon: Icons.menu_book_outlined,
-            title: 'Custom Recipes',
-            subtitle: 'Save your own recipes',
-            onTap: () => context.push('/recipes/add'),
-          ),
+          if (isTablet)
+            Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: [
+                SizedBox(
+                  width: screenWidth >= 900 ? 320 : 280,
+                  child: _SettingsItem(
+                    icon: Icons.people_outline,
+                    title: 'Profile & Preferences',
+                    subtitle: 'Household, goals, cuisines, allergies',
+                    onTap: () => context.push('/preferences'),
+                  ),
+                ),
+                SizedBox(
+                  width: screenWidth >= 900 ? 320 : 280,
+                  child: _SettingsItem(
+                    icon: Icons.payments_outlined,
+                    title: 'Budget Management',
+                    subtitle: r'$400 weekly grocery cap',
+                    onTap: () => context.push('/budget'),
+                  ),
+                ),
+                SizedBox(
+                  width: screenWidth >= 900 ? 320 : 280,
+                  child: _SettingsItem(
+                    icon: Icons.language,
+                    title: 'Language',
+                    subtitle: 'English / Français',
+                    onTap: () => context.push('/language'),
+                  ),
+                ),
+                SizedBox(
+                  width: screenWidth >= 900 ? 320 : 280,
+                  child: _SettingsItem(
+                    icon: Icons.notifications_outlined,
+                    title: 'Notifications',
+                    subtitle: 'Pantry alerts and plan reminders',
+                    onTap: () => context.push('/notification-preferences'),
+                  ),
+                ),
+                SizedBox(
+                  width: screenWidth >= 900 ? 320 : 280,
+                  child: _SettingsItem(
+                    icon: Icons.menu_book_outlined,
+                    title: 'Custom Recipes',
+                    subtitle: 'Save your own recipes',
+                    onTap: () => context.push('/recipes/add'),
+                  ),
+                ),
+              ],
+            )
+          else ...[
+            _SettingsItem(
+              icon: Icons.people_outline,
+              title: 'Profile & Preferences',
+              subtitle: 'Household, goals, cuisines, allergies',
+              onTap: () => context.push('/preferences'),
+            ),
+            _SettingsItem(
+              icon: Icons.payments_outlined,
+              title: 'Budget Management',
+              subtitle: r'$400 weekly grocery cap',
+              onTap: () => context.push('/budget'),
+            ),
+            _SettingsItem(
+              icon: Icons.language,
+              title: 'Language',
+              subtitle: 'English / Français',
+              onTap: () => context.push('/language'),
+            ),
+            _SettingsItem(
+              icon: Icons.notifications_outlined,
+              title: 'Notifications',
+              subtitle: 'Pantry alerts and plan reminders',
+              onTap: () => context.push('/notification-preferences'),
+            ),
+            _SettingsItem(
+              icon: Icons.menu_book_outlined,
+              title: 'Custom Recipes',
+              subtitle: 'Save your own recipes',
+              onTap: () => context.push('/recipes/add'),
+            ),
+          ],
           const SizedBox(height: AppSpacing.xs),
           AppCard(
             padding: const EdgeInsets.all(AppSpacing.md),

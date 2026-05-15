@@ -7,80 +7,166 @@ import '../../core/extensions/theme_extensions.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/pantry_chip.dart';
 import '../../core/widgets/primary_button.dart';
+import '../../core/widgets/loading_skeleton.dart';
 import '../../shared/models/demo_data.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 
-class PantryScreen extends StatelessWidget {
+class PantryScreen extends StatefulWidget {
   const PantryScreen({super.key});
 
   @override
+  State<PantryScreen> createState() => _PantryScreenState();
+}
+
+class _PantryScreenState extends State<PantryScreen> {
+  final _searchController = TextEditingController();
+  String _selectedFilter = 'All Items';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) setState(() => _isLoading = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onRefresh() async {
+    setState(() => _isLoading = true);
+    await Future.delayed(const Duration(seconds: 1));
+    if (mounted) setState(() => _isLoading = false);
+  }
+
+  List<PantryItem> get _filteredItems {
+    if (_selectedFilter == 'All Items') return pantryItems;
+    return pantryItems
+        .where(
+          (item) => item.category.toLowerCase() == _selectedFilter.toLowerCase(),
+        )
+        .toList();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
+
     return PlateScaffold(
       title: 'PlatePilot',
-      child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        children: [
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'Search ingredients...',
-              prefixIcon: Icon(
-                Icons.search,
-                color: context.text.bodyMedium?.color,
+      child: _isLoading
+          ? ListView(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              children: const [
+                LoadingSkeletonCard(),
+                SizedBox(height: AppSpacing.md),
+                LoadingSkeletonCard(),
+                SizedBox(height: AppSpacing.md),
+                LoadingSkeletonCard(),
+                SizedBox(height: AppSpacing.md),
+                LoadingSkeletonCard(),
+              ],
+            )
+          : RefreshIndicator(
+              onRefresh: _onRefresh,
+              child: ListView(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                children: [
+                  TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search ingredients...',
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: context.text.bodyMedium?.color,
+                      ),
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Wrap(
+                    spacing: AppSpacing.xs,
+                    runSpacing: AppSpacing.xs,
+                    children: [
+                      for (final label in [
+                        'All Items',
+                        'Produce',
+                        'Dairy & Eggs',
+                        'Proteins',
+                        'Staples',
+                      ])
+                        GestureDetector(
+                          onTap: () =>
+                              setState(() => _selectedFilter = label),
+                          child: PantryChip(
+                            label: label,
+                            selected: _selectedFilter == label,
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  PrimaryButton(
+                    label: 'Scan or Add to Pantry',
+                    icon: Icons.add_circle_outline,
+                    onPressed: () => context.push('/pantry/add'),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Row(
+                    children: [
+                      const Icon(Icons.priority_high,
+                          color: ColorTokens.error),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text('Use Soon', style: context.text.headlineMedium),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  if (isTablet)
+                    Wrap(
+                      spacing: AppSpacing.md,
+                      runSpacing: AppSpacing.md,
+                      children: _filteredItems
+                          .map(
+                            (item) => SizedBox(
+                              width: screenWidth >= 900 ? 280 : 220,
+                              child: _PantryItemCard(item: item),
+                            ),
+                          )
+                          .toList(),
+                    )
+                  else
+                    ..._filteredItems.map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                        child: _PantryItemCard(item: item),
+                      ),
+                    ),
+                  AppCard(
+                    color: ColorTokens.primaryGreen.withValues(
+                      alpha: context.isDark ? 0.16 : 0.08,
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.recycling,
+                            color: ColorTokens.primaryGreen),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Text(
+                            'Use spinach in tonight\'s frittata to prevent waste and save about \$4.',
+                            style: context.text.bodyLarge,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          const Wrap(
-            spacing: AppSpacing.xs,
-            runSpacing: AppSpacing.xs,
-            children: [
-              PantryChip(label: 'All Items', selected: true),
-              PantryChip(label: 'Produce'),
-              PantryChip(label: 'Dairy & Eggs'),
-              PantryChip(label: 'Proteins'),
-              PantryChip(label: 'Staples'),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          PrimaryButton(
-            label: 'Scan or Add to Pantry',
-            icon: Icons.add_circle_outline,
-            onPressed: () => context.push('/pantry/add'),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              const Icon(Icons.priority_high, color: ColorTokens.error),
-              const SizedBox(width: AppSpacing.xs),
-              Text('Use Soon', style: context.text.headlineMedium),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          ...pantryItems.map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: _PantryItemCard(item: item),
-            ),
-          ),
-          AppCard(
-            color: ColorTokens.primaryGreen.withValues(
-              alpha: context.isDark ? 0.16 : 0.08,
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.recycling, color: ColorTokens.primaryGreen),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    'Use spinach in tonight’s frittata to prevent waste and save about \$4.',
-                    style: context.text.bodyLarge,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

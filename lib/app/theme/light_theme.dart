@@ -31,6 +31,13 @@ ThemeData buildLightTheme() {
         fontWeight: FontWeight.w700,
       ),
     ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: ColorTokens.surface,
+      selectedItemColor: ColorTokens.primaryGreen,
+      unselectedItemColor: ColorTokens.textSecondary,
+      type: BottomNavigationBarType.fixed,
+      elevation: 8,
+    ),
     cardTheme: CardThemeData(
       color: ColorTokens.surface,
       elevation: 0,
@@ -39,6 +46,51 @@ ThemeData buildLightTheme() {
         borderRadius: BorderRadius.circular(AppRadius.card),
         side: const BorderSide(color: ColorTokens.border),
       ),
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: ColorTokens.surfaceContainerLow,
+      labelStyle: textTheme.labelSmall?.copyWith(color: ColorTokens.textPrimary),
+      side: const BorderSide(color: ColorTokens.border),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.small),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+    ),
+    switchTheme: SwitchThemeData(
+      trackColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return ColorTokens.primaryGreen;
+        return ColorTokens.border;
+      }),
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return Colors.white;
+        return ColorTokens.textSecondary;
+      }),
+    ),
+    dividerTheme: const DividerThemeData(
+      color: ColorTokens.border,
+      thickness: 1,
+      space: 1,
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: ColorTokens.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.modal),
+      ),
+      titleTextStyle: textTheme.headlineSmall,
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: ColorTokens.textPrimary,
+      contentTextStyle: textTheme.bodyLarge?.copyWith(color: Colors.white),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.small),
+      ),
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: ColorTokens.primaryGreen,
+      foregroundColor: Colors.white,
+      elevation: 4,
+      shape: CircleBorder(),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,

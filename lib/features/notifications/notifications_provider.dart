@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/providers/preferences_provider.dart';
 import '../../shared/models/mvp_entities.dart';
 
 class NotificationPreferences {
@@ -98,23 +99,40 @@ class NotificationsNotifier extends Notifier<List<AppNotification>> {
 
 class NotificationPreferencesNotifier
     extends Notifier<NotificationPreferences> {
+  static const _pantryAlertsKey = 'notifications.pantryAlerts';
+  static const _budgetAlertsKey = 'notifications.budgetAlerts';
+  static const _weeklyRemindersKey = 'notifications.weeklyReminders';
+  static const _promoKey = 'notifications.promotionalNotifications';
+
   @override
-  NotificationPreferences build() => const NotificationPreferences();
+  NotificationPreferences build() {
+    final prefs = ref.watch(sharedPreferencesProvider);
+    return NotificationPreferences(
+      pantryAlerts: prefs.getBool(_pantryAlertsKey) ?? true,
+      budgetAlerts: prefs.getBool(_budgetAlertsKey) ?? true,
+      weeklyReminders: prefs.getBool(_weeklyRemindersKey) ?? true,
+      promotionalNotifications: prefs.getBool(_promoKey) ?? false,
+    );
+  }
 
-  void setPantryAlerts(bool value) {
+  Future<void> setPantryAlerts(bool value) async {
     state = state.copyWith(pantryAlerts: value);
+    await ref.read(sharedPreferencesProvider).setBool(_pantryAlertsKey, value);
   }
 
-  void setBudgetAlerts(bool value) {
+  Future<void> setBudgetAlerts(bool value) async {
     state = state.copyWith(budgetAlerts: value);
+    await ref.read(sharedPreferencesProvider).setBool(_budgetAlertsKey, value);
   }
 
-  void setWeeklyReminders(bool value) {
+  Future<void> setWeeklyReminders(bool value) async {
     state = state.copyWith(weeklyReminders: value);
+    await ref.read(sharedPreferencesProvider).setBool(_weeklyRemindersKey, value);
   }
 
-  void setPromotionalNotifications(bool value) {
+  Future<void> setPromotionalNotifications(bool value) async {
     state = state.copyWith(promotionalNotifications: value);
+    await ref.read(sharedPreferencesProvider).setBool(_promoKey, value);
   }
 }
 

@@ -106,7 +106,11 @@ class RecipeDetailsScreen extends StatelessWidget {
                 child: SecondaryButton(
                   label: 'Replace',
                   icon: Icons.swap_horiz,
-                  onPressed: () {},
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Recipe replaced')),
+                    );
+                  },
                 ),
               ),
               const SizedBox(width: AppSpacing.xs),
@@ -114,7 +118,13 @@ class RecipeDetailsScreen extends StatelessWidget {
                 child: PrimaryButton(
                   label: 'Start Cooking',
                   icon: Icons.restaurant,
-                  onPressed: () {},
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Starting cooking timer...'),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],

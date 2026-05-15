@@ -29,6 +29,13 @@ ThemeData buildDarkTheme() {
         fontWeight: FontWeight.w700,
       ),
     ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: ColorTokens.darkSurface,
+      selectedItemColor: ColorTokens.primaryGreen,
+      unselectedItemColor: ColorTokens.darkTextSecondary,
+      type: BottomNavigationBarType.fixed,
+      elevation: 8,
+    ),
     cardTheme: CardThemeData(
       color: ColorTokens.darkSurface,
       elevation: 0,
@@ -37,6 +44,51 @@ ThemeData buildDarkTheme() {
         borderRadius: BorderRadius.circular(AppRadius.card),
         side: const BorderSide(color: ColorTokens.darkBorder),
       ),
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: ColorTokens.darkElevatedSurface,
+      labelStyle: textTheme.labelSmall?.copyWith(color: ColorTokens.darkTextPrimary),
+      side: const BorderSide(color: ColorTokens.darkBorder),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.small),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+    ),
+    switchTheme: SwitchThemeData(
+      trackColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return ColorTokens.primaryGreen;
+        return ColorTokens.darkBorder;
+      }),
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return Colors.white;
+        return ColorTokens.darkTextSecondary;
+      }),
+    ),
+    dividerTheme: const DividerThemeData(
+      color: ColorTokens.darkBorder,
+      thickness: 1,
+      space: 1,
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: ColorTokens.darkSurface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.modal),
+      ),
+      titleTextStyle: textTheme.headlineSmall,
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: ColorTokens.darkElevatedSurface,
+      contentTextStyle: textTheme.bodyLarge?.copyWith(color: ColorTokens.darkTextPrimary),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.small),
+      ),
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: ColorTokens.primaryGreen,
+      foregroundColor: Colors.white,
+      elevation: 4,
+      shape: CircleBorder(),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,

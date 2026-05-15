@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/providers/preferences_provider.dart';
+
 class BudgetState {
   const BudgetState({
     required this.weeklyBudget,
@@ -28,31 +30,52 @@ class BudgetState {
 }
 
 class BudgetNotifier extends Notifier<BudgetState> {
+  static const _budgetKey = 'budget.weeklyBudget';
+  static const _spentKey = 'budget.spentAmount';
+  static const _historyKey = 'budget.history';
+
   @override
   BudgetState build() {
-    return const BudgetState(
-      weeklyBudget: 400,
-      spentAmount: 144,
-      history: [310, 368, 340, 388, 356],
+    final prefs = ref.watch(sharedPreferencesProvider);
+    return BudgetState(
+      weeklyBudget: prefs.getDouble(_budgetKey) ?? 400,
+      spentAmount: prefs.getDouble(_spentKey) ?? 144,
+      history: (prefs.getStringList(_historyKey) ?? [])
+          .map((e) => double.parse(e))
+          .toList(),
     );
   }
 
-  void setBudget(double value) {
+  Future<void> setBudget(double value) async {
     state = state.copyWith(weeklyBudget: value);
+    await _persist();
   }
 
-  void increaseBudget(double value) {
+  Future<void> increaseBudget(double value) async {
     state = state.copyWith(weeklyBudget: state.weeklyBudget + value);
+    await _persist();
   }
 
-  void replaceBudget(double value) {
+  Future<void> replaceBudget(double value) async {
     state = state.copyWith(weeklyBudget: value, spentAmount: 0);
+    await _persist();
   }
 
-  void resetCycle() {
+  Future<void> resetCycle() async {
     state = state.copyWith(
       spentAmount: 0,
       history: [...state.history, state.spentAmount],
+    );
+    await _persist();
+  }
+
+  Future<void> _persist() async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setDouble(_budgetKey, state.weeklyBudget);
+    await prefs.setDouble(_spentKey, state.spentAmount);
+    await prefs.setStringList(
+      _historyKey,
+      state.history.map((e) => e.toString()).toList(),
     );
   }
 }

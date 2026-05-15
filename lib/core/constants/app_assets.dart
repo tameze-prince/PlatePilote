@@ -1,3 +1,4 @@
+@Deprecated('No longer used. Will be removed in a future version.')
 abstract final class AppAssets {
   static const splash = 'stitch_smart_meal_copilot/splash_screen_3/screen.png';
   static const home = 'stitch_smart_meal_copilot/dashboard_home_1/screen.png';
