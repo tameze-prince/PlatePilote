@@ -8,6 +8,7 @@ import '../../core/extensions/theme_extensions.dart';
 import '../../core/providers/app_session_provider.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/primary_button.dart';
+import '../../core/widgets/social_sign_in_buttons.dart';
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
@@ -108,6 +109,8 @@ class _AuthShell extends StatelessWidget {
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         PrimaryButton(label: action, onPressed: onAction),
+                        const SizedBox(height: AppSpacing.md),
+                        const SocialSignInButtons(),
                         const SizedBox(height: AppSpacing.md),
                         Center(
                           child: TextButton(

@@ -7,6 +7,7 @@ import '../../core/extensions/theme_extensions.dart';
 import '../../core/providers/app_session_provider.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/primary_button.dart';
+import '../../core/widgets/social_sign_in_buttons.dart';
 
 class SignupScreen extends ConsumerWidget {
   const SignupScreen({super.key});
@@ -60,6 +61,8 @@ class SignupScreen extends ConsumerWidget {
                         }
                       },
                     ),
+                    const SizedBox(height: AppSpacing.md),
+                    const SocialSignInButtons(),
                     Center(
                       child: TextButton(
                         onPressed: () => context.go('/login'),
