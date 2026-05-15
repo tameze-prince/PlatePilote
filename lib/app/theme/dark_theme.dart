@@ -47,7 +47,9 @@ ThemeData buildDarkTheme() {
     ),
     chipTheme: ChipThemeData(
       backgroundColor: ColorTokens.darkElevatedSurface,
-      labelStyle: textTheme.labelSmall?.copyWith(color: ColorTokens.darkTextPrimary),
+      labelStyle: textTheme.labelSmall?.copyWith(
+        color: ColorTokens.darkTextPrimary,
+      ),
       side: const BorderSide(color: ColorTokens.darkBorder),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.small),
@@ -56,11 +58,15 @@ ThemeData buildDarkTheme() {
     ),
     switchTheme: SwitchThemeData(
       trackColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) return ColorTokens.primaryGreen;
+        if (states.contains(WidgetState.selected)) {
+          return ColorTokens.primaryGreen;
+        }
         return ColorTokens.darkBorder;
       }),
       thumbColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) return Colors.white;
+        if (states.contains(WidgetState.selected)) {
+          return Colors.white;
+        }
         return ColorTokens.darkTextSecondary;
       }),
     ),
@@ -78,7 +84,9 @@ ThemeData buildDarkTheme() {
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: ColorTokens.darkElevatedSurface,
-      contentTextStyle: textTheme.bodyLarge?.copyWith(color: ColorTokens.darkTextPrimary),
+      contentTextStyle: textTheme.bodyLarge?.copyWith(
+        color: ColorTokens.darkTextPrimary,
+      ),
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.small),

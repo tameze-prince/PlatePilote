@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../features/grocery/grocery_provider.dart';
+import '../../../shared/models/demo_data.dart';
 import '../../../shared/widgets/form_page.dart';
 import '../../../shared/widgets/plate_scaffold.dart';
 
-class AddGroceryItemScreen extends StatefulWidget {
+class AddGroceryItemScreen extends ConsumerStatefulWidget {
   const AddGroceryItemScreen({super.key});
 
   @override
-  State<AddGroceryItemScreen> createState() => _AddGroceryItemScreenState();
+  ConsumerState<AddGroceryItemScreen> createState() =>
+      _AddGroceryItemScreenState();
 }
 
-class _AddGroceryItemScreenState extends State<AddGroceryItemScreen> {
+class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _quantityController = TextEditingController();
@@ -28,15 +32,24 @@ class _AddGroceryItemScreenState extends State<AddGroceryItemScreen> {
     super.dispose();
   }
 
-  void _submit() {
-    debugPrint('GroceryItem added: ${_nameController.text}, '
-        'qty: ${_quantityController.text} ${_unitController.text}, '
-        'category: $_category, '
-        'priority: $_priority, '
-        'cost: \$${_costController.text}');
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Grocery item added!')),
-    );
+  Future<void> _submit() async {
+    await ref
+        .read(groceryProvider.notifier)
+        .addItem(
+          GroceryItem(
+            name: _nameController.text,
+            quantity: '${_quantityController.text} ${_unitController.text}'
+                .trim(),
+            price: _costController.text.isEmpty
+                ? r'$0.00'
+                : '\$${_costController.text}',
+            category: _category,
+          ),
+        );
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Grocery item added!')));
     Navigator.of(context).pop();
   }
 
@@ -72,17 +85,17 @@ class _AddGroceryItemScreenState extends State<AddGroceryItemScreen> {
               'Dairy & Eggs',
               'Protein',
               'Pantry Staples',
-            ].map(
-              (v) => DropdownMenuItem(value: v, child: Text(v)),
-            ).toList(),
+            ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
             onChanged: (v) => setState(() => _category = v!),
             decoration: const InputDecoration(labelText: 'Category'),
           ),
           DropdownButtonFormField<String>(
             initialValue: _priority,
-            items: const ['Low', 'Normal', 'High'].map(
-              (v) => DropdownMenuItem(value: v, child: Text(v)),
-            ).toList(),
+            items: const [
+              'Low',
+              'Normal',
+              'High',
+            ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
             onChanged: (v) => setState(() => _priority = v!),
             decoration: const InputDecoration(labelText: 'Priority'),
           ),

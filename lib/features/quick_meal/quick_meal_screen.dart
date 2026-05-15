@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme/color_tokens.dart';
 import '../../app/theme/spacing.dart';
@@ -86,28 +87,23 @@ class QuickMealScreen extends StatelessWidget {
                               child: SecondaryButton(
                                 label: 'Swap',
                                 icon: Icons.swap_horiz,
-                                  onPressed: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content:
-                                            Text('Swapping meal suggestion...'),
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Swapping meal suggestion...',
                                       ),
-                                    );
-                                  },
-                                ),
+                                    ),
+                                  );
+                                },
                               ),
-                              const SizedBox(width: AppSpacing.xs),
-                              Expanded(
-                                child: PrimaryButton(
-                                  label: 'Cook',
-                                  icon: Icons.restaurant,
-                                  onPressed: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Starting quick meal...'),
-                                      ),
-                                    );
-                                  },
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
+                            Expanded(
+                              child: PrimaryButton(
+                                label: 'Cook',
+                                icon: Icons.restaurant,
+                                onPressed: () => context.push('/recipe/0'),
                               ),
                             ),
                           ],

@@ -15,7 +15,7 @@ class FormPage extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   final List<Widget> children;
   final String submitLabel;
-  final VoidCallback onSubmit;
+  final Future<void> Function() onSubmit;
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +31,9 @@ class FormPage extends StatelessWidget {
           PrimaryButton(
             label: submitLabel,
             icon: Icons.check,
-            onPressed: () {
+            onPressed: () async {
               if (formKey.currentState!.validate()) {
-                onSubmit();
+                await onSubmit();
               }
             },
           ),

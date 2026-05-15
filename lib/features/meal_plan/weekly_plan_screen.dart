@@ -110,7 +110,7 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
                 padding: const EdgeInsets.only(bottom: AppSpacing.md),
                 child: MealCard(
                   meal: entry.$2,
-                  onTap: () => context.push('/recipe/${entry.$1}'),
+                  onTap: () => context.push('/meal/${entry.$1}'),
                 ),
               ),
             ),
@@ -121,10 +121,7 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Estimated Budget',
-                    style: context.text.headlineSmall,
-                  ),
+                  Text('Estimated Budget', style: context.text.headlineSmall),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     r'$142.85 for 24 grocery items, including 8 pantry ingredients already on hand.',

@@ -65,16 +65,21 @@ class EditablePreferences {
       cookingSkill: json['cookingSkill'] as String? ?? 'Balanced',
       weeklyBudget: json['weeklyBudget'] as String? ?? r'$120',
       cookingTime: json['cookingTime'] as String? ?? '30 min',
-      dietaryPreferences: (json['dietaryPreferences'] as List<dynamic>?)
-              ?.cast<String>().toSet() ??
+      dietaryPreferences:
+          (json['dietaryPreferences'] as List<dynamic>?)
+              ?.cast<String>()
+              .toSet() ??
           const {'High protein'},
-      allergies: (json['allergies'] as List<dynamic>?)
-              ?.cast<String>().toSet() ??
+      allergies:
+          (json['allergies'] as List<dynamic>?)?.cast<String>().toSet() ??
           const {},
-      goals: (json['goals'] as List<dynamic>?)?.cast<String>().toSet() ??
+      goals:
+          (json['goals'] as List<dynamic>?)?.cast<String>().toSet() ??
           const {'Save money'},
-      preferredCuisines: (json['preferredCuisines'] as List<dynamic>?)
-              ?.cast<String>().toSet() ??
+      preferredCuisines:
+          (json['preferredCuisines'] as List<dynamic>?)
+              ?.cast<String>()
+              .toSet() ??
           const {'Mediterranean'},
     );
   }

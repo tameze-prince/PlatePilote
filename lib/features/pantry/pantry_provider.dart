@@ -67,7 +67,9 @@ class PantryNotifier extends Notifier<PantryListState> {
 
   Future<void> _persist() async {
     final encoded = state.items.map(_pantryItemToJson).toList();
-    await ref.read(sharedPreferencesProvider).setString(_key, jsonEncode(encoded));
+    await ref
+        .read(sharedPreferencesProvider)
+        .setString(_key, jsonEncode(encoded));
   }
 
   Map<String, dynamic> _pantryItemToJson(PantryItem item) => {

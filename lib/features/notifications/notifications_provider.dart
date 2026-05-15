@@ -127,7 +127,9 @@ class NotificationPreferencesNotifier
 
   Future<void> setWeeklyReminders(bool value) async {
     state = state.copyWith(weeklyReminders: value);
-    await ref.read(sharedPreferencesProvider).setBool(_weeklyRemindersKey, value);
+    await ref
+        .read(sharedPreferencesProvider)
+        .setBool(_weeklyRemindersKey, value);
   }
 
   Future<void> setPromotionalNotifications(bool value) async {

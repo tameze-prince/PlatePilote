@@ -10,6 +10,7 @@ import '../../features/auth/signup_screen.dart';
 import '../../features/grocery/grocery_list_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/localization/language_settings_screen.dart';
+import '../../features/meal_details/meal_details_screen.dart';
 import '../../features/meal_plan/weekly_plan_screen.dart';
 import '../../features/notifications/notification_preferences_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
@@ -17,12 +18,16 @@ import '../../features/onboarding/onboarding_flow.dart';
 import '../../features/pantry/forms/add_pantry_item_screen.dart';
 import '../../features/pantry/pantry_screen.dart';
 import '../../features/premium/premium_upgrade_screen.dart';
+import '../../features/premium/payment_method_screen.dart';
+import '../../features/premium/subscription_management_screen.dart';
 import '../../features/preferences/edit_preferences_screen.dart';
 import '../../features/quick_meal/quick_meal_screen.dart';
 import '../../features/recipe/recipe_details_screen.dart';
 import '../../features/recipes/forms/add_recipe_screen.dart';
+import '../../features/search/search_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/splash/splash_screen.dart';
+import '../../features/support/offline_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -79,9 +84,35 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             RecipeDetailsScreen(recipeId: state.pathParameters['id'] ?? '0'),
       ),
       GoRoute(
+        path: '/meal/:id',
+        name: AppRoute.mealDetails.name,
+        builder: (context, state) =>
+            MealDetailsScreen(mealId: state.pathParameters['id'] ?? '0'),
+      ),
+      GoRoute(
         path: '/premium',
         name: AppRoute.premium.name,
         builder: (context, state) => const PremiumUpgradeScreen(),
+      ),
+      GoRoute(
+        path: '/subscription',
+        name: AppRoute.subscription.name,
+        builder: (context, state) => const SubscriptionManagementScreen(),
+      ),
+      GoRoute(
+        path: '/payment-method',
+        name: AppRoute.paymentMethod.name,
+        builder: (context, state) => const PaymentMethodScreen(),
+      ),
+      GoRoute(
+        path: '/search',
+        name: AppRoute.search.name,
+        builder: (context, state) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: '/offline',
+        name: AppRoute.offline.name,
+        builder: (context, state) => const OfflineScreen(),
       ),
       GoRoute(
         path: '/notifications',
@@ -191,7 +222,12 @@ enum AppRoute {
   settings,
   quickMeal,
   recipeDetails,
+  mealDetails,
   premium,
+  subscription,
+  paymentMethod,
+  search,
+  offline,
   notifications,
   notificationPreferences,
   language,

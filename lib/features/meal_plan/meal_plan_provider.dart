@@ -69,7 +69,9 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
 
   Future<void> _persist() async {
     final encoded = state.meals.map(_mealToJson).toList();
-    await ref.read(sharedPreferencesProvider).setString(_key, jsonEncode(encoded));
+    await ref
+        .read(sharedPreferencesProvider)
+        .setString(_key, jsonEncode(encoded));
   }
 
   Map<String, dynamic> _mealToJson(Meal meal) => {

@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../features/recipes/custom_recipe_provider.dart';
+import '../../../shared/models/mvp_entities.dart';
 import '../../../shared/widgets/form_page.dart';
 import '../../../shared/widgets/plate_scaffold.dart';
 
-class AddRecipeScreen extends StatefulWidget {
+class AddRecipeScreen extends ConsumerStatefulWidget {
   const AddRecipeScreen({super.key});
 
   @override
-  State<AddRecipeScreen> createState() => _AddRecipeScreenState();
+  ConsumerState<AddRecipeScreen> createState() => _AddRecipeScreenState();
 }
 
-class _AddRecipeScreenState extends State<AddRecipeScreen> {
+class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -37,20 +40,36 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     super.dispose();
   }
 
-  void _submit() {
-    debugPrint('Recipe added: ${_nameController.text}, '
-        'desc: ${_descriptionController.text}, '
-        'prep: ${_prepTimeController.text}, '
-        'cook: ${_cookTimeController.text}, '
-        'difficulty: $_difficulty, '
-        'servings: ${_servingsController.text}, '
-        'ingredients: ${_ingredientsController.text}, '
-        'instructions: ${_instructionsController.text}, '
-        'tags: ${_tagsController.text}, '
-        'cost: \$${_costController.text}');
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Recipe saved!')),
-    );
+  Future<void> _submit() async {
+    ref
+        .read(customRecipesProvider.notifier)
+        .add(
+          CustomRecipe(
+            name: _nameController.text,
+            description: _descriptionController.text,
+            preparationMinutes: int.tryParse(_prepTimeController.text) ?? 0,
+            cookingMinutes: int.tryParse(_cookTimeController.text) ?? 0,
+            difficulty: _difficulty,
+            servings: int.tryParse(_servingsController.text) ?? 1,
+            ingredients: _ingredientsController.text
+                .split('\n')
+                .where((value) => value.trim().isNotEmpty)
+                .toList(),
+            instructions: _instructionsController.text
+                .split('\n')
+                .where((value) => value.trim().isNotEmpty)
+                .toList(),
+            tags: _tagsController.text
+                .split(',')
+                .map((value) => value.trim())
+                .where((value) => value.isNotEmpty)
+                .toSet(),
+            estimatedCost: double.tryParse(_costController.text) ?? 0,
+          ),
+        );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Recipe saved!')));
     Navigator.of(context).pop();
   }
 
@@ -84,9 +103,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           ),
           DropdownButtonFormField<String>(
             initialValue: _difficulty,
-            items: const ['Easy', 'Medium', 'Advanced'].map(
-              (v) => DropdownMenuItem(value: v, child: Text(v)),
-            ).toList(),
+            items: const [
+              'Easy',
+              'Medium',
+              'Advanced',
+            ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
             onChanged: (v) => setState(() => _difficulty = v!),
             decoration: const InputDecoration(labelText: 'Difficulty'),
           ),

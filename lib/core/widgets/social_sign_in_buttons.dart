@@ -19,10 +19,7 @@ class SocialSignInButtons extends ConsumerWidget {
             const Expanded(child: Divider()),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: Text(
-                'or continue with',
-                style: context.text.bodyMedium,
-              ),
+              child: Text('or continue with', style: context.text.bodyMedium),
             ),
             const Expanded(child: Divider()),
           ],

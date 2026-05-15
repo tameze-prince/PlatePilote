@@ -49,7 +49,9 @@ ThemeData buildLightTheme() {
     ),
     chipTheme: ChipThemeData(
       backgroundColor: ColorTokens.surfaceContainerLow,
-      labelStyle: textTheme.labelSmall?.copyWith(color: ColorTokens.textPrimary),
+      labelStyle: textTheme.labelSmall?.copyWith(
+        color: ColorTokens.textPrimary,
+      ),
       side: const BorderSide(color: ColorTokens.border),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.small),
@@ -58,11 +60,15 @@ ThemeData buildLightTheme() {
     ),
     switchTheme: SwitchThemeData(
       trackColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) return ColorTokens.primaryGreen;
+        if (states.contains(WidgetState.selected)) {
+          return ColorTokens.primaryGreen;
+        }
         return ColorTokens.border;
       }),
       thumbColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) return Colors.white;
+        if (states.contains(WidgetState.selected)) {
+          return Colors.white;
+        }
         return ColorTokens.textSecondary;
       }),
     ),

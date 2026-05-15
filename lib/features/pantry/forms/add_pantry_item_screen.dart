@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../features/pantry/pantry_provider.dart';
+import '../../../shared/models/demo_data.dart';
 import '../../../shared/widgets/form_page.dart';
 import '../../../shared/widgets/plate_scaffold.dart';
 
-class AddPantryItemScreen extends StatefulWidget {
+class AddPantryItemScreen extends ConsumerStatefulWidget {
   const AddPantryItemScreen({super.key});
 
   @override
-  State<AddPantryItemScreen> createState() => _AddPantryItemScreenState();
+  ConsumerState<AddPantryItemScreen> createState() =>
+      _AddPantryItemScreenState();
 }
 
-class _AddPantryItemScreenState extends State<AddPantryItemScreen> {
+class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _quantityController = TextEditingController();
@@ -37,20 +41,30 @@ class _AddPantryItemScreenState extends State<AddPantryItemScreen> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (date != null) {
-      _expirationController.text =
-          '${date.month}/${date.day}/${date.year}';
+      _expirationController.text = '${date.month}/${date.day}/${date.year}';
     }
   }
 
-  void _submit() {
-    debugPrint('PantryItem added: ${_nameController.text}, '
-        'category: $_category, '
-        'qty: ${_quantityController.text} ${_unitController.text}, '
-        'expires: ${_expirationController.text}, '
-        'notes: ${_notesController.text}');
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Pantry item added!')),
-    );
+  Future<void> _submit() async {
+    await ref
+        .read(pantryProvider.notifier)
+        .addItem(
+          PantryItem(
+            name: _nameController.text,
+            quantity: '${_quantityController.text} ${_unitController.text}'
+                .trim(),
+            expires: _expirationController.text.isEmpty
+                ? 'No expiration date'
+                : 'Expires ${_expirationController.text}',
+            category: _category,
+            icon: Icons.inventory_2_outlined,
+            urgent: false,
+          ),
+        );
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Pantry item added!')));
     Navigator.of(context).pop();
   }
 
@@ -80,9 +94,7 @@ class _AddPantryItemScreenState extends State<AddPantryItemScreen> {
               'Spices',
               'Frozen',
               'Pantry Staples',
-            ].map(
-              (v) => DropdownMenuItem(value: v, child: Text(v)),
-            ).toList(),
+            ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
             onChanged: (v) => setState(() => _category = v!),
             decoration: const InputDecoration(labelText: 'Category'),
           ),

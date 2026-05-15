@@ -44,16 +44,14 @@ class _GroceryItemTileState extends State<GroceryItemTile> {
                 Text(
                   widget.item.name,
                   style: context.text.bodyLarge?.copyWith(
-                    decoration:
-                        _checked ? TextDecoration.lineThrough : null,
+                    decoration: _checked ? TextDecoration.lineThrough : null,
                     color: _checked ? context.text.bodyMedium?.color : null,
                   ),
                 ),
                 Text(
                   'Qty: ${widget.item.quantity}',
                   style: context.text.bodyMedium?.copyWith(
-                    decoration:
-                        _checked ? TextDecoration.lineThrough : null,
+                    decoration: _checked ? TextDecoration.lineThrough : null,
                     color: _checked ? context.text.bodyMedium?.color : null,
                   ),
                 ),

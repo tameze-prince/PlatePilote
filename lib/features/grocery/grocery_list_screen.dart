@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/color_tokens.dart';
@@ -10,15 +11,16 @@ import '../../core/widgets/grocery_item_tile.dart';
 import '../../core/widgets/loading_skeleton.dart';
 import '../../shared/models/demo_data.dart';
 import '../../shared/widgets/plate_scaffold.dart';
+import 'grocery_provider.dart';
 
-class GroceryListScreen extends StatefulWidget {
+class GroceryListScreen extends ConsumerStatefulWidget {
   const GroceryListScreen({super.key});
 
   @override
-  State<GroceryListScreen> createState() => _GroceryListScreenState();
+  ConsumerState<GroceryListScreen> createState() => _GroceryListScreenState();
 }
 
-class _GroceryListScreenState extends State<GroceryListScreen> {
+class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
   bool _isLoading = true;
 
   @override
@@ -39,8 +41,9 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isTablet = screenWidth >= 600;
+    final groceryState = ref.watch(groceryProvider);
     final grouped = <String, List<GroceryItem>>{};
-    for (final item in groceryItems) {
+    for (final item in groceryState.items) {
       grouped.putIfAbsent(item.category, () => []).add(item);
     }
 

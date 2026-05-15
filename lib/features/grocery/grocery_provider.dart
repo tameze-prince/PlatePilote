@@ -60,9 +60,10 @@ class GroceryNotifier extends Notifier<GroceryListState> {
   }
 
   Future<void> _persist() async {
-    final encoded =
-        state.items.map(_groceryItemToJson).toList();
-    await ref.read(sharedPreferencesProvider).setString(_key, jsonEncode(encoded));
+    final encoded = state.items.map(_groceryItemToJson).toList();
+    await ref
+        .read(sharedPreferencesProvider)
+        .setString(_key, jsonEncode(encoded));
   }
 
   Map<String, dynamic> _groceryItemToJson(GroceryItem item) => {

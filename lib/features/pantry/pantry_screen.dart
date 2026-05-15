@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/color_tokens.dart';
@@ -10,15 +11,16 @@ import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/loading_skeleton.dart';
 import '../../shared/models/demo_data.dart';
 import '../../shared/widgets/plate_scaffold.dart';
+import 'pantry_provider.dart';
 
-class PantryScreen extends StatefulWidget {
+class PantryScreen extends ConsumerStatefulWidget {
   const PantryScreen({super.key});
 
   @override
-  State<PantryScreen> createState() => _PantryScreenState();
+  ConsumerState<PantryScreen> createState() => _PantryScreenState();
 }
 
-class _PantryScreenState extends State<PantryScreen> {
+class _PantryScreenState extends ConsumerState<PantryScreen> {
   final _searchController = TextEditingController();
   String _selectedFilter = 'All Items';
   bool _isLoading = true;
@@ -43,11 +45,12 @@ class _PantryScreenState extends State<PantryScreen> {
     if (mounted) setState(() => _isLoading = false);
   }
 
-  List<PantryItem> get _filteredItems {
-    if (_selectedFilter == 'All Items') return pantryItems;
-    return pantryItems
+  List<PantryItem> _filteredItems(List<PantryItem> items) {
+    if (_selectedFilter == 'All Items') return items;
+    return items
         .where(
-          (item) => item.category.toLowerCase() == _selectedFilter.toLowerCase(),
+          (item) =>
+              item.category.toLowerCase() == _selectedFilter.toLowerCase(),
         )
         .toList();
   }
@@ -56,6 +59,8 @@ class _PantryScreenState extends State<PantryScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isTablet = screenWidth >= 600;
+    final pantryState = ref.watch(pantryProvider);
+    final filteredItems = _filteredItems(pantryState.items);
 
     return PlateScaffold(
       title: 'PlatePilot',
@@ -101,8 +106,7 @@ class _PantryScreenState extends State<PantryScreen> {
                         'Staples',
                       ])
                         GestureDetector(
-                          onTap: () =>
-                              setState(() => _selectedFilter = label),
+                          onTap: () => setState(() => _selectedFilter = label),
                           child: PantryChip(
                             label: label,
                             selected: _selectedFilter == label,
@@ -119,8 +123,7 @@ class _PantryScreenState extends State<PantryScreen> {
                   const SizedBox(height: AppSpacing.lg),
                   Row(
                     children: [
-                      const Icon(Icons.priority_high,
-                          color: ColorTokens.error),
+                      const Icon(Icons.priority_high, color: ColorTokens.error),
                       const SizedBox(width: AppSpacing.xs),
                       Text('Use Soon', style: context.text.headlineMedium),
                     ],
@@ -130,7 +133,7 @@ class _PantryScreenState extends State<PantryScreen> {
                     Wrap(
                       spacing: AppSpacing.md,
                       runSpacing: AppSpacing.md,
-                      children: _filteredItems
+                      children: filteredItems
                           .map(
                             (item) => SizedBox(
                               width: screenWidth >= 900 ? 280 : 220,
@@ -140,7 +143,7 @@ class _PantryScreenState extends State<PantryScreen> {
                           .toList(),
                     )
                   else
-                    ..._filteredItems.map(
+                    ...filteredItems.map(
                       (item) => Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.md),
                         child: _PantryItemCard(item: item),
@@ -152,8 +155,10 @@ class _PantryScreenState extends State<PantryScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.recycling,
-                            color: ColorTokens.primaryGreen),
+                        const Icon(
+                          Icons.recycling,
+                          color: ColorTokens.primaryGreen,
+                        ),
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: Text(

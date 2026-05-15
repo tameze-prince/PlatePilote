@@ -14,10 +14,7 @@ final dioProvider = Provider<Dio>((ref) {
     ),
   );
 
-  dio.interceptors.addAll([
-    _AuthTokenInterceptor(),
-    _ErrorLogInterceptor(),
-  ]);
+  dio.interceptors.addAll([_AuthTokenInterceptor(), _ErrorLogInterceptor()]);
 
   return dio;
 });

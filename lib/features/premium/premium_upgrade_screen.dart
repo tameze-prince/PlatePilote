@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme/color_tokens.dart';
 import '../../app/theme/spacing.dart';
@@ -6,12 +8,13 @@ import '../../core/extensions/theme_extensions.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../shared/widgets/plate_scaffold.dart';
+import 'subscription_provider.dart';
 
-class PremiumUpgradeScreen extends StatelessWidget {
+class PremiumUpgradeScreen extends ConsumerWidget {
   const PremiumUpgradeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isTablet = screenWidth >= 600;
 
@@ -63,7 +66,8 @@ class PremiumUpgradeScreen extends StatelessWidget {
                   child: _PremiumFeature(
                     icon: Icons.auto_awesome,
                     title: 'AI plan regeneration',
-                    subtitle: 'Swap meals while preserving budget and nutrition.',
+                    subtitle:
+                        'Swap meals while preserving budget and nutrition.',
                   ),
                 ),
                 SizedBox(width: AppSpacing.xs),
@@ -71,7 +75,8 @@ class PremiumUpgradeScreen extends StatelessWidget {
                   child: _PremiumFeature(
                     icon: Icons.document_scanner_outlined,
                     title: 'Unlimited pantry scans',
-                    subtitle: 'Receipt, barcode, and camera-driven pantry capture.',
+                    subtitle:
+                        'Receipt, barcode, and camera-driven pantry capture.',
                   ),
                 ),
                 SizedBox(width: AppSpacing.xs),
@@ -79,7 +84,8 @@ class PremiumUpgradeScreen extends StatelessWidget {
                   child: _PremiumFeature(
                     icon: Icons.savings_outlined,
                     title: 'Savings intelligence',
-                    subtitle: 'Track waste reduction and best-value substitutions.',
+                    subtitle:
+                        'Track waste reduction and best-value substitutions.',
                   ),
                 ),
               ],
@@ -106,9 +112,8 @@ class PremiumUpgradeScreen extends StatelessWidget {
             label: 'Start Premium Trial',
             icon: Icons.arrow_forward,
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Premium trial started!')),
-              );
+              ref.read(subscriptionProvider.notifier).startTrial();
+              context.push('/subscription');
             },
           ),
         ],
