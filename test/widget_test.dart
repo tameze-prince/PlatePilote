@@ -17,6 +17,7 @@ void main() {
         child: const PlatePilotApp(),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.text('PlatePilot'), findsOneWidget);
     expect(find.text('Your smart meal co-pilot'), findsOneWidget);

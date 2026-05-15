@@ -65,23 +65,33 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: AppSpacing.lg),
           _SettingsItem(
             icon: Icons.people_outline,
-            title: 'Household',
-            subtitle: '2 people - balanced portions',
+            title: 'Profile & Preferences',
+            subtitle: 'Household, goals, cuisines, allergies',
+            onTap: () => context.push('/preferences'),
           ),
           _SettingsItem(
             icon: Icons.payments_outlined,
-            title: 'Budget',
+            title: 'Budget Management',
             subtitle: r'$400 weekly grocery cap',
+            onTap: () => context.push('/budget'),
           ),
           _SettingsItem(
-            icon: Icons.no_food_outlined,
-            title: 'Dietary Constraints',
-            subtitle: 'High protein, low waste',
+            icon: Icons.language,
+            title: 'Language',
+            subtitle: 'English / Français',
+            onTap: () => context.push('/language'),
           ),
           _SettingsItem(
             icon: Icons.notifications_outlined,
             title: 'Notifications',
             subtitle: 'Pantry alerts and plan reminders',
+            onTap: () => context.push('/notification-preferences'),
+          ),
+          _SettingsItem(
+            icon: Icons.menu_book_outlined,
+            title: 'Custom Recipes',
+            subtitle: 'Save your own recipes',
+            onTap: () => context.push('/recipes/add'),
           ),
           const SizedBox(height: AppSpacing.xs),
           AppCard(
@@ -139,17 +149,20 @@ class _SettingsItem extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.onTap,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: AppCard(
+        onTap: onTap,
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           children: [

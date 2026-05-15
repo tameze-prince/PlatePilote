@@ -1,0 +1,12 @@
+{
+  "@@locale": "fr",
+  "generatePlan": "Générer mon plan",
+  "budgetRemaining": "Budget restant",
+  "notifications": "Notifications",
+  "language": "Langue",
+  "editPreferences": "Modifier les préférences",
+  "budgetManagement": "Gestion du budget",
+  "addPantryItem": "Ajouter au garde-manger",
+  "addGroceryItem": "Ajouter un article",
+  "addRecipe": "Ajouter une recette"
+}

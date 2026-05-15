@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme/color_tokens.dart';
 import '../../app/theme/spacing.dart';
@@ -22,8 +23,8 @@ class GroceryListScreen extends StatelessWidget {
     return PlateScaffold(
       title: 'PlatePilot',
       trailing: IconButton(
-        onPressed: () {},
-        icon: const Icon(Icons.share_outlined),
+        onPressed: () => context.push('/grocery/add'),
+        icon: const Icon(Icons.add_circle_outline),
       ),
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),

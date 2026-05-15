@@ -52,7 +52,7 @@ class PlateScaffold extends StatelessWidget {
         actions: [
           trailing ??
               IconButton(
-                onPressed: () {},
+                onPressed: () => context.push('/notifications'),
                 icon: Icon(
                   Icons.notifications_outlined,
                   color: context.colors.primary,

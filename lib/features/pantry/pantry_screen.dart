@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme/color_tokens.dart';
 import '../../app/theme/spacing.dart';
@@ -44,7 +45,7 @@ class PantryScreen extends StatelessWidget {
           PrimaryButton(
             label: 'Scan or Add to Pantry',
             icon: Icons.add_circle_outline,
-            onPressed: () {},
+            onPressed: () => context.push('/pantry/add'),
           ),
           const SizedBox(height: AppSpacing.lg),
           Row(
