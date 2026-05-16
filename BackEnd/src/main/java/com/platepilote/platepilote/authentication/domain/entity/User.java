@@ -1,0 +1,72 @@
+package com.platepilote.platepilote.authentication.domain.entity;
+
+/**
+ * USER ENTITY - DATABASE TABLE: users
+ * =====================================
+ * 
+ * WHAT IT IS:
+ * Represents a registered user in the system.
+ * Maps to the "users" table in the PostgreSQL database.
+ * 
+ * FIELDS EXPLANATION:
+ * - id: Unique identifier (UUID), inherited from BaseEntity
+ * - email: User's email address (used for login), must be unique
+ * - passwordHash: BCrypt-hashed password (NEVER store plain text passwords!)
+ * - firstName, lastName: User's display name
+ * - phone: Optional phone number for notifications
+ * - avatarUrl: URL to user's profile picture (stored in Cloudinary/R2)
+ * - provider: How the user registered ("local" = email/password, "google" = Google OAuth)
+ * - providerId: ID from the OAuth provider (e.g., Google user ID)
+ * - emailVerified: Whether the user clicked the email verification link
+ * - enabled: Whether the account is active (can be disabled by admin)
+ * - createdAt, updatedAt, deletedAt: Inherited from BaseEntity
+ */
+
+import com.platepilote.platepilote.common.kernel.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity  // Tells JPA: "This class maps to a database table"
+@Table(name = "users")  // Specifies the table name
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder  // Lombok: Enables builder pattern (User.builder().email("...").build())
+public class User extends BaseEntity {
+
+    @Column(nullable = false, unique = true)  // Required and must be unique
+    private String email;
+
+    @Column(name = "password_hash")  // Column name in database (snake_case)
+    private String passwordHash;
+
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
+
+    private String phone;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    @Column(nullable = false)
+    private String provider = "local";  // Default to email/password registration
+
+    @Column(name = "provider_id")
+    private String providerId;
+
+    @Column(name = "email_verified")
+    private Boolean emailVerified = false;
+
+    @Column(nullable = false)
+    private Boolean enabled = true;
+}
