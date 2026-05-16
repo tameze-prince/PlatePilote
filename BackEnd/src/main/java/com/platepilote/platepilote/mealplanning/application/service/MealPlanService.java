@@ -12,12 +12,15 @@ import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanEntryR
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanRepository;
 import com.platepilote.platepilote.recipes.domain.entity.Recipe;
 import com.platepilote.platepilote.recipes.domain.repository.RecipeRepository;
+import com.platepilote.platepilote.recommendation.domain.service.RecommendationEngine;
+import com.platepilote.platepilote.recommendation.domain.service.RecommendationEngine.RecommendationResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,6 +33,7 @@ public class MealPlanService {
     private final MealPlanRepository mealPlanRepository;
     private final MealPlanEntryRepository mealPlanEntryRepository;
     private final RecipeRepository recipeRepository;
+    private final RecommendationEngine recommendationEngine;
 
     @Transactional(readOnly = true)
     public PagedResponse<MealPlanResponse> getUserMealPlans(UUID userId, Pageable pageable) {
@@ -125,6 +129,39 @@ public class MealPlanService {
 
         mealPlan.setStatus("ACTIVE");
         mealPlanRepository.save(mealPlan);
+    }
+
+    public MealPlanResponse generateWeeklyPlan(UUID userId, LocalDate startDate) {
+        List<List<RecommendationResult>> weeklyPlan = recommendationEngine.generateWeeklyMealPlan(userId);
+        LocalDate endDate = startDate.plusDays(6);
+
+        MealPlan mealPlan = MealPlan.builder()
+                .userId(userId)
+                .name("Auto-Generated Weekly Plan")
+                .startDate(startDate)
+                .endDate(endDate)
+                .status("ACTIVE")
+                .build();
+        MealPlan saved = mealPlanRepository.save(mealPlan);
+
+        String[] mealTypes = {"Breakfast", "Lunch", "Dinner"};
+        for (int day = 0; day < weeklyPlan.size(); day++) {
+            List<RecommendationResult> dayMeals = weeklyPlan.get(day);
+            LocalDate mealDate = startDate.plusDays(day);
+            for (int mealIdx = 0; mealIdx < dayMeals.size() && mealIdx < mealTypes.length; mealIdx++) {
+                RecommendationResult result = dayMeals.get(mealIdx);
+                MealPlanEntry entry = MealPlanEntry.builder()
+                        .mealPlanId(saved.getId())
+                        .recipeId(result.recipe().getId())
+                        .mealDate(mealDate)
+                        .mealType(mealTypes[mealIdx])
+                        .servings(result.recipe().getServings())
+                        .build();
+                mealPlanEntryRepository.save(entry);
+            }
+        }
+
+        return toFullResponse(saved);
     }
 
     public void deleteMealPlan(UUID userId, UUID mealPlanId) {

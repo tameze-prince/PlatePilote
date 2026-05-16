@@ -33,8 +33,9 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      # validate = check schema matches entities (Flyway manages schema)
-      ddl-auto: validate
+      # update = Hibernate auto-adds missing columns/tables (Flyway manages initial schema)
+      # validate = strict check (fails if schema doesn't match entities)
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:

@@ -54,6 +54,16 @@ public class GroceryController {
         return ResponseEntity.ok(ApiResponse.success(list));
     }
 
+    @PostMapping("/generate")
+    public ResponseEntity<ApiResponse<GroceryListResponse>> generateFromMealPlan(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam UUID mealPlanId) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        GroceryListResponse list = groceryService.generateFromMealPlan(userId, mealPlanId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Grocery list generated from meal plan", list));
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<GroceryListResponse>> createList(
             @AuthenticationPrincipal UserDetails userDetails,

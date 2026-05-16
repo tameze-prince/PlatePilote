@@ -8,14 +8,25 @@ import com.platepilote.platepilote.grocery.domain.entity.GroceryItem;
 import com.platepilote.platepilote.grocery.domain.entity.GroceryList;
 import com.platepilote.platepilote.grocery.domain.repository.GroceryItemRepository;
 import com.platepilote.platepilote.grocery.domain.repository.GroceryListRepository;
+import com.platepilote.platepilote.mealplanning.domain.entity.MealPlan;
+import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanEntry;
+import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanEntryRepository;
+import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanRepository;
+import com.platepilote.platepilote.pantry.domain.entity.PantryItem;
+import com.platepilote.platepilote.pantry.domain.repository.PantryItemRepository;
+import com.platepilote.platepilote.recipes.domain.entity.RecipeIngredient;
+import com.platepilote.platepilote.recipes.domain.repository.RecipeIngredientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -26,6 +37,10 @@ public class GroceryService {
 
     private final GroceryListRepository groceryListRepository;
     private final GroceryItemRepository groceryItemRepository;
+    private final MealPlanRepository mealPlanRepository;
+    private final MealPlanEntryRepository mealPlanEntryRepository;
+    private final RecipeIngredientRepository recipeIngredientRepository;
+    private final PantryItemRepository pantryItemRepository;
 
     @Transactional(readOnly = true)
     public PagedResponse<GroceryListResponse> getUserLists(UUID userId, Pageable pageable) {
@@ -126,6 +141,66 @@ public class GroceryService {
         groceryListRepository.save(list);
     }
 
+    public GroceryListResponse generateFromMealPlan(UUID userId, UUID mealPlanId) {
+        MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
+                .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
+        if (!mealPlan.getUserId().equals(userId)) {
+            throw new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString());
+        }
+
+        List<MealPlanEntry> entries = mealPlanEntryRepository.findByMealPlanId(mealPlanId);
+        Map<String, GroceryItemAggregate> aggregatedItems = new HashMap<>();
+        List<PantryItem> pantryItems = pantryItemRepository
+                .findByUserIdAndDeletedAtIsNull(userId, PageRequest.of(0, 500))
+                .getContent();
+
+        for (MealPlanEntry entry : entries) {
+            List<RecipeIngredient> ingredients = recipeIngredientRepository
+                    .findByRecipeIdOrderBySortOrderAsc(entry.getRecipeId());
+
+            for (RecipeIngredient ri : ingredients) {
+                String key = ri.getName().toLowerCase().trim();
+                boolean alreadyInPantry = pantryItems.stream()
+                        .anyMatch(pi -> pi.getName().toLowerCase().contains(key));
+                if (alreadyInPantry) continue;
+
+                aggregatedItems.merge(key,
+                        new GroceryItemAggregate(ri.getName(), ri.getQuantity(), ri.getUnit(), ri.getNotes(), 1),
+                        (existing, incoming) -> new GroceryItemAggregate(
+                                existing.name,
+                                existing.totalQuantity.add(incoming.totalQuantity),
+                                existing.unit,
+                                existing.notes != null ? existing.notes : incoming.notes,
+                                existing.count + 1
+                        ));
+            }
+        }
+
+        GroceryList list = GroceryList.builder()
+                .userId(userId)
+                .name("Grocery List for " + mealPlan.getName())
+                .status("ACTIVE")
+                .build();
+        GroceryList saved = groceryListRepository.save(list);
+
+        int sortOrder = 0;
+        for (Map.Entry<String, GroceryItemAggregate> entry : aggregatedItems.entrySet()) {
+            GroceryItemAggregate agg = entry.getValue();
+            GroceryItem item = GroceryItem.builder()
+                    .groceryListId(saved.getId())
+                    .name(agg.name)
+                    .quantity(agg.totalQuantity)
+                    .unit(agg.unit)
+                    .checked(false)
+                    .notes(agg.notes)
+                    .sortOrder(sortOrder++)
+                    .build();
+            groceryItemRepository.save(item);
+        }
+
+        return toFullListResponse(saved);
+    }
+
     public void deleteList(UUID userId, UUID listId) {
         GroceryList list = groceryListRepository.findById(listId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", listId.toString()));
@@ -200,5 +275,13 @@ public class GroceryService {
             Boolean checked,
             String notes,
             Integer sortOrder
+    ) {}
+
+    private record GroceryItemAggregate(
+            String name,
+            BigDecimal totalQuantity,
+            String unit,
+            String notes,
+            int count
     ) {}
 }

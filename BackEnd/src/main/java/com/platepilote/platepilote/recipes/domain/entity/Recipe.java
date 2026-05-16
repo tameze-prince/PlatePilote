@@ -86,4 +86,65 @@ public class Recipe extends BaseEntity {
 
     @Column(name = "user_id")
     private UUID userId;  // Who created this recipe (null = system recipe)
+
+    // Nutritional metadata per serving
+    @Column(name = "calories_per_serving")
+    private Integer caloriesPerServing;
+
+    @Column(name = "protein_per_serving")
+    private Double proteinPerServing;
+
+    @Column(name = "carbs_per_serving")
+    private Double carbsPerServing;
+
+    @Column(name = "fat_per_serving")
+    private Double fatPerServing;
+
+    @Column(name = "fiber_per_serving")
+    private Double fiberPerServing;
+
+    // Allergen flags
+    @Column(name = "contains_gluten")
+    private Boolean containsGluten;
+
+    @Column(name = "contains_lactose")
+    private Boolean containsLactose;
+
+    @Column(name = "contains_nuts")
+    private Boolean containsNuts;
+
+    @Column(name = "contains_soy")
+    private Boolean containsSoy;
+
+    @Column(name = "contains_eggs")
+    private Boolean containsEggs;
+
+    @Column(name = "contains_fish")
+    private Boolean containsFish;
+
+    @Column(name = "contains_shellfish")
+    private Boolean containsShellfish;
+
+    // Dietary flags
+    private Boolean vegan;
+    private Boolean vegetarian;
+
+    @Column(name = "halal_friendly")
+    private Boolean halalFriendly;
+
+    @Column(name = "kosher_friendly")
+    private Boolean kosherFriendly;
+
+    @Column(name = "low_carb")
+    private Boolean lowCarb;
+
+    @Column(name = "keto_friendly")
+    private Boolean ketoFriendly;
+
+    // Pricing
+    @Column(name = "estimated_cost", precision = 10, scale = 2)
+    private java.math.BigDecimal estimatedCost;
+
+    @Column(name = "source_url")
+    private String sourceUrl;
 }

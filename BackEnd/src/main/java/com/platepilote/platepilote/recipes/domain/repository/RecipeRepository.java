@@ -78,4 +78,12 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      */
     @Query("SELECT r FROM Recipe r WHERE r.id IN :ids AND r.deletedAt IS NULL")
     List<Recipe> findByIds(@Param("ids") List<UUID> ids);
+
+    @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.deletedAt IS NULL AND r.totalTimeMinutes <= :maxTime")
+    Page<Recipe> findQuickMeals(@Param("maxTime") Integer maxTime, Pageable pageable);
+
+    @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.deletedAt IS NULL AND " +
+           "(:cuisine IS NULL OR r.cuisineType = :cuisine) AND " +
+           "(r.estimatedCost IS NULL OR r.estimatedCost <= :maxCost)")
+    List<Recipe> findByFilters(@Param("cuisine") String cuisine, @Param("maxCost") java.math.BigDecimal maxCost, Pageable pageable);
 }

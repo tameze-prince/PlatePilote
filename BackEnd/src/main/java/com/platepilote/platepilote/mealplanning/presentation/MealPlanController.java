@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
@@ -51,6 +53,15 @@ public class MealPlanController {
         UUID userId = UUID.fromString(userDetails.getUsername());
         MealPlanResponse plan = mealPlanService.getMealPlanById(userId, mealPlanId);
         return ResponseEntity.ok(ApiResponse.success(plan));
+    }
+
+    @PostMapping("/generate")
+    public ResponseEntity<ApiResponse<MealPlanResponse>> generateWeeklyPlan(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        MealPlanResponse plan = mealPlanService.generateWeeklyPlan(userId, startDate);
+        return ResponseEntity.ok(ApiResponse.success("Weekly plan generated", plan));
     }
 
     @PostMapping
