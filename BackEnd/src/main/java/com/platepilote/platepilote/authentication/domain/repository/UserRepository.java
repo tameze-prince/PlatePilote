@@ -23,7 +23,7 @@ package com.platepilote.platepilote.authentication.domain.repository;
  * For complex queries, you can use @Query annotation.
  */
 
-import com.platepilote.platepilote.authentication.domain.entity.User;
+import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -31,14 +31,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository  // Tells Spring: "This is a data access bean"
-public interface UserRepository extends JpaRepository<User, UUID> {
+public interface UserRepository extends JpaRepository<OurUser, UUID> {
 
     /**
      * Find a user by their email address.
-     * Returns Optional<User> - empty if no user found.
+     * Returns Optional<OurUser> - empty if no user found.
      * Used during login to load user details.
      */
-    Optional<User> findByEmail(String email);
+    Optional<OurUser> findByEmail(String email);
 
     /**
      * Check if a user with this email already exists.

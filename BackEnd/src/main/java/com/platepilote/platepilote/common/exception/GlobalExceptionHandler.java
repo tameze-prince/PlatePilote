@@ -180,7 +180,6 @@ public class GlobalExceptionHandler {
      * Extended error response for validation errors with field-specific messages.
      */
     @Getter
-    @AllArgsConstructor
     public static class ValidationErrorResponse extends ErrorResponse {
         private final Map<String, String> errors;  // Field name -> error message
 

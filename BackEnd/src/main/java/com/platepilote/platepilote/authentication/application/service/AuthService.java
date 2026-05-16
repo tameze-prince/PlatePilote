@@ -35,7 +35,7 @@ package com.platepilote.platepilote.authentication.application.service;
 import com.platepilote.platepilote.authentication.application.dto.AuthenticationResponse;
 import com.platepilote.platepilote.authentication.application.dto.LoginRequest;
 import com.platepilote.platepilote.authentication.application.dto.RegisterRequest;
-import com.platepilote.platepilote.authentication.domain.entity.User;
+import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.common.security.JwtService;
@@ -74,7 +74,7 @@ public class AuthService {
         }
 
         // Create new user entity
-        User user = User.builder()
+        OurUser user = OurUser.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
@@ -152,7 +152,7 @@ public class AuthService {
         }
 
         // Load user from database
-        User user = userRepository.findByEmail(email)
+        OurUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessRuleViolationException("User not found"));
 
         // Create UserDetails for validation

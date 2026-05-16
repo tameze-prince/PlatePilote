@@ -22,7 +22,7 @@ package com.platepilote.platepilote.authentication.application.service;
  * 7. If no match -> login failed, 401 error returned
  */
 
-import com.platepilote.platepilote.authentication.domain.entity.User;
+import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -51,10 +51,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)  // Read-only transaction for performance
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
+        OurUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        // Convert our User entity to Spring Security's UserDetails format
+        // Convert our OurUser entity to Spring Security's UserDetails format
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPasswordHash(),

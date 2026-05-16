@@ -1,0 +1,183 @@
+package com.platepilote.platepilote.mealplanning.application.service;
+
+import com.platepilote.platepilote.common.dto.PagedResponse;
+import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
+import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
+import com.platepilote.platepilote.mealplanning.application.dto.MealPlanEntryRequest;
+import com.platepilote.platepilote.mealplanning.application.dto.MealPlanRequest;
+import com.platepilote.platepilote.mealplanning.application.dto.MealPlanResponse;
+import com.platepilote.platepilote.mealplanning.domain.entity.MealPlan;
+import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanEntry;
+import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanEntryRepository;
+import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanRepository;
+import com.platepilote.platepilote.recipes.domain.entity.Recipe;
+import com.platepilote.platepilote.recipes.domain.repository.RecipeRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class MealPlanService {
+
+    private final MealPlanRepository mealPlanRepository;
+    private final MealPlanEntryRepository mealPlanEntryRepository;
+    private final RecipeRepository recipeRepository;
+
+    @Transactional(readOnly = true)
+    public PagedResponse<MealPlanResponse> getUserMealPlans(UUID userId, Pageable pageable) {
+        Page<MealPlan> page = mealPlanRepository.findByUserIdAndDeletedAtIsNull(userId, pageable);
+        List<MealPlanResponse> content = page.getContent()
+                .stream()
+                .map(this::toSummaryResponse)
+                .collect(Collectors.toList());
+
+        return PagedResponse.of(content, page.getNumber(), page.getSize(), page.getTotalElements());
+    }
+
+    @Transactional(readOnly = true)
+    public MealPlanResponse getMealPlanById(UUID userId, UUID mealPlanId) {
+        MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
+                .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
+
+        if (!mealPlan.getUserId().equals(userId)) {
+            throw new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString());
+        }
+
+        return toFullResponse(mealPlan);
+    }
+
+    public MealPlanResponse createMealPlan(UUID userId, MealPlanRequest request) {
+        if (request.getEndDate().isBefore(request.getStartDate())) {
+            throw new BusinessRuleViolationException("End date must be after start date");
+        }
+
+        MealPlan mealPlan = MealPlan.builder()
+                .userId(userId)
+                .name(request.getName())
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .status("DRAFT")
+                .build();
+
+        MealPlan saved = mealPlanRepository.save(mealPlan);
+        return toSummaryResponse(saved);
+    }
+
+    public MealPlanResponse addEntry(UUID userId, UUID mealPlanId, MealPlanEntryRequest request) {
+        MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
+                .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
+
+        if (!mealPlan.getUserId().equals(userId)) {
+            throw new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString());
+        }
+
+        if (request.getMealDate().isBefore(mealPlan.getStartDate()) ||
+            request.getMealDate().isAfter(mealPlan.getEndDate())) {
+            throw new BusinessRuleViolationException("Meal date must be within the plan's date range");
+        }
+
+        Recipe recipe = recipeRepository.findById(request.getRecipeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", request.getRecipeId().toString()));
+
+        MealPlanEntry entry = MealPlanEntry.builder()
+                .mealPlanId(mealPlanId)
+                .recipeId(request.getRecipeId())
+                .mealDate(request.getMealDate())
+                .mealType(request.getMealType())
+                .servings(request.getServings())
+                .notes(request.getNotes())
+                .build();
+
+        mealPlanEntryRepository.save(entry);
+
+        return toFullResponse(mealPlan);
+    }
+
+    public void removeEntry(UUID userId, UUID entryId) {
+        MealPlanEntry entry = mealPlanEntryRepository.findById(entryId)
+                .orElseThrow(() -> new ResourceNotFoundException("MealPlanEntry", "id", entryId.toString()));
+
+        MealPlan mealPlan = mealPlanRepository.findById(entry.getMealPlanId())
+                .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", entry.getMealPlanId().toString()));
+
+        if (!mealPlan.getUserId().equals(userId)) {
+            throw new ResourceNotFoundException("MealPlan", "id", entry.getMealPlanId().toString());
+        }
+
+        mealPlanEntryRepository.delete(entry);
+    }
+
+    public void activateMealPlan(UUID userId, UUID mealPlanId) {
+        MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
+                .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
+
+        if (!mealPlan.getUserId().equals(userId)) {
+            throw new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString());
+        }
+
+        mealPlan.setStatus("ACTIVE");
+        mealPlanRepository.save(mealPlan);
+    }
+
+    public void deleteMealPlan(UUID userId, UUID mealPlanId) {
+        MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
+                .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
+
+        if (!mealPlan.getUserId().equals(userId)) {
+            throw new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString());
+        }
+
+        mealPlan.softDelete();
+        mealPlanRepository.save(mealPlan);
+    }
+
+    private MealPlanResponse toSummaryResponse(MealPlan mealPlan) {
+        return MealPlanResponse.builder()
+                .id(mealPlan.getId())
+                .name(mealPlan.getName())
+                .startDate(mealPlan.getStartDate())
+                .endDate(mealPlan.getEndDate())
+                .status(mealPlan.getStatus())
+                .createdAt(mealPlan.getCreatedAt())
+                .updatedAt(mealPlan.getUpdatedAt())
+                .build();
+    }
+
+    private MealPlanResponse toFullResponse(MealPlan mealPlan) {
+        List<MealPlanEntry> entries = mealPlanEntryRepository.findByMealPlanId(mealPlan.getId());
+
+        List<MealPlanResponse.MealPlanEntryResponse> entryResponses = entries.stream()
+                .map(entry -> {
+                    Recipe recipe = recipeRepository.findById(entry.getRecipeId()).orElse(null);
+                    return MealPlanResponse.MealPlanEntryResponse.builder()
+                            .id(entry.getId())
+                            .recipeId(entry.getRecipeId())
+                            .recipeName(recipe != null ? recipe.getName() : "Unknown")
+                            .mealDate(entry.getMealDate())
+                            .mealType(entry.getMealType())
+                            .servings(entry.getServings())
+                            .notes(entry.getNotes())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return MealPlanResponse.builder()
+                .id(mealPlan.getId())
+                .name(mealPlan.getName())
+                .startDate(mealPlan.getStartDate())
+                .endDate(mealPlan.getEndDate())
+                .status(mealPlan.getStatus())
+                .entries(entryResponses)
+                .createdAt(mealPlan.getCreatedAt())
+                .updatedAt(mealPlan.getUpdatedAt())
+                .build();
+    }
+}

@@ -8,20 +8,20 @@ package com.platepilote.platepilote.pantry.domain.repository;
  * 
  * 1. findByUserIdAndDeletedAtIsNull(userId, pageable)
  *    -> Get all active pantry items for a user (paginated)
- *    SQL: SELECT * FROM pantry_items WHERE user_id = ? AND deleted_at IS NULL LIMIT ? OFFSET ?
+ *    SQL: SELECT * FROM pantry_items WHERE ouruser_id = ? AND deleted_at IS NULL LIMIT ? OFFSET ?
  * 
  * 2. findByUserIdAndCategoryAndDeletedAtIsNull(userId, category)
  *    -> Get pantry items filtered by category
- *    SQL: SELECT * FROM pantry_items WHERE user_id = ? AND category = ? AND deleted_at IS NULL
+ *    SQL: SELECT * FROM pantry_items WHERE ouruser_id = ? AND category = ? AND deleted_at IS NULL
  * 
  * 3. findExpiringItems(userId, date)
  *    -> Get items expiring on or before a specific date
- *    SQL: SELECT * FROM pantry_items WHERE user_id = ? AND deleted_at IS NULL AND expiration_date <= ?
+ *    SQL: SELECT * FROM pantry_items WHERE ouruser_id = ? AND deleted_at IS NULL AND expiration_date <= ?
  *    Used to send "item expiring soon" notifications
  * 
  * 4. searchByUserIdAndQuery(userId, query)
  *    -> Search pantry items by name (case-insensitive partial match)
- *    SQL: SELECT * FROM pantry_items WHERE user_id = ? AND deleted_at IS NULL AND LOWER(name) LIKE '%query%'
+ *    SQL: SELECT * FROM pantry_items WHERE ouruser_id = ? AND deleted_at IS NULL AND LOWER(name) LIKE '%query%'
  */
 
 import com.platepilote.platepilote.pantry.domain.entity.PantryItem;

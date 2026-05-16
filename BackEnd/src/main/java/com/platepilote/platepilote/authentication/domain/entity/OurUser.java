@@ -1,12 +1,12 @@
 package com.platepilote.platepilote.authentication.domain.entity;
 
 /**
- * USER ENTITY - DATABASE TABLE: users
+ * USER ENTITY - DATABASE TABLE: our_user
  * =====================================
  * 
  * WHAT IT IS:
  * Represents a registered user in the system.
- * Maps to the "users" table in the PostgreSQL database.
+ * Maps to the "our_user" table in the PostgreSQL database.
  * 
  * FIELDS EXPLANATION:
  * - id: Unique identifier (UUID), inherited from BaseEntity
@@ -33,13 +33,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity  // Tells JPA: "This class maps to a database table"
-@Table(name = "users")  // Specifies the table name
+@Table(name = "our_user")  // Specifies the table name
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder  // Lombok: Enables builder pattern (User.builder().email("...").build())
-public class User extends BaseEntity {
+public class OurUser extends BaseEntity {
 
     @Column(nullable = false, unique = true)  // Required and must be unique
     private String email;
