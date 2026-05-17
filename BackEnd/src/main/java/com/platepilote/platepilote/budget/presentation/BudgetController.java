@@ -1,5 +1,6 @@
 package com.platepilote.platepilote.budget.presentation;
 
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.budget.application.dto.BudgetRequest;
 import com.platepilote.platepilote.budget.application.service.BudgetService;
 import com.platepilote.platepilote.budget.application.service.BudgetService.BudgetResponse;
@@ -31,13 +32,14 @@ import java.util.UUID;
 public class BudgetController {
 
     private final BudgetService budgetService;
+    private final SecurityUtils securityUtils;
 
     @GetMapping
     public ResponseEntity<ApiResponse<PagedResponse<BudgetResponse>>> getMyBudgets(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").descending());
         PagedResponse<BudgetResponse> budgets = budgetService.getUserBudgets(userId, pageable);
         return ResponseEntity.ok(ApiResponse.success(budgets));
@@ -47,7 +49,7 @@ public class BudgetController {
     public ResponseEntity<ApiResponse<BudgetResponse>> createBudget(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody BudgetRequest request) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         BudgetResponse budget = budgetService.createBudget(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Budget created", budget));
@@ -57,7 +59,7 @@ public class BudgetController {
     public ResponseEntity<ApiResponse<Void>> deleteBudget(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID budgetId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         budgetService.deleteBudget(userId, budgetId);
         return ResponseEntity.ok(ApiResponse.success("Budget deleted", null));
     }

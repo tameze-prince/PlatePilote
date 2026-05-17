@@ -32,13 +32,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PagedResponse<T> {
+public class PagedResponse<T> implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private List<T> content;     // The actual items on this page
     private int page;            // Current page number (0-indexed)

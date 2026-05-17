@@ -23,9 +23,10 @@ public class UsdaImporter {
         int imported = 0;
         for (int i = 0; i < maxResults; i++) {
             try {
+                String uniqueId = java.util.UUID.randomUUID().toString().substring(0, 8);
                 Ingredient ingredient = Ingredient.builder()
                         .canonicalName("USDA Import " + query + " #" + (i + 1))
-                        .slug(normalizer.toSlug(query + "-" + (i + 1)))
+                        .slug(normalizer.toSlug(query + "-" + (i + 1) + "-" + uniqueId))
                         .category("Imported")
                         .description("Imported from USDA FoodData Central")
                         .defaultUnit("g")

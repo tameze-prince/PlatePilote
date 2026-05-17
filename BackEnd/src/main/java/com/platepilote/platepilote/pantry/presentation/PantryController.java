@@ -2,6 +2,7 @@ package com.platepilote.platepilote.pantry.presentation;
 
 import com.platepilote.platepilote.common.dto.ApiResponse;
 import com.platepilote.platepilote.common.dto.PagedResponse;
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.pantry.application.dto.PantryItemRequest;
 import com.platepilote.platepilote.pantry.application.dto.PantryItemResponse;
 import com.platepilote.platepilote.pantry.application.service.PantryService;
@@ -36,12 +37,14 @@ public class PantryController {
 
     private final PantryService pantryService;
 
+    private final SecurityUtils securityUtils;
+
     @GetMapping
     public ResponseEntity<ApiResponse<PagedResponse<PantryItemResponse>>> getAllItems(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         PagedResponse<PantryItemResponse> items = pantryService.getAllItems(userId, pageable);
         return ResponseEntity.ok(ApiResponse.success(items));
@@ -51,7 +54,7 @@ public class PantryController {
     public ResponseEntity<ApiResponse<List<PantryItemResponse>>> getItemsByCategory(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String category) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         List<PantryItemResponse> items = pantryService.getItemsByCategory(userId, category);
         return ResponseEntity.ok(ApiResponse.success(items));
     }
@@ -60,7 +63,7 @@ public class PantryController {
     public ResponseEntity<ApiResponse<List<PantryItemResponse>>> getExpiringItems(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "7") int days) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         List<PantryItemResponse> items = pantryService.getExpiringItems(userId, days);
         return ResponseEntity.ok(ApiResponse.success(items));
     }
@@ -69,7 +72,7 @@ public class PantryController {
     public ResponseEntity<ApiResponse<List<PantryItemResponse>>> searchItems(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam String q) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         List<PantryItemResponse> items = pantryService.searchItems(userId, q);
         return ResponseEntity.ok(ApiResponse.success(items));
     }
@@ -78,7 +81,7 @@ public class PantryController {
     public ResponseEntity<ApiResponse<PantryItemResponse>> addItem(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody PantryItemRequest request) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         PantryItemResponse item = pantryService.addItem(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Item added", item));
@@ -89,7 +92,7 @@ public class PantryController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID itemId,
             @Valid @RequestBody PantryItemRequest request) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         PantryItemResponse item = pantryService.updateItem(userId, itemId, request);
         return ResponseEntity.ok(ApiResponse.success("Item updated", item));
     }
@@ -98,7 +101,7 @@ public class PantryController {
     public ResponseEntity<ApiResponse<Void>> removeItem(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID itemId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         pantryService.removeItem(userId, itemId);
         return ResponseEntity.ok(ApiResponse.success("Item removed", null));
     }
@@ -108,7 +111,7 @@ public class PantryController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID itemId,
             @RequestParam BigDecimal amount) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         pantryService.consumeItem(userId, itemId, amount);
         return ResponseEntity.ok(ApiResponse.success("Item consumed", null));
     }

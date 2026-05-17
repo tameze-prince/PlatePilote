@@ -2,6 +2,7 @@ package com.platepilote.platepilote.recipes.presentation;
 
 import com.platepilote.platepilote.common.dto.ApiResponse;
 import com.platepilote.platepilote.common.dto.PagedResponse;
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.recipes.application.dto.RecipeRequest;
 import com.platepilote.platepilote.recipes.application.dto.RecipeResponse;
 import com.platepilote.platepilote.recipes.application.service.RecipeService;
@@ -32,6 +33,8 @@ import java.util.UUID;
 public class RecipeController {
 
     private final RecipeService recipeService;
+
+    private final SecurityUtils securityUtils;
 
     @GetMapping("/public")
     public ResponseEntity<ApiResponse<PagedResponse<RecipeResponse>>> getPublicRecipes(
@@ -83,7 +86,7 @@ public class RecipeController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         PagedResponse<RecipeResponse> recipes = recipeService.getUserRecipes(userId, pageable);
         return ResponseEntity.ok(ApiResponse.success(recipes));
@@ -101,7 +104,7 @@ public class RecipeController {
     public ResponseEntity<ApiResponse<RecipeResponse>> createRecipe(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody RecipeRequest request) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         RecipeResponse recipe = recipeService.createRecipe(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Recipe created", recipe));
@@ -112,7 +115,7 @@ public class RecipeController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID recipeId,
             @Valid @RequestBody RecipeRequest request) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         RecipeResponse recipe = recipeService.updateRecipe(userId, recipeId, request);
         return ResponseEntity.ok(ApiResponse.success("Recipe updated", recipe));
     }
@@ -121,7 +124,7 @@ public class RecipeController {
     public ResponseEntity<ApiResponse<Void>> deleteRecipe(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID recipeId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         recipeService.deleteRecipe(userId, recipeId);
         return ResponseEntity.ok(ApiResponse.success("Recipe deleted", null));
     }

@@ -1,6 +1,7 @@
 package com.platepilote.platepilote.recommendation.presentation;
 
 import com.platepilote.platepilote.common.dto.ApiResponse;
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.recommendation.domain.service.RecommendationEngine;
 import com.platepilote.platepilote.recommendation.domain.service.RecommendationEngine.RecommendationResult;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +24,13 @@ import java.util.stream.Collectors;
 public class RecommendationController {
 
     private final RecommendationEngine recommendationEngine;
+    private final SecurityUtils securityUtils;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<RecipeRecommendation>>> getRecommendations(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "10") int limit) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         List<RecommendationResult> results = recommendationEngine.getRecommendations(userId, limit);
         return ResponseEntity.ok(ApiResponse.success(toDto(results)));
     }
@@ -38,7 +40,7 @@ public class RecommendationController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "30") int maxTime,
             @RequestParam(defaultValue = "3") int limit) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         List<RecommendationResult> results = recommendationEngine.getQuickMeals(userId, maxTime, limit);
         return ResponseEntity.ok(ApiResponse.success(toDto(results)));
     }
@@ -46,7 +48,7 @@ public class RecommendationController {
     @PostMapping("/weekly-plan")
     public ResponseEntity<ApiResponse<List<List<RecipeRecommendation>>>> generateWeeklyPlan(
             @AuthenticationPrincipal UserDetails userDetails) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         List<List<RecommendationResult>> weeklyPlan = recommendationEngine.generateWeeklyMealPlan(userId);
         List<List<RecipeRecommendation>> dtoPlan = weeklyPlan.stream()
                 .map(this::toDto)

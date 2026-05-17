@@ -57,6 +57,9 @@ public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/v1/auth/**",           // Login, register, refresh token
             "/api/v1/recipes/public/**", // Browse public recipes
+            "/api/v1/ingredients/**",    // Food intelligence database
+            "/api/v1/pricing/**",        // Price and barcode lookup
+            "/api/v1/imports/**",        // Data import endpoints
             "/v3/api-docs/**",           // OpenAPI documentation
             "/swagger-ui/**",            // Swagger UI
             "/swagger-ui.html",

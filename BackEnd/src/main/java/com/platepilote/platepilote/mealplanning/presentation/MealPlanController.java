@@ -2,6 +2,7 @@ package com.platepilote.platepilote.mealplanning.presentation;
 
 import com.platepilote.platepilote.common.dto.ApiResponse;
 import com.platepilote.platepilote.common.dto.PagedResponse;
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.mealplanning.application.dto.MealPlanEntryRequest;
 import com.platepilote.platepilote.mealplanning.application.dto.MealPlanRequest;
 import com.platepilote.platepilote.mealplanning.application.dto.MealPlanResponse;
@@ -34,13 +35,14 @@ import java.util.UUID;
 public class MealPlanController {
 
     private final MealPlanService mealPlanService;
+    private final SecurityUtils securityUtils;
 
     @GetMapping
     public ResponseEntity<ApiResponse<PagedResponse<MealPlanResponse>>> getMyMealPlans(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").descending());
         PagedResponse<MealPlanResponse> plans = mealPlanService.getUserMealPlans(userId, pageable);
         return ResponseEntity.ok(ApiResponse.success(plans));
@@ -50,7 +52,7 @@ public class MealPlanController {
     public ResponseEntity<ApiResponse<MealPlanResponse>> getMealPlan(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID mealPlanId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         MealPlanResponse plan = mealPlanService.getMealPlanById(userId, mealPlanId);
         return ResponseEntity.ok(ApiResponse.success(plan));
     }
@@ -59,7 +61,7 @@ public class MealPlanController {
     public ResponseEntity<ApiResponse<MealPlanResponse>> generateWeeklyPlan(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         MealPlanResponse plan = mealPlanService.generateWeeklyPlan(userId, startDate);
         return ResponseEntity.ok(ApiResponse.success("Weekly plan generated", plan));
     }
@@ -68,7 +70,7 @@ public class MealPlanController {
     public ResponseEntity<ApiResponse<MealPlanResponse>> createMealPlan(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody MealPlanRequest request) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         MealPlanResponse plan = mealPlanService.createMealPlan(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Meal plan created", plan));
@@ -79,7 +81,7 @@ public class MealPlanController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID mealPlanId,
             @Valid @RequestBody MealPlanEntryRequest request) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         MealPlanResponse plan = mealPlanService.addEntry(userId, mealPlanId, request);
         return ResponseEntity.ok(ApiResponse.success("Entry added", plan));
     }
@@ -88,7 +90,7 @@ public class MealPlanController {
     public ResponseEntity<ApiResponse<Void>> removeEntry(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID entryId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         mealPlanService.removeEntry(userId, entryId);
         return ResponseEntity.ok(ApiResponse.success("Entry removed", null));
     }
@@ -97,7 +99,7 @@ public class MealPlanController {
     public ResponseEntity<ApiResponse<Void>> activateMealPlan(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID mealPlanId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         mealPlanService.activateMealPlan(userId, mealPlanId);
         return ResponseEntity.ok(ApiResponse.success("Meal plan activated", null));
     }
@@ -106,7 +108,7 @@ public class MealPlanController {
     public ResponseEntity<ApiResponse<Void>> deleteMealPlan(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID mealPlanId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         mealPlanService.deleteMealPlan(userId, mealPlanId);
         return ResponseEntity.ok(ApiResponse.success("Meal plan deleted", null));
     }

@@ -2,6 +2,7 @@ package com.platepilote.platepilote.notification.presentation;
 
 import com.platepilote.platepilote.common.dto.ApiResponse;
 import com.platepilote.platepilote.common.dto.PagedResponse;
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.notification.application.service.NotificationService;
 import com.platepilote.platepilote.notification.application.service.NotificationService.NotificationResponse;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +28,14 @@ import java.util.UUID;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final SecurityUtils securityUtils;
 
     @GetMapping
     public ResponseEntity<ApiResponse<PagedResponse<NotificationResponse>>> getNotifications(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         PagedResponse<NotificationResponse> notifications = notificationService.getNotifications(userId, pageable);
         return ResponseEntity.ok(ApiResponse.success(notifications));
@@ -44,7 +46,7 @@ public class NotificationController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         PagedResponse<NotificationResponse> notifications = notificationService.getUnreadNotifications(userId, pageable);
         return ResponseEntity.ok(ApiResponse.success(notifications));
@@ -53,7 +55,7 @@ public class NotificationController {
     @GetMapping("/unread/count")
     public ResponseEntity<ApiResponse<Long>> getUnreadCount(
             @AuthenticationPrincipal UserDetails userDetails) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         long count = notificationService.getUnreadCount(userId);
         return ResponseEntity.ok(ApiResponse.success(count));
     }
@@ -62,7 +64,7 @@ public class NotificationController {
     public ResponseEntity<ApiResponse<Void>> markAsRead(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID notificationId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         notificationService.markAsRead(userId, notificationId);
         return ResponseEntity.ok(ApiResponse.success("Notification marked as read", null));
     }
@@ -70,7 +72,7 @@ public class NotificationController {
     @PatchMapping("/read-all")
     public ResponseEntity<ApiResponse<Void>> markAllAsRead(
             @AuthenticationPrincipal UserDetails userDetails) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         notificationService.markAllAsRead(userId);
         return ResponseEntity.ok(ApiResponse.success("All notifications marked as read", null));
     }
@@ -79,7 +81,7 @@ public class NotificationController {
     public ResponseEntity<ApiResponse<Void>> deleteNotification(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID notificationId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         notificationService.deleteNotification(userId, notificationId);
         return ResponseEntity.ok(ApiResponse.success("Notification deleted", null));
     }

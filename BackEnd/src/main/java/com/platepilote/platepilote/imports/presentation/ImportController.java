@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/v1/imports")
@@ -21,7 +22,8 @@ public class ImportController {
     public ResponseEntity<ApiResponse<ImportJob>> importFromUsda(
             @RequestParam(defaultValue = "chicken") String query,
             @RequestParam(defaultValue = "10") int maxResults) {
-        ImportJob job = importService.importFromUsda(query, maxResults);
+        CompletableFuture<ImportJob> future = importService.importFromUsda(query, maxResults);
+        ImportJob job = future.join();
         return ResponseEntity.ok(ApiResponse.success("USDA import started", job));
     }
 
@@ -29,7 +31,8 @@ public class ImportController {
     public ResponseEntity<ApiResponse<ImportJob>> importFromOpenFoodFacts(
             @RequestParam(defaultValue = "rice") String query,
             @RequestParam(defaultValue = "10") int maxResults) {
-        ImportJob job = importService.importFromOpenFoodFacts(query, maxResults);
+        CompletableFuture<ImportJob> future = importService.importFromOpenFoodFacts(query, maxResults);
+        ImportJob job = future.join();
         return ResponseEntity.ok(ApiResponse.success("Open Food Facts import started", job));
     }
 
@@ -37,7 +40,8 @@ public class ImportController {
     public ResponseEntity<ApiResponse<ImportJob>> importFromMealDb(
             @RequestParam(defaultValue = "chicken") String query,
             @RequestParam(defaultValue = "10") int maxResults) {
-        ImportJob job = importService.importFromMealDb(query, maxResults);
+        CompletableFuture<ImportJob> future = importService.importFromMealDb(query, maxResults);
+        ImportJob job = future.join();
         return ResponseEntity.ok(ApiResponse.success("TheMealDB import started", job));
     }
 }

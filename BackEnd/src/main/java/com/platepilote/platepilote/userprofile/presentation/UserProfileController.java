@@ -1,6 +1,7 @@
 package com.platepilote.platepilote.userprofile.presentation;
 
 import com.platepilote.platepilote.common.dto.ApiResponse;
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.userprofile.application.dto.UserProfileRequest;
 import com.platepilote.platepilote.userprofile.application.dto.UserProfileResponse;
 import com.platepilote.platepilote.userprofile.application.service.UserProfileService;
@@ -25,6 +26,8 @@ import java.util.UUID;
 public class UserProfileController {
 
     private final UserProfileService userProfileService;
+
+    private final SecurityUtils securityUtils;
 
     @GetMapping
     public ResponseEntity<ApiResponse<UserProfileResponse>> getProfile(
@@ -53,6 +56,6 @@ public class UserProfileController {
     }
 
     private UUID extractUserId(UserDetails userDetails) {
-        return UUID.fromString(userDetails.getUsername());
+        return securityUtils.getCurrentUserId(userDetails);
     }
 }

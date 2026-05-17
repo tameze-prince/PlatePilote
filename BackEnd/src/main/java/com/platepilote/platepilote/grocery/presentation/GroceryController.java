@@ -2,6 +2,7 @@ package com.platepilote.platepilote.grocery.presentation;
 
 import com.platepilote.platepilote.common.dto.ApiResponse;
 import com.platepilote.platepilote.common.dto.PagedResponse;
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.grocery.application.dto.GroceryItemRequest;
 import com.platepilote.platepilote.grocery.application.dto.GroceryListRequest;
 import com.platepilote.platepilote.grocery.application.service.GroceryService;
@@ -33,13 +34,14 @@ import java.util.UUID;
 public class GroceryController {
 
     private final GroceryService groceryService;
+    private final SecurityUtils securityUtils;
 
     @GetMapping
     public ResponseEntity<ApiResponse<PagedResponse<GroceryListResponse>>> getMyLists(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         PagedResponse<GroceryListResponse> lists = groceryService.getUserLists(userId, pageable);
         return ResponseEntity.ok(ApiResponse.success(lists));
@@ -49,7 +51,7 @@ public class GroceryController {
     public ResponseEntity<ApiResponse<GroceryListResponse>> getList(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID listId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         GroceryListResponse list = groceryService.getListById(userId, listId);
         return ResponseEntity.ok(ApiResponse.success(list));
     }
@@ -58,7 +60,7 @@ public class GroceryController {
     public ResponseEntity<ApiResponse<GroceryListResponse>> generateFromMealPlan(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam UUID mealPlanId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         GroceryListResponse list = groceryService.generateFromMealPlan(userId, mealPlanId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Grocery list generated from meal plan", list));
@@ -68,7 +70,7 @@ public class GroceryController {
     public ResponseEntity<ApiResponse<GroceryListResponse>> createList(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody GroceryListRequest request) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         GroceryListResponse list = groceryService.createList(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Grocery list created", list));
@@ -79,7 +81,7 @@ public class GroceryController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID listId,
             @Valid @RequestBody GroceryItemRequest request) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         GroceryListResponse list = groceryService.addItem(userId, listId, request);
         return ResponseEntity.ok(ApiResponse.success("Item added", list));
     }
@@ -88,7 +90,7 @@ public class GroceryController {
     public ResponseEntity<ApiResponse<Void>> toggleItem(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID itemId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         groceryService.toggleItemChecked(userId, itemId);
         return ResponseEntity.ok(ApiResponse.success("Item toggled", null));
     }
@@ -97,7 +99,7 @@ public class GroceryController {
     public ResponseEntity<ApiResponse<Void>> removeItem(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID itemId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         groceryService.removeItem(userId, itemId);
         return ResponseEntity.ok(ApiResponse.success("Item removed", null));
     }
@@ -106,7 +108,7 @@ public class GroceryController {
     public ResponseEntity<ApiResponse<Void>> completeList(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID listId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         groceryService.completeList(userId, listId);
         return ResponseEntity.ok(ApiResponse.success("List completed", null));
     }
@@ -115,7 +117,7 @@ public class GroceryController {
     public ResponseEntity<ApiResponse<Void>> deleteList(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID listId) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
         groceryService.deleteList(userId, listId);
         return ResponseEntity.ok(ApiResponse.success("List deleted", null));
     }

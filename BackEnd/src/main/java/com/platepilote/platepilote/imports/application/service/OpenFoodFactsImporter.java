@@ -26,10 +26,11 @@ public class OpenFoodFactsImporter {
         int imported = 0;
         for (int i = 0; i < maxResults; i++) {
             try {
+                String uniqueId = java.util.UUID.randomUUID().toString().substring(0, 8);
                 String productName = "Product " + query + " #" + (i + 1);
                 Ingredient ingredient = Ingredient.builder()
-                        .canonicalName(productName)
-                        .slug(normalizer.toSlug(productName))
+                        .canonicalName(productName + " " + uniqueId)
+                        .slug(normalizer.toSlug(productName + "-" + uniqueId))
                         .category("Imported")
                         .defaultUnit("g")
                         .sourceName("Open Food Facts")
@@ -37,10 +38,10 @@ public class OpenFoodFactsImporter {
                         .build();
                 ingredient = ingredientRepository.save(ingredient);
                 BarcodeProduct barcodeProduct = BarcodeProduct.builder()
-                        .barcode("OFF-DEMO-" + (i + 1))
+                        .barcode("OFF-DEMO-" + uniqueId + "-" + (i + 1))
                         .productName(productName)
                         .ingredientId(ingredient.getId())
-                        .openFoodFactsCode("OFF-DEMO-" + (i + 1))
+                        .openFoodFactsCode("OFF-DEMO-" + uniqueId + "-" + (i + 1))
                         .build();
                 barcodeProductRepository.save(barcodeProduct);
                 imported++;

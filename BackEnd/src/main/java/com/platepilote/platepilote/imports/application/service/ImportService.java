@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 
@@ -25,7 +26,7 @@ public class ImportService {
     private final MealDbImporter mealDbImporter;
 
     @Async
-    public ImportJob importFromUsda(String query, int maxResults) {
+    public CompletableFuture<ImportJob> importFromUsda(String query, int maxResults) {
         ImportJob job = createJob("USDA_FOOD_DATA_CENTRAL");
         try {
             usdaImporter.importData(query, maxResults, job);
@@ -33,11 +34,11 @@ public class ImportService {
         } catch (Exception e) {
             markFailed(job, e.getMessage());
         }
-        return job;
+        return CompletableFuture.completedFuture(job);
     }
 
     @Async
-    public ImportJob importFromOpenFoodFacts(String query, int maxResults) {
+    public CompletableFuture<ImportJob> importFromOpenFoodFacts(String query, int maxResults) {
         ImportJob job = createJob("OPEN_FOOD_FACTS");
         try {
             openFoodFactsImporter.importData(query, maxResults, job);
@@ -45,11 +46,11 @@ public class ImportService {
         } catch (Exception e) {
             markFailed(job, e.getMessage());
         }
-        return job;
+        return CompletableFuture.completedFuture(job);
     }
 
     @Async
-    public ImportJob importFromMealDb(String query, int maxResults) {
+    public CompletableFuture<ImportJob> importFromMealDb(String query, int maxResults) {
         ImportJob job = createJob("THE_MEAL_DB");
         try {
             mealDbImporter.importData(query, maxResults, job);
@@ -57,7 +58,7 @@ public class ImportService {
         } catch (Exception e) {
             markFailed(job, e.getMessage());
         }
-        return job;
+        return CompletableFuture.completedFuture(job);
     }
 
     @Scheduled(cron = "0 0 2 * * ?") // Run at 2:00 AM daily
