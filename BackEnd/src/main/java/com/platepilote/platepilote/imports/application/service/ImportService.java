@@ -1,6 +1,5 @@
 package com.platepilote.platepilote.imports.application.service;
 
-import com.platepilote.platepilote.common.dto.ApiResponse;
 import com.platepilote.platepilote.imports.domain.entity.ImportJob;
 import com.platepilote.platepilote.imports.domain.repository.ImportJobRepository;
 import lombok.RequiredArgsConstructor;
@@ -8,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
@@ -17,7 +14,6 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class ImportService {
 
     private final ImportJobRepository importJobRepository;

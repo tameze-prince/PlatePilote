@@ -104,6 +104,9 @@ server:
 # APPLICATION-SPECIFIC SETTINGS
 # ==========================================
 app:
+  api:
+    usda-key: A98qqw0hzL20lv9SAnbXBkm7OA6dgaijwLFzkpdX
+    themealdb-key: 1
   jwt:
     # Secret key for signing JWT tokens (Base64 encoded)
     # CHANGE THIS IN PRODUCTION to a long random string!
