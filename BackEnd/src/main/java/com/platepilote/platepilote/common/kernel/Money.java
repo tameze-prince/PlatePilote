@@ -28,6 +28,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Currency;
 
 @Embeddable  // Tells JPA: "This object's fields are stored in the parent entity's table"
@@ -45,7 +46,7 @@ public class Money {
     public Money(BigDecimal amount, Currency currency) {
         if (amount == null) throw new IllegalArgumentException("Amount cannot be null");
         if (currency == null) throw new IllegalArgumentException("Currency cannot be null");
-        this.amount = amount.setScale(2, BigDecimal.ROUND_HALF_UP);
+        this.amount = amount.setScale(2, RoundingMode.HALF_UP); // Always round to 2 decimal places
         this.currency = currency.getCurrencyCode();
     }
 
