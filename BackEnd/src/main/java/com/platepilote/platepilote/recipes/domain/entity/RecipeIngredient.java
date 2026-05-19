@@ -72,4 +72,7 @@ public class RecipeIngredient {
 
     @Column(name = "sort_order")
     private Integer sortOrder = 0;  // Order in which ingredients are displayed
+
+    @Column(name = "ingredient_id")
+    private UUID ingredientId;
 }

@@ -72,9 +72,15 @@ public class RecommendationController {
                         r.budgetScore(),
                         r.pantryScore(),
                         r.timeScore(),
-                        r.skillScore(),
                         r.preferenceScore(),
-                        r.varietyScore()
+                        r.nutritionScore(),
+                        r.varietyScore(),
+                        r.locationScore(),
+                        r.estimatedCost(),
+                        r.currencyCode(),
+                        r.countryCode(),
+                        r.reasons(),
+                        r.warnings()
                 ))
                 .collect(Collectors.toList());
     }
@@ -93,8 +99,14 @@ public class RecommendationController {
             double budgetScore,
             double pantryScore,
             double timeScore,
-            double skillScore,
             double preferenceScore,
-            double varietyScore
+            double nutritionScore,
+            double varietyScore,
+            double locationScore,
+            java.math.BigDecimal estimatedCost,
+            String currencyCode,
+            String countryCode,
+            List<String> reasons,
+            List<String> warnings
     ) {}
 }

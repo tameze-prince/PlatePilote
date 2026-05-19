@@ -34,21 +34,27 @@ import com.platepilote.platepilote.common.kernel.DomainException;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.core.env.Environment;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice  // Tells Spring: "This class handles exceptions for all controllers"
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final Environment environment;
 
     /**
      * Handle "resource not found" errors -> HTTP 404
@@ -158,9 +164,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         ex.printStackTrace();
+        boolean production = Arrays.asList(environment.getActiveProfiles()).contains("prod");
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "An unexpected error occurred: " + ex.getClass().getSimpleName() + " - " + ex.getMessage(),
+                production
+                        ? "An unexpected error occurred"
+                        : "An unexpected error occurred: " + ex.getClass().getSimpleName() + " - " + ex.getMessage(),
                 Instant.now()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);

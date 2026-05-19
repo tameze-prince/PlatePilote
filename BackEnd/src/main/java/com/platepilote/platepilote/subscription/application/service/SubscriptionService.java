@@ -17,6 +17,7 @@ import java.util.UUID;
 public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
+    private final EntitlementService entitlementService;
 
     @Transactional(readOnly = true)
     public SubscriptionResponse getSubscription(UUID userId) {
@@ -48,8 +49,13 @@ public class SubscriptionService {
 
         subscription.setPlanType("PREMIUM");
         subscription.setStartDate(Instant.now());
-        subscription.setEndDate(Instant.now().plusSeconds(30L * 24 * 60 * 60)); // 30 days
+        Instant expiresAt = Instant.now().plusSeconds(30L * 24 * 60 * 60);
+        subscription.setEndDate(expiresAt); // 30 days
+        subscription.setExpiresAt(expiresAt);
+        subscription.setProvider("INTERNAL");
+        subscription.setLastVerifiedAt(Instant.now());
         subscription.setCancelAtPeriodEnd(false);
+        entitlementService.grantPremium(userId, "INTERNAL", expiresAt);
 
         Subscription saved = subscriptionRepository.save(subscription);
         return toResponse(saved);
@@ -61,6 +67,7 @@ public class SubscriptionService {
 
         subscription.setCancelAtPeriodEnd(true);
         subscriptionRepository.save(subscription);
+        entitlementService.revokePremium(userId);
     }
 
     private SubscriptionResponse toResponse(Subscription subscription) {
@@ -72,6 +79,9 @@ public class SubscriptionService {
                 subscription.getEndDate(),
                 subscription.getTrialEndDate(),
                 subscription.getCancelAtPeriodEnd(),
+                subscription.getProvider(),
+                subscription.getExpiresAt(),
+                subscription.getLastVerifiedAt(),
                 subscription.getCreatedAt()
         );
     }
@@ -84,6 +94,9 @@ public class SubscriptionService {
             Instant endDate,
             Instant trialEndDate,
             Boolean cancelAtPeriodEnd,
+            String provider,
+            Instant expiresAt,
+            Instant lastVerifiedAt,
             Instant createdAt
     ) {}
 }

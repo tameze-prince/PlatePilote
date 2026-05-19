@@ -10,7 +10,7 @@ package com.platepilote.platepilote.authentication.domain.entity;
  * ROLES IN THIS APP:
  * - ROLE_USER: Standard user (can manage pantry, recipes, meal plans)
  * - ROLE_ADMIN: Administrator (can manage all users, view analytics)
- * - ROLE_PREMIUM: Premium subscriber (access to advanced features)
+ * - ROLE_PREMIUM_USER: Premium subscriber (access to advanced features)
  * 
  * HOW ROLES WORK:
  * A user can have multiple roles through the user_roles join table.

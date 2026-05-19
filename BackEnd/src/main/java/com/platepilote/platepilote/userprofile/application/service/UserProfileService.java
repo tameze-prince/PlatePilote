@@ -40,6 +40,13 @@ public class UserProfileService {
         profile.setWeightKg(request.getWeightKg());
         profile.setActivityLevel(request.getActivityLevel());
         profile.setHealthGoals(request.getHealthGoals());
+        profile.setCountryCode(defaultIfBlank(request.getCountryCode(), "US").toUpperCase());
+        profile.setCurrencyCode(defaultIfBlank(request.getCurrencyCode(), "USD").toUpperCase());
+        profile.setLocale(defaultIfBlank(request.getLocale(), "en-US"));
+        profile.setCookingSkill(defaultIfBlank(request.getCookingSkill(), "BEGINNER").toUpperCase());
+        profile.setHouseholdSize(request.getHouseholdSize() == null || request.getHouseholdSize() < 1
+                ? 1
+                : request.getHouseholdSize());
 
         UserProfile saved = userProfileRepository.save(profile);
         return toResponse(saved);
@@ -62,8 +69,17 @@ public class UserProfileService {
                 .weightKg(profile.getWeightKg())
                 .activityLevel(profile.getActivityLevel())
                 .healthGoals(profile.getHealthGoals())
+                .countryCode(profile.getCountryCode())
+                .currencyCode(profile.getCurrencyCode())
+                .locale(profile.getLocale())
+                .cookingSkill(profile.getCookingSkill())
+                .householdSize(profile.getHouseholdSize())
                 .createdAt(profile.getCreatedAt())
                 .updatedAt(profile.getUpdatedAt())
                 .build();
+    }
+
+    private String defaultIfBlank(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value.trim();
     }
 }

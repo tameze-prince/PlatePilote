@@ -147,4 +147,22 @@ public class Recipe extends BaseEntity {
 
     @Column(name = "source_url")
     private String sourceUrl;
+
+    @Column(name = "enabled")
+    private Boolean enabled = true;
+
+    @Column(name = "verified")
+    private Boolean verified = false;
+
+    @Column(name = "verification_status")
+    private String verificationStatus = "UNREVIEWED";
+
+    @Column(name = "nutrition_source")
+    private String nutritionSource;
+
+    @Column(name = "allergen_source")
+    private String allergenSource;
+
+    @Column(name = "confidence_score")
+    private Double confidenceScore = 0.5;
 }

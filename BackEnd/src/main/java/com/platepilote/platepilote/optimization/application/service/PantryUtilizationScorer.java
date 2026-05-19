@@ -4,6 +4,7 @@ import com.platepilote.platepilote.pantry.domain.entity.PantryItem;
 import com.platepilote.platepilote.pantry.domain.repository.PantryItemRepository;
 import com.platepilote.platepilote.recipes.domain.entity.RecipeIngredient;
 import com.platepilote.platepilote.recipes.domain.repository.RecipeIngredientRepository;
+import com.platepilote.platepilote.ingredients.application.service.IngredientResolutionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ public class PantryUtilizationScorer {
 
     private final PantryItemRepository pantryItemRepository;
     private final RecipeIngredientRepository recipeIngredientRepository;
+    private final IngredientResolutionService ingredientResolutionService;
 
     public double calculatePantryScore(UUID userId, UUID recipeId) {
         List<PantryItem> pantryItems = pantryItemRepository
@@ -37,8 +39,12 @@ public class PantryUtilizationScorer {
     }
 
     private boolean ingredientMatches(PantryItem pantryItem, RecipeIngredient recipeIngredient) {
-        String pantryName = pantryItem.getName().toLowerCase().trim();
-        String recipeName = recipeIngredient.getName().toLowerCase().trim();
+        if (pantryItem.getIngredientId() != null && recipeIngredient.getIngredientId() != null) {
+            return pantryItem.getIngredientId().equals(recipeIngredient.getIngredientId());
+        }
+
+        String pantryName = ingredientResolutionService.normalize(pantryItem.getName());
+        String recipeName = ingredientResolutionService.normalize(recipeIngredient.getName());
         return pantryName.contains(recipeName) || recipeName.contains(pantryName);
     }
 }

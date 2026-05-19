@@ -22,6 +22,7 @@ public class PantryItemResponse {
     private BigDecimal quantity;
     private String unit;
     private LocalDate expirationDate;
+    private UUID ingredientId;
     private boolean isExpired;
     private Instant createdAt;
     private Instant updatedAt;

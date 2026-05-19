@@ -41,6 +41,9 @@ spring:
       path: /h2-console
 
 app:
+  api:
+    usda-key: test-usda-key
+    themealdb-key: 1
   jwt:
     # Test-only secret (not secure, but fine for tests)
     secret: dGVzdC1zZWNyZXQta2V5LWZvci1kZXZlbG9wbWVudC1vbmx5LWRvLW5vdC11c2UtaW4tcHJvZA==

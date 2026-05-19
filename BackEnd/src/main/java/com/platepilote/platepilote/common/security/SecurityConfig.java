@@ -55,11 +55,13 @@ public class SecurityConfig {
      * Everything else requires authentication.
      */
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/v1/auth/**",           // Login, register, refresh token
+            "/api/v1/auth/register",     // Create account
+            "/api/v1/auth/login",        // Login
+            "/api/v1/auth/refresh",      // Refresh access token
+            "/api/v1/auth/logout",       // Revoke a provided refresh token
             "/api/v1/recipes/public/**", // Browse public recipes
             "/api/v1/ingredients/**",    // Food intelligence database
             "/api/v1/pricing/**",        // Price and barcode lookup
-            "/api/v1/imports/**",        // Data import endpoints
             "/v3/api-docs/**",           // OpenAPI documentation
             "/swagger-ui/**",            // Swagger UI
             "/swagger-ui.html",
@@ -81,6 +83,12 @@ public class SecurityConfig {
                 // Define which URLs need authentication and which are public
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()  // Public endpoints
+                        .requestMatchers("/api/v1/admin/users/*/roles", "/api/v1/admin/feature-flags/**")
+                            .hasRole("SUPER_ADMIN")
+                        .requestMatchers("/api/v1/admin/**")
+                            .hasAnyRole("ADMIN", "SUPER_ADMIN", "SUPPORT_AGENT", "ANALYST", "CONTENT_MANAGER")
+                        .requestMatchers("/api/v1/imports/**")
+                            .hasAnyRole("ADMIN", "SUPER_ADMIN", "CONTENT_MANAGER", "SYSTEM")
                         .anyRequest().authenticated()                    // Everything else needs login
                 )
                 

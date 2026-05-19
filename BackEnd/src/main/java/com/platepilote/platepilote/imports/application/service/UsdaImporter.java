@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,8 +33,13 @@ public class UsdaImporter {
 
         List<Map<String, Object>> foods = null;
         try {
-            String url = "https://api.nal.usda.gov/fdc/v1/foods/search?api_key={key}&generalSearchInput={query}";
-            Map<String, Object> response = restTemplate.getForObject(url, Map.class, apiKey, query);
+            String url = "https://api.nal.usda.gov/fdc/v1/foods/search?api_key=" + apiKey;
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("query", query);
+            List<String> dataTypes = List.of("Foundation", "SR Legacy");
+            requestBody.put("dataType", dataTypes);
+            requestBody.put("pageSize", maxResults);
+            Map<String, Object> response = restTemplate.postForObject(url, requestBody, Map.class);
             if (response != null && response.containsKey("foods")) {
                 foods = (List<Map<String, Object>>) response.get("foods");
             }

@@ -65,4 +65,19 @@ public class UserProfile extends AuditableEntity {
 
     @Column(name = "health_goals", columnDefinition = "TEXT")
     private String healthGoals;
+
+    @Column(name = "country_code")
+    private String countryCode = "US";
+
+    @Column(name = "currency_code")
+    private String currencyCode = "USD";
+
+    @Column(name = "locale")
+    private String locale = "en-US";
+
+    @Column(name = "cooking_skill")
+    private String cookingSkill = "BEGINNER";
+
+    @Column(name = "household_size")
+    private Integer householdSize = 1;
 }

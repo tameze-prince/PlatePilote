@@ -23,6 +23,7 @@ package com.platepilote.platepilote.authentication.application.service;
  */
 
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
+import com.platepilote.platepilote.authentication.domain.entity.Role;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -32,7 +33,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,13 +56,20 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         OurUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        // Convert our OurUser entity to Spring Security's UserDetails format
+        Set<SimpleGrantedAuthority> authorities = user.getRoles().stream()
+                .map(Role::getName)
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toSet());
+        if (authorities.isEmpty()) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        }
+
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPasswordHash(),
                 user.getEnabled(),
                 true, true, true,  // accountNonExpired, credentialsNonExpired, accountNonLocked
-                List.of(new SimpleGrantedAuthority("ROLE_USER"))  // Default role
+                authorities
         );
     }
 }

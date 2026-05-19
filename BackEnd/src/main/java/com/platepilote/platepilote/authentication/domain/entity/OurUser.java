@@ -25,12 +25,19 @@ package com.platepilote.platepilote.authentication.domain.entity;
 import com.platepilote.platepilote.common.kernel.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity  // Tells JPA: "This class maps to a database table"
 @Table(name = "our_user")  // Specifies the table name
@@ -69,4 +76,13 @@ public class OurUser extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean enabled = true;
+
+    @Builder.Default
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 }

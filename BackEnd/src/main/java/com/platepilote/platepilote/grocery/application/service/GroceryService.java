@@ -159,18 +159,18 @@ public class GroceryService {
                     .findByRecipeIdOrderBySortOrderAsc(entry.getRecipeId());
 
             for (RecipeIngredient ri : ingredients) {
-                String key = ri.getName().toLowerCase().trim();
-                boolean alreadyInPantry = pantryItems.stream()
-                        .anyMatch(pi -> pi.getName().toLowerCase().contains(key));
+                String key = groceryKey(ri);
+                boolean alreadyInPantry = pantryItems.stream().anyMatch(pi -> pantryCovers(pi, ri));
                 if (alreadyInPantry) continue;
 
                 aggregatedItems.merge(key,
-                        new GroceryItemAggregate(ri.getName(), ri.getQuantity(), ri.getUnit(), ri.getNotes(), 1),
+                        new GroceryItemAggregate(ri.getName(), ri.getQuantity(), ri.getUnit(), ri.getNotes(), ri.getIngredientId(), 1),
                         (existing, incoming) -> new GroceryItemAggregate(
                                 existing.name,
                                 existing.totalQuantity.add(incoming.totalQuantity),
                                 existing.unit,
                                 existing.notes != null ? existing.notes : incoming.notes,
+                                existing.ingredientId != null ? existing.ingredientId : incoming.ingredientId,
                                 existing.count + 1
                         ));
             }
@@ -193,6 +193,7 @@ public class GroceryService {
                     .unit(agg.unit)
                     .checked(false)
                     .notes(agg.notes)
+                    .ingredientId(agg.ingredientId)
                     .sortOrder(sortOrder++)
                     .build();
             groceryItemRepository.save(item);
@@ -252,8 +253,40 @@ public class GroceryService {
                 item.getEstimatedPrice(),
                 item.getChecked(),
                 item.getNotes(),
-                item.getSortOrder()
+                item.getSortOrder(),
+                item.getIngredientId()
         );
+    }
+
+    private String groceryKey(RecipeIngredient ingredient) {
+        if (ingredient.getIngredientId() != null) {
+            return "ingredient:" + ingredient.getIngredientId();
+        }
+        return "name:" + normalizeName(ingredient.getName());
+    }
+
+    private boolean pantryCovers(PantryItem pantryItem, RecipeIngredient recipeIngredient) {
+        if (pantryItem.getIngredientId() != null && recipeIngredient.getIngredientId() != null) {
+            return pantryItem.getIngredientId().equals(recipeIngredient.getIngredientId())
+                    && sameUnit(pantryItem.getUnit(), recipeIngredient.getUnit())
+                    && pantryItem.getQuantity().compareTo(recipeIngredient.getQuantity()) >= 0;
+        }
+
+        String pantryName = normalizeName(pantryItem.getName());
+        String recipeName = normalizeName(recipeIngredient.getName());
+        return !pantryName.isBlank()
+                && !recipeName.isBlank()
+                && (pantryName.contains(recipeName) || recipeName.contains(pantryName))
+                && sameUnit(pantryItem.getUnit(), recipeIngredient.getUnit())
+                && pantryItem.getQuantity().compareTo(recipeIngredient.getQuantity()) >= 0;
+    }
+
+    private boolean sameUnit(String left, String right) {
+        return normalizeName(left).equals(normalizeName(right));
+    }
+
+    private String normalizeName(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
     }
 
     public record GroceryListResponse(
@@ -274,7 +307,8 @@ public class GroceryService {
             java.math.BigDecimal estimatedPrice,
             Boolean checked,
             String notes,
-            Integer sortOrder
+            Integer sortOrder,
+            UUID ingredientId
     ) {}
 
     private record GroceryItemAggregate(
@@ -282,6 +316,7 @@ public class GroceryService {
             BigDecimal totalQuantity,
             String unit,
             String notes,
+            UUID ingredientId,
             int count
     ) {}
 }

@@ -1,6 +1,7 @@
 package com.platepilote.platepilote.optimization.application.service;
 
 import com.platepilote.platepilote.ingredients.domain.repository.IngredientRepository;
+import com.platepilote.platepilote.ingredients.application.service.IngredientResolutionService;
 import com.platepilote.platepilote.pricing.application.service.PricingService;
 import com.platepilote.platepilote.recipes.domain.entity.RecipeIngredient;
 import com.platepilote.platepilote.recipes.domain.repository.RecipeIngredientRepository;
@@ -21,6 +22,7 @@ public class BudgetOptimizer {
     private final RecipeIngredientRepository recipeIngredientRepository;
     private final IngredientRepository ingredientRepository;
     private final PricingService pricingService;
+    private final IngredientResolutionService ingredientResolutionService;
 
     public BigDecimal estimateRecipeCost(UUID recipeId, String countryCode) {
         List<RecipeIngredient> ingredients = recipeIngredientRepository.findByRecipeIdOrderBySortOrderAsc(recipeId);
@@ -36,7 +38,14 @@ public class BudgetOptimizer {
     }
 
     private BigDecimal estimateIngredientCost(RecipeIngredient ri, String countryCode) {
-        return pricingService.getLatestPricePerUnit(ri.getRecipe().getId(), countryCode)
+        UUID ingredientId = ri.getIngredientId();
+        if (ingredientId == null) {
+            ingredientId = ingredientResolutionService.resolveIngredientId(ri.getName()).orElse(null);
+        }
+        if (ingredientId == null) {
+            return BigDecimal.ZERO;
+        }
+        return pricingService.getLatestPricePerUnit(ingredientId, countryCode)
                 .orElse(BigDecimal.ZERO)
                 .multiply(ri.getQuantity());
     }

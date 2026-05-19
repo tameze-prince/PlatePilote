@@ -75,4 +75,7 @@ public class GroceryItem {
 
     @Column(name = "sort_order")
     private Integer sortOrder = 0;  // Display order in the list
+
+    @Column(name = "ingredient_id")
+    private UUID ingredientId;
 }

@@ -3,6 +3,7 @@ package com.platepilote.platepilote.recipes.application.service;
 import com.platepilote.platepilote.common.dto.PagedResponse;
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
+import com.platepilote.platepilote.ingredients.application.service.IngredientResolutionService;
 import com.platepilote.platepilote.recipes.application.dto.RecipeIngredientRequest;
 import com.platepilote.platepilote.recipes.application.dto.RecipeRequest;
 import com.platepilote.platepilote.recipes.application.dto.RecipeResponse;
@@ -32,6 +33,7 @@ public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final RecipeIngredientRepository ingredientRepository;
     private final RecipeStepRepository stepRepository;
+    private final IngredientResolutionService ingredientResolutionService;
 
     @Transactional(readOnly = true)
     public PagedResponse<RecipeResponse> getPublicRecipes(Pageable pageable) {
@@ -105,6 +107,7 @@ public class RecipeService {
                                 .unit(req.getUnit())
                                 .notes(req.getNotes())
                                 .sortOrder(req.getSortOrder() != null ? req.getSortOrder() : i)
+                                .ingredientId(ingredientResolutionService.resolveIngredientId(req.getName()).orElse(null))
                                 .build();
                     })
                     .collect(Collectors.toList());
@@ -161,6 +164,7 @@ public class RecipeService {
                                 .unit(req.getUnit())
                                 .notes(req.getNotes())
                                 .sortOrder(req.getSortOrder() != null ? req.getSortOrder() : i)
+                                .ingredientId(ingredientResolutionService.resolveIngredientId(req.getName()).orElse(null))
                                 .build();
                     })
                     .collect(Collectors.toList());
@@ -234,6 +238,7 @@ public class RecipeService {
                         .unit(i.getUnit())
                         .notes(i.getNotes())
                         .sortOrder(i.getSortOrder())
+                        .ingredientId(i.getIngredientId())
                         .build())
                 .collect(Collectors.toList());
 

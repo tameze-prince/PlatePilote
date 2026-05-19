@@ -37,6 +37,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -142,6 +143,10 @@ public class JwtService {
      */
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+
+    public Instant extractExpirationInstant(String token) {
+        return extractExpiration(token).toInstant();
     }
 
     /**

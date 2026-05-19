@@ -60,4 +60,7 @@ public class PantryItem extends BaseEntity {
 
     @Column(name = "expiration_date")
     private LocalDate expirationDate;
+
+    @Column(name = "ingredient_id")
+    private UUID ingredientId;
 }

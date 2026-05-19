@@ -42,4 +42,22 @@ public class Subscription extends BaseEntity {
 
     @Column(name = "cancel_at_period_end")
     private Boolean cancelAtPeriodEnd = false;
+
+    @Column(name = "provider")
+    private String provider = "INTERNAL";
+
+    @Column(name = "provider_subscription_id")
+    private String providerSubscriptionId;
+
+    @Column(name = "purchase_token", length = 1000)
+    private String purchaseToken;
+
+    @Column(name = "original_transaction_id")
+    private String originalTransactionId;
+
+    @Column(name = "expires_at")
+    private Instant expiresAt;
+
+    @Column(name = "last_verified_at")
+    private Instant lastVerifiedAt;
 }

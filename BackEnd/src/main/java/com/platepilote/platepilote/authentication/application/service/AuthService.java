@@ -36,6 +36,10 @@ import com.platepilote.platepilote.authentication.application.dto.Authentication
 import com.platepilote.platepilote.authentication.application.dto.LoginRequest;
 import com.platepilote.platepilote.authentication.application.dto.RegisterRequest;
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
+import com.platepilote.platepilote.authentication.domain.entity.RefreshToken;
+import com.platepilote.platepilote.authentication.domain.entity.Role;
+import com.platepilote.platepilote.authentication.domain.repository.RefreshTokenRepository;
+import com.platepilote.platepilote.authentication.domain.repository.RoleRepository;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.common.security.JwtService;
@@ -48,13 +52,23 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.HexFormat;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;  // BCrypt password hasher
     private final AuthenticationManager authenticationManager;  // Spring Security auth manager
     private final JwtService jwtService;  // JWT token generator/validator
@@ -73,7 +87,9 @@ public class AuthService {
             throw new BusinessRuleViolationException("Email already registered");
         }
 
-        // Create new user entity
+        Role userRole = roleRepository.findByName("ROLE_USER")
+                .orElseThrow(() -> new BusinessRuleViolationException("Default user role is not configured"));
+
         OurUser user = OurUser.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -82,6 +98,7 @@ public class AuthService {
                 .provider("local")
                 .emailVerified(false)
                 .enabled(true)
+                .roles(new HashSet<>(List.of(userRole)))
                 .build();
 
         // Save user to database
@@ -91,12 +108,15 @@ public class AuthService {
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPasswordHash(),
-                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                user.getRoles().stream()
+                        .map(Role::getName)
+                        .map(SimpleGrantedAuthority::new)
+                        .toList()
         );
 
         // Generate JWT tokens
-        String accessToken = jwtService.generateToken(userDetails);
-        String refreshToken = jwtService.generateRefreshToken(userDetails);
+        String accessToken = jwtService.generateToken(roleClaims(user), userDetails);
+        String refreshToken = issueRefreshToken(user, userDetails);
 
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
@@ -117,18 +137,21 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
-        // Load user details for JWT generation
+        OurUser user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow();
+
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                 request.getEmail(),
-                userRepository.findByEmail(request.getEmail())
-                        .orElseThrow()
-                        .getPasswordHash(),
-                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                user.getPasswordHash(),
+                user.getRoles().stream()
+                        .map(Role::getName)
+                        .map(SimpleGrantedAuthority::new)
+                        .toList()
         );
 
         // Generate JWT tokens
-        String accessToken = jwtService.generateToken(userDetails);
-        String refreshToken = jwtService.generateRefreshToken(userDetails);
+        String accessToken = jwtService.generateToken(roleClaims(user), userDetails);
+        String refreshToken = issueRefreshToken(user, userDetails);
 
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
@@ -143,6 +166,7 @@ public class AuthService {
      * @return AuthenticationResponse with new access token
      * @throws BusinessRuleViolationException if refresh token is invalid
      */
+    @Transactional
     public AuthenticationResponse refreshToken(String refreshToken) {
         // Extract email from the refresh token
         final String email = jwtService.extractUsername(refreshToken);
@@ -155,24 +179,89 @@ public class AuthService {
         OurUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessRuleViolationException("User not found"));
 
+        if (!Boolean.TRUE.equals(user.getEnabled())) {
+            throw new BusinessRuleViolationException("User account is disabled");
+        }
+
         // Create UserDetails for validation
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPasswordHash(),
-                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                user.getRoles().stream()
+                        .map(Role::getName)
+                        .map(SimpleGrantedAuthority::new)
+                        .toList()
         );
 
-        // Verify the refresh token is still valid
-        if (!jwtService.isTokenValid(refreshToken, userDetails)) {
+        String tokenHash = hashToken(refreshToken);
+        RefreshToken persistedToken = refreshTokenRepository.findByToken(tokenHash)
+                .orElseThrow(() -> new BusinessRuleViolationException("Invalid refresh token"));
+
+        boolean revoked = Boolean.TRUE.equals(persistedToken.getRevoked());
+        boolean expired = persistedToken.getExpiresAt().isBefore(Instant.now());
+        boolean wrongUser = !persistedToken.getUserId().equals(user.getId());
+
+        if (revoked || expired || wrongUser || !jwtService.isTokenValid(refreshToken, userDetails)) {
             throw new BusinessRuleViolationException("Invalid refresh token");
         }
 
-        // Generate a new access token (keep the same refresh token)
-        String newAccessToken = jwtService.generateToken(userDetails);
+        persistedToken.setRevoked(true);
+        refreshTokenRepository.save(persistedToken);
+
+        String newAccessToken = jwtService.generateToken(roleClaims(user), userDetails);
+        String newRefreshToken = issueRefreshToken(user, userDetails);
 
         return AuthenticationResponse.builder()
                 .accessToken(newAccessToken)
-                .refreshToken(refreshToken)
+                .refreshToken(newRefreshToken)
                 .build();
+    }
+
+    @Transactional
+    public void logout(String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return;
+        }
+        String tokenHash = hashToken(refreshToken);
+        refreshTokenRepository.findByToken(tokenHash).ifPresent(token -> {
+            token.setRevoked(true);
+            refreshTokenRepository.save(token);
+        });
+    }
+
+    @Transactional
+    public void logoutAll(UUID userId) {
+        refreshTokenRepository.revokeAllActiveForUser(userId);
+    }
+
+    private String issueRefreshToken(OurUser user, UserDetails userDetails) {
+        String refreshToken = jwtService.generateRefreshToken(userDetails);
+        refreshTokenRepository.save(RefreshToken.builder()
+                .userId(user.getId())
+                .token(hashToken(refreshToken))
+                .expiresAt(jwtService.extractExpirationInstant(refreshToken))
+                .revoked(false)
+                .build());
+        return refreshToken;
+    }
+
+    private String hashToken(String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("SHA-256 is not available", ex);
+        }
+    }
+
+    private Map<String, Object> roleClaims(OurUser user) {
+        List<String> roles = user.getRoles().stream()
+                .map(Role::getName)
+                .toList();
+        if (roles.isEmpty()) {
+            roles = List.of("ROLE_USER");
+        }
+        return Map.of("roles", roles);
     }
 }

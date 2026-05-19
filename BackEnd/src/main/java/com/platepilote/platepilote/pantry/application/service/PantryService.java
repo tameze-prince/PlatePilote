@@ -6,6 +6,7 @@ import com.platepilote.platepilote.pantry.application.dto.PantryItemRequest;
 import com.platepilote.platepilote.pantry.application.dto.PantryItemResponse;
 import com.platepilote.platepilote.pantry.domain.entity.PantryItem;
 import com.platepilote.platepilote.pantry.domain.repository.PantryItemRepository;
+import com.platepilote.platepilote.ingredients.application.service.IngredientResolutionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class PantryService {
 
     private final PantryItemRepository pantryItemRepository;
+    private final IngredientResolutionService ingredientResolutionService;
 
     @Transactional(readOnly = true)
     public PagedResponse<PantryItemResponse> getAllItems(UUID userId, Pageable pageable) {
@@ -69,6 +71,7 @@ public class PantryService {
                 .quantity(request.getQuantity())
                 .unit(request.getUnit())
                 .expirationDate(request.getExpirationDate())
+                .ingredientId(ingredientResolutionService.resolveIngredientId(request.getName()).orElse(null))
                 .build();
 
         PantryItem saved = pantryItemRepository.save(item);
@@ -88,6 +91,7 @@ public class PantryService {
         item.setQuantity(request.getQuantity());
         item.setUnit(request.getUnit());
         item.setExpirationDate(request.getExpirationDate());
+        item.setIngredientId(ingredientResolutionService.resolveIngredientId(request.getName()).orElse(null));
 
         PantryItem saved = pantryItemRepository.save(item);
         return toResponse(saved);
@@ -133,6 +137,7 @@ public class PantryService {
                 .quantity(item.getQuantity())
                 .unit(item.getUnit())
                 .expirationDate(item.getExpirationDate())
+                .ingredientId(item.getIngredientId())
                 .isExpired(isExpired)
                 .createdAt(item.getCreatedAt())
                 .updatedAt(item.getUpdatedAt())

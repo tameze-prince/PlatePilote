@@ -36,10 +36,13 @@ import com.platepilote.platepilote.authentication.application.dto.LoginRequest;
 import com.platepilote.platepilote.authentication.application.dto.RegisterRequest;
 import com.platepilote.platepilote.authentication.application.service.AuthService;
 import com.platepilote.platepilote.common.dto.ApiResponse;
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,6 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final SecurityUtils securityUtils;
 
     /**
      * POST /api/v1/auth/register
@@ -86,4 +90,18 @@ public class AuthController {
         AuthenticationResponse response = authService.refreshToken(refreshToken);
         return ResponseEntity.ok(ApiResponse.success("Token refreshed", response));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody RefreshTokenRequest request) {
+        authService.logout(request.refreshToken());
+        return ResponseEntity.ok(ApiResponse.success("Logout successful", null));
+    }
+
+    @PostMapping("/logout-all")
+    public ResponseEntity<ApiResponse<Void>> logoutAll(@AuthenticationPrincipal UserDetails userDetails) {
+        authService.logoutAll(securityUtils.getCurrentUserId(userDetails));
+        return ResponseEntity.ok(ApiResponse.success("All sessions revoked", null));
+    }
+
+    public record RefreshTokenRequest(String refreshToken) {}
 }

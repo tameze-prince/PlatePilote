@@ -45,6 +45,7 @@ public class RecipeResponse {
         private String unit;
         private String notes;
         private Integer sortOrder;
+        private UUID ingredientId;
     }
 
     @Getter

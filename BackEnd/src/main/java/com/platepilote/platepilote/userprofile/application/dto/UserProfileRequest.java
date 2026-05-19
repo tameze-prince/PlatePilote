@@ -31,4 +31,14 @@ public class UserProfileRequest {
     private String activityLevel;
 
     private String healthGoals;
+
+    private String countryCode;
+
+    private String currencyCode;
+
+    private String locale;
+
+    private String cookingSkill;
+
+    private Integer householdSize;
 }
