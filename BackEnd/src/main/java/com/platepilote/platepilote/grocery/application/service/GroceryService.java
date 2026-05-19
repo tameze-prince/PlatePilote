@@ -14,8 +14,10 @@ import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanEntryR
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanRepository;
 import com.platepilote.platepilote.pantry.domain.entity.PantryItem;
 import com.platepilote.platepilote.pantry.domain.repository.PantryItemRepository;
+import com.platepilote.platepilote.pricing.application.service.PricingService;
 import com.platepilote.platepilote.recipes.domain.entity.RecipeIngredient;
 import com.platepilote.platepilote.recipes.domain.repository.RecipeIngredientRepository;
+import com.platepilote.platepilote.userprofile.domain.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +43,8 @@ public class GroceryService {
     private final MealPlanEntryRepository mealPlanEntryRepository;
     private final RecipeIngredientRepository recipeIngredientRepository;
     private final PantryItemRepository pantryItemRepository;
+    private final PricingService pricingService;
+    private final UserProfileRepository userProfileRepository;
 
     @Transactional(readOnly = true)
     public PagedResponse<GroceryListResponse> getUserLists(UUID userId, Pageable pageable) {
@@ -153,6 +157,9 @@ public class GroceryService {
         List<PantryItem> pantryItems = pantryItemRepository
                 .findByUserIdAndDeletedAtIsNull(userId, PageRequest.of(0, 500))
                 .getContent();
+        String countryCode = userProfileRepository.findByUserId(userId)
+                .map(profile -> profile.getCountryCode() == null ? "US" : profile.getCountryCode())
+                .orElse("US");
 
         for (MealPlanEntry entry : entries) {
             List<RecipeIngredient> ingredients = recipeIngredientRepository
@@ -160,19 +167,9 @@ public class GroceryService {
 
             for (RecipeIngredient ri : ingredients) {
                 String key = groceryKey(ri);
-                boolean alreadyInPantry = pantryItems.stream().anyMatch(pi -> pantryCovers(pi, ri));
-                if (alreadyInPantry) continue;
-
                 aggregatedItems.merge(key,
                         new GroceryItemAggregate(ri.getName(), ri.getQuantity(), ri.getUnit(), ri.getNotes(), ri.getIngredientId(), 1),
-                        (existing, incoming) -> new GroceryItemAggregate(
-                                existing.name,
-                                existing.totalQuantity.add(incoming.totalQuantity),
-                                existing.unit,
-                                existing.notes != null ? existing.notes : incoming.notes,
-                                existing.ingredientId != null ? existing.ingredientId : incoming.ingredientId,
-                                existing.count + 1
-                        ));
+                        this::mergeGroceryItems);
             }
         }
 
@@ -185,14 +182,19 @@ public class GroceryService {
 
         int sortOrder = 0;
         for (Map.Entry<String, GroceryItemAggregate> entry : aggregatedItems.entrySet()) {
-            GroceryItemAggregate agg = entry.getValue();
+            GroceryItemAggregate agg = subtractPantry(entry.getValue(), pantryItems);
+            if (agg.totalQuantity.compareTo(BigDecimal.ZERO) <= 0) {
+                continue;
+            }
             GroceryItem item = GroceryItem.builder()
                     .groceryListId(saved.getId())
                     .name(agg.name)
                     .quantity(agg.totalQuantity)
                     .unit(agg.unit)
+                    .estimatedPrice(estimateItemPrice(agg, countryCode))
+                    .priceConfidence(agg.ingredientId == null ? BigDecimal.ZERO : new BigDecimal("0.70"))
                     .checked(false)
-                    .notes(agg.notes)
+                    .notes(itemNotes(agg))
                     .ingredientId(agg.ingredientId)
                     .sortOrder(sortOrder++)
                     .build();
@@ -251,6 +253,7 @@ public class GroceryService {
                 item.getQuantity(),
                 item.getUnit(),
                 item.getEstimatedPrice(),
+                item.getPriceConfidence(),
                 item.getChecked(),
                 item.getNotes(),
                 item.getSortOrder(),
@@ -259,30 +262,135 @@ public class GroceryService {
     }
 
     private String groceryKey(RecipeIngredient ingredient) {
+        String unitFamily = unitFamily(ingredient.getUnit());
         if (ingredient.getIngredientId() != null) {
-            return "ingredient:" + ingredient.getIngredientId();
+            return "ingredient:" + ingredient.getIngredientId() + ":" + unitFamily;
         }
-        return "name:" + normalizeName(ingredient.getName());
+        return "name:" + normalizeName(ingredient.getName()) + ":" + unitFamily;
     }
 
-    private boolean pantryCovers(PantryItem pantryItem, RecipeIngredient recipeIngredient) {
-        if (pantryItem.getIngredientId() != null && recipeIngredient.getIngredientId() != null) {
-            return pantryItem.getIngredientId().equals(recipeIngredient.getIngredientId())
-                    && sameUnit(pantryItem.getUnit(), recipeIngredient.getUnit())
-                    && pantryItem.getQuantity().compareTo(recipeIngredient.getQuantity()) >= 0;
+    private GroceryItemAggregate subtractPantry(GroceryItemAggregate item, List<PantryItem> pantryItems) {
+        BigDecimal remaining = item.totalQuantity;
+        for (PantryItem pantryItem : pantryItems) {
+            if (!sameIngredient(pantryItem, item)) {
+                continue;
+            }
+            BigDecimal pantryQuantity = convertQuantity(pantryItem.getQuantity(), pantryItem.getUnit(), item.unit);
+            if (pantryQuantity == null) {
+                continue;
+            }
+            remaining = remaining.subtract(pantryQuantity);
+            if (remaining.compareTo(BigDecimal.ZERO) <= 0) {
+                remaining = BigDecimal.ZERO;
+                break;
+            }
+        }
+        return new GroceryItemAggregate(item.name, remaining, item.unit, item.notes, item.ingredientId, item.count);
+    }
+
+    private boolean sameIngredient(PantryItem pantryItem, GroceryItemAggregate item) {
+        if (pantryItem.getIngredientId() != null && item.ingredientId != null) {
+            return pantryItem.getIngredientId().equals(item.ingredientId);
         }
 
         String pantryName = normalizeName(pantryItem.getName());
-        String recipeName = normalizeName(recipeIngredient.getName());
+        String recipeName = normalizeName(item.name);
         return !pantryName.isBlank()
                 && !recipeName.isBlank()
-                && (pantryName.contains(recipeName) || recipeName.contains(pantryName))
-                && sameUnit(pantryItem.getUnit(), recipeIngredient.getUnit())
-                && pantryItem.getQuantity().compareTo(recipeIngredient.getQuantity()) >= 0;
+                && (pantryName.contains(recipeName) || recipeName.contains(pantryName));
     }
 
-    private boolean sameUnit(String left, String right) {
-        return normalizeName(left).equals(normalizeName(right));
+    private BigDecimal convertQuantity(BigDecimal quantity, String fromUnit, String toUnit) {
+        String from = normalizeUnit(fromUnit);
+        String to = normalizeUnit(toUnit);
+        if (from.equals(to)) {
+            return quantity;
+        }
+        if (!unitFamily(from).equals(unitFamily(to))) {
+            return null;
+        }
+        BigDecimal base = toBaseUnit(quantity, from);
+        return base == null ? null : fromBaseUnit(base, to);
+    }
+
+    private BigDecimal toBaseUnit(BigDecimal quantity, String unit) {
+        return switch (unit) {
+            case "g", "ml" -> quantity;
+            case "kg", "l" -> quantity.multiply(BigDecimal.valueOf(1000));
+            case "tsp" -> quantity.multiply(BigDecimal.valueOf(5));
+            case "tbsp" -> quantity.multiply(BigDecimal.valueOf(15));
+            case "cup" -> quantity.multiply(BigDecimal.valueOf(240));
+            default -> null;
+        };
+    }
+
+    private BigDecimal fromBaseUnit(BigDecimal quantity, String unit) {
+        return switch (unit) {
+            case "g", "ml" -> quantity;
+            case "kg", "l" -> quantity.divide(BigDecimal.valueOf(1000), 3, java.math.RoundingMode.HALF_UP);
+            case "tsp" -> quantity.divide(BigDecimal.valueOf(5), 3, java.math.RoundingMode.HALF_UP);
+            case "tbsp" -> quantity.divide(BigDecimal.valueOf(15), 3, java.math.RoundingMode.HALF_UP);
+            case "cup" -> quantity.divide(BigDecimal.valueOf(240), 3, java.math.RoundingMode.HALF_UP);
+            default -> null;
+        };
+    }
+
+    private String normalizeUnit(String value) {
+        String unit = normalizeName(value);
+        return switch (unit) {
+            case "gram", "grams" -> "g";
+            case "kilogram", "kilograms" -> "kg";
+            case "milliliter", "milliliters" -> "ml";
+            case "liter", "liters", "litre", "litres" -> "l";
+            case "teaspoon", "teaspoons" -> "tsp";
+            case "tablespoon", "tablespoons" -> "tbsp";
+            case "cups" -> "cup";
+            default -> unit;
+        };
+    }
+
+    private String unitFamily(String value) {
+        String unit = normalizeUnit(value);
+        return switch (unit) {
+            case "g", "kg" -> "mass";
+            case "ml", "l", "tsp", "tbsp", "cup" -> "volume";
+            default -> "unit:" + unit;
+        };
+    }
+
+    private GroceryItemAggregate mergeGroceryItems(GroceryItemAggregate existing, GroceryItemAggregate incoming) {
+        BigDecimal incomingQuantity = convertQuantity(incoming.totalQuantity, incoming.unit, existing.unit);
+        if (incomingQuantity == null) {
+            incomingQuantity = incoming.totalQuantity;
+        }
+        return new GroceryItemAggregate(
+                existing.name,
+                existing.totalQuantity.add(incomingQuantity),
+                existing.unit,
+                existing.notes != null ? existing.notes : incoming.notes,
+                existing.ingredientId != null ? existing.ingredientId : incoming.ingredientId,
+                existing.count + 1
+        );
+    }
+
+    private String itemNotes(GroceryItemAggregate item) {
+        if (item.ingredientId != null) {
+            return item.notes;
+        }
+        String warning = "Canonical ingredient unresolved; price estimate unavailable";
+        if (item.notes == null || item.notes.isBlank()) {
+            return warning;
+        }
+        return item.notes + " | " + warning;
+    }
+
+    private BigDecimal estimateItemPrice(GroceryItemAggregate item, String countryCode) {
+        if (item.ingredientId == null) {
+            return null;
+        }
+        return pricingService.getLatestPricePerUnit(item.ingredientId, countryCode)
+                .map(price -> price.multiply(item.totalQuantity))
+                .orElse(null);
     }
 
     private String normalizeName(String value) {
@@ -305,6 +413,7 @@ public class GroceryService {
             java.math.BigDecimal quantity,
             String unit,
             java.math.BigDecimal estimatedPrice,
+            java.math.BigDecimal priceConfidence,
             Boolean checked,
             String notes,
             Integer sortOrder,

@@ -25,6 +25,8 @@ package com.platepilote.platepilote.authentication.domain.repository;
 
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -40,9 +42,16 @@ public interface UserRepository extends JpaRepository<OurUser, UUID> {
      */
     Optional<OurUser> findByEmail(String email);
 
+    Optional<OurUser> findByProviderIgnoreCaseAndProviderId(String provider, String providerId);
+
     /**
      * Check if a user with this email already exists.
      * Used during registration to prevent duplicate accounts.
      */
     boolean existsByEmail(String email);
+
+    @Query("SELECT u FROM OurUser u WHERE LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))")
+    org.springframework.data.domain.Page<OurUser> search(@Param("query") String query, org.springframework.data.domain.Pageable pageable);
 }

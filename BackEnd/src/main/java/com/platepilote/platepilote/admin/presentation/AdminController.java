@@ -1,16 +1,13 @@
 package com.platepilote.platepilote.admin.presentation;
 
 import com.platepilote.platepilote.admin.application.service.AdminService;
-import com.platepilote.platepilote.admin.domain.entity.AuditLog;
 import com.platepilote.platepilote.admin.domain.entity.FeatureFlag;
+import com.platepilote.platepilote.admin.domain.entity.SystemSetting;
 import com.platepilote.platepilote.common.dto.ApiResponse;
 import com.platepilote.platepilote.common.dto.PagedResponse;
 import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.imports.application.service.ImportService;
 import com.platepilote.platepilote.imports.domain.entity.ImportJob;
-import com.platepilote.platepilote.ingredients.domain.entity.Ingredient;
-import com.platepilote.platepilote.recipes.domain.entity.Recipe;
-import com.platepilote.platepilote.subscription.domain.entity.Subscription;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,9 +48,10 @@ public class AdminController {
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','SUPPORT_AGENT')")
     public ResponseEntity<ApiResponse<PagedResponse<AdminService.UserAdminResponse>>> users(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String query) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return ResponseEntity.ok(ApiResponse.success(adminService.users(pageable)));
+        return ResponseEntity.ok(ApiResponse.success(adminService.users(pageable, query)));
     }
 
     @GetMapping("/users/{id}")
@@ -86,29 +84,47 @@ public class AdminController {
 
     @GetMapping("/recipes")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER')")
-    public ResponseEntity<ApiResponse<PagedResponse<Recipe>>> recipes(
+    public ResponseEntity<ApiResponse<PagedResponse<AdminService.RecipeAdminResponse>>> recipes(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String query) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return ResponseEntity.ok(ApiResponse.success(adminService.recipes(pageable)));
+        return ResponseEntity.ok(ApiResponse.success(adminService.recipes(pageable, query)));
     }
 
     @GetMapping("/ingredients")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER')")
-    public ResponseEntity<ApiResponse<PagedResponse<Ingredient>>> ingredients(
+    public ResponseEntity<ApiResponse<PagedResponse<AdminService.IngredientAdminResponse>>> ingredients(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String query) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("canonicalName").ascending());
-        return ResponseEntity.ok(ApiResponse.success(adminService.ingredients(pageable)));
+        return ResponseEntity.ok(ApiResponse.success(adminService.ingredients(pageable, query)));
     }
 
     @GetMapping("/imports")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER')")
-    public ResponseEntity<ApiResponse<PagedResponse<ImportJob>>> imports(
+    public ResponseEntity<ApiResponse<PagedResponse<AdminService.ImportJobResponse>>> imports(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(ApiResponse.success(adminService.imports(pageable)));
+    }
+
+    @GetMapping("/imports/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER')")
+    public ResponseEntity<ApiResponse<AdminService.ImportJobResponse>> importJob(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success(adminService.importJob(id)));
+    }
+
+    @PostMapping("/imports/{id}/retry")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER')")
+    public ResponseEntity<ApiResponse<ImportJob>> retryImport(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable UUID id) {
+        UUID actorId = securityUtils.getCurrentUserId(userDetails);
+        return ResponseEntity.ok(ApiResponse.success("Import retry requested",
+                adminService.retryImport(actorId, userDetails.getUsername(), id)));
     }
 
     @PostMapping("/imports/run")
@@ -128,7 +144,7 @@ public class AdminController {
 
     @GetMapping("/subscriptions")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','SUPPORT_AGENT')")
-    public ResponseEntity<ApiResponse<PagedResponse<Subscription>>> subscriptions(
+    public ResponseEntity<ApiResponse<PagedResponse<AdminService.SubscriptionAdminResponse>>> subscriptions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -137,7 +153,7 @@ public class AdminController {
 
     @GetMapping("/audit-logs")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
-    public ResponseEntity<ApiResponse<PagedResponse<AuditLog>>> auditLogs(
+    public ResponseEntity<ApiResponse<PagedResponse<com.platepilote.platepilote.admin.domain.entity.AuditLog>>> auditLogs(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -148,6 +164,38 @@ public class AdminController {
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<List<FeatureFlag>>> featureFlags() {
         return ResponseEntity.ok(ApiResponse.success(adminService.featureFlags()));
+    }
+
+    @GetMapping("/system-settings")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<List<SystemSetting>>> systemSettings() {
+        return ResponseEntity.ok(ApiResponse.success(adminService.systemSettings()));
+    }
+
+    @PutMapping("/system-settings/{key}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<SystemSetting>> updateSystemSetting(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String key,
+            @RequestBody SettingUpdateRequest request) {
+        UUID actorId = securityUtils.getCurrentUserId(userDetails);
+        return ResponseEntity.ok(ApiResponse.success("System setting updated",
+                adminService.updateSystemSetting(actorId, userDetails.getUsername(), key, request.value())));
+    }
+
+    @GetMapping("/recommendations/analytics")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','ANALYST')")
+    public ResponseEntity<ApiResponse<AdminService.RecommendationAnalyticsResponse>> recommendationAnalytics() {
+        return ResponseEntity.ok(ApiResponse.success(adminService.recommendationAnalytics()));
+    }
+
+    @GetMapping("/billing-events")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<PagedResponse<AdminService.BillingEventResponse>>> billingEvents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(ApiResponse.success(adminService.billingEvents(pageable)));
     }
 
     @PostMapping("/feature-flags/{key}/toggle")
@@ -161,4 +209,6 @@ public class AdminController {
     }
 
     public record RoleUpdateRequest(Set<String> roles) {}
+
+    public record SettingUpdateRequest(String value) {}
 }

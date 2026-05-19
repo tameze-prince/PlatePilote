@@ -33,8 +33,10 @@ package com.platepilote.platepilote.authentication.presentation;
 
 import com.platepilote.platepilote.authentication.application.dto.AuthenticationResponse;
 import com.platepilote.platepilote.authentication.application.dto.LoginRequest;
+import com.platepilote.platepilote.authentication.application.dto.OAuth2LoginRequest;
 import com.platepilote.platepilote.authentication.application.dto.RegisterRequest;
 import com.platepilote.platepilote.authentication.application.service.AuthService;
+import com.platepilote.platepilote.authentication.application.service.EmailVerificationService;
 import com.platepilote.platepilote.common.dto.ApiResponse;
 import com.platepilote.platepilote.common.security.SecurityUtils;
 import jakarta.validation.Valid;
@@ -55,6 +57,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final EmailVerificationService emailVerificationService;
     private final SecurityUtils securityUtils;
 
     /**
@@ -80,6 +83,13 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Login successful", response));
     }
 
+    @PostMapping("/oauth2")
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> oauth2Login(
+            @Valid @RequestBody OAuth2LoginRequest request) {
+        AuthenticationResponse response = authService.oauth2Login(request);
+        return ResponseEntity.ok(ApiResponse.success("OAuth2 login successful", response));
+    }
+
     /**
      * POST /api/v1/auth/refresh?refreshToken=xxx
      * Generates new access token from refresh token.
@@ -89,6 +99,18 @@ public class AuthController {
             @RequestParam String refreshToken) {
         AuthenticationResponse response = authService.refreshToken(refreshToken);
         return ResponseEntity.ok(ApiResponse.success("Token refreshed", response));
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<ApiResponse<Void>> verifyEmail(@RequestParam String token) {
+        emailVerificationService.verifyEmail(token);
+        return ResponseEntity.ok(ApiResponse.success("Email verified", null));
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<ApiResponse<Void>> resendVerification(@Valid @RequestBody ResendVerificationRequest request) {
+        emailVerificationService.resendVerificationEmail(request.email());
+        return ResponseEntity.ok(ApiResponse.success("Verification email sent", null));
     }
 
     @PostMapping("/logout")
@@ -104,4 +126,5 @@ public class AuthController {
     }
 
     public record RefreshTokenRequest(String refreshToken) {}
+    public record ResendVerificationRequest(String email) {}
 }

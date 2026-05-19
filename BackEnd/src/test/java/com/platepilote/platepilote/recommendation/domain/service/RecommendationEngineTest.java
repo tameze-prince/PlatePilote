@@ -8,8 +8,10 @@ import com.platepilote.platepilote.authentication.domain.repository.UserReposito
 import com.platepilote.platepilote.budget.domain.repository.BudgetRepository;
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.ingredients.application.service.IngredientResolutionService;
+import com.platepilote.platepilote.ingredients.domain.repository.IngredientAllergenRepository;
 import com.platepilote.platepilote.optimization.application.service.BudgetOptimizer;
 import com.platepilote.platepilote.optimization.application.service.PantryUtilizationScorer;
+import com.platepilote.platepilote.pantry.domain.repository.PantryItemRepository;
 import com.platepilote.platepilote.preferences.domain.entity.Allergy;
 import com.platepilote.platepilote.preferences.domain.repository.AllergyRepository;
 import com.platepilote.platepilote.preferences.domain.repository.DietaryPreferenceRepository;
@@ -19,6 +21,7 @@ import com.platepilote.platepilote.recipes.domain.repository.RecipeIngredientRep
 import com.platepilote.platepilote.recipes.domain.repository.RecipeRepository;
 import com.platepilote.platepilote.recommendation.domain.entity.RecommendationEvent;
 import com.platepilote.platepilote.recommendation.domain.repository.RecommendationEventRepository;
+import com.platepilote.platepilote.recommendation.domain.repository.UserInteractionRepository;
 import com.platepilote.platepilote.subscription.application.service.EntitlementService;
 import com.platepilote.platepilote.userprofile.domain.repository.UserProfileRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,6 +79,12 @@ class RecommendationEngineTest {
     private IngredientResolutionService ingredientResolutionService;
     @Mock
     private EntitlementService entitlementService;
+    @Mock
+    private UserInteractionRepository userInteractionRepository;
+    @Mock
+    private IngredientAllergenRepository ingredientAllergenRepository;
+    @Mock
+    private PantryItemRepository pantryItemRepository;
 
     private RecommendationEngine engine;
 
@@ -94,7 +103,10 @@ class RecommendationEngineTest {
                 budgetOptimizer,
                 pantryUtilizationScorer,
                 ingredientResolutionService,
-                entitlementService
+                entitlementService,
+                userInteractionRepository,
+                ingredientAllergenRepository,
+                pantryItemRepository
         );
 
         lenient().when(userProfileRepository.findByUserId(any())).thenReturn(Optional.empty());
@@ -104,6 +116,8 @@ class RecommendationEngineTest {
                 .thenReturn(new PageImpl<>(List.of()));
         lenient().when(userRepository.findById(any())).thenReturn(Optional.empty());
         lenient().when(entitlementService.hasActiveEntitlement(any(), anyString())).thenReturn(false);
+        lenient().when(userInteractionRepository.findByUserIdAndCreatedAtAfter(any(), any())).thenReturn(List.of());
+        lenient().when(pantryItemRepository.findExpiringItems(any(), any())).thenReturn(List.of());
         lenient().when(systemSettingRepository.findBySettingKey(anyString()))
                 .thenAnswer(invocation -> {
                     String key = invocation.getArgument(0, String.class);

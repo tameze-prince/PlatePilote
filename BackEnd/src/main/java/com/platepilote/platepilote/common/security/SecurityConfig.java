@@ -57,8 +57,12 @@ public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/v1/auth/register",     // Create account
             "/api/v1/auth/login",        // Login
+            "/api/v1/auth/oauth2",       // Google/Apple OAuth2 ID token login
             "/api/v1/auth/refresh",      // Refresh access token
+            "/api/v1/auth/verify-email", // Verify local-account email
+            "/api/v1/auth/resend-verification", // Resend local-account verification email
             "/api/v1/auth/logout",       // Revoke a provided refresh token
+            "/api/v1/billing/stripe/webhook", // Stripe signed billing webhook
             "/api/v1/recipes/public/**", // Browse public recipes
             "/api/v1/ingredients/**",    // Food intelligence database
             "/api/v1/pricing/**",        // Price and barcode lookup

@@ -49,11 +49,39 @@ app:
     secret: dGVzdC1zZWNyZXQta2V5LWZvci1kZXZlbG9wbWVudC1vbmx5LWRvLW5vdC11c2UtaW4tcHJvZA==
     expiration: 3600000
     refresh-expiration: 604800000
+  email:
+    verification:
+      from: PlatePilote Test <no-reply@test.platepilote.com>
+      frontend-url: http://localhost:3000/verify-email
+      expiration-hours: 24
+  oauth2:
+    google:
+      client-ids: test-google-client
+      jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+      issuers:
+        - https://accounts.google.com
+        - accounts.google.com
+    apple:
+      client-ids: test-apple-client
+      jwk-set-uri: https://appleid.apple.com/auth/keys
+      issuers:
+        - https://appleid.apple.com
   cors:
     allowed-origins: http://localhost:3000,http://localhost:8080
     allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
     allowed-headers: Authorization,Content-Type,X-Requested-With,Accept
     max-age: 3600
+  billing:
+    free-trial-days: 30
+    past-due-grace-days: 3
+    stripe:
+      secret-key: sk_test_placeholder
+      webhook-secret: whsec_placeholder
+      monthly-price-id: price_monthly
+      yearly-price-id: price_yearly
+      success-url: http://localhost:3000/billing/success
+      cancel-url: http://localhost:3000/billing/cancel
+      portal-return-url: http://localhost:3000/settings/billing
 
 logging:
   level:

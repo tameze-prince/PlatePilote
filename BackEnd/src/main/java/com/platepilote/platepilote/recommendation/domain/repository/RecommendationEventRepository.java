@@ -11,4 +11,8 @@ public interface RecommendationEventRepository extends JpaRepository<Recommendat
     long countByUserIdAndCreatedAtAfterAndQuotaLimitedFalse(UUID userId, Instant createdAt);
 
     long countByCreatedAtAfter(Instant createdAt);
+
+    long countByCreatedAtAfterAndQuotaLimitedTrue(Instant createdAt);
+
+    long countByCreatedAtAfterAndResultCount(Instant createdAt, Integer resultCount);
 }

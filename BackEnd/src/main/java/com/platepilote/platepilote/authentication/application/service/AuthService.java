@@ -34,6 +34,7 @@ package com.platepilote.platepilote.authentication.application.service;
 
 import com.platepilote.platepilote.authentication.application.dto.AuthenticationResponse;
 import com.platepilote.platepilote.authentication.application.dto.LoginRequest;
+import com.platepilote.platepilote.authentication.application.dto.OAuth2LoginRequest;
 import com.platepilote.platepilote.authentication.application.dto.RegisterRequest;
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import com.platepilote.platepilote.authentication.domain.entity.RefreshToken;
@@ -72,6 +73,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;  // BCrypt password hasher
     private final AuthenticationManager authenticationManager;  // Spring Security auth manager
     private final JwtService jwtService;  // JWT token generator/validator
+    private final OAuth2IdentityVerifier oAuth2IdentityVerifier;
+    private final EmailVerificationService emailVerificationService;
 
     /**
      * Register a new user account.
@@ -102,21 +105,15 @@ public class AuthService {
                 .build();
 
         // Save user to database
-        userRepository.save(user);
+        OurUser savedUser = userRepository.save(user);
+        emailVerificationService.sendVerificationEmail(savedUser);
 
         // Create UserDetails for JWT generation
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPasswordHash(),
-                user.getRoles().stream()
-                        .map(Role::getName)
-                        .map(SimpleGrantedAuthority::new)
-                        .toList()
-        );
+        UserDetails userDetails = userDetails(savedUser);
 
         // Generate JWT tokens
-        String accessToken = jwtService.generateToken(roleClaims(user), userDetails);
-        String refreshToken = issueRefreshToken(user, userDetails);
+        String accessToken = jwtService.generateToken(roleClaims(savedUser), userDetails);
+        String refreshToken = issueRefreshToken(savedUser, userDetails);
 
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
@@ -140,14 +137,7 @@ public class AuthService {
         OurUser user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow();
 
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                request.getEmail(),
-                user.getPasswordHash(),
-                user.getRoles().stream()
-                        .map(Role::getName)
-                        .map(SimpleGrantedAuthority::new)
-                        .toList()
-        );
+        UserDetails userDetails = userDetails(user);
 
         // Generate JWT tokens
         String accessToken = jwtService.generateToken(roleClaims(user), userDetails);
@@ -167,6 +157,40 @@ public class AuthService {
      * @throws BusinessRuleViolationException if refresh token is invalid
      */
     @Transactional
+    public AuthenticationResponse oauth2Login(OAuth2LoginRequest request) {
+        OAuth2IdentityVerifier.OAuth2Identity identity = oAuth2IdentityVerifier.verify(
+                request.provider(), request.idToken());
+        if (identity.email() == null || identity.email().isBlank()) {
+            throw new BusinessRuleViolationException("OAuth2 token is missing email");
+        }
+        if (!identity.emailVerified()) {
+            throw new BusinessRuleViolationException("OAuth2 email must be verified");
+        }
+
+        Role userRole = roleRepository.findByName("ROLE_USER")
+                .orElseThrow(() -> new BusinessRuleViolationException("Default user role is not configured"));
+
+        OurUser user = userRepository.findByProviderIgnoreCaseAndProviderId(identity.provider(), identity.providerId())
+                .or(() -> userRepository.findByEmail(identity.email()))
+                .map(existing -> linkOAuth2Identity(existing, identity, request))
+                .orElseGet(() -> createOAuth2User(identity, request, userRole));
+
+        if (!Boolean.TRUE.equals(user.getEnabled())) {
+            throw new BusinessRuleViolationException("User account is disabled");
+        }
+
+        OurUser saved = userRepository.save(user);
+        UserDetails userDetails = userDetails(saved);
+        String accessToken = jwtService.generateToken(roleClaims(saved), userDetails);
+        String refreshToken = issueRefreshToken(saved, userDetails);
+
+        return AuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    @Transactional
     public AuthenticationResponse refreshToken(String refreshToken) {
         // Extract email from the refresh token
         final String email = jwtService.extractUsername(refreshToken);
@@ -184,14 +208,7 @@ public class AuthService {
         }
 
         // Create UserDetails for validation
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPasswordHash(),
-                user.getRoles().stream()
-                        .map(Role::getName)
-                        .map(SimpleGrantedAuthority::new)
-                        .toList()
-        );
+        UserDetails userDetails = userDetails(user);
 
         String tokenHash = hashToken(refreshToken);
         RefreshToken persistedToken = refreshTokenRepository.findByToken(tokenHash)
@@ -243,6 +260,76 @@ public class AuthService {
                 .revoked(false)
                 .build());
         return refreshToken;
+    }
+
+    private OurUser createOAuth2User(OAuth2IdentityVerifier.OAuth2Identity identity,
+                                     OAuth2LoginRequest request,
+                                     Role userRole) {
+        return OurUser.builder()
+                .firstName(nameOrFallback(request.firstName(), identity.firstName(), "User"))
+                .lastName(nameOrFallback(request.lastName(), identity.lastName(), ""))
+                .email(identity.email())
+                .passwordHash(null)
+                .provider(identity.provider())
+                .providerId(identity.providerId())
+                .avatarUrl(identity.avatarUrl())
+                .emailVerified(true)
+                .enabled(true)
+                .roles(new HashSet<>(List.of(userRole)))
+                .build();
+    }
+
+    private OurUser linkOAuth2Identity(OurUser user,
+                                       OAuth2IdentityVerifier.OAuth2Identity identity,
+                                       OAuth2LoginRequest request) {
+        boolean sameProvider = identity.provider().equalsIgnoreCase(user.getProvider());
+        if (user.getProviderId() != null && sameProvider && !user.getProviderId().equals(identity.providerId())) {
+            throw new BusinessRuleViolationException("OAuth2 account is already linked to another identity");
+        }
+        if (user.getProviderId() == null || sameProvider || "local".equalsIgnoreCase(user.getProvider())) {
+            user.setProvider(identity.provider());
+            user.setProviderId(identity.providerId());
+        }
+        user.setEmailVerified(true);
+        if (user.getAvatarUrl() == null || user.getAvatarUrl().isBlank()) {
+            user.setAvatarUrl(identity.avatarUrl());
+        }
+        if (request.firstName() != null && !request.firstName().isBlank()) {
+            user.setFirstName(request.firstName().trim());
+        } else if ((user.getFirstName() == null || user.getFirstName().isBlank()) && identity.firstName() != null) {
+            user.setFirstName(identity.firstName());
+        }
+        if (request.lastName() != null && !request.lastName().isBlank()) {
+            user.setLastName(request.lastName().trim());
+        } else if ((user.getLastName() == null || user.getLastName().isBlank()) && identity.lastName() != null) {
+            user.setLastName(identity.lastName());
+        }
+        return user;
+    }
+
+    private String nameOrFallback(String requestValue, String identityValue, String fallback) {
+        if (requestValue != null && !requestValue.isBlank()) {
+            return requestValue.trim();
+        }
+        if (identityValue != null && !identityValue.isBlank()) {
+            return identityValue.trim();
+        }
+        return fallback;
+    }
+
+    private UserDetails userDetails(OurUser user) {
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPasswordHash() == null ? "{noop}oauth2" : user.getPasswordHash(),
+                Boolean.TRUE.equals(user.getEnabled()),
+                true,
+                true,
+                true,
+                user.getRoles().stream()
+                        .map(Role::getName)
+                        .map(SimpleGrantedAuthority::new)
+                        .toList()
+        );
     }
 
     private String hashToken(String token) {

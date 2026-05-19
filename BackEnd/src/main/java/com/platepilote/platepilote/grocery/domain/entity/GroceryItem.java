@@ -67,6 +67,9 @@ public class GroceryItem {
     @Column(name = "estimated_price")
     private BigDecimal estimatedPrice;  // Expected cost for budget tracking
 
+    @Column(name = "price_confidence")
+    private BigDecimal priceConfidence;
+
     @Column(nullable = false)
     private Boolean checked = false;  // true = item has been purchased
 

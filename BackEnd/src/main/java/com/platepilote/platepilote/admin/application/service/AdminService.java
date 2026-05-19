@@ -2,13 +2,17 @@ package com.platepilote.platepilote.admin.application.service;
 
 import com.platepilote.platepilote.admin.domain.entity.AuditLog;
 import com.platepilote.platepilote.admin.domain.entity.FeatureFlag;
+import com.platepilote.platepilote.admin.domain.entity.SystemSetting;
 import com.platepilote.platepilote.admin.domain.repository.AiUsageMetricRepository;
 import com.platepilote.platepilote.admin.domain.repository.AuditLogRepository;
 import com.platepilote.platepilote.admin.domain.repository.FeatureFlagRepository;
+import com.platepilote.platepilote.admin.domain.repository.SystemSettingRepository;
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import com.platepilote.platepilote.authentication.domain.entity.Role;
 import com.platepilote.platepilote.authentication.domain.repository.RoleRepository;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
+import com.platepilote.platepilote.billing.domain.entity.BillingEvent;
+import com.platepilote.platepilote.billing.domain.repository.BillingEventRepository;
 import com.platepilote.platepilote.common.dto.PagedResponse;
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
@@ -48,8 +52,10 @@ public class AdminService {
     private final ImportJobRepository importJobRepository;
     private final AuditLogRepository auditLogRepository;
     private final FeatureFlagRepository featureFlagRepository;
+    private final SystemSettingRepository systemSettingRepository;
     private final RecommendationEventRepository recommendationEventRepository;
     private final AiUsageMetricRepository aiUsageMetricRepository;
+    private final BillingEventRepository billingEventRepository;
     private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
@@ -71,7 +77,14 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public PagedResponse<UserAdminResponse> users(Pageable pageable) {
-        Page<OurUser> page = userRepository.findAll(pageable);
+        return users(pageable, null);
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<UserAdminResponse> users(Pageable pageable, String query) {
+        Page<OurUser> page = query == null || query.isBlank()
+                ? userRepository.findAll(pageable)
+                : userRepository.search(query, pageable);
         List<UserAdminResponse> content = page.getContent().stream()
                 .map(this::toUserResponse)
                 .collect(Collectors.toList());
@@ -112,27 +125,51 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
-    public PagedResponse<ImportJob> imports(Pageable pageable) {
+    public PagedResponse<ImportJobResponse> imports(Pageable pageable) {
         Page<ImportJob> page = importJobRepository.findByDeletedAtIsNullOrderByCreatedAtDesc(pageable);
-        return PagedResponse.of(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements());
+        return PagedResponse.of(page.getContent().stream().map(this::toImportResponse).toList(),
+                page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
     @Transactional(readOnly = true)
-    public PagedResponse<Recipe> recipes(Pageable pageable) {
-        Page<Recipe> page = recipeRepository.findAll(pageable);
-        return PagedResponse.of(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements());
+    public ImportJobResponse importJob(UUID id) {
+        return importJobRepository.findById(id)
+                .map(this::toImportResponse)
+                .orElseThrow(() -> new ResourceNotFoundException("ImportJob", "id", id.toString()));
+    }
+
+    public ImportJob retryImport(UUID actorId, String actorEmail, UUID id) {
+        ImportJob job = importJobRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ImportJob", "id", id.toString()));
+        job.setStatus("RETRY_REQUESTED");
+        ImportJob saved = importJobRepository.save(job);
+        auditLogService.log(actorId, actorEmail, "IMPORT_RETRY_REQUESTED", "ImportJob", id.toString(), Map.of("source", job.getSource()));
+        return saved;
     }
 
     @Transactional(readOnly = true)
-    public PagedResponse<Ingredient> ingredients(Pageable pageable) {
-        Page<Ingredient> page = ingredientRepository.findAll(pageable);
-        return PagedResponse.of(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements());
+    public PagedResponse<RecipeAdminResponse> recipes(Pageable pageable, String query) {
+        Page<Recipe> page = query == null || query.isBlank()
+                ? recipeRepository.findAll(pageable)
+                : recipeRepository.searchPublicRecipes(query, pageable);
+        return PagedResponse.of(page.getContent().stream().map(this::toRecipeResponse).toList(),
+                page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
     @Transactional(readOnly = true)
-    public PagedResponse<Subscription> subscriptions(Pageable pageable) {
+    public PagedResponse<IngredientAdminResponse> ingredients(Pageable pageable, String query) {
+        Page<Ingredient> page = query == null || query.isBlank()
+                ? ingredientRepository.findAll(pageable)
+                : ingredientRepository.search(query, pageable);
+        return PagedResponse.of(page.getContent().stream().map(this::toIngredientResponse).toList(),
+                page.getNumber(), page.getSize(), page.getTotalElements());
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<SubscriptionAdminResponse> subscriptions(Pageable pageable) {
         Page<Subscription> page = subscriptionRepository.findAll(pageable);
-        return PagedResponse.of(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements());
+        return PagedResponse.of(page.getContent().stream().map(this::toSubscriptionResponse).toList(),
+                page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
     @Transactional(readOnly = true)
@@ -144,6 +181,36 @@ public class AdminService {
     @Transactional(readOnly = true)
     public List<FeatureFlag> featureFlags() {
         return featureFlagRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SystemSetting> systemSettings() {
+        return systemSettingRepository.findAll();
+    }
+
+    public SystemSetting updateSystemSetting(UUID actorId, String actorEmail, String key, String value) {
+        SystemSetting setting = systemSettingRepository.findBySettingKey(key)
+                .orElseGet(() -> SystemSetting.builder().settingKey(key).description("Admin configured setting").build());
+        setting.setSettingValue(value);
+        SystemSetting saved = systemSettingRepository.save(setting);
+        auditLogService.log(actorId, actorEmail, "SYSTEM_SETTING_UPDATED", "SystemSetting", key, Map.of("value", value));
+        return saved;
+    }
+
+    @Transactional(readOnly = true)
+    public RecommendationAnalyticsResponse recommendationAnalytics() {
+        Instant monthStart = Instant.now().minus(30, ChronoUnit.DAYS);
+        long requests = recommendationEventRepository.countByCreatedAtAfter(monthStart);
+        long quotaBlocks = recommendationEventRepository.countByCreatedAtAfterAndQuotaLimitedTrue(monthStart);
+        long emptyResults = recommendationEventRepository.countByCreatedAtAfterAndResultCount(monthStart, 0);
+        return new RecommendationAnalyticsResponse(requests, quotaBlocks, emptyResults);
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<BillingEventResponse> billingEvents(Pageable pageable) {
+        Page<BillingEvent> page = billingEventRepository.findAllByOrderByCreatedAtDesc(pageable);
+        return PagedResponse.of(page.getContent().stream().map(this::toBillingEventResponse).toList(),
+                page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
     public FeatureFlag toggleFeatureFlag(UUID actorId, String actorEmail, String key) {
@@ -178,6 +245,36 @@ public class AdminService {
         return Math.round(value * 100.0) / 100.0;
     }
 
+    private RecipeAdminResponse toRecipeResponse(Recipe recipe) {
+        return new RecipeAdminResponse(recipe.getId(), recipe.getName(), recipe.getCuisineType(), recipe.getMealType(),
+                recipe.getIsPublic(), recipe.getEnabled(), recipe.getVerified(), recipe.getVerificationStatus(),
+                recipe.getConfidenceScore(), recipe.getCreatedAt(), recipe.getUpdatedAt());
+    }
+
+    private IngredientAdminResponse toIngredientResponse(Ingredient ingredient) {
+        return new IngredientAdminResponse(ingredient.getId(), ingredient.getCanonicalName(), ingredient.getSlug(),
+                ingredient.getCategory(), ingredient.getDefaultUnit(), ingredient.getCreatedAt(),
+                ingredient.getUpdatedAt());
+    }
+
+    private SubscriptionAdminResponse toSubscriptionResponse(Subscription subscription) {
+        return new SubscriptionAdminResponse(subscription.getId(), subscription.getUserId(), subscription.getPlanType(),
+                subscription.getStatus(), subscription.getProvider(), subscription.getProviderSubscriptionId(),
+                subscription.getExpiresAt(), subscription.getLastVerifiedAt(), subscription.getCancelAtPeriodEnd(),
+                subscription.getCreatedAt(), subscription.getUpdatedAt());
+    }
+
+    private ImportJobResponse toImportResponse(ImportJob job) {
+        return new ImportJobResponse(job.getId(), job.getSource(), job.getStatus(), job.getTotalRecords(),
+                job.getSuccessfulRecords(), job.getFailedRecords(), job.getErrorMessage(), job.getStartedAt(),
+                job.getCompletedAt(), job.getCreatedAt());
+    }
+
+    private BillingEventResponse toBillingEventResponse(BillingEvent event) {
+        return new BillingEventResponse(event.getId(), event.getProvider(), event.getEventId(), event.getEventType(),
+                event.getProcessed(), event.getErrorMessage(), event.getCreatedAt(), event.getProcessedAt());
+    }
+
     public record OverviewResponse(
             long totalUsers,
             long premiumSubscribers,
@@ -203,4 +300,28 @@ public class AdminService {
             Instant createdAt,
             Instant updatedAt
     ) {}
+
+    public record RecipeAdminResponse(UUID id, String name, String cuisineType, String mealType,
+                                      Boolean isPublic, Boolean enabled, Boolean verified,
+                                      String verificationStatus, Double confidenceScore,
+                                      Instant createdAt, Instant updatedAt) {}
+
+    public record IngredientAdminResponse(UUID id, String canonicalName, String slug, String category,
+                                          String defaultUnit, Instant createdAt, Instant updatedAt) {}
+
+    public record SubscriptionAdminResponse(UUID id, UUID userId, String planType, String status,
+                                            String provider, String providerSubscriptionId,
+                                            Instant expiresAt, Instant lastVerifiedAt,
+                                            Boolean cancelAtPeriodEnd, Instant createdAt, Instant updatedAt) {}
+
+    public record ImportJobResponse(UUID id, String source, String status, Integer totalRecords,
+                                    Integer successfulRecords, Integer failedRecords, String errorMessage,
+                                    Instant startedAt, Instant completedAt, Instant createdAt) {}
+
+    public record RecommendationAnalyticsResponse(long requestsLast30Days, long quotaBlocksLast30Days,
+                                                  long emptyResultRequestsLast30Days) {}
+
+    public record BillingEventResponse(UUID id, String provider, String eventId, String eventType,
+                                       Boolean processed, String errorMessage,
+                                       Instant createdAt, Instant processedAt) {}
 }
