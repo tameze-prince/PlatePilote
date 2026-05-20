@@ -30,6 +30,7 @@ import com.platepilote.platepilote.subscription.application.service.EntitlementS
 import com.platepilote.platepilote.userprofile.domain.entity.UserProfile;
 import com.platepilote.platepilote.userprofile.domain.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +48,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,6 +56,16 @@ import java.util.stream.Collectors;
 public class RecommendationEngine {
 
     private static final int DEFAULT_FREE_WEEKLY_LIMIT = 20;
+    private static final Map<String, List<String>> REGIONAL_CUISINES = Map.of(
+            "CM", List.of("cameroonian", "west african", "african"),
+            "FR", List.of("french", "mediterranean"),
+            "DE", List.of("german", "european"),
+            "GB", List.of("british", "indian"),
+            "US", List.of("american", "mexican"),
+            "IN", List.of("indian"),
+            "CN", List.of("chinese", "asian"),
+            "JP", List.of("japanese", "asian")
+    );
 
     private final RecipeRepository recipeRepository;
     private final RecipeIngredientRepository recipeIngredientRepository;
@@ -102,9 +114,12 @@ public class RecommendationEngine {
 
     private List<RecommendationResult> recommend(UUID userId, String requestType, Integer maxTime, int limit) {
         Instant started = Instant.now();
+
+        // PHASE 1: Load user context (cached where possible)
         UserContext context = loadContext(userId);
         enforceQuota(context, requestType);
 
+        // PHASE 2: Fetch candidate recipes (1 query)
         int candidateLimit = maxTime == null
                 ? Math.max(30, Math.min(100, Math.max(1, limit) * 5))
                 : Math.max(20, Math.min(60, Math.max(1, limit) * 5));
@@ -112,18 +127,27 @@ public class RecommendationEngine {
                 ? recipeRepository.findByIsPublicTrueAndDeletedAtIsNull(PageRequest.of(0, candidateLimit)).getContent()
                 : recipeRepository.findQuickMeals(maxTime, PageRequest.of(0, candidateLimit)).getContent();
 
-        List<UUID> candidateIds = candidates.stream().map(Recipe::getId).collect(Collectors.toList());
-        AllergenContext allergenContext = buildAllergenContext(candidateIds, context.allergies());
+        if (candidates.isEmpty()) {
+            recordEvent(userId, requestType, context, 0, started, false);
+            return List.of();
+        }
 
+        List<UUID> candidateIds = candidates.stream().map(Recipe::getId).collect(Collectors.toList());
+
+        // PHASE 3: Batch-load ALL scoring data upfront (~5 queries total)
+        ScoringData scoringData = loadScoringData(candidateIds, context);
+
+        // PHASE 4: Score purely in-memory — ZERO database calls
         List<RecommendationResult> scoredResults = candidates.stream()
                 .filter(this::isEligibleForRecommendation)
-                .filter(recipe -> !isExcludedByAllergiesBatched(recipe, context.allergies(), allergenContext))
+                .filter(recipe -> !isExcludedByAllergiesBatched(recipe, context.allergies(), scoringData.allergenCtx))
                 .filter(recipe -> !isExcludedByDiet(recipe, context.preferences()))
-                .map(recipe -> score(recipe, context))
+                .map(recipe -> scoreInMemory(recipe, context, scoringData))
                 .filter(result -> result.finalScore() > 0)
                 .sorted(Comparator.comparingDouble(RecommendationResult::finalScore).reversed())
                 .collect(Collectors.toList());
 
+        // PHASE 5: Apply diversity and return
         List<RecommendationResult> results = applyDiversity(scoredResults, Math.max(1, Math.min(limit, 50)));
         if (results.size() < settingInt("recommendation_min_results_before_fallback", 5)) {
             results = results.stream().map(this::withFallbackWarning).collect(Collectors.toList());
@@ -135,21 +159,83 @@ public class RecommendationEngine {
 
     private UserContext loadContext(UUID userId) {
         UserProfile profile = userProfileRepository.findByUserId(userId).orElse(null);
+        String countryCode = profile == null || profile.getCountryCode() == null ? "US" : profile.getCountryCode().toUpperCase(Locale.ROOT);
+        String currencyCode = profile == null || profile.getCurrencyCode() == null ? "USD" : profile.getCurrencyCode().toUpperCase(Locale.ROOT);
+        String locale = profile == null ? "en-US" : valueOrDefault(profile.getLocale(), "en-US");
+        String cookingSkill = profile == null ? "BEGINNER" : valueOrDefault(profile.getCookingSkill(), "BEGINNER").toUpperCase(Locale.ROOT);
+        int householdSize = profile == null ? 1 : Math.max(1, profile.getHouseholdSize() == null ? 1 : profile.getHouseholdSize());
+        String healthGoals = profile == null ? "" : valueOrDefault(profile.getHealthGoals(), "");
+
+        List<DietaryPreference> preferences = dietaryPreferenceRepository.findByUserId(userId);
+        List<Allergy> allergies = allergyRepository.findByUserId(userId);
+        BigDecimal weeklyBudget = getWeeklyBudget(userId);
+        boolean premium = isPremium(userId);
+        Map<UUID, Double> interactionScores = loadInteractionScores(userId);
+        Set<UUID> expiringIngredientIds = loadExpiringIngredientIds(userId);
+
         return new UserContext(
-                userId,
-                profile == null || profile.getCountryCode() == null ? "US" : profile.getCountryCode().toUpperCase(Locale.ROOT),
-                profile == null || profile.getCurrencyCode() == null ? "USD" : profile.getCurrencyCode().toUpperCase(Locale.ROOT),
-                profile == null ? "en-US" : valueOrDefault(profile.getLocale(), "en-US"),
-                profile == null ? "BEGINNER" : valueOrDefault(profile.getCookingSkill(), "BEGINNER").toUpperCase(Locale.ROOT),
-                profile == null ? 1 : Math.max(1, profile.getHouseholdSize() == null ? 1 : profile.getHouseholdSize()),
-                profile == null ? "" : valueOrDefault(profile.getHealthGoals(), ""),
-                dietaryPreferenceRepository.findByUserId(userId),
-                allergyRepository.findByUserId(userId),
-                getWeeklyBudget(userId),
-                isPremium(userId),
-                loadInteractionScores(userId),
-                loadExpiringIngredientIds(userId)
+                userId, countryCode, currencyCode, locale, cookingSkill, householdSize, healthGoals,
+                preferences, allergies, weeklyBudget, premium, interactionScores, expiringIngredientIds
         );
+    }
+
+    private ScoringData loadScoringData(List<UUID> candidateIds, UserContext context) {
+        // 1. Allergen context (2 queries)
+        AllergenContext allergenCtx = buildAllergenContext(candidateIds, context.allergies());
+
+        // 2. Batch recipe costs (1 query via batch method)
+        Map<UUID, BigDecimal> recipeCosts = budgetOptimizer.estimateMultipleRecipeCosts(candidateIds, context.countryCode());
+
+        // 3. Batch pantry scores (2 queries via batch method)
+        Map<UUID, Double> pantryScores = pantryUtilizationScorer.calculatePantryScoresForRecipes(context.userId(), candidateIds);
+
+        // 4. Batch expiring pantry matches (1 query via batch method)
+        Map<UUID, Boolean> expiringMatches = pantryUtilizationScorer.findRecipesUsingExpiringPantry(
+                context.userId(), context.expiringIngredientIds(), candidateIds);
+
+        // 5. Load weights once (cached via system settings)
+        RecommendationWeights weights = loadWeights();
+
+        return new ScoringData(allergenCtx, recipeCosts, pantryScores, expiringMatches, weights);
+    }
+
+    private RecommendationResult scoreInMemory(Recipe recipe, UserContext context, ScoringData data) {
+        BigDecimal estimatedCost = data.recipeCosts.getOrDefault(recipe.getId(), BigDecimal.ZERO);
+        if (estimatedCost.compareTo(BigDecimal.ZERO) == 0 && recipe.getEstimatedCost() != null) {
+            estimatedCost = recipe.getEstimatedCost();
+        }
+
+        double pantryScore = data.pantryScores.getOrDefault(recipe.getId(), 0.0);
+        double budgetScore = calculateBudgetScore(estimatedCost, context.weeklyBudget());
+        double preferenceScore = calculatePreferenceScore(recipe, context.preferences());
+        double nutritionScore = calculateNutritionScore(recipe, context.healthGoals());
+        double timeScore = calculateTimeScore(recipe);
+        double varietyScore = calculateVarietyScore(recipe);
+        double locationScore = calculateLocationScore(recipe, context.countryCode());
+        double feedbackScore = Math.max(-0.20, Math.min(0.20, context.interactionScores().getOrDefault(recipe.getId(), 0.0)));
+        boolean expiringPantryMatch = data.expiringMatches.getOrDefault(recipe.getId(), false);
+
+        double finalScore = pantryScore * data.weights.pantry()
+                + budgetScore * data.weights.budget()
+                + preferenceScore * data.weights.preference()
+                + nutritionScore * data.weights.nutrition()
+                + timeScore * data.weights.time()
+                + varietyScore * data.weights.variety()
+                + locationScore * data.weights.location()
+                + feedbackScore
+                + (expiringPantryMatch ? 0.05 : 0.0);
+
+        List<String> reasons = buildReasons(recipe, pantryScore, budgetScore, preferenceScore,
+                nutritionScore, timeScore, locationScore, context);
+        if (expiringPantryMatch) {
+            reasons.add("Uses pantry items expiring soon");
+        }
+        List<String> warnings = buildWarnings(recipe);
+
+        return new RecommendationResult(recipe, round(finalScore), round(budgetScore), round(pantryScore),
+                round(timeScore), round(preferenceScore), round(nutritionScore), round(varietyScore),
+                round(locationScore), estimatedCost, context.currencyCode(), context.countryCode(),
+                reasons, warnings);
     }
 
     private void enforceQuota(UserContext context, String requestType) {
@@ -174,46 +260,8 @@ public class RecommendationEngine {
         }
     }
 
-    private RecommendationResult score(Recipe recipe, UserContext context) {
-        RecommendationWeights weights = loadWeights();
-        BigDecimal estimatedCost = estimateCost(recipe, context.countryCode());
-        double pantryScore = pantryUtilizationScorer.calculatePantryScore(context.userId(), recipe.getId());
-        double budgetScore = calculateBudgetScore(estimatedCost, context.weeklyBudget());
-        double preferenceScore = calculatePreferenceScore(recipe, context.preferences());
-        double nutritionScore = calculateNutritionScore(recipe, context.healthGoals());
-        double timeScore = calculateTimeScore(recipe);
-        double varietyScore = calculateVarietyScore(recipe);
-        double locationScore = calculateLocationScore(recipe, context.countryCode());
-        double feedbackScore = Math.max(-0.20, Math.min(0.20, context.interactionScores().getOrDefault(recipe.getId(), 0.0)));
-        boolean expiringPantryMatch = usesExpiringPantry(recipe, context.expiringIngredientIds());
-
-        double finalScore = pantryScore * weights.pantry()
-                + budgetScore * weights.budget()
-                + preferenceScore * weights.preference()
-                + nutritionScore * weights.nutrition()
-                + timeScore * weights.time()
-                + varietyScore * weights.variety()
-                + locationScore * weights.location()
-                + feedbackScore
-                + (expiringPantryMatch ? 0.05 : 0.0);
-
-        List<String> reasons = buildReasons(recipe, pantryScore, budgetScore, preferenceScore,
-                nutritionScore, timeScore, locationScore, context);
-        if (expiringPantryMatch) {
-            reasons.add("Uses pantry items expiring soon");
-        }
-        List<String> warnings = buildWarnings(recipe);
-
-        return new RecommendationResult(recipe, round(finalScore), round(budgetScore), round(pantryScore),
-                round(timeScore), round(preferenceScore), round(nutritionScore), round(varietyScore),
-                round(locationScore), estimatedCost, context.currencyCode(), context.countryCode(),
-                reasons, warnings);
-    }
-
     private AllergenContext buildAllergenContext(List<UUID> recipeIds, List<Allergy> allergies) {
-        List<RecipeIngredient> allIngredients = recipeIds.isEmpty()
-                ? List.of()
-                : recipeIngredientRepository.findByRecipeIdIn(recipeIds);
+        List<RecipeIngredient> allIngredients = recipeIngredientRepository.findByRecipeIdIn(recipeIds);
 
         Set<UUID> ingredientIds = allIngredients.stream()
                 .map(RecipeIngredient::getIngredientId)
@@ -271,40 +319,6 @@ public class RecommendationEngine {
         return false;
     }
 
-    private boolean isExcludedByAllergies(Recipe recipe, List<Allergy> allergies) {
-        if (allergies.isEmpty()) {
-            return false;
-        }
-        List<RecipeIngredient> ingredients = recipeIngredientRepository.findByRecipeIdOrderBySortOrderAsc(recipe.getId());
-        for (Allergy allergy : allergies) {
-            String allergen = ingredientResolutionService.normalize(allergy.getAllergen());
-            if (allergen.isBlank()) {
-                continue;
-            }
-            if (matchesAllergenFlag(recipe, allergen)) {
-                return true;
-            }
-            for (RecipeIngredient ingredient : ingredients) {
-                if (ingredient.getIngredientId() != null
-                        && ingredientAllergenRepository.existsByIngredientIdAndAllergenGroupIgnoreCase(
-                        ingredient.getIngredientId(), allergen)) {
-                    return true;
-                }
-                String recipeIngredient = ingredientResolutionService.normalize(ingredient.getName());
-                if (recipeIngredient.contains(allergen) || allergen.contains(recipeIngredient)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private record AllergenContext(
-            Map<UUID, List<RecipeIngredient>> recipeIngredientsMap,
-            Map<UUID, List<String>> ingredientAllergenMap,
-            Set<String> normalizedAllergens
-    ) {}
-
     private boolean isEligibleForRecommendation(Recipe recipe) {
         if (Boolean.FALSE.equals(recipe.getEnabled())) {
             return false;
@@ -356,20 +370,9 @@ public class RecommendationEngine {
                 case "halal" -> {
                     if (Boolean.FALSE.equals(recipe.getHalalFriendly())) return true;
                 }
-                default -> {
-                    // Cuisine preferences are scored softly, not excluded.
-                }
             }
         }
         return false;
-    }
-
-    private BigDecimal estimateCost(Recipe recipe, String countryCode) {
-        BigDecimal local = budgetOptimizer.estimateRecipeCost(recipe.getId(), countryCode);
-        if (local.compareTo(BigDecimal.ZERO) > 0) {
-            return local;
-        }
-        return recipe.getEstimatedCost() == null ? BigDecimal.ZERO : recipe.getEstimatedCost();
     }
 
     private BigDecimal getWeeklyBudget(UUID userId) {
@@ -386,7 +389,7 @@ public class RecommendationEngine {
         }
         return userRepository.findById(userId)
                 .map(OurUser::getRoles)
-                .orElseGet(java.util.Set::of)
+                .orElseGet(Set::of)
                 .stream()
                 .anyMatch(role -> "ROLE_PREMIUM_USER".equals(role.getName())
                         || "ROLE_ADMIN".equals(role.getName())
@@ -517,17 +520,7 @@ public class RecommendationEngine {
             return 0.5;
         }
         String cuisine = ingredientResolutionService.normalize(recipe.getCuisineType());
-        Map<String, List<String>> regionalCuisines = Map.of(
-                "CM", List.of("cameroonian", "west african", "african"),
-                "FR", List.of("french", "mediterranean"),
-                "DE", List.of("german", "european"),
-                "GB", List.of("british", "indian"),
-                "US", List.of("american", "mexican"),
-                "IN", List.of("indian"),
-                "CN", List.of("chinese", "asian"),
-                "JP", List.of("japanese", "asian")
-        );
-        return regionalCuisines.getOrDefault(countryCode, List.of()).stream()
+        return REGIONAL_CUISINES.getOrDefault(countryCode, List.of()).stream()
                 .anyMatch(cuisine::contains) ? 1.0 : 0.55;
     }
 
@@ -557,15 +550,6 @@ public class RecommendationEngine {
                 .map(PantryItem::getIngredientId)
                 .filter(java.util.Objects::nonNull)
                 .collect(Collectors.toSet());
-    }
-
-    private boolean usesExpiringPantry(Recipe recipe, Set<UUID> expiringIngredientIds) {
-        if (expiringIngredientIds.isEmpty()) {
-            return false;
-        }
-        return recipeIngredientRepository.findByRecipeIdOrderBySortOrderAsc(recipe.getId()).stream()
-                .map(RecipeIngredient::getIngredientId)
-                .anyMatch(expiringIngredientIds::contains);
     }
 
     private List<RecommendationResult> applyDiversity(List<RecommendationResult> results, int limit) {
@@ -693,6 +677,20 @@ public class RecommendationEngine {
             );
         }
     }
+
+    private record AllergenContext(
+            Map<UUID, List<RecipeIngredient>> recipeIngredientsMap,
+            Map<UUID, List<String>> ingredientAllergenMap,
+            Set<String> normalizedAllergens
+    ) {}
+
+    private record ScoringData(
+            AllergenContext allergenCtx,
+            Map<UUID, BigDecimal> recipeCosts,
+            Map<UUID, Double> pantryScores,
+            Map<UUID, Boolean> expiringMatches,
+            RecommendationWeights weights
+    ) {}
 
     public record RecommendationResult(
             Recipe recipe,

@@ -19,12 +19,21 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final EntitlementService entitlementService;
 
-    @Transactional(readOnly = true)
     public SubscriptionResponse getSubscription(UUID userId) {
-        Subscription subscription = subscriptionRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Subscription", "userId", userId.toString()));
+        return subscriptionRepository.findByUserId(userId)
+                .map(this::toResponse)
+                .orElseGet(() -> getOrCreateFreeSubscription(userId));
+    }
 
-        return toResponse(subscription);
+    private SubscriptionResponse getOrCreateFreeSubscription(UUID userId) {
+        Subscription subscription = Subscription.builder()
+                .userId(userId)
+                .planType("FREE")
+                .status("ACTIVE")
+                .startDate(Instant.now())
+                .build();
+        Subscription saved = subscriptionRepository.save(subscription);
+        return toResponse(saved);
     }
 
     public SubscriptionResponse createFreeSubscription(UUID userId) {

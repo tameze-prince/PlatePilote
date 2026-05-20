@@ -28,7 +28,7 @@ CREATE INDEX IF NOT EXISTS idx_recipe_user_active ON recipes(user_id, deleted_at
 CREATE INDEX IF NOT EXISTS idx_budget_user_active ON budgets(user_id, deleted_at);
 
 -- Notifications: filtered by user + read status + not deleted
-CREATE INDEX IF NOT EXISTS idx_notification_user_read ON notifications(user_id, is_read, deleted_at);
+CREATE INDEX IF NOT EXISTS idx_notification_user_read ON notifications(user_id, read, deleted_at);
 
 -- Grocery lists: filtered by user + not deleted
 CREATE INDEX IF NOT EXISTS idx_grocery_list_user ON grocery_lists(user_id, deleted_at);
@@ -37,7 +37,7 @@ CREATE INDEX IF NOT EXISTS idx_grocery_list_user ON grocery_lists(user_id, delet
 CREATE INDEX IF NOT EXISTS idx_meal_plan_user ON meal_plans(user_id, deleted_at);
 
 -- Refresh tokens: hashed token lookup during authentication
-CREATE INDEX IF NOT EXISTS idx_refresh_token_hash ON refresh_tokens(token_hash);
+CREATE INDEX IF NOT EXISTS idx_refresh_token ON refresh_tokens(token);
 
 -- User interactions: filtered by user + date for recommendation feedback
 CREATE INDEX IF NOT EXISTS idx_user_interaction_user_date ON user_interactions(user_id, created_at);

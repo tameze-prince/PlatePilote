@@ -77,7 +77,7 @@ spring:
       timeout: 6000ms
 
   cache:
-    type: redis
+    type: ${CACHE_TYPE:none}
     redis:
       time-to-live: 600000  # Cache expires after 10 minutes
 

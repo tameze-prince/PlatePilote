@@ -20,8 +20,16 @@ public class UserProfileService {
 
     @Transactional(readOnly = true)
     public UserProfileResponse getProfileByUserId(UUID userId) {
-        UserProfile profile = userProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("UserProfile", "userId", userId.toString()));
+        UserProfile profile = userProfileRepository.findByUserId(userId).orElseGet(() -> {
+            UserProfile defaultProfile = new UserProfile();
+            defaultProfile.setUserId(userId);
+            defaultProfile.setCountryCode("US");
+            defaultProfile.setCurrencyCode("USD");
+            defaultProfile.setLocale("en-US");
+            defaultProfile.setCookingSkill("BEGINNER");
+            defaultProfile.setHouseholdSize(1);
+            return defaultProfile;
+        });
 
         return toResponse(profile);
     }
