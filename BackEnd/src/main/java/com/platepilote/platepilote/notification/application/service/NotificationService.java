@@ -2,6 +2,7 @@ package com.platepilote.platepilote.notification.application.service;
 
 import com.platepilote.platepilote.common.dto.PagedResponse;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.notification.domain.entity.Notification;
 import com.platepilote.platepilote.notification.domain.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final SecurityUtils securityUtils;
 
     @Transactional(readOnly = true)
     public PagedResponse<NotificationResponse> getNotifications(UUID userId, Pageable pageable) {
@@ -43,9 +45,7 @@ public class NotificationService {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Notification", "id", notificationId.toString()));
 
-        if (!notification.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("Notification", "id", notificationId.toString());
-        }
+        securityUtils.verifyOwnership(notification.getUserId(), userId, "Notification", notificationId.toString());
 
         notification.setRead(true);
         notification.setReadAt(Instant.now());
@@ -69,9 +69,7 @@ public class NotificationService {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Notification", "id", notificationId.toString()));
 
-        if (!notification.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("Notification", "id", notificationId.toString());
-        }
+        securityUtils.verifyOwnership(notification.getUserId(), userId, "Notification", notificationId.toString());
 
         notification.softDelete();
         notificationRepository.save(notification);

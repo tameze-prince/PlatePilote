@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,4 +29,7 @@ public interface IngredientRepository extends JpaRepository<Ingredient, UUID> {
     @Query("SELECT i FROM Ingredient i WHERE i.deletedAt IS NULL AND " +
            "LOWER(i.canonicalName) IN :names")
     Page<Ingredient> findByCanonicalNameInIgnoreCase(@Param("names") java.util.List<String> names, Pageable pageable);
+
+    @Query("SELECT i FROM Ingredient i WHERE i.id IN :ids AND i.deletedAt IS NULL")
+    List<Ingredient> findAllByIdAndDeletedAtIsNull(@Param("ids") List<UUID> ids);
 }

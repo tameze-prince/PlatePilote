@@ -10,6 +10,7 @@ public class EmailVerificationProperties {
     private String from = "PlatePilote <no-reply@platepilote.com>";
     private String frontendUrl = "http://localhost:3000/verify-email";
     private int expirationHours = 24;
+    private boolean failOnSendError = false;
 
     public String getFrom() {
         return from;
@@ -33,5 +34,13 @@ public class EmailVerificationProperties {
 
     public void setExpirationHours(int expirationHours) {
         this.expirationHours = expirationHours;
+    }
+
+    public boolean isFailOnSendError() {
+        return failOnSendError;
+    }
+
+    public void setFailOnSendError(boolean failOnSendError) {
+        this.failOnSendError = failOnSendError;
     }
 }

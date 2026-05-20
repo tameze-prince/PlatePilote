@@ -24,10 +24,11 @@ spring:
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 10    # Max connections to database
+      maximum-pool-size: 20    # Max connections to database (increased from 10 for concurrent load)
       minimum-idle: 5          # Min connections kept alive
-      idle-timeout: 30000      # Close idle connections after 30s
+      idle-timeout: 300000     # Close idle connections after 5min (was 30s, too aggressive)
       connection-timeout: 20000 # Wait max 20s for connection
+      max-lifetime: 1200000    # Max connection lifetime: 20min (prevents stale connections)
 
   # ==========================================
   # JPA / HIBERNATE CONFIGURATION
@@ -44,6 +45,16 @@ spring:
         format_sql: true
         use_sql_comments: true
         default_schema: public
+        cache:
+          use_second_level_cache: true
+          use_query_cache: true
+          region:
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+        jakarta:
+          cache:
+            missing_cache_strategy: create
+            provider: org.ehcache.jsr107.EhcacheCachingProvider
+            uri: classpath:ehcache.xml
 
   # ==========================================
   # FLYWAY - DATABASE MIGRATIONS
@@ -98,6 +109,10 @@ spring:
 # ==========================================
 server:
   port: 8081
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain
+    min-response-size: 1024
   error:
     include-message: always
     include-binding-errors: always
@@ -132,6 +147,7 @@ app:
       from: ${EMAIL_VERIFICATION_FROM:PlatePilote <no-reply@platepilote.com>}
       frontend-url: ${EMAIL_VERIFICATION_URL:http://localhost:3000/verify-email}
       expiration-hours: ${EMAIL_VERIFICATION_EXPIRATION_HOURS:24}
+      fail-on-send-error: ${EMAIL_VERIFICATION_FAIL_ON_SEND_ERROR:false}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8081}
     allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS

@@ -8,6 +8,7 @@ import com.platepilote.platepilote.authentication.domain.repository.UserReposito
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmailVerificationService {
 
     private final EmailVerificationTokenRepository tokenRepository;
@@ -88,7 +90,11 @@ public class EmailVerificationService {
         try {
             mailSender.send(message);
         } catch (MailException ex) {
-            throw new BusinessRuleViolationException("Unable to send verification email");
+            log.warn("Unable to send verification email to {} using sender {}: {}",
+                    user.getEmail(), properties.getFrom(), ex.getMessage());
+            if (properties.isFailOnSendError()) {
+                throw new BusinessRuleViolationException("Unable to send verification email");
+            }
         }
     }
 }

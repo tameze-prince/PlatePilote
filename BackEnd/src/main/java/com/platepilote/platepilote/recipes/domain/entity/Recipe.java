@@ -82,6 +82,7 @@ public class Recipe extends BaseEntity {
     private String source;  // Where the recipe came from
 
     @Column(name = "is_public")
+    @Builder.Default
     private Boolean isPublic = true;  // true = visible to all users
 
     @Column(name = "user_id")
@@ -149,12 +150,15 @@ public class Recipe extends BaseEntity {
     private String sourceUrl;
 
     @Column(name = "enabled")
+    @Builder.Default
     private Boolean enabled = true;
 
     @Column(name = "verified")
+    @Builder.Default
     private Boolean verified = false;
 
     @Column(name = "verification_status")
+    @Builder.Default
     private String verificationStatus = "UNREVIEWED";
 
     @Column(name = "nutrition_source")
@@ -164,5 +168,6 @@ public class Recipe extends BaseEntity {
     private String allergenSource;
 
     @Column(name = "confidence_score")
+    @Builder.Default
     private Double confidenceScore = 0.5;
 }

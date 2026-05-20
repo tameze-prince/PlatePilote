@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
@@ -22,6 +23,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -61,6 +63,35 @@ class EmailVerificationServiceTest {
         verify(mailSender).send(messageCaptor.capture());
         assertThat(messageCaptor.getValue().getTo()).containsExactly("user@example.com");
         assertThat(messageCaptor.getValue().getText()).contains("https://app.platepilote.com/verify-email?token=");
+    }
+
+    @Test
+    void sendVerificationEmailDoesNotBlockRegistrationWhenMailFailsByDefault() {
+        OurUser user = user(false);
+        when(tokenRepository.save(any(EmailVerificationToken.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doThrow(new MailSendException("smtp rejected sender")).when(mailSender).send(any(SimpleMailMessage.class));
+
+        service.sendVerificationEmail(user);
+
+        verify(tokenRepository).save(any(EmailVerificationToken.class));
+    }
+
+    @Test
+    void sendVerificationEmailCanFailFastInStrictMode() {
+        EmailVerificationProperties properties = new EmailVerificationProperties();
+        properties.setFrom("PlatePilote <no-reply@test.platepilote.com>");
+        properties.setFrontendUrl("https://app.platepilote.com/verify-email");
+        properties.setExpirationHours(24);
+        properties.setFailOnSendError(true);
+        service = new EmailVerificationService(tokenRepository, userRepository, mailSender, properties);
+
+        OurUser user = user(false);
+        when(tokenRepository.save(any(EmailVerificationToken.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doThrow(new MailSendException("smtp rejected sender")).when(mailSender).send(any(SimpleMailMessage.class));
+
+        assertThatThrownBy(() -> service.sendVerificationEmail(user))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageContaining("Unable to send verification email");
     }
 
     @Test

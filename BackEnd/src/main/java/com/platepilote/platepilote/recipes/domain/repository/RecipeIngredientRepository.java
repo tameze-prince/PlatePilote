@@ -17,6 +17,8 @@ package com.platepilote.platepilote.recipes.domain.repository;
 
 import com.platepilote.platepilote.recipes.domain.entity.RecipeIngredient;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -35,4 +37,7 @@ public interface RecipeIngredientRepository extends JpaRepository<RecipeIngredie
      * Called when a recipe is deleted to clean up orphaned ingredients.
      */
     void deleteByRecipeId(UUID recipeId);
+
+    @Query("SELECT ri FROM RecipeIngredient ri WHERE ri.recipe.id IN :recipeIds")
+    List<RecipeIngredient> findByRecipeIdIn(@Param("recipeIds") List<UUID> recipeIds);
 }

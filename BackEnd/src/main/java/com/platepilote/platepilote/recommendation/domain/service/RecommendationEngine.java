@@ -8,6 +8,7 @@ import com.platepilote.platepilote.budget.domain.entity.Budget;
 import com.platepilote.platepilote.budget.domain.repository.BudgetRepository;
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.ingredients.application.service.IngredientResolutionService;
+import com.platepilote.platepilote.ingredients.domain.entity.IngredientAllergen;
 import com.platepilote.platepilote.ingredients.domain.repository.IngredientAllergenRepository;
 import com.platepilote.platepilote.optimization.application.service.BudgetOptimizer;
 import com.platepilote.platepilote.optimization.application.service.PantryUtilizationScorer;
@@ -104,13 +105,19 @@ public class RecommendationEngine {
         UserContext context = loadContext(userId);
         enforceQuota(context, requestType);
 
+        int candidateLimit = maxTime == null
+                ? Math.max(30, Math.min(100, Math.max(1, limit) * 5))
+                : Math.max(20, Math.min(60, Math.max(1, limit) * 5));
         List<Recipe> candidates = maxTime == null
-                ? recipeRepository.findByIsPublicTrueAndDeletedAtIsNull(PageRequest.of(0, 500)).getContent()
-                : recipeRepository.findQuickMeals(maxTime, PageRequest.of(0, 200)).getContent();
+                ? recipeRepository.findByIsPublicTrueAndDeletedAtIsNull(PageRequest.of(0, candidateLimit)).getContent()
+                : recipeRepository.findQuickMeals(maxTime, PageRequest.of(0, candidateLimit)).getContent();
+
+        List<UUID> candidateIds = candidates.stream().map(Recipe::getId).collect(Collectors.toList());
+        AllergenContext allergenContext = buildAllergenContext(candidateIds, context.allergies());
 
         List<RecommendationResult> scoredResults = candidates.stream()
                 .filter(this::isEligibleForRecommendation)
-                .filter(recipe -> !isExcludedByAllergies(recipe, context.allergies()))
+                .filter(recipe -> !isExcludedByAllergiesBatched(recipe, context.allergies(), allergenContext))
                 .filter(recipe -> !isExcludedByDiet(recipe, context.preferences()))
                 .map(recipe -> score(recipe, context))
                 .filter(result -> result.finalScore() > 0)
@@ -203,6 +210,67 @@ public class RecommendationEngine {
                 reasons, warnings);
     }
 
+    private AllergenContext buildAllergenContext(List<UUID> recipeIds, List<Allergy> allergies) {
+        List<RecipeIngredient> allIngredients = recipeIds.isEmpty()
+                ? List.of()
+                : recipeIngredientRepository.findByRecipeIdIn(recipeIds);
+
+        Set<UUID> ingredientIds = allIngredients.stream()
+                .map(RecipeIngredient::getIngredientId)
+                .filter(id -> id != null)
+                .collect(Collectors.toSet());
+
+        List<IngredientAllergen> allAllergens = ingredientIds.isEmpty()
+                ? List.of()
+                : ingredientAllergenRepository.findByIngredientIdIn(ingredientIds);
+
+        Map<UUID, List<String>> ingredientAllergenMap = new HashMap<>();
+        for (IngredientAllergen ia : allAllergens) {
+            ingredientAllergenMap.computeIfAbsent(ia.getIngredient().getId(), k -> new ArrayList<>())
+                    .add(ia.getAllergenGroup());
+        }
+
+        Map<UUID, List<RecipeIngredient>> recipeIngredientsMap = allIngredients.stream()
+                .collect(Collectors.groupingBy(ri -> ri.getRecipe().getId()));
+
+        Set<String> normalizedAllergens = new HashSet<>();
+        for (Allergy allergy : allergies) {
+            String normalized = ingredientResolutionService.normalize(allergy.getAllergen());
+            if (!normalized.isBlank()) {
+                normalizedAllergens.add(normalized);
+            }
+        }
+
+        return new AllergenContext(recipeIngredientsMap, ingredientAllergenMap, normalizedAllergens);
+    }
+
+    private boolean isExcludedByAllergiesBatched(Recipe recipe, List<Allergy> allergies, AllergenContext ctx) {
+        if (allergies.isEmpty() || ctx.normalizedAllergens.isEmpty()) {
+            return false;
+        }
+
+        List<RecipeIngredient> ingredients = ctx.recipeIngredientsMap.getOrDefault(recipe.getId(), List.of());
+
+        for (String allergen : ctx.normalizedAllergens) {
+            if (matchesAllergenFlag(recipe, allergen)) {
+                return true;
+            }
+            for (RecipeIngredient ingredient : ingredients) {
+                if (ingredient.getIngredientId() != null) {
+                    List<String> ingredientAllergens = ctx.ingredientAllergenMap.getOrDefault(ingredient.getIngredientId(), List.of());
+                    if (ingredientAllergens.stream().anyMatch(a -> a.equalsIgnoreCase(allergen))) {
+                        return true;
+                    }
+                }
+                String recipeIngredient = ingredientResolutionService.normalize(ingredient.getName());
+                if (recipeIngredient.contains(allergen) || allergen.contains(recipeIngredient)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private boolean isExcludedByAllergies(Recipe recipe, List<Allergy> allergies) {
         if (allergies.isEmpty()) {
             return false;
@@ -230,6 +298,12 @@ public class RecommendationEngine {
         }
         return false;
     }
+
+    private record AllergenContext(
+            Map<UUID, List<RecipeIngredient>> recipeIngredientsMap,
+            Map<UUID, List<String>> ingredientAllergenMap,
+            Set<String> normalizedAllergens
+    ) {}
 
     private boolean isEligibleForRecommendation(Recipe recipe) {
         if (Boolean.FALSE.equals(recipe.getEnabled())) {

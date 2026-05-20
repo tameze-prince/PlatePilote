@@ -3,6 +3,7 @@ package com.platepilote.platepilote.mealplanning.application.service;
 import com.platepilote.platepilote.common.dto.PagedResponse;
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.mealplanning.application.dto.MealPlanEntryRequest;
 import com.platepilote.platepilote.mealplanning.application.dto.MealPlanRequest;
 import com.platepilote.platepilote.mealplanning.application.dto.MealPlanResponse;
@@ -22,7 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +37,7 @@ public class MealPlanService {
     private final MealPlanEntryRepository mealPlanEntryRepository;
     private final RecipeRepository recipeRepository;
     private final RecommendationEngine recommendationEngine;
+    private final SecurityUtils securityUtils;
 
     @Transactional(readOnly = true)
     public PagedResponse<MealPlanResponse> getUserMealPlans(UUID userId, Pageable pageable) {
@@ -51,9 +55,7 @@ public class MealPlanService {
         MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
 
-        if (!mealPlan.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString());
-        }
+        securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", mealPlanId.toString());
 
         return toFullResponse(mealPlan);
     }
@@ -79,9 +81,7 @@ public class MealPlanService {
         MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
 
-        if (!mealPlan.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString());
-        }
+        securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", mealPlanId.toString());
 
         if (request.getMealDate().isBefore(mealPlan.getStartDate()) ||
             request.getMealDate().isAfter(mealPlan.getEndDate())) {
@@ -112,9 +112,7 @@ public class MealPlanService {
         MealPlan mealPlan = mealPlanRepository.findById(entry.getMealPlanId())
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", entry.getMealPlanId().toString()));
 
-        if (!mealPlan.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("MealPlan", "id", entry.getMealPlanId().toString());
-        }
+        securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", entry.getMealPlanId().toString());
 
         mealPlanEntryRepository.delete(entry);
     }
@@ -123,9 +121,7 @@ public class MealPlanService {
         MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
 
-        if (!mealPlan.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString());
-        }
+        securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", mealPlanId.toString());
 
         mealPlan.setStatus("ACTIVE");
         mealPlanRepository.save(mealPlan);
@@ -168,9 +164,7 @@ public class MealPlanService {
         MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
 
-        if (!mealPlan.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString());
-        }
+        securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", mealPlanId.toString());
 
         mealPlan.softDelete();
         mealPlanRepository.save(mealPlan);
@@ -191,9 +185,17 @@ public class MealPlanService {
     private MealPlanResponse toFullResponse(MealPlan mealPlan) {
         List<MealPlanEntry> entries = mealPlanEntryRepository.findByMealPlanId(mealPlan.getId());
 
+        List<UUID> recipeIds = entries.stream()
+                .map(MealPlanEntry::getRecipeId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<UUID, Recipe> recipeMap = recipeRepository.findAllById(recipeIds).stream()
+                .collect(Collectors.toMap(Recipe::getId, Function.identity()));
+
         List<MealPlanResponse.MealPlanEntryResponse> entryResponses = entries.stream()
                 .map(entry -> {
-                    Recipe recipe = recipeRepository.findById(entry.getRecipeId()).orElse(null);
+                    Recipe recipe = recipeMap.get(entry.getRecipeId());
                     return MealPlanResponse.MealPlanEntryResponse.builder()
                             .id(entry.getId())
                             .recipeId(entry.getRecipeId())

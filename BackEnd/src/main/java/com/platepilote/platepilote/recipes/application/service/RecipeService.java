@@ -3,6 +3,7 @@ package com.platepilote.platepilote.recipes.application.service;
 import com.platepilote.platepilote.common.dto.PagedResponse;
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.ingredients.application.service.IngredientResolutionService;
 import com.platepilote.platepilote.recipes.application.dto.RecipeIngredientRequest;
 import com.platepilote.platepilote.recipes.application.dto.RecipeRequest;
@@ -34,6 +35,7 @@ public class RecipeService {
     private final RecipeIngredientRepository ingredientRepository;
     private final RecipeStepRepository stepRepository;
     private final IngredientResolutionService ingredientResolutionService;
+    private final SecurityUtils securityUtils;
 
     @Transactional(readOnly = true)
     public PagedResponse<RecipeResponse> getPublicRecipes(Pageable pageable) {
@@ -90,8 +92,12 @@ public class RecipeService {
                 .mealType(request.getMealType())
                 .imageUrl(request.getImageUrl())
                 .source(request.getSource())
-                .isPublic(request.getIsPublic())
+                .isPublic(request.getIsPublic() == null || request.getIsPublic())
                 .userId(userId)
+                .enabled(true)
+                .verified(false)
+                .verificationStatus("UNREVIEWED")
+                .confidenceScore(0.5)
                 .build();
 
         Recipe saved = recipeRepository.save(recipe);
@@ -133,9 +139,7 @@ public class RecipeService {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", recipeId.toString()));
 
-        if (!recipe.getUserId().equals(userId)) {
-            throw new BusinessRuleViolationException("You can only update your own recipes");
-        }
+        securityUtils.verifyOwnership(recipe.getUserId(), userId, "Recipe", recipeId.toString());
 
         recipe.setName(request.getName());
         recipe.setDescription(request.getDescription());
@@ -191,9 +195,7 @@ public class RecipeService {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", recipeId.toString()));
 
-        if (!recipe.getUserId().equals(userId)) {
-            throw new BusinessRuleViolationException("You can only delete your own recipes");
-        }
+        securityUtils.verifyOwnership(recipe.getUserId(), userId, "Recipe", recipeId.toString());
 
         recipe.softDelete();
         recipeRepository.save(recipe);

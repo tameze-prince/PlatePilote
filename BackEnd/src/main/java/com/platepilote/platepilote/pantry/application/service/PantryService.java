@@ -2,6 +2,7 @@ package com.platepilote.platepilote.pantry.application.service;
 
 import com.platepilote.platepilote.common.dto.PagedResponse;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.pantry.application.dto.PantryItemRequest;
 import com.platepilote.platepilote.pantry.application.dto.PantryItemResponse;
 import com.platepilote.platepilote.pantry.domain.entity.PantryItem;
@@ -25,6 +26,7 @@ public class PantryService {
 
     private final PantryItemRepository pantryItemRepository;
     private final IngredientResolutionService ingredientResolutionService;
+    private final SecurityUtils securityUtils;
 
     @Transactional(readOnly = true)
     public PagedResponse<PantryItemResponse> getAllItems(UUID userId, Pageable pageable) {
@@ -82,9 +84,7 @@ public class PantryService {
         PantryItem item = pantryItemRepository.findById(itemId)
                 .orElseThrow(() -> new ResourceNotFoundException("PantryItem", "id", itemId.toString()));
 
-        if (!item.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("PantryItem", "id", itemId.toString());
-        }
+        securityUtils.verifyOwnership(item.getUserId(), userId, "PantryItem", itemId.toString());
 
         item.setName(request.getName());
         item.setCategory(request.getCategory());
@@ -101,9 +101,7 @@ public class PantryService {
         PantryItem item = pantryItemRepository.findById(itemId)
                 .orElseThrow(() -> new ResourceNotFoundException("PantryItem", "id", itemId.toString()));
 
-        if (!item.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("PantryItem", "id", itemId.toString());
-        }
+        securityUtils.verifyOwnership(item.getUserId(), userId, "PantryItem", itemId.toString());
 
         item.softDelete();
         pantryItemRepository.save(item);
@@ -113,9 +111,7 @@ public class PantryService {
         PantryItem item = pantryItemRepository.findById(itemId)
                 .orElseThrow(() -> new ResourceNotFoundException("PantryItem", "id", itemId.toString()));
 
-        if (!item.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("PantryItem", "id", itemId.toString());
-        }
+        securityUtils.verifyOwnership(item.getUserId(), userId, "PantryItem", itemId.toString());
 
         java.math.BigDecimal newQuantity = item.getQuantity().subtract(amount);
         if (newQuantity.compareTo(java.math.BigDecimal.ZERO) <= 0) {

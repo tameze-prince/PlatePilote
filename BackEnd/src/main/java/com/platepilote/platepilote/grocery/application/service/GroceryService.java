@@ -2,6 +2,7 @@ package com.platepilote.platepilote.grocery.application.service;
 
 import com.platepilote.platepilote.common.dto.PagedResponse;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.grocery.application.dto.GroceryItemRequest;
 import com.platepilote.platepilote.grocery.application.dto.GroceryListRequest;
 import com.platepilote.platepilote.grocery.domain.entity.GroceryItem;
@@ -27,8 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -45,6 +48,7 @@ public class GroceryService {
     private final PantryItemRepository pantryItemRepository;
     private final PricingService pricingService;
     private final UserProfileRepository userProfileRepository;
+    private final SecurityUtils securityUtils;
 
     @Transactional(readOnly = true)
     public PagedResponse<GroceryListResponse> getUserLists(UUID userId, Pageable pageable) {
@@ -84,9 +88,7 @@ public class GroceryService {
         GroceryList list = groceryListRepository.findById(listId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", listId.toString()));
 
-        if (!list.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("GroceryList", "id", listId.toString());
-        }
+        securityUtils.verifyOwnership(list.getUserId(), userId, "GroceryList", listId.toString());
 
         GroceryItem item = GroceryItem.builder()
                 .groceryListId(listId)
@@ -111,9 +113,7 @@ public class GroceryService {
         GroceryList list = groceryListRepository.findById(item.getGroceryListId())
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", item.getGroceryListId().toString()));
 
-        if (!list.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("GroceryList", "id", item.getGroceryListId().toString());
-        }
+        securityUtils.verifyOwnership(list.getUserId(), userId, "GroceryList", item.getGroceryListId().toString());
 
         item.setChecked(!item.getChecked());
         groceryItemRepository.save(item);
@@ -126,9 +126,7 @@ public class GroceryService {
         GroceryList list = groceryListRepository.findById(item.getGroceryListId())
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", item.getGroceryListId().toString()));
 
-        if (!list.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("GroceryList", "id", item.getGroceryListId().toString());
-        }
+        securityUtils.verifyOwnership(list.getUserId(), userId, "GroceryList", item.getGroceryListId().toString());
 
         groceryItemRepository.delete(item);
     }
@@ -137,9 +135,7 @@ public class GroceryService {
         GroceryList list = groceryListRepository.findById(listId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", listId.toString()));
 
-        if (!list.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("GroceryList", "id", listId.toString());
-        }
+        securityUtils.verifyOwnership(list.getUserId(), userId, "GroceryList", listId.toString());
 
         list.setStatus("COMPLETED");
         groceryListRepository.save(list);
@@ -154,24 +150,29 @@ public class GroceryService {
 
         List<MealPlanEntry> entries = mealPlanEntryRepository.findByMealPlanId(mealPlanId);
         Map<String, GroceryItemAggregate> aggregatedItems = new HashMap<>();
-        List<PantryItem> pantryItems = pantryItemRepository
-                .findByUserIdAndDeletedAtIsNull(userId, PageRequest.of(0, 500))
-                .getContent();
-        String countryCode = userProfileRepository.findByUserId(userId)
-                .map(profile -> profile.getCountryCode() == null ? "US" : profile.getCountryCode())
-                .orElse("US");
 
+        Set<UUID> requiredIngredientIds = new HashSet<>();
         for (MealPlanEntry entry : entries) {
             List<RecipeIngredient> ingredients = recipeIngredientRepository
                     .findByRecipeIdOrderBySortOrderAsc(entry.getRecipeId());
-
             for (RecipeIngredient ri : ingredients) {
                 String key = groceryKey(ri);
                 aggregatedItems.merge(key,
                         new GroceryItemAggregate(ri.getName(), ri.getQuantity(), ri.getUnit(), ri.getNotes(), ri.getIngredientId(), 1),
                         this::mergeGroceryItems);
+                if (ri.getIngredientId() != null) {
+                    requiredIngredientIds.add(ri.getIngredientId());
+                }
             }
         }
+
+        List<PantryItem> pantryItems = requiredIngredientIds.isEmpty()
+                ? List.of()
+                : pantryItemRepository.findByUserIdAndIngredientIdIn(userId, requiredIngredientIds);
+
+        String countryCode = userProfileRepository.findByUserId(userId)
+                .map(profile -> profile.getCountryCode() == null ? "US" : profile.getCountryCode())
+                .orElse("US");
 
         GroceryList list = GroceryList.builder()
                 .userId(userId)
@@ -208,9 +209,7 @@ public class GroceryService {
         GroceryList list = groceryListRepository.findById(listId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", listId.toString()));
 
-        if (!list.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("GroceryList", "id", listId.toString());
-        }
+        securityUtils.verifyOwnership(list.getUserId(), userId, "GroceryList", listId.toString());
 
         groceryItemRepository.deleteByGroceryListId(listId);
         list.softDelete();

@@ -55,6 +55,7 @@ public class IngredientService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "ingredients_batch", key = "#ids")
     public List<IngredientResponse> findAllById(List<UUID> ids) {
         return ingredientRepository.findAllById(ids).stream()
                 .map(this::toResponse)

@@ -51,12 +51,12 @@ app:
     refresh-expiration: 604800000
   email:
     verification:
-      from: PlatePilote Test <no-reply@test.platepilote.com>
+      from: PlatePilote <platepilote@gmail.com>
       frontend-url: http://localhost:3000/verify-email
       expiration-hours: 24
   oauth2:
     google:
-      client-ids: test-google-client
+      client-ids: 741109389853-2568g1o2p5siocg31at1c39ndatuqv53.apps.googleusercontent.com
       jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
       issuers:
         - https://accounts.google.com

@@ -34,6 +34,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -61,4 +62,7 @@ public interface PantryItemRepository extends JpaRepository<PantryItem, UUID> {
      */
     @Query("SELECT p FROM PantryItem p WHERE p.userId = :userId AND p.deletedAt IS NULL AND LOWER(p.name) LIKE LOWER(CONCAT('%', :query, '%'))")
     List<PantryItem> searchByUserIdAndQuery(@Param("userId") UUID userId, @Param("query") String query);
+
+    @Query("SELECT p FROM PantryItem p WHERE p.userId = :userId AND p.deletedAt IS NULL AND p.ingredientId IN :ingredientIds")
+    List<PantryItem> findByUserIdAndIngredientIdIn(@Param("userId") UUID userId, @Param("ingredientIds") Set<UUID> ingredientIds);
 }

@@ -5,6 +5,7 @@ import com.platepilote.platepilote.budget.domain.entity.Budget;
 import com.platepilote.platepilote.budget.domain.repository.BudgetRepository;
 import com.platepilote.platepilote.common.dto.PagedResponse;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class BudgetService {
 
     private final BudgetRepository budgetRepository;
+    private final SecurityUtils securityUtils;
 
     @Transactional(readOnly = true)
     public PagedResponse<BudgetResponse> getUserBudgets(UUID userId, Pageable pageable) {
@@ -51,9 +53,7 @@ public class BudgetService {
         Budget budget = budgetRepository.findById(budgetId)
                 .orElseThrow(() -> new ResourceNotFoundException("Budget", "id", budgetId.toString()));
 
-        if (!budget.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("Budget", "id", budgetId.toString());
-        }
+        securityUtils.verifyOwnership(budget.getUserId(), userId, "Budget", budgetId.toString());
 
         budget.softDelete();
         budgetRepository.save(budget);
