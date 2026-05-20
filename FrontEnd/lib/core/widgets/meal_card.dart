@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme/color_tokens.dart';
-import '../../app/theme/spacing.dart';
+import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../shared/models/demo_data.dart';
 import 'app_card.dart';
@@ -45,14 +45,14 @@ class MealCard extends StatelessWidget {
                     letterSpacing: 0.6,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.micro),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   meal.title,
                   style: context.text.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.micro),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   '${meal.kcal} kcal - ${meal.minutes} mins',
                   style: context.text.bodyMedium,

@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/color_tokens.dart';
-import '../../app/theme/spacing.dart';
-import '../../core/extensions/theme_extensions.dart';
-import '../../core/widgets/app_card.dart';
-import '../../core/widgets/budget_meter.dart';
-import '../../core/widgets/loading_skeleton.dart';
-import '../../core/widgets/meal_card.dart';
-import '../../core/widgets/primary_button.dart';
-import '../../core/widgets/savings_card.dart';
+import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_spacing.dart';
+import '../../app/theme/app_radius.dart';
+import '../../app/theme/app_typography.dart';
+import '../../core/widgets/modern_components.dart';
+import '../../core/widgets/modern_animations.dart';
+import '../../core/widgets/floating_components.dart';
 import '../../shared/models/demo_data.dart';
-import '../../shared/widgets/plate_scaffold.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -40,266 +37,539 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isTablet = screenWidth >= 600;
 
-    return PlateScaffold(
-      title: 'PlatePilot',
-      child: _isLoading
-          ? ListView(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              children: const [
-                LoadingSkeleton(height: 28, width: 240),
-                SizedBox(height: AppSpacing.md),
-                LoadingSkeleton(height: 18, width: 200),
-                SizedBox(height: AppSpacing.lg),
-                LoadingSkeletonCard(),
-                SizedBox(height: AppSpacing.md),
-                LoadingSkeletonCard(),
-                SizedBox(height: AppSpacing.md),
-                LoadingSkeletonCard(),
-              ],
-            )
-          : RefreshIndicator(
-              onRefresh: _onRefresh,
-              child: ListView(
-                padding: const EdgeInsets.all(AppSpacing.md),
+    return Scaffold(
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
+      body: CustomScrollView(
+        slivers: [
+          // Floating App Bar
+          SliverToBoxAdapter(
+            child: FloatingAppBar(
+              title: Row(
                 children: [
-                  Text(
-                    'Good morning, Sarah!',
-                    style: context.text.headlineLarge?.copyWith(
-                      fontSize: isTablet ? 32 : null,
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: isDark
+                        ? AppColors.darkPrimaryContainer
+                        : AppColors.primaryContainer,
+                    child: Text(
+                      'S',
+                      style: AppTypography.labelMedium.copyWith(
+                        color: isDark
+                            ? AppColors.primaryLight
+                            : AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.xs),
+                  const SizedBox(width: AppSpacing.sm),
                   Text(
-                    'Ready to stay on track and save today?',
-                    style: context.text.bodyMedium,
+                    'PlatePilot',
+                    style: AppTypography.titleLarge.copyWith(
+                      color: isDark
+                          ? AppColors.primaryLight
+                          : AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                  const SizedBox(height: AppSpacing.lg),
-                  _StreakBar(streak: 7, mealsPlanned: 21, wasteSaved: 3),
-                  const SizedBox(height: AppSpacing.md),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final cards = [
-                        const SavingsCard(),
-                        const AppCard(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _BudgetHeader(),
-                              SizedBox(height: AppSpacing.md),
-                              BudgetMeter(
-                                progress: 0.64,
-                                caption: r'$256.00 remaining of $400.00',
-                              ),
-                            ],
-                          ),
+                ],
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.notifications_outlined),
+                  onPressed: () => context.push('/notifications'),
+                  color: isDark
+                      ? AppColors.darkOnSurfaceVariant
+                      : AppColors.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
+          
+          // Floating Search Bar
+          SliverToBoxAdapter(
+            child: FloatingSearchBar(
+              hintText: 'Search recipes, ingredients...',
+              onTap: () => context.push('/search'),
+            ),
+          ),
+          
+          // Content
+          SliverToBoxAdapter(
+            child: _isLoading
+                ? _buildLoadingState()
+                : RefreshIndicator(
+                    onRefresh: _onRefresh,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(
+                        bottom: 100, // Space for floating nav
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
                         ),
-                      ];
-                      if (constraints.maxWidth > 560) {
-                        return Row(
-                          children: cards
-                              .map(
-                                (card) => Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                      right: AppSpacing.md,
-                                    ),
-                                    child: card,
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        );
-                      }
-                      return Column(
-                        children: cards
-                            .map(
-                              (card) => Padding(
-                                padding: const EdgeInsets.only(
-                                  bottom: AppSpacing.md,
-                                ),
-                                child: card,
-                              ),
-                            )
-                            .toList(),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  AppCard(
-                    child: Column(
-                      children: [
-                        Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Text(
-                                'Your Plan for Today',
-                                style: context.text.headlineMedium,
+                            // Greeting
+                            AnimatedListItem(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Good morning, Sarah!',
+                                    style: AppTypography.displaySmall.copyWith(
+                                      color: isDark
+                                          ? AppColors.darkOnSurface
+                                          : AppColors.onSurface,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  Text(
+                                    'Ready to stay on track and save today?',
+                                    style: AppTypography.bodyMedium.copyWith(
+                                      color: isDark
+                                          ? AppColors.darkOnSurfaceVariant
+                                          : AppColors.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            TextButton(
-                              onPressed: () => context.go('/plan'),
-                              child: const Text('View Full Plan'),
+                            
+                            const SizedBox(height: AppSpacing.lg),
+                            
+                            // Stats Row
+                            AnimatedListItem(
+                              delay: 1,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: StatCard(
+                                      icon: Icons.local_fire_department,
+                                      label: 'Day streak',
+                                      value: '7',
+                                      color: AppColors.secondary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  Expanded(
+                                    child: StatCard(
+                                      icon: Icons.restaurant,
+                                      label: 'Meals',
+                                      value: '21',
+                                      color: isDark
+                                          ? AppColors.primaryLight
+                                          : AppColors.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  Expanded(
+                                    child: StatCard(
+                                      icon: Icons.recycling,
+                                      label: 'Waste saved',
+                                      value: '3',
+                                      color: AppColors.tertiary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            
+                            const SizedBox(height: AppSpacing.md),
+                            
+                            // Savings Card
+                            AnimatedListItem(
+                              delay: 2,
+                              child: ModernCard(
+                                title: 'Savings Summary',
+                                subtitle: 'Saved this month',
+                                leading: Container(
+                                  padding: const EdgeInsets.all(AppSpacing.xs),
+                                  decoration: BoxDecoration(
+                                    color: (isDark
+                                            ? AppColors.primaryLight
+                                            : AppColors.primary)
+                                        .withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.sm,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.savings,
+                                    color: isDark
+                                        ? AppColors.primaryLight
+                                        : AppColors.primary,
+                                    size: 20,
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '\$142.50',
+                                      style: AppTypography.displayMedium.copyWith(
+                                        color: isDark
+                                            ? AppColors.primaryLight
+                                            : AppColors.primary,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppSpacing.xs),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.trending_up,
+                                          color: isDark
+                                              ? AppColors.primaryLight
+                                              : AppColors.primary,
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '12% more than last month',
+                                          style: AppTypography.bodySmall.copyWith(
+                                            color: isDark
+                                                ? AppColors.primaryLight
+                                                : AppColors.primary,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            
+                            const SizedBox(height: AppSpacing.md),
+                            
+                            // Budget Card
+                            AnimatedListItem(
+                              delay: 3,
+                              child: ProgressCard(
+                                icon: Icons.account_balance_wallet,
+                                label: 'Budget Status',
+                                value: '64% Spent',
+                                progress: 0.64,
+                                maxValue: 400,
+                                color: isDark
+                                    ? AppColors.primaryLight
+                                    : AppColors.primary,
+                              ),
+                            ),
+                            
+                            const SizedBox(height: AppSpacing.md),
+                            
+                            // Today's Plan
+                            AnimatedListItem(
+                              delay: 4,
+                              child: ModernCard(
+                                title: 'Your Plan for Today',
+                                trailing: TextButton(
+                                  onPressed: () => context.push('/plan'),
+                                  child: Text(
+                                    'View Full Plan',
+                                    style: AppTypography.labelMedium.copyWith(
+                                      color: isDark
+                                          ? AppColors.primaryLight
+                                          : AppColors.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                child: Column(
+                                  children: todayMeals
+                                      .map(
+                                        (meal) => Padding(
+                                          padding: const EdgeInsets.only(
+                                            bottom: AppSpacing.xs,
+                                          ),
+                                          child: _buildMealItem(
+                                            context: context,
+                                            isDark: isDark,
+                                            meal: meal,
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                              ),
+                            ),
+                            
+                            const SizedBox(height: AppSpacing.md),
+                            
+                            // Pantry Alert
+                            AnimatedListItem(
+                              delay: 5,
+                              child: AlertCard(
+                                type: AlertType.warning,
+                                title: 'Pantry Alerts',
+                                message:
+                                    'Spinach and Greek yogurt should be used this week.',
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => context.push('/pantry'),
+                                    child: Text(
+                                      'View Pantry',
+                                      style: AppTypography.labelMedium.copyWith(
+                                        color: isDark
+                                            ? AppColors.warning
+                                            : AppColors.warning,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            
+                            const SizedBox(height: AppSpacing.md),
+                            
+                            // Quick Meal Button
+                            AnimatedListItem(
+                              delay: 6,
+                              child: AnimatedButton(
+                                onPressed: () => context.push('/quick-meal'),
+                                backgroundColor: isDark
+                                    ? AppColors.primaryLight
+                                    : AppColors.primary,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.bolt, size: 18),
+                                    const SizedBox(width: AppSpacing.sm),
+                                    Text(
+                                      'Quick Meal Mode',
+                                      style: AppTypography.labelLarge.copyWith(
+                                        color: isDark
+                                            ? AppColors.darkBackground
+                                            : Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: AppSpacing.md),
-                        ...todayMeals.map(
-                          (meal) => Padding(
-                            padding: const EdgeInsets.only(
-                              bottom: AppSpacing.xs,
-                            ),
-                            child: MealCard(
-                              meal: meal,
-                              compact: true,
-                              onTap: () => context.push('/recipe/0'),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
-                  AppCard(
-                    color: ColorTokens.error.withValues(
-                      alpha: context.isDark ? 0.16 : 0.08,
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.warning_amber,
-                          color: ColorTokens.error,
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: Text(
-                            'Spinach and Greek yogurt should be used this week.',
-                            style: context.text.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
+          ),
+        ],
+      ),
+      // Floating Navigation Bar
+      extendBody: true,
+      bottomNavigationBar: FloatingNavigationBar(
+        currentIndex: 0,
+        onDestinationSelected: (index) {
+          switch (index) {
+            case 0:
+              context.go('/home');
+              break;
+            case 1:
+              context.go('/plan');
+              break;
+            case 2:
+              context.go('/grocery');
+              break;
+            case 3:
+              context.go('/pantry');
+              break;
+            case 4:
+              context.go('/settings');
+              break;
+          }
+        },
+        destinations: const [
+          FloatingNavDestination(
+            icon: Icons.home_outlined,
+            selectedIcon: Icons.home,
+            label: 'Home',
+          ),
+          FloatingNavDestination(
+            icon: Icons.calendar_month_outlined,
+            selectedIcon: Icons.calendar_month,
+            label: 'Plan',
+          ),
+          FloatingNavDestination(
+            icon: Icons.shopping_cart_outlined,
+            selectedIcon: Icons.shopping_cart,
+            label: 'Grocery',
+          ),
+          FloatingNavDestination(
+            icon: Icons.kitchen_outlined,
+            selectedIcon: Icons.kitchen,
+            label: 'Pantry',
+          ),
+          FloatingNavDestination(
+            icon: Icons.settings_outlined,
+            selectedIcon: Icons.settings,
+            label: 'Settings',
+          ),
+        ],
+      ),
+      // Floating Action Button
+      floatingActionButton: FloatingButton(
+        onPressed: () => context.push('/quick-meal'),
+        child: const Icon(Icons.bolt),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+
+  Widget _buildLoadingState() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.lg,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const LoadingSkeleton(height: 32, width: 240),
+          const SizedBox(height: AppSpacing.xs),
+          const LoadingSkeleton(height: 16, width: 200),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.darkSurfaceContainerHigh
+                        : AppColors.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(AppRadius.card),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.darkSurfaceContainerHigh
+                        : AppColors.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(AppRadius.card),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.darkSurfaceContainerHigh
+                        : AppColors.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(AppRadius.card),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Container(
+            height: 150,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppColors.darkSurfaceContainerHigh
+                  : AppColors.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(AppRadius.card),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Container(
+            height: 120,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppColors.darkSurfaceContainerHigh
+                  : AppColors.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(AppRadius.card),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMealItem({
+    required BuildContext context,
+    required bool isDark,
+    required dynamic meal,
+  }) {
+    return GestureDetector(
+      onTap: () => context.push('/recipe/0'),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        decoration: BoxDecoration(
+          color: isDark
+              ? AppColors.darkSurfaceContainerLow
+              : AppColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.xs),
+              decoration: BoxDecoration(
+                color: meal.tint.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+              ),
+              child: Icon(
+                meal.icon,
+                color: meal.tint,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    meal.title,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: isDark
+                          ? AppColors.darkOnSurface
+                          : AppColors.onSurface,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
-                  PrimaryButton(
-                    label: 'Quick Meal Mode',
-                    icon: Icons.bolt,
-                    onPressed: () => context.push('/quick-meal'),
+                  Text(
+                    '${meal.minutes} min • ${meal.kcal} kcal',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: isDark
+                          ? AppColors.darkOnSurfaceVariant
+                          : AppColors.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
             ),
-    );
-  }
-}
-
-class _StreakBar extends StatelessWidget {
-  const _StreakBar({
-    required this.streak,
-    required this.mealsPlanned,
-    required this.wasteSaved,
-  });
-
-  final int streak;
-  final int mealsPlanned;
-  final int wasteSaved;
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final isTablet = screenWidth >= 600;
-
-    return AppCard(
-      child: Row(
-        children: [
-          _StreakStat(
-            icon: Icons.local_fire_department,
-            value: '$streak',
-            label: 'Day streak',
-            color: ColorTokens.accentAmber,
-          ),
-          if (isTablet) ...[
-            const SizedBox(width: AppSpacing.md),
-            _StreakStat(
-              icon: Icons.restaurant,
-              value: '$mealsPlanned',
-              label: 'Meals',
-              color: ColorTokens.primaryGreen,
+            Icon(
+              Icons.arrow_forward_ios,
+              color: isDark
+                  ? AppColors.darkOnSurfaceVariant
+                  : AppColors.onSurfaceVariant,
+              size: 16,
             ),
           ],
-          const SizedBox(width: AppSpacing.md),
-          _StreakStat(
-            icon: Icons.recycling,
-            value: '$wasteSaved',
-            label: 'Waste saved',
-            color: ColorTokens.accentBlue,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StreakStat extends StatelessWidget {
-  const _StreakStat({
-    required this.icon,
-    required this.value,
-    required this.label,
-    required this.color,
-  });
-
-  final IconData icon;
-  final String value;
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 22),
-          const SizedBox(height: AppSpacing.micro),
-          Text(
-            value,
-            style: context.text.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-          Text(label, style: context.text.bodyMedium),
-        ],
-      ),
-    );
-  }
-}
-
-class _BudgetHeader extends StatelessWidget {
-  const _BudgetHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Budget Status', style: context.text.labelSmall),
-              const SizedBox(height: AppSpacing.micro),
-              Text('64% Spent', style: context.text.headlineSmall),
-            ],
-          ),
         ),
-        const Icon(
-          Icons.account_balance_wallet_outlined,
-          color: ColorTokens.accentAmber,
-        ),
-      ],
+      ),
     );
   }
 }

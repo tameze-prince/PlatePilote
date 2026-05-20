@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/spacing.dart';
+import '../../app/theme/app_spacing.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 import 'subscription_provider.dart';

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../app/theme/color_tokens.dart';
-import '../../app/theme/radius.dart';
+import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
 
 class LoadingSkeleton extends StatelessWidget {
@@ -28,7 +28,7 @@ class LoadingSkeleton extends StatelessWidget {
         width: width,
         decoration: BoxDecoration(
           color: baseColor,
-          borderRadius: BorderRadius.circular(AppRadius.small),
+          borderRadius: BorderRadius.circular(AppRadius.sm),
         ),
       ),
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/theme/spacing.dart';
+import '../../app/theme/app_spacing.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 import 'notifications_provider.dart';
 

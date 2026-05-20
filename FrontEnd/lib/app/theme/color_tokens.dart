@@ -1,24 +1,58 @@
 import 'package:flutter/material.dart';
 
+import 'app_colors.dart';
+
+// Backward compatibility layer
+// All new code should use AppColors directly
 abstract final class ColorTokens {
-  static const primary = Color(0xFF006E2F);
-  static const primaryGreen = Color(0xFF22C55E);
-  static const primaryDark = Color(0xFF16A34A);
-  static const accentAmber = Color(0xFFF59E0B);
-  static const accentBlue = Color(0xFF3B82F6);
-  static const error = Color(0xFFEF4444);
-  static const background = Color(0xFFF8FAFC);
-  static const surface = Color(0xFFFFFFFF);
-  static const surfaceContainerLow = Color(0xFFEDF6EA);
-  static const surfaceContainer = Color(0xFFE8F0E4);
-  static const surfaceContainerHigh = Color(0xFFE2EBDE);
-  static const border = Color(0xFFE2E8F0);
-  static const textPrimary = Color(0xFF0F172A);
-  static const textSecondary = Color(0xFF64748B);
-  static const darkBackground = Color(0xFF0B1220);
-  static const darkSurface = Color(0xFF111827);
-  static const darkElevatedSurface = Color(0xFF1F2937);
-  static const darkBorder = Color(0xFF374151);
-  static const darkTextPrimary = Color(0xFFF9FAFB);
-  static const darkTextSecondary = Color(0xFF9CA3AF);
+  // Primary colors
+  static const primary = AppColors.primary;
+  static const primaryGreen = AppColors.primaryLight;
+  static const primaryDark = AppColors.primaryDark;
+  
+  // Accent colors
+  static const accentAmber = AppColors.secondary;
+  static const accentBlue = AppColors.tertiary;
+  
+  // Functional colors
+  static const error = AppColors.error;
+  static const success = AppColors.success;
+  static const warning = AppColors.warning;
+  static const info = AppColors.info;
+  
+  // Light theme surfaces
+  static const background = AppColors.background;
+  static const surface = AppColors.surface;
+  static const surfaceContainerLow = AppColors.surfaceContainerLow;
+  static const surfaceContainer = AppColors.surfaceContainer;
+  static const surfaceContainerHigh = AppColors.surfaceContainerHigh;
+  
+  // Light theme borders
+  static const border = AppColors.outline;
+  
+  // Light theme text
+  static const textPrimary = AppColors.onBackground;
+  static const textSecondary = AppColors.onSurfaceVariant;
+  
+  // Dark theme surfaces
+  static const darkBackground = AppColors.darkBackground;
+  static const darkSurface = AppColors.darkSurface;
+  static const darkElevatedSurface = AppColors.darkSurfaceContainerHigh;
+  
+  // Dark theme borders
+  static const darkBorder = AppColors.darkOutline;
+  
+  // Dark theme text
+  static const darkTextPrimary = AppColors.darkOnBackground;
+  static const darkTextSecondary = AppColors.darkOnSurfaceVariant;
+  
+  // Category colors
+  static const categoryProduce = AppColors.categoryProduce;
+  static const categoryProtein = AppColors.categoryProtein;
+  static const categoryDairy = AppColors.categoryDairy;
+  static const categoryPantry = AppColors.categoryPantry;
+  static const categoryBeverages = AppColors.categoryBeverages;
+  static const categorySnacks = AppColors.categorySnacks;
+  static const categoryFrozen = AppColors.categoryFrozen;
+  static const categoryOther = AppColors.categoryOther;
 }

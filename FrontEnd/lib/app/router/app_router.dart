@@ -3,20 +3,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/app_session_provider.dart';
+import '../../core/widgets/floating_components.dart';
 import '../../features/auth/login_screen.dart';
-import '../../features/budget/budget_management_screen.dart';
-import '../../features/grocery/forms/add_grocery_item_screen.dart';
 import '../../features/auth/signup_screen.dart';
+import '../../features/auth/email_verification_screen.dart';
+import '../../features/auth/forgot_password_screen.dart';
+import '../../features/budget/budget_management_screen.dart';
+import '../../features/budget/budget_analytics_screen.dart';
+import '../../features/budget/savings_tracker_screen.dart';
+import '../../features/grocery/forms/add_grocery_item_screen.dart';
+import '../../features/grocery/forms/edit_grocery_item_screen.dart';
 import '../../features/grocery/grocery_list_screen.dart';
+import '../../features/grocery/cost_breakdown_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/localization/language_settings_screen.dart';
 import '../../features/meal_details/meal_details_screen.dart';
 import '../../features/meal_plan/weekly_plan_screen.dart';
+import '../../features/meal_plan/meal_swap_screen.dart';
+import '../../features/meal_plan/plan_acceptance_screen.dart';
+import '../../features/meal_plan/meal_plan_history_screen.dart';
 import '../../features/notifications/notification_preferences_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
 import '../../features/onboarding/onboarding_flow.dart';
 import '../../features/pantry/forms/add_pantry_item_screen.dart';
+import '../../features/pantry/forms/edit_pantry_item_screen.dart';
 import '../../features/pantry/pantry_screen.dart';
+import '../../features/pantry/expiration_dashboard_screen.dart';
 import '../../features/premium/premium_upgrade_screen.dart';
 import '../../features/premium/payment_method_screen.dart';
 import '../../features/premium/subscription_management_screen.dart';
@@ -24,10 +36,12 @@ import '../../features/preferences/edit_preferences_screen.dart';
 import '../../features/quick_meal/quick_meal_screen.dart';
 import '../../features/recipe/recipe_details_screen.dart';
 import '../../features/recipes/forms/add_recipe_screen.dart';
+import '../../features/recipes/favorites_screen.dart';
 import '../../features/search/search_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/support/offline_screen.dart';
+import '../../shared/models/demo_data.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -73,6 +87,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SignupScreen(),
       ),
       GoRoute(
+        path: '/verify-email',
+        name: AppRoute.verifyEmail.name,
+        builder: (context, state) => const EmailVerificationScreen(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        name: AppRoute.forgotPassword.name,
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
         path: '/quick-meal',
         name: AppRoute.quickMeal.name,
         builder: (context, state) => const QuickMealScreen(),
@@ -88,6 +112,36 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: AppRoute.mealDetails.name,
         builder: (context, state) =>
             MealDetailsScreen(mealId: state.pathParameters['id'] ?? '0'),
+      ),
+      GoRoute(
+        path: '/meal-swap/:dayIndex/:mealType',
+        name: AppRoute.mealSwap.name,
+        builder: (context, state) {
+          final dayIndex = int.parse(state.pathParameters['dayIndex'] ?? '0');
+          final mealType = state.pathParameters['mealType'] ?? 'Dinner';
+          final currentMeal = state.extra as Meal? ?? const Meal(
+            day: '',
+            type: 'Dinner',
+            title: 'Unknown',
+            minutes: 0,
+            kcal: 0,
+            icon: Icons.restaurant,
+            tint: Color(0xFF22C55E),
+          );
+          return MealSwapScreen(
+            currentMeal: currentMeal,
+            dayIndex: dayIndex,
+            mealType: mealType,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/plan-acceptance',
+        name: AppRoute.planAcceptance.name,
+        builder: (context, state) {
+          final meals = state.extra as List<Meal>? ?? const [];
+          return PlanAcceptanceScreen(meals: meals);
+        },
       ),
       GoRoute(
         path: '/premium',
@@ -108,6 +162,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/search',
         name: AppRoute.search.name,
         builder: (context, state) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: '/favorites',
+        name: AppRoute.favorites.name,
+        builder: (context, state) => const FavoritesScreen(),
       ),
       GoRoute(
         path: '/offline',
@@ -140,9 +199,32 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const BudgetManagementScreen(),
       ),
       GoRoute(
+        path: '/budget-analytics',
+        name: AppRoute.budgetAnalytics.name,
+        builder: (context, state) => const BudgetAnalyticsScreen(),
+      ),
+      GoRoute(
+        path: '/savings-tracker',
+        name: AppRoute.savingsTracker.name,
+        builder: (context, state) => const SavingsTrackerScreen(),
+      ),
+      GoRoute(
         path: '/pantry/add',
         name: AppRoute.addPantryItem.name,
         builder: (context, state) => const AddPantryItemScreen(),
+      ),
+      GoRoute(
+        path: '/pantry/edit/:id',
+        name: AppRoute.editPantryItem.name,
+        builder: (context, state) {
+          final item = state.extra as PantryItem?;
+          return EditPantryItemScreen(item: item);
+        },
+      ),
+      GoRoute(
+        path: '/pantry/expirations',
+        name: AppRoute.pantryExpirations.name,
+        builder: (context, state) => const PantryExpirationScreen(),
       ),
       GoRoute(
         path: '/grocery/add',
@@ -150,9 +232,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AddGroceryItemScreen(),
       ),
       GoRoute(
+        path: '/grocery/edit/:id',
+        name: AppRoute.editGroceryItem.name,
+        builder: (context, state) {
+          final item = state.extra as GroceryItem?;
+          return EditGroceryItemScreen(item: item);
+        },
+      ),
+      GoRoute(
+        path: '/grocery/breakdown',
+        name: AppRoute.groceryBreakdown.name,
+        builder: (context, state) => const GroceryCostBreakdownScreen(),
+      ),
+      GoRoute(
         path: '/recipes/add',
         name: AppRoute.addRecipe.name,
         builder: (context, state) => const AddRecipeScreen(),
+      ),
+      GoRoute(
+        path: '/plan-history',
+        name: AppRoute.planHistory.name,
+        builder: (context, state) => const MealPlanHistoryScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -215,6 +315,8 @@ enum AppRoute {
   onboarding,
   login,
   signup,
+  verifyEmail,
+  forgotPassword,
   home,
   plan,
   grocery,
@@ -223,19 +325,29 @@ enum AppRoute {
   quickMeal,
   recipeDetails,
   mealDetails,
+  mealSwap,
+  planAcceptance,
   premium,
   subscription,
   paymentMethod,
   search,
+  favorites,
   offline,
   notifications,
   notificationPreferences,
   language,
   preferences,
   budget,
+  budgetAnalytics,
+  savingsTracker,
   addPantryItem,
+  editPantryItem,
+  pantryExpirations,
   addGroceryItem,
+  editGroceryItem,
+  groceryBreakdown,
   addRecipe,
+  planHistory,
 }
 
 class PlatePilotShell extends StatelessWidget {
@@ -247,36 +359,37 @@ class PlatePilotShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
+      extendBody: true,
+      bottomNavigationBar: FloatingNavigationBar(
+        currentIndex: navigationShell.currentIndex,
         onDestinationSelected: (index) => navigationShell.goBranch(
           index,
           initialLocation: index == navigationShell.currentIndex,
         ),
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
+          FloatingNavDestination(
+            icon: Icons.home_outlined,
+            selectedIcon: Icons.home,
             label: 'Home',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.calendar_month_outlined),
-            selectedIcon: Icon(Icons.calendar_month),
+          FloatingNavDestination(
+            icon: Icons.calendar_month_outlined,
+            selectedIcon: Icons.calendar_month,
             label: 'Plan',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.shopping_cart_outlined),
-            selectedIcon: Icon(Icons.shopping_cart),
+          FloatingNavDestination(
+            icon: Icons.shopping_cart_outlined,
+            selectedIcon: Icons.shopping_cart,
             label: 'Grocery',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.kitchen_outlined),
-            selectedIcon: Icon(Icons.kitchen),
+          FloatingNavDestination(
+            icon: Icons.kitchen_outlined,
+            selectedIcon: Icons.kitchen,
             label: 'Pantry',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
+          FloatingNavDestination(
+            icon: Icons.settings_outlined,
+            selectedIcon: Icons.settings,
             label: 'Settings',
           ),
         ],

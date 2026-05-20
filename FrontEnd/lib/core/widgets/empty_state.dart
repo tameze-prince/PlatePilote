@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme/color_tokens.dart';
-import '../../app/theme/spacing.dart';
+import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 
 class EmptyState extends StatelessWidget {

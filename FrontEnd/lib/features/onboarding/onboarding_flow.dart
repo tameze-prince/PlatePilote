@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/color_tokens.dart';
-import '../../app/theme/spacing.dart';
+import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../core/providers/app_session_provider.dart';
 import '../../core/widgets/app_card.dart';

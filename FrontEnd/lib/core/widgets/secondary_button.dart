@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/radius.dart';
-import '../../app/theme/spacing.dart';
+import '../../app/theme/app_radius.dart';
+import '../../app/theme/app_spacing.dart';
 
 class SecondaryButton extends StatelessWidget {
   const SecondaryButton({
