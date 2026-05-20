@@ -28,7 +28,7 @@ CREATE INDEX IF NOT EXISTS idx_recipe_user_active ON recipes(user_id, deleted_at
 CREATE INDEX IF NOT EXISTS idx_budget_user_active ON budgets(user_id, deleted_at);
 
 -- Notifications: filtered by user + read status + not deleted
-CREATE INDEX IF NOT EXISTS idx_notification_user_read ON notifications(user_id, read, deleted_at);
+CREATE INDEX IF NOT EXISTS idx_notification_user_read ON notifications(user_id, read);
 
 -- Grocery lists: filtered by user + not deleted
 CREATE INDEX IF NOT EXISTS idx_grocery_list_user ON grocery_lists(user_id, deleted_at);
