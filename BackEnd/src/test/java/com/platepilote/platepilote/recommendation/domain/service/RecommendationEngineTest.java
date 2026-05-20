@@ -151,10 +151,8 @@ class RecommendationEngineTest {
                 .build()));
         when(recipeRepository.findByIsPublicTrueAndDeletedAtIsNull(any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(unsafe, safe)));
-        when(recipeIngredientRepository.findByRecipeIdOrderBySortOrderAsc(unsafe.getId()))
-                .thenReturn(List.of(ingredient(unsafe, "peanut butter")));
-        when(recipeIngredientRepository.findByRecipeIdOrderBySortOrderAsc(safe.getId()))
-                .thenReturn(List.of(ingredient(safe, "black beans")));
+        when(recipeIngredientRepository.findByRecipeIdIn(any(List.class)))
+                .thenReturn(List.of(ingredient(unsafe, "peanut butter"), ingredient(safe, "black beans")));
 
         List<RecommendationEngine.RecommendationResult> results = engine.getRecommendations(userId, 10);
 

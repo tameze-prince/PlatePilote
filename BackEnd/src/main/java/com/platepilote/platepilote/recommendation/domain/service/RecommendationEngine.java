@@ -226,7 +226,7 @@ public class RecommendationEngine {
 
         Map<UUID, List<String>> ingredientAllergenMap = new HashMap<>();
         for (IngredientAllergen ia : allAllergens) {
-            ingredientAllergenMap.computeIfAbsent(ia.getIngredient().getId(), k -> new ArrayList<>())
+            ingredientAllergenMap.computeIfAbsent(ia.getIngredientId(), k -> new ArrayList<>())
                     .add(ia.getAllergenGroup());
         }
 

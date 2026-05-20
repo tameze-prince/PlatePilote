@@ -1,5 +1,6 @@
 package com.platepilote.platepilote.grocery.application.service;
 
+import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.grocery.domain.entity.GroceryItem;
 import com.platepilote.platepilote.grocery.domain.entity.GroceryList;
 import com.platepilote.platepilote.grocery.domain.repository.GroceryItemRepository;
@@ -28,6 +29,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,6 +47,7 @@ class GroceryServiceTest {
     @Mock private PantryItemRepository pantryItemRepository;
     @Mock private PricingService pricingService;
     @Mock private UserProfileRepository userProfileRepository;
+    @Mock private SecurityUtils securityUtils;
 
     private GroceryService groceryService;
 
@@ -52,7 +55,7 @@ class GroceryServiceTest {
     void setUp() {
         groceryService = new GroceryService(groceryListRepository, groceryItemRepository, mealPlanRepository,
                 mealPlanEntryRepository, recipeIngredientRepository, pantryItemRepository, pricingService,
-                userProfileRepository);
+                userProfileRepository, securityUtils);
         when(groceryListRepository.save(any(GroceryList.class))).thenAnswer(invocation -> {
             GroceryList list = invocation.getArgument(0);
             list.setId(UUID.randomUUID());
@@ -76,8 +79,8 @@ class GroceryServiceTest {
                 .thenReturn(List.of(ingredient("Flour", "kg", "1", flourId)));
         when(recipeIngredientRepository.findByRecipeIdOrderBySortOrderAsc(recipeTwo))
                 .thenReturn(List.of(ingredient("All-purpose flour", "g", "500", flourId)));
-        when(pantryItemRepository.findByUserIdAndDeletedAtIsNull(any(), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of(pantry("Flour", "g", "250", flourId))));
+        when(pantryItemRepository.findByUserIdAndIngredientIdIn(any(), any(Set.class)))
+                .thenReturn(List.of(pantry("Flour", "g", "250", flourId)));
         when(pricingService.getLatestPricePerUnit(flourId, "US")).thenReturn(Optional.of(new BigDecimal("2.00")));
 
         groceryService.generateFromMealPlan(userId, mealPlanId);
@@ -102,8 +105,8 @@ class GroceryServiceTest {
         when(mealPlanEntryRepository.findByMealPlanId(mealPlanId)).thenReturn(List.of(entry(mealPlanId, recipeId)));
         when(recipeIngredientRepository.findByRecipeIdOrderBySortOrderAsc(recipeId))
                 .thenReturn(List.of(ingredient("Tomatoes", "g", "500", ingredientId)));
-        when(pantryItemRepository.findByUserIdAndDeletedAtIsNull(any(), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of(pantry("Tomatoes", "ml", "240", ingredientId))));
+        when(pantryItemRepository.findByUserIdAndIngredientIdIn(any(), any(Set.class)))
+                .thenReturn(List.of(pantry("Tomatoes", "ml", "240", ingredientId)));
         when(pricingService.getLatestPricePerUnit(ingredientId, "US")).thenReturn(Optional.empty());
 
         groceryService.generateFromMealPlan(userId, mealPlanId);

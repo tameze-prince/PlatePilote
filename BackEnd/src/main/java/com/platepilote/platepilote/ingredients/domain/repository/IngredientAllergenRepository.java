@@ -13,6 +13,6 @@ public interface IngredientAllergenRepository extends JpaRepository<IngredientAl
 
     boolean existsByIngredientIdAndAllergenGroupIgnoreCase(UUID ingredientId, String allergenGroup);
 
-    @Query("SELECT ia FROM IngredientAllergen ia WHERE ia.ingredient.id IN :ingredientIds")
+    @Query("SELECT ia FROM IngredientAllergen ia WHERE ia.ingredientId IN :ingredientIds")
     List<IngredientAllergen> findByIngredientIdIn(@Param("ingredientIds") Set<UUID> ingredientIds);
 }
