@@ -33,12 +33,13 @@ import '../../features/premium/premium_upgrade_screen.dart';
 import '../../features/premium/payment_method_screen.dart';
 import '../../features/premium/subscription_management_screen.dart';
 import '../../features/preferences/edit_preferences_screen.dart';
+import '../../features/preferences/food_preferences_screen.dart';
 import '../../features/quick_meal/quick_meal_screen.dart';
 import '../../features/recipe/recipe_details_screen.dart';
 import '../../features/recipes/forms/add_recipe_screen.dart';
 import '../../features/recipes/favorites_screen.dart';
 import '../../features/search/search_screen.dart';
-import '../../features/settings/settings_screen.dart';
+import '../../features/profile/profile_screen.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/support/offline_screen.dart';
 import '../../shared/models/demo_data.dart';
@@ -199,6 +200,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const EditPreferencesScreen(),
       ),
       GoRoute(
+        path: '/food-preferences',
+        name: AppRoute.foodPreferences.name,
+        builder: (context, state) => const FoodPreferencesScreen(),
+      ),
+      GoRoute(
         path: '/budget',
         name: AppRoute.budget.name,
         builder: (context, state) => const BudgetManagementScreen(),
@@ -303,9 +309,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/settings',
-                name: AppRoute.settings.name,
-                builder: (context, state) => const SettingsScreen(),
+                path: '/profile',
+                name: AppRoute.profile.name,
+                builder: (context, state) => const ProfileScreen(),
               ),
             ],
           ),
@@ -327,6 +333,8 @@ enum AppRoute {
   grocery,
   pantry,
   settings,
+  profile,
+  foodPreferences,
   quickMeal,
   recipeDetails,
   mealDetails,
@@ -393,9 +401,9 @@ class PlatePilotShell extends StatelessWidget {
             label: 'Pantry',
           ),
           FloatingNavDestination(
-            icon: Icons.settings_outlined,
-            selectedIcon: Icons.settings,
-            label: 'Settings',
+            icon: Icons.person_outline,
+            selectedIcon: Icons.person,
+            label: 'Profile',
           ),
         ],
       ),

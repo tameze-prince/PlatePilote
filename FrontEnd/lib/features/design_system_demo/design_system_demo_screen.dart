@@ -15,8 +15,7 @@ class DesignSystemDemoScreen extends StatefulWidget {
   const DesignSystemDemoScreen({super.key});
 
   @override
-  State<DesignSystemDemoScreen> createState() =>
-      _DesignSystemDemoScreenState();
+  State<DesignSystemDemoScreen> createState() => _DesignSystemDemoScreenState();
 }
 
 class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
@@ -26,7 +25,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Scaffold(
       appBar: ModernAppBar(
         title: Text(
@@ -62,44 +61,44 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
             _buildSectionTitle('Color Palette'),
             const SizedBox(height: AppSpacing.md),
             _buildColorPalette(),
-            
+
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Typography
             _buildSectionTitle('Typography'),
             const SizedBox(height: AppSpacing.md),
             _buildTypographyDemo(),
-            
+
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Cards
             _buildSectionTitle('Cards'),
             const SizedBox(height: AppSpacing.md),
             _buildCardsDemo(),
-            
+
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Buttons
             _buildSectionTitle('Buttons'),
             const SizedBox(height: AppSpacing.md),
             _buildButtonsDemo(),
-            
+
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Progress indicators
             _buildSectionTitle('Progress Indicators'),
             const SizedBox(height: AppSpacing.md),
             _buildProgressDemo(),
-            
+
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Alerts
             _buildSectionTitle('Alerts'),
             const SizedBox(height: AppSpacing.md),
             _buildAlertsDemo(),
-            
+
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Empty state
             _buildSectionTitle('Empty State'),
             const SizedBox(height: AppSpacing.md),
@@ -110,9 +109,9 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
               actionLabel: 'Clear Filters',
               onAction: () {},
             ),
-            
+
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Loading skeleton
             _buildSectionTitle('Loading Skeleton'),
             const SizedBox(height: AppSpacing.md),
@@ -126,7 +125,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
   Widget _buildSectionTitle(String title) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Text(
       title,
       style: AppTypography.headlineSmall.copyWith(
@@ -139,13 +138,19 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
   Widget _buildColorPalette() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Wrap(
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,
       children: [
-        _buildColorChip('Primary', isDark ? AppColors.primaryLight : AppColors.primary),
-        _buildColorChip('Secondary', isDark ? AppColors.secondaryLight : AppColors.secondary),
+        _buildColorChip(
+          'Primary',
+          isDark ? AppColors.primaryLight : AppColors.primary,
+        ),
+        _buildColorChip(
+          'Secondary',
+          isDark ? AppColors.secondaryLight : AppColors.secondary,
+        ),
         _buildColorChip('Tertiary', AppColors.tertiary),
         _buildColorChip('Success', AppColors.success),
         _buildColorChip('Warning', AppColors.warning),
@@ -158,7 +163,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
   Widget _buildColorChip(String label, Color color) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -181,69 +186,120 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
   Widget _buildTypographyDemo() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Display Large', style: AppTypography.displayLarge.copyWith(
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        )),
+        Text(
+          'Display Large',
+          style: AppTypography.displayLarge.copyWith(
+            color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Display Medium', style: AppTypography.displayMedium.copyWith(
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        )),
+        Text(
+          'Display Medium',
+          style: AppTypography.displayMedium.copyWith(
+            color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Display Small', style: AppTypography.displaySmall.copyWith(
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        )),
+        Text(
+          'Display Small',
+          style: AppTypography.displaySmall.copyWith(
+            color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Headline Large', style: AppTypography.headlineLarge.copyWith(
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        )),
+        Text(
+          'Headline Large',
+          style: AppTypography.headlineLarge.copyWith(
+            color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Headline Medium', style: AppTypography.headlineMedium.copyWith(
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        )),
+        Text(
+          'Headline Medium',
+          style: AppTypography.headlineMedium.copyWith(
+            color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Headline Small', style: AppTypography.headlineSmall.copyWith(
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        )),
+        Text(
+          'Headline Small',
+          style: AppTypography.headlineSmall.copyWith(
+            color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Title Large', style: AppTypography.titleLarge.copyWith(
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        )),
+        Text(
+          'Title Large',
+          style: AppTypography.titleLarge.copyWith(
+            color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Title Medium', style: AppTypography.titleMedium.copyWith(
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        )),
+        Text(
+          'Title Medium',
+          style: AppTypography.titleMedium.copyWith(
+            color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Title Small', style: AppTypography.titleSmall.copyWith(
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        )),
+        Text(
+          'Title Small',
+          style: AppTypography.titleSmall.copyWith(
+            color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Body Large', style: AppTypography.bodyLarge.copyWith(
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        )),
+        Text(
+          'Body Large',
+          style: AppTypography.bodyLarge.copyWith(
+            color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Body Medium', style: AppTypography.bodyMedium.copyWith(
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        )),
+        Text(
+          'Body Medium',
+          style: AppTypography.bodyMedium.copyWith(
+            color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Body Small', style: AppTypography.bodySmall.copyWith(
-          color: isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant,
-        )),
+        Text(
+          'Body Small',
+          style: AppTypography.bodySmall.copyWith(
+            color: isDark
+                ? AppColors.darkOnSurfaceVariant
+                : AppColors.onSurfaceVariant,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Label Large', style: AppTypography.labelLarge.copyWith(
-          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-        )),
+        Text(
+          'Label Large',
+          style: AppTypography.labelLarge.copyWith(
+            color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Label Medium', style: AppTypography.labelMedium.copyWith(
-          color: isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant,
-        )),
+        Text(
+          'Label Medium',
+          style: AppTypography.labelMedium.copyWith(
+            color: isDark
+                ? AppColors.darkOnSurfaceVariant
+                : AppColors.onSurfaceVariant,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
-        Text('Label Small', style: AppTypography.labelSmall.copyWith(
-          color: isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant,
-        )),
+        Text(
+          'Label Small',
+          style: AppTypography.labelSmall.copyWith(
+            color: isDark
+                ? AppColors.darkOnSurfaceVariant
+                : AppColors.onSurfaceVariant,
+          ),
+        ),
       ],
     );
   }
@@ -251,7 +307,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
   Widget _buildCardsDemo() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Column(
       children: [
         ModernCard(
@@ -330,10 +386,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
   Widget _buildProgressDemo() {
     return Column(
       children: [
-        AnimatedProgressIndicator(
-          value: 0.64,
-          minHeight: 8,
-        ),
+        AnimatedProgressIndicator(value: 0.64, minHeight: 8),
         const SizedBox(height: AppSpacing.md),
         AnimatedProgressIndicator(
           value: 0.32,
@@ -369,12 +422,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
           type: AlertType.error,
           title: 'Error',
           message: 'Failed to sync with server. Please try again',
-          actions: [
-            TextButton(
-              onPressed: () {},
-              child: const Text('Retry'),
-            ),
-          ],
+          actions: [TextButton(onPressed: () {}, child: const Text('Retry'))],
         ),
         const SizedBox(height: AppSpacing.md),
         AlertCard(
@@ -401,15 +449,9 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const LoadingSkeleton(
-                    height: 16,
-                    width: double.infinity,
-                  ),
+                  const LoadingSkeleton(height: 16, width: double.infinity),
                   const SizedBox(height: AppSpacing.xs),
-                  const LoadingSkeleton(
-                    height: 12,
-                    width: 120,
-                  ),
+                  const LoadingSkeleton(height: 12, width: 120),
                 ],
               ),
             ),

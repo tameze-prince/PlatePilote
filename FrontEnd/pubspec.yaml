@@ -65,42 +65,42 @@ flutter:
 
   uses-material-design: true
 
-  assets:
-    - stitch_smart_meal_copilot/
-    - stitch_smart_meal_copilot/add_to_grocery_list_1/
-    - stitch_smart_meal_copilot/add_to_grocery_list_2/
-    - stitch_smart_meal_copilot/add_to_pantry_1/
-    - stitch_smart_meal_copilot/add_to_pantry_2/
-    - stitch_smart_meal_copilot/authentication_1/
-    - stitch_smart_meal_copilot/authentication_2/
-    - stitch_smart_meal_copilot/dashboard_home_1/
-    - stitch_smart_meal_copilot/dashboard_home_2/
-    - stitch_smart_meal_copilot/grocery_list_1/
-    - stitch_smart_meal_copilot/grocery_list_2/
-    - stitch_smart_meal_copilot/onboarding_constraints_1/
-    - stitch_smart_meal_copilot/onboarding_constraints_2/
-    - stitch_smart_meal_copilot/onboarding_flow/
-    - stitch_smart_meal_copilot/onboarding_goals_1/
-    - stitch_smart_meal_copilot/onboarding_goals_2/
-    - stitch_smart_meal_copilot/onboarding_household_setup_1/
-    - stitch_smart_meal_copilot/onboarding_household_setup_2/
-    - stitch_smart_meal_copilot/pantry_management_1/
-    - stitch_smart_meal_copilot/pantry_management_2/
-    - stitch_smart_meal_copilot/premium_upgrade_1/
-    - stitch_smart_meal_copilot/premium_upgrade_2/
-    - stitch_smart_meal_copilot/premium_upgrade_3/
-    - stitch_smart_meal_copilot/quick_meal_mode_1/
-    - stitch_smart_meal_copilot/quick_meal_mode_2/
-    - stitch_smart_meal_copilot/recipe_details_1/
-    - stitch_smart_meal_copilot/recipe_details_2/
-    - stitch_smart_meal_copilot/settings_1/
-    - stitch_smart_meal_copilot/settings_2/
-    - stitch_smart_meal_copilot/splash_screen_1/
-    - stitch_smart_meal_copilot/splash_screen_2/
-    - stitch_smart_meal_copilot/splash_screen_3/
-    - stitch_smart_meal_copilot/weekly_meal_plan/
-    - stitch_smart_meal_copilot/weekly_meal_plan_updated_1/
-    - stitch_smart_meal_copilot/weekly_meal_plan_updated_2/
+  # assets:
+  #   - stitch_smart_meal_copilot/
+  #   - stitch_smart_meal_copilot/add_to_grocery_list_1/
+  #   - stitch_smart_meal_copilot/add_to_grocery_list_2/
+  #   - stitch_smart_meal_copilot/add_to_pantry_1/
+  #   - stitch_smart_meal_copilot/add_to_pantry_2/
+  #   - stitch_smart_meal_copilot/authentication_1/
+  #   - stitch_smart_meal_copilot/authentication_2/
+  #   - stitch_smart_meal_copilot/dashboard_home_1/
+  #   - stitch_smart_meal_copilot/dashboard_home_2/
+  #   - stitch_smart_meal_copilot/grocery_list_1/
+  #   - stitch_smart_meal_copilot/grocery_list_2/
+  #   - stitch_smart_meal_copilot/onboarding_constraints_1/
+  #   - stitch_smart_meal_copilot/onboarding_constraints_2/
+  #   - stitch_smart_meal_copilot/onboarding_flow/
+  #   - stitch_smart_meal_copilot/onboarding_goals_1/
+  #   - stitch_smart_meal_copilot/onboarding_goals_2/
+  #   - stitch_smart_meal_copilot/onboarding_household_setup_1/
+  #   - stitch_smart_meal_copilot/onboarding_household_setup_2/
+  #   - stitch_smart_meal_copilot/pantry_management_1/
+  #   - stitch_smart_meal_copilot/pantry_management_2/
+  #   - stitch_smart_meal_copilot/premium_upgrade_1/
+  #   - stitch_smart_meal_copilot/premium_upgrade_2/
+  #   - stitch_smart_meal_copilot/premium_upgrade_3/
+  #   - stitch_smart_meal_copilot/quick_meal_mode_1/
+  #   - stitch_smart_meal_copilot/quick_meal_mode_2/
+  #   - stitch_smart_meal_copilot/recipe_details_1/
+  #   - stitch_smart_meal_copilot/recipe_details_2/
+  #   - stitch_smart_meal_copilot/settings_1/
+  #   - stitch_smart_meal_copilot/settings_2/
+  #   - stitch_smart_meal_copilot/splash_screen_1/
+  #   - stitch_smart_meal_copilot/splash_screen_2/
+  #   - stitch_smart_meal_copilot/splash_screen_3/
+  #   - stitch_smart_meal_copilot/weekly_meal_plan/
+  #   - stitch_smart_meal_copilot/weekly_meal_plan_updated_1/
+  #   - stitch_smart_meal_copilot/weekly_meal_plan_updated_2/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

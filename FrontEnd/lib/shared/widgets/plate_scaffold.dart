@@ -25,6 +25,7 @@ class PlateScaffold extends StatelessWidget {
       body: PremiumBackground(
         safeArea: false,
         child: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               FloatingHeader(

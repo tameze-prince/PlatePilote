@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -35,6 +36,13 @@ class _SearchScreenState extends State<SearchScreen> {
           // Floating App Bar
           SliverToBoxAdapter(
             child: FloatingAppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => context.pop(),
+                color: isDark
+                    ? AppColors.darkOnSurfaceVariant
+                    : AppColors.onSurfaceVariant,
+              ),
               title: Text(
                 'Search',
                 style: AppTypography.titleLarge.copyWith(

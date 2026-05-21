@@ -74,6 +74,27 @@ class PremiumTheme {
     ];
   }
 
+  static List<BoxShadow> navbarShadow(BuildContext context) {
+    final dark = isDark(context);
+    return [
+      BoxShadow(
+        color: Colors.black.withOpacity(dark ? 0.35 : 0.14),
+        blurRadius: 40,
+        offset: const Offset(0, 12),
+      ),
+      BoxShadow(
+        color: Colors.black.withOpacity(dark ? 0.18 : 0.08),
+        blurRadius: 12,
+        offset: const Offset(0, 4),
+      ),
+      BoxShadow(
+        color: AppColors.primaryAccentGreen.withOpacity(dark ? 0.15 : 0.08),
+        blurRadius: 20,
+        spreadRadius: -2,
+      ),
+    ];
+  }
+
   static List<BoxShadow> glow(BuildContext context, {Color? color}) => [
         BoxShadow(
           color: (color ?? AppColors.primaryAccentGreen).withOpacity(
@@ -327,6 +348,7 @@ class _PressableState extends State<_Pressable> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: widget.onTap,
+      behavior: HitTestBehavior.opaque,
       onTapDown: widget.onTap == null ? null : (_) => setState(() => _pressed = true),
       onTapUp: widget.onTap == null ? null : (_) => setState(() => _pressed = false),
       onTapCancel: widget.onTap == null ? null : () => setState(() => _pressed = false),
@@ -586,6 +608,7 @@ class SelectableGlassCard extends StatelessWidget {
             selected ? PremiumTheme.glow(context) : PremiumTheme.softShadow(context),
         child: GestureDetector(
           onTap: onTap,
+          behavior: HitTestBehavior.opaque,
           child: Padding(
             padding: padding,
             child: IconTheme(
@@ -727,6 +750,48 @@ class FloatingHeader extends StatelessWidget {
   }
 }
 
+class GlassNavigationContainer extends StatelessWidget {
+  const GlassNavigationContainer({
+    required this.child,
+    this.height = 74,
+    super.key,
+  });
+
+  final Widget child;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppRadius.full),
+        boxShadow: PremiumTheme.navbarShadow(context),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.full),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+          child: Container(
+            decoration: BoxDecoration(
+              color: PremiumTheme.isDark(context)
+                  ? Colors.white.withOpacity(0.08)
+                  : Colors.white.withOpacity(0.70),
+              borderRadius: BorderRadius.circular(AppRadius.full),
+              border: Border.all(
+                color: PremiumTheme.isDark(context)
+                    ? Colors.white.withOpacity(0.08)
+                    : Colors.white.withOpacity(0.85),
+              ),
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class FloatingBottomNavigation extends StatelessWidget {
   const FloatingBottomNavigation({
     required this.currentIndex,
@@ -741,38 +806,51 @@ class FloatingBottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.md,
-          0,
-          AppSpacing.md,
-          AppSpacing.md,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Flexible(
-              child: GlassContainer(
-                borderRadius: AppRadius.full,
-                blurSigma: 30,
-                elevated: true,
-                padding: const EdgeInsets.all(6),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (final entry in destinations.indexed)
-                      _FloatingNavItem(
-                        destination: entry.$2,
-                        selected: entry.$1 == currentIndex,
-                        onTap: () => onDestinationSelected(entry.$1),
-                      ),
-                  ],
+    return RepaintBoundary(
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            0,
+            AppSpacing.lg,
+            AppSpacing.lg,
+          ),
+          child: SizedBox(
+            height: 80,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 74,
+                  child: const GlassNavigationContainer(
+                    height: 74,
+                    child: SizedBox.expand(),
+                  ),
                 ),
-              ),
+                Positioned.fill(
+                  child: Row(
+                    children: [
+                      for (final entry in destinations.indexed)
+                        Expanded(
+                          child: Center(
+                            child: _FloatingNavItem(
+                              destination: entry.$2,
+                              selected: entry.$1 == currentIndex,
+                              onTap: () =>
+                                  onDestinationSelected(entry.$1),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -791,7 +869,7 @@ class FloatingBottomDestination {
   final IconData? selectedIcon;
 }
 
-class _FloatingNavItem extends StatelessWidget {
+class _FloatingNavItem extends StatefulWidget {
   const _FloatingNavItem({
     required this.destination,
     required this.selected,
@@ -803,56 +881,89 @@ class _FloatingNavItem extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_FloatingNavItem> createState() => _FloatingNavItemState();
+}
+
+class _FloatingNavItemState extends State<_FloatingNavItem> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final selectedForeground =
         PremiumTheme.isDark(context) ? AppColors.darkBackground : Colors.white;
-    final color = selected
+    final color = widget.selected
         ? selectedForeground
         : PremiumTheme.textSecondary(context).withOpacity(0.78);
 
     return Tooltip(
-      message: destination.label,
+      message: widget.destination.label,
       child: Semantics(
         button: true,
-        selected: selected,
-        label: destination.label,
+        selected: widget.selected,
+        label: widget.destination.label,
         child: GestureDetector(
-          onTap: onTap,
-          child: AnimatedContainer(
+          onTap: widget.onTap,
+          onTapDown: (_) => setState(() => _pressed = true),
+          onTapUp: (_) => setState(() => _pressed = false),
+          onTapCancel: () => setState(() => _pressed = false),
+          child: AnimatedSlide(
             duration: AppAnimations.normal,
             curve: Curves.easeOutCubic,
-            constraints: const BoxConstraints(minWidth: 58, minHeight: 54),
-            padding: EdgeInsets.symmetric(
-              horizontal: selected ? AppSpacing.sm : AppSpacing.xs,
-              vertical: AppSpacing.xs,
-            ),
-            decoration: BoxDecoration(
-              color:
-                  selected ? AppColors.primaryAccentGreen : Colors.transparent,
-              borderRadius: BorderRadius.circular(AppRadius.full),
-              boxShadow: selected ? PremiumTheme.glow(context) : null,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  selected
-                      ? destination.selectedIcon ?? destination.icon
-                      : destination.icon,
-                  color: color,
-                  size: 22,
+            offset: widget.selected ? const Offset(0, -0.10) : Offset.zero,
+            child: AnimatedScale(
+              duration: AppAnimations.normal,
+              curve: Curves.easeOutCubic,
+              scale: _pressed ? 0.92 : (widget.selected ? 1.0 : 1.0),
+              child: AnimatedContainer(
+                duration: AppAnimations.normal,
+                curve: Curves.easeOutCubic,
+                width: widget.selected ? 64 : 52,
+                height: widget.selected ? 64 : 52,
+                decoration: BoxDecoration(
+                  color: widget.selected
+                      ? AppColors.primaryAccentGreen
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                  boxShadow: widget.selected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.primaryAccentGreen
+                                .withOpacity(0.35),
+                            blurRadius: 24,
+                            spreadRadius: 0,
+                          ),
+                        ]
+                      : null,
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  destination.label,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: color,
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      widget.selected
+                          ? widget.destination.selectedIcon ??
+                              widget.destination.icon
+                          : widget.destination.icon,
+                      color: color,
+                      size: widget.selected ? 24 : 22,
+                    ),
+                    if (widget.selected)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          widget.destination.label,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: color,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 9,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
