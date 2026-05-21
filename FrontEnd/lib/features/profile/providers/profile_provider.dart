@@ -1,59 +1,133 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/providers/preferences_provider.dart';
+import '../../../core/repositories/profile_repository.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class UserProfile {
   const UserProfile({
-    this.displayName = 'Sarah Parker',
-    this.email = 'sarah.parker@example.com',
-    this.height,
-    this.weight,
-    this.age,
+    this.displayName = '',
+    this.email = '',
+    this.heightCm,
+    this.weightKg,
+    this.dateOfBirth,
     this.gender,
+    this.activityLevel,
+    this.countryCode = 'US',
+    this.currencyCode = 'USD',
+    this.locale = 'en-US',
+    this.cookingSkill,
+    this.householdSize,
+    this.healthGoals,
   });
 
   final String displayName;
   final String email;
-  final double? height;
-  final double? weight;
-  final int? age;
+  final double? heightCm;
+  final double? weightKg;
+  final String? dateOfBirth;
   final String? gender;
+  final String? activityLevel;
+  final String countryCode;
+  final String currencyCode;
+  final String locale;
+  final String? cookingSkill;
+  final int? householdSize;
+  final String? healthGoals;
+
+  int? get age {
+    if (dateOfBirth == null) return null;
+    try {
+      final date = DateTime.parse(dateOfBirth!);
+      final now = DateTime.now();
+      int age = now.year - date.year;
+      if (now.month < date.month ||
+          (now.month == date.month && now.day < date.day)) {
+        age--;
+      }
+      return age;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  int get completeness {
+    int score = 0;
+    if (gender != null) score++;
+    if (heightCm != null) score++;
+    if (weightKg != null) score++;
+    if (dateOfBirth != null) score++;
+    if (activityLevel != null) score++;
+    if (cookingSkill != null) score++;
+    if (householdSize != null) score++;
+    if (healthGoals != null && healthGoals!.isNotEmpty) score++;
+    return score;
+  }
 
   UserProfile copyWith({
     String? displayName,
     String? email,
-    double? height,
-    double? weight,
-    int? age,
+    double? heightCm,
+    double? weightKg,
+    String? dateOfBirth,
     String? gender,
+    String? activityLevel,
+    String? countryCode,
+    String? currencyCode,
+    String? locale,
+    String? cookingSkill,
+    int? householdSize,
+    String? healthGoals,
   }) {
     return UserProfile(
       displayName: displayName ?? this.displayName,
       email: email ?? this.email,
-      height: height ?? this.height,
-      weight: weight ?? this.weight,
-      age: age ?? this.age,
+      heightCm: heightCm ?? this.heightCm,
+      weightKg: weightKg ?? this.weightKg,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       gender: gender ?? this.gender,
+      activityLevel: activityLevel ?? this.activityLevel,
+      countryCode: countryCode ?? this.countryCode,
+      currencyCode: currencyCode ?? this.currencyCode,
+      locale: locale ?? this.locale,
+      cookingSkill: cookingSkill ?? this.cookingSkill,
+      householdSize: householdSize ?? this.householdSize,
+      healthGoals: healthGoals ?? this.healthGoals,
     );
   }
 
   Map<String, dynamic> toJson() => {
         'displayName': displayName,
         'email': email,
-        'height': height,
-        'weight': weight,
-        'age': age,
+        'heightCm': heightCm,
+        'weightKg': weightKg,
+        'dateOfBirth': dateOfBirth,
         'gender': gender,
+        'activityLevel': activityLevel,
+        'countryCode': countryCode,
+        'currencyCode': currencyCode,
+        'locale': locale,
+        'cookingSkill': cookingSkill,
+        'householdSize': householdSize,
+        'healthGoals': healthGoals,
       };
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
-      displayName: json['displayName'] as String? ?? 'Sarah Parker',
-      email: json['email'] as String? ?? 'sarah.parker@example.com',
-      height: (json['height'] as num?)?.toDouble(),
-      weight: (json['weight'] as num?)?.toDouble(),
-      age: json['age'] as int?,
+      displayName: json['displayName'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      heightCm: (json['heightCm'] as num?)?.toDouble(),
+      weightKg: (json['weightKg'] as num?)?.toDouble(),
+      dateOfBirth: json['dateOfBirth'] as String?,
       gender: json['gender'] as String?,
+      activityLevel: json['activityLevel'] as String?,
+      countryCode: json['countryCode'] as String? ?? 'US',
+      currencyCode: json['currencyCode'] as String? ?? 'USD',
+      locale: json['locale'] as String? ?? 'en-US',
+      cookingSkill: json['cookingSkill'] as String?,
+      householdSize: json['householdSize'] as int?,
+      healthGoals: json['healthGoals'] as String?,
     );
   }
 }
@@ -73,34 +147,60 @@ class ProfileNotifier extends Notifier<UserProfile> {
     return const UserProfile();
   }
 
-  Future<void> setDisplayName(String value) async {
-    state = state.copyWith(displayName: value);
-    await _persist();
+  Future<void> loadFromApi() async {
+    try {
+      final repo = ref.read(profileRepositoryProvider);
+      final apiProfile = await repo.getProfile();
+      final authState = ref.read(authProvider);
+      state = UserProfile(
+        displayName: _buildDisplayName(apiProfile, authState.name),
+        email: authState.email ?? '',
+        heightCm: (apiProfile['heightCm'] as num?)?.toDouble(),
+        weightKg: (apiProfile['weightKg'] as num?)?.toDouble(),
+        dateOfBirth: apiProfile['dateOfBirth'] as String?,
+        gender: apiProfile['gender'] as String?,
+        activityLevel: apiProfile['activityLevel'] as String?,
+        countryCode: apiProfile['countryCode'] as String? ?? 'US',
+        currencyCode: apiProfile['currencyCode'] as String? ?? 'USD',
+        locale: apiProfile['locale'] as String? ?? 'en-US',
+        cookingSkill: apiProfile['cookingSkill'] as String?,
+        householdSize: apiProfile['householdSize'] as int?,
+        healthGoals: apiProfile['healthGoals'] as String?,
+      );
+      await _persist();
+    } catch (_) {}
   }
 
-  Future<void> setEmail(String value) async {
-    state = state.copyWith(email: value);
+  Future<void> updateProfile({
+    String? displayName,
+    String? email,
+    String? dateOfBirth,
+    String? gender,
+    double? heightCm,
+    double? weightKg,
+    String? activityLevel,
+    String? countryCode,
+    String? currencyCode,
+    String? cookingSkill,
+    int? householdSize,
+    String? healthGoals,
+  }) async {
+    state = state.copyWith(
+      displayName: displayName,
+      email: email,
+      dateOfBirth: dateOfBirth,
+      gender: gender,
+      heightCm: heightCm,
+      weightKg: weightKg,
+      activityLevel: activityLevel,
+      countryCode: countryCode,
+      currencyCode: currencyCode,
+      cookingSkill: cookingSkill,
+      householdSize: householdSize,
+      healthGoals: healthGoals,
+    );
     await _persist();
-  }
-
-  Future<void> setHeight(double? value) async {
-    state = state.copyWith(height: value);
-    await _persist();
-  }
-
-  Future<void> setWeight(double? value) async {
-    state = state.copyWith(weight: value);
-    await _persist();
-  }
-
-  Future<void> setAge(int? value) async {
-    state = state.copyWith(age: value);
-    await _persist();
-  }
-
-  Future<void> setGender(String? value) async {
-    state = state.copyWith(gender: value);
-    await _persist();
+    await _syncToApi();
   }
 
   Future<void> _persist() async {
@@ -108,8 +208,40 @@ class ProfileNotifier extends Notifier<UserProfile> {
         .read(sharedPreferencesProvider)
         .setString(_key, json.encode(state.toJson()));
   }
+
+  Future<void> _syncToApi() async {
+    try {
+      final repo = ref.read(profileRepositoryProvider);
+      await repo.updateProfile(
+        dateOfBirth: state.dateOfBirth,
+        gender: state.gender,
+        heightCm: state.heightCm,
+        weightKg: state.weightKg,
+        activityLevel: state.activityLevel,
+        countryCode: state.countryCode,
+        currencyCode: state.currencyCode,
+        cookingSkill: state.cookingSkill,
+        householdSize: state.householdSize,
+        healthGoals: state.healthGoals,
+      );
+    } catch (_) {}
+  }
+
+  String _buildDisplayName(Map<String, dynamic> apiProfile, String? authName) {
+    if (authName != null && authName.isNotEmpty) return authName;
+    final firstName = apiProfile['firstName'] as String?;
+    final lastName = apiProfile['lastName'] as String?;
+    if (firstName != null && lastName != null) return '$firstName $lastName';
+    return state.displayName;
+  }
 }
 
 final profileProvider = NotifierProvider<ProfileNotifier, UserProfile>(
   ProfileNotifier.new,
 );
+
+final profileCompletenessProvider = Provider<double>((ref) {
+  final profile = ref.watch(profileProvider);
+  const totalFields = 8;
+  return profile.completeness / totalFields;
+});

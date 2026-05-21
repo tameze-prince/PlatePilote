@@ -2,7 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/app_session_provider.dart';
 import '../../../core/repositories/auth_repository.dart';
+import '../../../core/repositories/preference_repository.dart';
+import '../../../core/repositories/profile_repository.dart';
 import '../../../core/services/secure_storage_service.dart';
+import '../../onboarding/onboarding_state.dart';
 import 'auth_state.dart';
 
 class AuthNotifier extends Notifier<AuthState> {
@@ -111,11 +114,36 @@ class AuthNotifier extends Notifier<AuthState> {
         name: '$firstName $lastName',
       );
       await ref.read(appSessionProvider.notifier).signIn();
+
+      await _syncOnboardingPreferences();
+
       return true;
     }
 
     state = AuthState(errorMessage: result.message ?? 'Registration failed');
     return false;
+  }
+
+  Future<void> _syncOnboardingPreferences() async {
+    try {
+      final onboarding = ref.read(onboardingProvider);
+
+      final profileRepo = ref.read(profileRepositoryProvider);
+      await profileRepo.updateProfile(
+        householdSize: int.tryParse(onboarding.householdSize ?? ''),
+        cookingSkill: onboarding.cookingSkill,
+        healthGoals: onboarding.goals.isNotEmpty
+            ? onboarding.goals.join(', ')
+            : null,
+      );
+
+      final prefRepo = ref.read(preferenceRepositoryProvider);
+      for (final diet in onboarding.dietaryPreferences) {
+        try {
+          await prefRepo.addDietaryPreference(diet);
+        } catch (_) {}
+      }
+    } catch (_) {}
   }
 
   Future<bool> verifyEmail(String token) async {

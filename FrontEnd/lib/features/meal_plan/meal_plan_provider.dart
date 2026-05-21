@@ -1,102 +1,206 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/providers/preferences_provider.dart';
+import '../../core/repositories/base_repository.dart';
 import '../../shared/models/demo_data.dart';
+import '../../shared/models/meal_plan.dart';
+import 'meal_plan_repository.dart';
 
 class MealPlanState {
   const MealPlanState({
+    this.currentPlan,
     this.meals = const [],
     this.isLoading = false,
+    this.isGenerating = false,
     this.error,
+    this.useDemoFallback = false,
   });
 
+  final MealPlan? currentPlan;
   final List<Meal> meals;
   final bool isLoading;
+  final bool isGenerating;
   final String? error;
+  final bool useDemoFallback;
+
+  MealPlanState copyWith({
+    MealPlan? currentPlan,
+    List<Meal>? meals,
+    bool? isLoading,
+    bool? isGenerating,
+    String? error,
+    bool? useDemoFallback,
+    bool clearError = false,
+  }) {
+    return MealPlanState(
+      currentPlan: currentPlan ?? this.currentPlan,
+      meals: meals ?? this.meals,
+      isLoading: isLoading ?? this.isLoading,
+      isGenerating: isGenerating ?? this.isGenerating,
+      error: clearError ? null : (error ?? this.error),
+      useDemoFallback: useDemoFallback ?? this.useDemoFallback,
+    );
+  }
 }
 
 class MealPlanNotifier extends Notifier<MealPlanState> {
-  static const _key = 'mealPlan.meals';
-
   @override
   MealPlanState build() {
-    final prefs = ref.watch(sharedPreferencesProvider);
-    final stored = prefs.getString(_key);
-    if (stored != null) {
-      final list = (json.decode(stored) as List)
-          .map((e) => _mealFromJson(e as Map<String, dynamic>))
-          .toList();
-      return MealPlanState(meals: list);
+    _loadCurrentPlan();
+    return const MealPlanState(isLoading: true);
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  List<Meal> _entriesToMeals(List<MealPlanEntry> entries) {
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return entries.map((entry) {
+      final date = entry.mealDate != null ? DateTime.tryParse(entry.mealDate!) : null;
+      final dayName = date != null ? dayNames[date.weekday - 1] : (entry.mealDate ?? '');
+      return Meal(
+        day: dayName,
+        type: entry.mealType ?? 'Meal',
+        title: entry.recipeName ?? 'Unknown Recipe',
+        minutes: 25,
+        kcal: 450,
+        icon: Icons.restaurant,
+        tint: Colors.green,
+        imageUrl: null,
+      );
+    }).toList();
+  }
+
+  Future<void> _loadCurrentPlan() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final repo = ref.read(mealPlanRepositoryProvider);
+      final page = await repo.listMealPlans(size: 1);
+      if (page.content.isNotEmpty) {
+        final plan = page.content.first;
+        final meals = _entriesToMeals(plan.entries);
+        state = state.copyWith(
+          currentPlan: plan,
+          meals: meals,
+          isLoading: false,
+        );
+      } else {
+        state = const MealPlanState(meals: demoMeals, useDemoFallback: true);
+      }
+    } on ApiException {
+      state = const MealPlanState(meals: demoMeals, useDemoFallback: true);
     }
-    return const MealPlanState(meals: demoMeals);
   }
 
-  Future<void> regeneratePlan() async {
-    state = MealPlanState(isLoading: true);
-    // TODO: call service to regenerate plan
-    await Future.delayed(const Duration(milliseconds: 300));
-    state = MealPlanState(meals: state.meals, isLoading: false);
-    await _persist();
+  Future<void> generateNewPlan({DateTime? startDate}) async {
+    state = state.copyWith(isGenerating: true, clearError: true);
+    try {
+      final repo = ref.read(mealPlanRepositoryProvider);
+      final plan = await repo.generateWeeklyPlan(
+        startDate: startDate != null ? _formatDate(startDate) : null,
+      );
+      final meals = _entriesToMeals(plan.entries);
+      state = state.copyWith(
+        currentPlan: plan,
+        meals: meals,
+        isGenerating: false,
+        useDemoFallback: false,
+      );
+    } on ApiException catch (e) {
+      state = state.copyWith(
+        isGenerating: false,
+        error: e.message,
+      );
+    }
   }
 
-  Future<void> replaceMeal(int index, Meal replacement) async {
-    final meals = [...state.meals];
-    meals[index] = replacement;
-    state = MealPlanState(meals: meals);
-    await _persist();
+  Future<void> replaceEntry(int index, MealPlanEntry newEntry) async {
+    final plan = state.currentPlan;
+    if (plan == null) return;
+    try {
+      final repo = ref.read(mealPlanRepositoryProvider);
+      final oldEntry = plan.entries.length > index ? plan.entries[index] : null;
+      if (oldEntry?.id != null) {
+        await repo.deleteEntry(oldEntry!.id!);
+      }
+      final updatedPlan = await repo.addEntry(
+        plan.id,
+        recipeId: newEntry.recipeId!,
+        mealDate: newEntry.mealDate!,
+        mealType: newEntry.mealType!,
+        servings: newEntry.servings ?? 1,
+        notes: newEntry.notes,
+      );
+      final meals = _entriesToMeals(updatedPlan.entries);
+      state = state.copyWith(currentPlan: updatedPlan, meals: meals);
+    } on ApiException catch (e) {
+      state = state.copyWith(error: e.message);
+    }
   }
 
-  Future<void> toggleLock(int index) async {
-    final meal = state.meals[index];
-    final updated = Meal(
-      day: meal.day,
-      type: meal.type,
-      title: meal.title,
-      minutes: meal.minutes,
-      kcal: meal.kcal,
-      icon: meal.icon,
-      tint: meal.tint,
-      locked: !meal.locked,
-    );
-    final meals = [...state.meals];
-    meals[index] = updated;
-    state = MealPlanState(meals: meals);
-    await _persist();
+  Future<void> removeEntry(int index) async {
+    final plan = state.currentPlan;
+    if (plan == null) return;
+    try {
+      final entry = plan.entries.length > index ? plan.entries[index] : null;
+      if (entry?.id == null) return;
+      final repo = ref.read(mealPlanRepositoryProvider);
+      await repo.deleteEntry(entry!.id!);
+      final updatedEntries = [...plan.entries]..removeAt(index);
+      final updatedPlan = MealPlan(
+        id: plan.id,
+        name: plan.name,
+        startDate: plan.startDate,
+        endDate: plan.endDate,
+        status: plan.status,
+        entries: updatedEntries,
+        createdAt: plan.createdAt,
+        updatedAt: plan.updatedAt,
+      );
+      final meals = _entriesToMeals(updatedEntries);
+      state = state.copyWith(currentPlan: updatedPlan, meals: meals);
+    } on ApiException catch (e) {
+      state = state.copyWith(error: e.message);
+    }
   }
 
-  Future<void> _persist() async {
-    final encoded = state.meals.map(_mealToJson).toList();
-    await ref
-        .read(sharedPreferencesProvider)
-        .setString(_key, jsonEncode(encoded));
+  Future<void> activatePlan() async {
+    final plan = state.currentPlan;
+    if (plan == null) return;
+    try {
+      final repo = ref.read(mealPlanRepositoryProvider);
+      await repo.activatePlan(plan.id);
+      state = state.copyWith(
+        currentPlan: MealPlan(
+          id: plan.id,
+          name: plan.name,
+          startDate: plan.startDate,
+          endDate: plan.endDate,
+          status: 'ACTIVE',
+          entries: plan.entries,
+          createdAt: plan.createdAt,
+          updatedAt: plan.updatedAt,
+        ),
+      );
+    } on ApiException catch (e) {
+      state = state.copyWith(error: e.message);
+    }
   }
 
-  Map<String, dynamic> _mealToJson(Meal meal) => {
-    'day': meal.day,
-    'type': meal.type,
-    'title': meal.title,
-    'minutes': meal.minutes,
-    'kcal': meal.kcal,
-    'iconCodePoint': meal.icon.codePoint,
-    'tintValue': meal.tint.toARGB32(),
-    'locked': meal.locked,
-  };
-
-  Meal _mealFromJson(Map<String, dynamic> json) {
-    return Meal(
-      day: json['day'] as String,
-      type: json['type'] as String,
-      title: json['title'] as String,
-      minutes: json['minutes'] as int,
-      kcal: json['kcal'] as int,
-      icon: IconData(json['iconCodePoint'] as int, fontFamily: 'MaterialIcons'),
-      tint: Color(json['tintValue'] as int),
-      locked: json['locked'] as bool? ?? false,
-    );
+  Future<void> deletePlan() async {
+    final plan = state.currentPlan;
+    if (plan == null) return;
+    try {
+      final repo = ref.read(mealPlanRepositoryProvider);
+      await repo.deleteMealPlan(plan.id);
+      state = const MealPlanState(meals: demoMeals, useDemoFallback: true);
+    } on ApiException catch (e) {
+      state = state.copyWith(error: e.message);
+    }
   }
+
+  Future<void> refresh() => _loadCurrentPlan();
 }
 
 final mealPlanProvider = NotifierProvider<MealPlanNotifier, MealPlanState>(

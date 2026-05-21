@@ -3,7 +3,10 @@ package com.platepilote.platepilote.preferences.presentation;
 import com.platepilote.platepilote.common.dto.ApiResponse;
 import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.preferences.application.dto.AllergyRequest;
+import com.platepilote.platepilote.preferences.application.dto.CuisinePreferenceRequest;
 import com.platepilote.platepilote.preferences.application.dto.DietaryPreferenceRequest;
+import com.platepilote.platepilote.preferences.application.dto.UserPreferencesRequest;
+import com.platepilote.platepilote.preferences.application.dto.UserPreferencesResponse;
 import com.platepilote.platepilote.preferences.application.service.PreferencesService;
 import com.platepilote.platepilote.preferences.domain.entity.Allergy;
 import jakarta.validation.Valid;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -88,5 +92,54 @@ public class PreferencesController {
         UUID userId = securityUtils.getCurrentUserId(userDetails);
         preferencesService.removeAllergy(userId, allergen);
         return ResponseEntity.ok(ApiResponse.success("Allergy removed", null));
+    }
+
+    // ==================== CUISINE PREFERENCES ====================
+
+    @GetMapping("/cuisines")
+    public ResponseEntity<ApiResponse<List<String>>> getCuisinePreferences(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        List<String> cuisines = preferencesService.getCuisinePreferences(userId);
+        return ResponseEntity.ok(ApiResponse.success(cuisines));
+    }
+
+    @PostMapping("/cuisines")
+    public ResponseEntity<ApiResponse<Void>> addCuisinePreference(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody CuisinePreferenceRequest request) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        preferencesService.addCuisinePreference(userId, request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Cuisine preference added", null));
+    }
+
+    @DeleteMapping("/cuisines/{cuisineType}")
+    public ResponseEntity<ApiResponse<Void>> removeCuisinePreference(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String cuisineType) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        preferencesService.removeCuisinePreference(userId, cuisineType);
+        return ResponseEntity.ok(ApiResponse.success("Cuisine preference removed", null));
+    }
+
+    // ==================== AGGREGATED PREFERENCES ====================
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserPreferencesResponse>> getMyPreferences(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        UserPreferencesResponse preferences = preferencesService.getAllPreferences(userId);
+        return ResponseEntity.ok(ApiResponse.success(preferences));
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<ApiResponse<UserPreferencesResponse>> updateMyPreferences(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody UserPreferencesRequest request) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        preferencesService.updateAllPreferences(userId, request);
+        UserPreferencesResponse updated = preferencesService.getAllPreferences(userId);
+        return ResponseEntity.ok(ApiResponse.success("Preferences updated", updated));
     }
 }

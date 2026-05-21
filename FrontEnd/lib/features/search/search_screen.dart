@@ -9,6 +9,7 @@ import '../../core/widgets/modern_components.dart';
 import '../../core/widgets/modern_animations.dart';
 import '../../core/widgets/floating_components.dart';
 import '../../shared/models/demo_data.dart';
+import '../../shared/widgets/recipe_image.dart';
 import '../support/filter_bottom_sheet.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -170,17 +171,11 @@ class _SearchScreenState extends State<SearchScreen> {
       },
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: meal.tint.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: Icon(
-              meal.icon,
-              color: meal.tint,
-              size: 24,
-            ),
+          RecipeImage(
+            imageUrl: meal.imageUrl,
+            cuisine: meal.title,
+            width: 48,
+            height: 48,
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(

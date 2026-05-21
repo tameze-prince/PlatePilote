@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
+import '../../app/theme/app_typography.dart';
+import '../../app/theme/color_tokens.dart';
 import '../../core/extensions/theme_extensions.dart';
+import '../../core/premium_components.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/secondary_button.dart';
 import '../../shared/models/demo_data.dart';
+import '../../shared/widgets/recipe_image.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 
 class QuickMealScreen extends StatelessWidget {
@@ -61,17 +66,38 @@ class QuickMealScreen extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(meal.icon, color: meal.tint, size: 32),
+                            RecipeImage(
+                              imageUrl: meal.imageUrl,
+                              cuisine: meal.title,
+                              width: 48,
+                              height: 48,
+                            ),
                             const SizedBox(width: AppSpacing.md),
                             Expanded(
                               child: Text(
                                 meal.title,
-                                style: context.text.headlineSmall,
+                                style: AppTypography.titleMedium.copyWith(
+                                  color: PremiumTheme.textPrimary(context),
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
-                            Text(
-                              '${meal.minutes}m',
-                              style: context.text.labelSmall,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.sm,
+                                vertical: AppSpacing.xxs,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryAccentGreen.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(AppRadius.full),
+                              ),
+                              child: Text(
+                                '${meal.minutes}m',
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: AppColors.primaryAccentGreen,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ],
                         ),

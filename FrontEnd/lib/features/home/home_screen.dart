@@ -11,6 +11,8 @@ import '../../core/widgets/modern_animations.dart';
 import '../../core/widgets/floating_components.dart';
 import '../../core/premium_components.dart';
 import '../../shared/models/demo_data.dart';
+import '../../shared/widgets/recipe_image.dart';
+import 'home_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -20,24 +22,21 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) setState(() => _isLoading = false);
+    Future.microtask(() {
+      ref.read(homeProvider.notifier).loadRecommendations();
     });
   }
 
   Future<void> _onRefresh() async {
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    if (mounted) setState(() => _isLoading = false);
+    await ref.read(homeProvider.notifier).loadRecommendations();
   }
 
   @override
   Widget build(BuildContext context) {
+    final homeState = ref.watch(homeProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
@@ -100,7 +99,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           
           // Content
           SliverToBoxAdapter(
-            child: _isLoading
+            child: homeState.isLoading
                 ? _buildLoadingState()
                 : RefreshIndicator(
                     onRefresh: _onRefresh,
@@ -122,7 +121,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Good morning, Sarah!',
+                                    _greeting(homeState.userName),
                                     style: AppTypography.displaySmall.copyWith(
                                       color: isDark
                                           ? AppColors.darkOnSurface
@@ -285,20 +284,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                 ),
                                 child: Column(
-                                  children: todayMeals
-                                      .map(
-                                        (meal) => Padding(
-                                          padding: const EdgeInsets.only(
-                                            bottom: AppSpacing.xs,
-                                          ),
-                                          child: _buildMealItem(
-                                            context: context,
-                                            isDark: isDark,
-                                            meal: meal,
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
+                                  children: homeState.recommendations.isEmpty
+                                      ? todayMeals
+                                          .take(3)
+                                          .map(
+                                            (meal) => Padding(
+                                              padding: const EdgeInsets.only(
+                                                bottom: AppSpacing.xs,
+                                              ),
+                                              child: _buildMealItem(
+                                                context: context,
+                                                isDark: isDark,
+                                                meal: meal,
+                                              ),
+                                            ),
+                                          )
+                                          .toList()
+                                      : homeState.recommendations
+                                          .take(3)
+                                          .map(
+                                            (r) => Padding(
+                                              padding: const EdgeInsets.only(
+                                                bottom: AppSpacing.xs,
+                                              ),
+                                              child: _buildRecoItem(
+                                                context: context,
+                                                isDark: isDark,
+                                                reco: r,
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
                                 ),
                               ),
                             ),
@@ -447,6 +463,79 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  String _greeting(String? name) {
+    if (name == null) return 'Good morning!';
+    final first = name.split(' ').first;
+    return 'Good morning, $first!';
+  }
+
+  Widget _buildRecoItem({
+    required BuildContext context,
+    required bool isDark,
+    required Map<String, dynamic> reco,
+  }) {
+    final name = reco['name'] as String? ?? 'Recipe';
+    final time = reco['totalTimeMinutes'] as int? ?? 30;
+    final cost = reco['estimatedCost'];
+    final costStr = cost != null ? '\$${(cost as num).toStringAsFixed(0)}' : '';
+    final cuisine = reco['cuisineType'] as String? ?? '';
+
+    return GestureDetector(
+      onTap: () => context.push('/recipe/${reco['id']}'),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        decoration: BoxDecoration(
+          color: isDark
+              ? AppColors.darkSurfaceContainerLow
+              : AppColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        child: Row(
+          children: [
+            RecipeImage(
+              imageUrl: reco['imageUrl'] as String?,
+              cuisine: cuisine,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: isDark
+                          ? AppColors.darkOnSurface
+                          : AppColors.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    '$time min${costStr.isNotEmpty ? ' • $costStr' : ''}${cuisine.isNotEmpty ? ' • $cuisine' : ''}',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: isDark
+                          ? AppColors.darkOnSurfaceVariant
+                          : AppColors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: isDark
+                  ? AppColors.darkOnSurfaceVariant
+                  : AppColors.onSurfaceVariant,
+              size: 16,
+            ),
+          ],
+        ),
       ),
     );
   }

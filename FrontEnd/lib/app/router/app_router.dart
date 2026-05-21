@@ -22,6 +22,7 @@ import '../../features/meal_plan/weekly_plan_screen.dart';
 import '../../features/meal_plan/meal_swap_screen.dart';
 import '../../features/meal_plan/plan_acceptance_screen.dart';
 import '../../features/meal_plan/meal_plan_history_screen.dart';
+import '../../shared/models/meal_plan.dart';
 import '../../features/notifications/notification_preferences_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
 import '../../features/onboarding/onboarding_flow.dart';
@@ -128,19 +129,31 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final dayIndex = int.parse(state.pathParameters['dayIndex'] ?? '0');
           final mealType = state.pathParameters['mealType'] ?? 'Dinner';
-          final currentMeal = state.extra as Meal? ?? const Meal(
-            day: '',
-            type: 'Dinner',
-            title: 'Unknown',
-            minutes: 0,
-            kcal: 0,
-            icon: Icons.restaurant,
-            tint: Color(0xFF22C55E),
-          );
+          final extra = state.extra;
+          final Meal currentMeal;
+          final MealPlanEntry? currentEntry;
+          if (extra is Map<String, dynamic>) {
+            currentMeal = extra['meal'] as Meal? ??
+                const Meal(
+                  day: '', type: 'Dinner', title: 'Unknown',
+                  minutes: 0, kcal: 0, icon: Icons.restaurant,
+                  tint: Color(0xFF22C55E),
+                );
+            currentEntry = extra['entry'] as MealPlanEntry?;
+          } else {
+            currentMeal = extra as Meal? ??
+                const Meal(
+                  day: '', type: 'Dinner', title: 'Unknown',
+                  minutes: 0, kcal: 0, icon: Icons.restaurant,
+                  tint: Color(0xFF22C55E),
+                );
+            currentEntry = null;
+          }
           return MealSwapScreen(
             currentMeal: currentMeal,
             dayIndex: dayIndex,
             mealType: mealType,
+            currentEntry: currentEntry,
           );
         },
       ),
@@ -148,8 +161,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/plan-acceptance',
         name: AppRoute.planAcceptance.name,
         builder: (context, state) {
-          final meals = state.extra as List<Meal>? ?? const [];
-          return PlanAcceptanceScreen(meals: meals);
+          final plan = state.extra as MealPlan? ??
+              MealPlan(id: '', name: '', entries: []);
+          return PlanAcceptanceScreen(plan: plan);
         },
       ),
       GoRoute(
