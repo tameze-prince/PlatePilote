@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
-import '../../core/extensions/theme_extensions.dart';
-import '../../core/widgets/app_card.dart';
-import '../../core/widgets/primary_button.dart';
-import '../../core/widgets/secondary_button.dart';
+import '../../app/theme/app_typography.dart';
+import '../../core/premium_components.dart';
+import 'providers/auth_provider.dart';
 
 class EmailVerificationScreen extends ConsumerStatefulWidget {
-  const EmailVerificationScreen({super.key});
+  const EmailVerificationScreen({super.key, this.token});
+
+  final String? token;
 
   @override
   ConsumerState<EmailVerificationScreen> createState() =>
@@ -20,30 +21,81 @@ class EmailVerificationScreen extends ConsumerStatefulWidget {
 
 class _EmailVerificationScreenState
     extends ConsumerState<EmailVerificationScreen> {
-  final _codeController = TextEditingController();
+  final _tokenController = TextEditingController();
+  bool _isVerifying = false;
   bool _isResending = false;
   int _resendCooldown = 0;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.token != null && widget.token!.isNotEmpty) {
+      _tokenController.text = widget.token!;
+      _verifyToken();
+    }
+  }
+
+  @override
   void dispose() {
-    _codeController.dispose();
+    _tokenController.dispose();
     super.dispose();
   }
 
-  Future<void> _verifyCode() async {
-    if (context.mounted) {
-      context.go('/home');
+  Future<void> _verifyToken() async {
+    final token = _tokenController.text.trim();
+    if (token.isEmpty) return;
+
+    setState(() => _isVerifying = true);
+
+    final success = await ref.read(authProvider.notifier).verifyEmail(token);
+
+    if (mounted) {
+      setState(() => _isVerifying = false);
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Email verified successfully!'),
+            backgroundColor: Colors.green.shade700,
+          ),
+        );
+        context.go('/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Verification failed. Check the token and try again.',
+            ),
+            backgroundColor: Colors.red.shade700,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _resendCode() async {
+    final email = ref.read(authProvider).email;
+    if (email == null) return;
+
     setState(() => _isResending = true);
-    await Future.delayed(const Duration(seconds: 2));
-    setState(() {
-      _isResending = false;
-      _resendCooldown = 60;
-    });
-    _startCooldown();
+
+    final success =
+        await ref.read(authProvider.notifier).resendVerification(email: email);
+
+    if (mounted) {
+      setState(() {
+        _isResending = false;
+        if (success) {
+          _resendCooldown = 60;
+          _startCooldown();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Verification email sent!'),
+              backgroundColor: Colors.green.shade700,
+            ),
+          );
+        }
+      });
+    }
   }
 
   void _startCooldown() {
@@ -58,128 +110,99 @@ class _EmailVerificationScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
-              child: Column(
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: ColorTokens.primaryGreen.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(AppRadius.modal),
+      body: PremiumBackground(
+        safeArea: false,
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 430),
+                child: Column(
+                  children: [
+                    const SizedBox(height: AppSpacing.lg),
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryAccentGreen.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(AppRadius.xxl),
+                      ),
+                      child: const Icon(
+                        Icons.mark_email_unread,
+                        color: AppColors.primaryAccentGreen,
+                        size: 40,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.mark_email_unread,
-                      color: ColorTokens.primaryGreen,
-                      size: 40,
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      'Verify Your Email',
+                      style: AppTypography.headlineMedium.copyWith(
+                        color: PremiumTheme.textPrimary(context),
+                        fontWeight: FontWeight.w800,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    'Verify Your Email',
-                    style: context.text.headlineMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    'We sent a verification code to\nyour email address',
-                    style: context.text.bodyMedium?.copyWith(
-                      color: ColorTokens.textSecondary,
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'We sent a verification link to your email.\n'
+                      'Paste the token below or click the link in the email.',
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: PremiumTheme.textSecondary(context),
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  AppCard(
-                    padding: const EdgeInsets.all(AppSpacing.xl),
-                    child: Column(
-                      children: [
-                        _buildCodeInput(),
-                        const SizedBox(height: AppSpacing.lg),
-                        PrimaryButton(
-                          label: 'Verify Email',
-                          onPressed: _verifyCode,
+                    const SizedBox(height: AppSpacing.xl),
+                    GlassContainer(
+                      borderRadius: AppRadius.xxl,
+                      elevated: true,
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Column(
+                        children: [
+                          GlassTextField(
+                            labelText: 'Verification Token',
+                            hintText: 'Paste your verification token here',
+                            controller: _tokenController,
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          GlassButton(
+                            label: _isVerifying ? 'Verifying...' : 'Verify Email',
+                            onPressed:
+                                (_isVerifying || _tokenController.text.trim().isEmpty)
+                                    ? null
+                                    : _verifyToken,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          GlassButton(
+                            label: _isResending
+                                ? 'Sending...'
+                                : (_resendCooldown > 0
+                                    ? 'Resend in $_resendCooldown s'
+                                    : 'Resend Verification Email'),
+                            onPressed:
+                                (_resendCooldown > 0 || _isResending) ? null : _resendCode,
+                            variant: GlassButtonVariant.outlined,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    TextButton(
+                      onPressed: () => context.go('/login'),
+                      child: Text(
+                        'Back to Sign In',
+                        style: TextStyle(
+                          color: PremiumTheme.textSecondary(context),
                         ),
-                        const SizedBox(height: AppSpacing.md),
-                        SecondaryButton(
-                          label: _resendCooldown > 0
-                              ? 'Resend in $_resendCooldown s'
-                              : 'Resend Code',
-                          onPressed:
-                              _resendCooldown > 0 || _isResending
-                                  ? null
-                                  : _resendCode,
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  TextButton(
-                    onPressed: () => context.go('/login'),
-                    child: const Text('Back to Sign In'),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildCodeInput() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Verification Code',
-          style: context.text.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        TextField(
-          controller: _codeController,
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.center,
-          style: context.text.headlineMedium?.copyWith(
-            letterSpacing: 8,
-            fontWeight: FontWeight.bold,
-          ),
-          decoration: InputDecoration(
-            hintText: '000000',
-            hintStyle: context.text.headlineMedium?.copyWith(
-              color: ColorTokens.textSecondary.withOpacity(0.3),
-              letterSpacing: 8,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.input),
-              borderSide: const BorderSide(color: ColorTokens.border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.input),
-              borderSide: const BorderSide(color: ColorTokens.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.input),
-              borderSide: const BorderSide(
-                color: ColorTokens.primaryGreen,
-                width: 2,
-              ),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: AppSpacing.md,
-            ),
-          ),
-          maxLength: 6,
-          buildCounter: (_, {required currentLength, required isFocused, maxLength}) =>
-              null,
-        ),
-      ],
     );
   }
 }

@@ -1,20 +1,34 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../services/secure_storage_service.dart';
+
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
       baseUrl: const String.fromEnvironment(
         'PLATEPILOT_API_BASE_URL',
-        defaultValue: 'http://localhost:8080/api',
+        defaultValue: 'http://localhost:8081/api/v1',
       ),
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 20),
       headers: const {'Accept': 'application/json'},
+      contentType: 'application/json',
     ),
   );
 
-  dio.interceptors.addAll([_AuthTokenInterceptor(), _ErrorLogInterceptor()]);
+  final secureStorage = ref.read(secureStorageProvider);
+
+  dio.interceptors.addAll([
+    _AuthTokenInterceptor(
+      tokenGetter: () => secureStorage.getAccessToken(),
+      refreshTokenGetter: () => secureStorage.getRefreshToken(),
+      onTokensRefreshed: (access, refresh) =>
+          secureStorage.saveTokens(accessToken: access, refreshToken: refresh),
+      onRefreshFailed: () => secureStorage.clearTokens(),
+    ),
+    _ErrorLogInterceptor(),
+  ]);
 
   return dio;
 });
@@ -24,10 +38,73 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 });
 
 class _AuthTokenInterceptor extends Interceptor {
+  _AuthTokenInterceptor({
+    required this.tokenGetter,
+    required this.refreshTokenGetter,
+    required this.onTokensRefreshed,
+    required this.onRefreshFailed,
+  });
+
+  final Future<String?> Function() tokenGetter;
+  final Future<String?> Function() refreshTokenGetter;
+  final Future<void> Function(String access, String refresh) onTokensRefreshed;
+  final Future<void> Function() onRefreshFailed;
+
+  final Dio _refreshDio = Dio(
+    BaseOptions(
+      baseUrl: const String.fromEnvironment(
+        'PLATEPILOT_API_BASE_URL',
+        defaultValue: 'http://localhost:8081/api/v1',
+      ),
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 20),
+      headers: const {'Accept': 'application/json'},
+    ),
+  );
+
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    // TODO: Attach auth token from secure storage when available
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+    final token = await tokenGetter();
+    if (token != null) {
+      options.headers['Authorization'] = 'Bearer $token';
+    }
     handler.next(options);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    if (err.response?.statusCode != 401) {
+      handler.next(err);
+      return;
+    }
+
+    final refreshToken = await refreshTokenGetter();
+    if (refreshToken == null) {
+      await onRefreshFailed();
+      handler.next(err);
+      return;
+    }
+
+    try {
+      final response = await _refreshDio.post(
+        '/auth/refresh',
+        queryParameters: {'refreshToken': refreshToken},
+      );
+
+      final data = response.data['data'] as Map<String, dynamic>;
+      final newAccessToken = data['accessToken'] as String;
+      final newRefreshToken = data['refreshToken'] as String;
+
+      await onTokensRefreshed(newAccessToken, newRefreshToken);
+
+      final retryOptions = err.requestOptions;
+      retryOptions.headers['Authorization'] = 'Bearer $newAccessToken';
+      final retryResponse = await Dio().fetch(retryOptions);
+      handler.resolve(retryResponse);
+    } catch (_) {
+      await onRefreshFailed();
+      handler.next(err);
+    }
   }
 }
 
@@ -49,8 +126,8 @@ class ApiClient {
     return _dio.get(path, queryParameters: query);
   }
 
-  Future<Response<dynamic>> post(String path, {Object? data}) {
-    return _dio.post(path, data: data);
+  Future<Response<dynamic>> post(String path, {Object? data, Map<String, dynamic>? query}) {
+    return _dio.post(path, data: data, queryParameters: query);
   }
 
   Future<Response<dynamic>> put(String path, {Object? data}) {

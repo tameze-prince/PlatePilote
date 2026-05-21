@@ -152,7 +152,7 @@ app:
       expiration-hours: ${EMAIL_VERIFICATION_EXPIRATION_HOURS:24}
       fail-on-send-error: ${EMAIL_VERIFICATION_FAIL_ON_SEND_ERROR:false}
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8081}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:59043,http://localhost:8081,http://localhost:*}
     allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
     allowed-headers: Authorization,Content-Type,X-Requested-With,Accept
     max-age: 3600

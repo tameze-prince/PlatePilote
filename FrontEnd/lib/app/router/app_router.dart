@@ -95,7 +95,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/verify-email',
         name: AppRoute.verifyEmail.name,
-        builder: (context, state) => const EmailVerificationScreen(),
+        builder: (context, state) {
+          final token = state.uri.queryParameters['token'];
+          return EmailVerificationScreen(token: token);
+        },
       ),
       GoRoute(
         path: '/forgot-password',

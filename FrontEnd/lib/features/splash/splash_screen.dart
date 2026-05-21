@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/color_tokens.dart';
 import '../../app/theme/app_spacing.dart';
+import '../auth/providers/auth_provider.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _scaleAnim;
@@ -28,10 +30,15 @@ class _SplashScreenState extends State<SplashScreen>
       curve: Curves.easeOutBack,
     );
     _controller.forward();
-    Future.delayed(const Duration(milliseconds: 2500), () {
-      if (!mounted) return;
-      context.pushReplacement('/onboarding');
-    });
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    await ref.read(authProvider.notifier).checkSession();
+    if (!mounted) return;
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+    context.pushReplacement('/onboarding');
   }
 
   @override
