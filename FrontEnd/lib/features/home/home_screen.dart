@@ -9,6 +9,7 @@ import '../../app/theme/app_typography.dart';
 import '../../core/widgets/modern_components.dart';
 import '../../core/widgets/modern_animations.dart';
 import '../../core/widgets/floating_components.dart';
+import '../../core/premium_components.dart';
 import '../../shared/models/demo_data.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -39,13 +40,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final isTablet = screenWidth >= 600;
-
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
-      body: CustomScrollView(
-        slivers: [
+      backgroundColor: PremiumTheme.background(context),
+      body: PremiumBackground(
+        safeArea: false,
+        child: CustomScrollView(
+          slivers: [
           // Floating App Bar
           SliverToBoxAdapter(
             child: FloatingAppBar(
@@ -364,65 +364,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
           ),
-        ],
+          ],
+        ),
       ),
-      // Floating Navigation Bar
       extendBody: true,
-      bottomNavigationBar: FloatingNavigationBar(
-        currentIndex: 0,
-        onDestinationSelected: (index) {
-          switch (index) {
-            case 0:
-              context.go('/home');
-              break;
-            case 1:
-              context.go('/plan');
-              break;
-            case 2:
-              context.go('/grocery');
-              break;
-            case 3:
-              context.go('/pantry');
-              break;
-            case 4:
-              context.go('/settings');
-              break;
-          }
-        },
-        destinations: const [
-          FloatingNavDestination(
-            icon: Icons.home_outlined,
-            selectedIcon: Icons.home,
-            label: 'Home',
-          ),
-          FloatingNavDestination(
-            icon: Icons.calendar_month_outlined,
-            selectedIcon: Icons.calendar_month,
-            label: 'Plan',
-          ),
-          FloatingNavDestination(
-            icon: Icons.shopping_cart_outlined,
-            selectedIcon: Icons.shopping_cart,
-            label: 'Grocery',
-          ),
-          FloatingNavDestination(
-            icon: Icons.kitchen_outlined,
-            selectedIcon: Icons.kitchen,
-            label: 'Pantry',
-          ),
-          FloatingNavDestination(
-            icon: Icons.settings_outlined,
-            selectedIcon: Icons.settings,
-            label: 'Settings',
-          ),
-        ],
-      ),
-      // Floating Action Button
-      floatingActionButton: FloatingButton(
-        onPressed: () => context.push('/quick-meal'),
-        child: const Icon(Icons.bolt),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 

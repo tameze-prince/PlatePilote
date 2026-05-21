@@ -5,6 +5,7 @@ import '../../app/theme/color_tokens.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
+import '../../core/premium_components.dart';
 import '../../core/providers/app_session_provider.dart';
 
 class SocialSignInButtons extends ConsumerWidget {
@@ -25,24 +26,16 @@ class SocialSignInButtons extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.md),
-        Row(
-          children: [
-            Expanded(
-              child: _SocialButton(
-                icon: Icons.g_mobiledata,
-                label: 'Google',
-                onTap: () => _signInWithProvider(ref, context, 'Google'),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: _SocialButton(
-                icon: Icons.apple,
-                label: 'Apple',
-                onTap: () => _signInWithProvider(ref, context, 'Apple'),
-              ),
-            ),
-          ],
+        _SocialButton(
+          icon: Icons.g_mobiledata,
+          label: 'Sign in with Google',
+          onTap: () => _signInWithProvider(ref, context, 'Google'),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        _SocialButton(
+          icon: Icons.apple,
+          label: 'Sign in with Apple',
+          onTap: () => _signInWithProvider(ref, context, 'Apple'),
         ),
       ],
     );
@@ -78,20 +71,22 @@ class _SocialButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = context.isDark
-        ? ColorTokens.darkBorder
-        : ColorTokens.border;
+    final borderColor =
+        context.isDark ? ColorTokens.darkBorder : ColorTokens.border;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.button),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.button),
-            border: Border.all(color: borderColor),
+        borderRadius: BorderRadius.circular(AppRadius.full),
+        child: GlassContainer(
+          borderRadius: AppRadius.full,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
           ),
+          shadows: const [],
+          backgroundColor: PremiumTheme.glass(context),
+          borderColor: borderColor,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

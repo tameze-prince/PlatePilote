@@ -7,6 +7,7 @@ import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 import '../../app/theme/app_elevation.dart';
+import '../premium_components.dart';
 
 /// Floating navigation bar with blur effect
 class FloatingNavigationBar extends StatelessWidget {
@@ -33,71 +34,17 @@ class FloatingNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    
-    return Container(
-      margin: margin ??
-          const EdgeInsets.only(
-            left: AppSpacing.md,
-            right: AppSpacing.md,
-            bottom: AppSpacing.md,
+    return FloatingBottomNavigation(
+      currentIndex: currentIndex,
+      onDestinationSelected: onDestinationSelected,
+      destinations: [
+        for (final destination in destinations)
+          FloatingBottomDestination(
+            icon: destination.icon,
+            selectedIcon: destination.selectedIcon,
+            label: destination.label,
           ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.xxl),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
-          child: Container(
-            decoration: BoxDecoration(
-              color: (backgroundColor ??
-                      (isDark
-                          ? AppColors.darkSurface
-                          : AppColors.surface))
-                  .withOpacity(0.85),
-              borderRadius: BorderRadius.circular(AppRadius.xxl),
-              border: Border.all(
-                color: borderColor ??
-                    (isDark
-                        ? AppColors.darkOutline.withOpacity(0.3)
-                        : AppColors.outline.withOpacity(0.3)),
-                width: 1,
-              ),
-              boxShadow: elevation != null
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: elevation! * 4,
-                        offset: Offset(0, elevation! * 2),
-                        spreadRadius: elevation! * -0.5,
-                      ),
-                    ]
-                  : AppElevation.navigationBarShadow,
-            ),
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xs,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(
-                    destinations.length,
-                    (index) => _buildDestination(
-                      context: context,
-                      isDark: isDark,
-                      destination: destinations[index],
-                      isSelected: index == currentIndex,
-                      onTap: () => onDestinationSelected(index),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+      ],
     );
   }
 

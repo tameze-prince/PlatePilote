@@ -5,9 +5,10 @@ import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 import '../../app/theme/app_elevation.dart';
-import '../widgets/modern_components.dart';
-import '../widgets/modern_animations.dart';
-import '../widgets/modern_app_shell.dart';
+import '../../core/widgets/modern_components.dart';
+import '../../core/widgets/modern_animations.dart';
+import '../../core/widgets/modern_app_shell.dart';
+import '../../core/widgets/empty_state.dart';
 
 /// Example screen demonstrating the new design system
 class DesignSystemDemoScreen extends StatefulWidget {

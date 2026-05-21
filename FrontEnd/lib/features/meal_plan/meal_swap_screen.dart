@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/theme/color_tokens.dart';
-import '../../../app/theme/app_spacing.dart';
-import '../../../app/theme/app_radius.dart';
-import '../../../core/extensions/theme_extensions.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/primary_button.dart';
-import '../../../core/widgets/secondary_button.dart';
-import '../../../shared/models/demo_data.dart';
+import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_spacing.dart';
+import '../../app/theme/app_radius.dart';
+import '../../core/extensions/theme_extensions.dart';
+import '../../core/widgets/app_card.dart';
+import '../../core/widgets/primary_button.dart';
+import '../../core/widgets/secondary_button.dart';
+import '../../shared/models/demo_data.dart';
 
 class MealSwapScreen extends ConsumerStatefulWidget {
   final Meal currentMeal;

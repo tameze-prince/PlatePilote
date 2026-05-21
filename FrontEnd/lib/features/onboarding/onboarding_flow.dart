@@ -3,13 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
-import '../../core/extensions/theme_extensions.dart';
+import '../../app/theme/app_typography.dart';
+import '../../core/premium_components.dart';
 import '../../core/providers/app_session_provider.dart';
-import '../../core/widgets/app_card.dart';
-import '../../core/widgets/primary_button.dart';
-import '../../core/widgets/secondary_button.dart';
 import 'onboarding_state.dart';
 
 class OnboardingFlow extends ConsumerStatefulWidget {
@@ -24,8 +22,6 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final isTablet = screenWidth >= 600;
     final state = ref.watch(onboardingProvider);
     final notifier = ref.read(onboardingProvider.notifier);
     final canContinue = switch (step) {
@@ -35,60 +31,78 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     };
 
     return Scaffold(
-      appBar: AppBar(title: const Text('PlatePilot')),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: isTablet ? 680 : 560),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                children: [
-                  _ProgressHeader(step: step, label: _stepLabel(step)),
-                  const SizedBox(height: AppSpacing.xl),
-                  Expanded(
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 220),
-                      child: SingleChildScrollView(
-                        key: ValueKey(step),
-                        child: _buildStep(context, state, notifier),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  PrimaryButton(
-                    label: step == 2 ? 'Continue to sign in' : 'Continue',
-                    onPressed: canContinue
-                        ? () async {
-                            HapticFeedback.selectionClick();
-                            if (step == 2) {
-                              await ref
-                                  .read(appSessionProvider.notifier)
-                                  .completeOnboarding();
-                              if (context.mounted) {
-                                context.go('/login');
-                              }
-                            } else {
-                              setState(() => step += 1);
-                            }
-                          }
-                        : null,
-                  ),
-                  if (step > 0) ...[
-                    const SizedBox(height: AppSpacing.xs),
-                    SecondaryButton(
-                      label: 'Back',
-                      icon: Icons.arrow_back,
-                      onPressed: () => setState(() => step -= 1),
-                    ),
-                  ],
-                ],
+      body: PremiumBackground(
+        safeArea: false,
+        child: SafeArea(
+          child: Column(
+            children: [
+              const FloatingHeader(title: 'PlatePilot'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  AppSpacing.sm,
+                  AppSpacing.md,
+                  AppSpacing.lg,
+                ),
+                child: _ProgressHeader(step: step, label: _stepLabel(step)),
               ),
-            ),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInOut,
+                  child: SingleChildScrollView(
+                    key: ValueKey(step),
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.md,
+                      0,
+                      AppSpacing.md,
+                      AppSpacing.lg,
+                    ),
+                    child: _buildStep(context, state, notifier),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  AppSpacing.sm,
+                  AppSpacing.md,
+                  AppSpacing.md,
+                ),
+                child: Column(
+                  children: [
+                    GlassButton(
+                      label: step == 2 ? 'Continue to sign in' : 'Continue',
+                      icon: Icons.arrow_forward,
+                      onPressed: canContinue ? _continue : null,
+                    ),
+                    if (step > 0) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      GlassOutlinedButton(
+                        label: 'Back',
+                        icon: Icons.arrow_back,
+                        onPressed: () => setState(() => step -= 1),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _continue() async {
+    HapticFeedback.selectionClick();
+    if (step == 2) {
+      await ref.read(appSessionProvider.notifier).completeOnboarding();
+      if (mounted) context.go('/login');
+      return;
+    }
+    setState(() => step += 1);
   }
 
   Widget _buildStep(
@@ -98,104 +112,109 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   ) {
     return switch (step) {
       0 => _OnboardingStep(
-        title: 'Let us get to know your household',
-        subtitle:
-            'PlatePilot tunes portions, prep time, and budget around your kitchen.',
-        children: [
-          _ChoiceGrid(
-            title: 'How many people do you usually cook for?',
-            choices: const ['1', '2', '3', '4+'],
-            selectedValues: {
-              if (state.householdSize != null) state.householdSize!,
-            },
-            onSelected: notifier.setHouseholdSize,
-          ),
-          _ChoiceGrid(
-            title: 'Cooking profile',
-            choices: const ['Beginner', 'Balanced', 'Batch cook', 'Chef mode'],
-            selectedValues: {
-              if (state.cookingSkill != null) state.cookingSkill!,
-            },
-            onSelected: notifier.setCookingSkill,
-          ),
-        ],
-      ),
-      1 => _OnboardingStep(
-        title: 'Set your budget and boundaries',
-        subtitle: 'Keep meals realistic without losing variety.',
-        children: [
-          _ChoiceGrid(
-            title: 'Weekly grocery budget',
-            choices: const [r'$75', r'$120', r'$180', 'Custom'],
-            selectedValues: {
-              if (state.weeklyBudget != null) state.weeklyBudget!,
-            },
-            onSelected: notifier.setWeeklyBudget,
-          ),
-          _ChoiceGrid(
-            title: 'Cooking time',
-            choices: const ['15 min', '30 min', '45 min', 'Flexible'],
-            selectedValues: {if (state.cookingTime != null) state.cookingTime!},
-            onSelected: notifier.setCookingTime,
-          ),
-          _ChoiceGrid(
-            title: 'Dietary preferences',
-            choices: const [
-              'High protein',
-              'Vegetarian',
-              'Gluten-free',
-              'Low carb',
-            ],
-            selectedValues: state.dietaryPreferences,
-            onSelected: notifier.toggleDietaryPreference,
-            multiSelect: true,
-          ),
-        ],
-      ),
-      _ => _OnboardingStep(
-        title: 'Choose your goals',
-        subtitle:
-            'Optional pantry setup helps PlatePilot use what you already own.',
-        children: [
-          _ChoiceGrid(
-            title: 'What should PlatePilot optimize for?',
-            choices: const [
-              'Save money',
-              'Eat healthier',
-              'Waste less',
-              'Cook faster',
-            ],
-            selectedValues: state.goals,
-            onSelected: notifier.toggleGoal,
-            multiSelect: true,
-          ),
-          AppCard(
-            color: context.isDark
-                ? ColorTokens.darkElevatedSurface
-                : ColorTokens.surfaceContainerLow,
-            child: Row(
-              children: [
-                const Icon(Icons.inventory_2_outlined),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    'Pantry setup can be finished later from the Pantry tab.',
-                    style: context.text.bodyMedium,
-                  ),
-                ),
-              ],
+          title: 'Let us get to know your household',
+          subtitle:
+              'PlatePilot tunes portions, prep time, and budget around your kitchen.',
+          children: [
+            _ChoiceGrid(
+              title: 'How many people do you usually cook for?',
+              choices: const ['1', '2', '3', '4+'],
+              selectedValues: {
+                if (state.householdSize != null) state.householdSize!,
+              },
+              onSelected: notifier.setHouseholdSize,
             ),
-          ),
-        ],
-      ),
+            _ChoiceGrid(
+              title: 'Cooking profile',
+              choices: const ['Beginner', 'Balanced', 'Batch cook', 'Chef mode'],
+              selectedValues: {
+                if (state.cookingSkill != null) state.cookingSkill!,
+              },
+              onSelected: notifier.setCookingSkill,
+            ),
+          ],
+        ),
+      1 => _OnboardingStep(
+          title: 'Set your budget and boundaries',
+          subtitle: 'Keep meals realistic without losing variety.',
+          children: [
+            _ChoiceGrid(
+              title: 'Weekly grocery budget',
+              choices: const [r'$75', r'$120', r'$180', 'Custom'],
+              selectedValues: {
+                if (state.weeklyBudget != null) state.weeklyBudget!,
+              },
+              onSelected: notifier.setWeeklyBudget,
+            ),
+            _ChoiceGrid(
+              title: 'Cooking time',
+              choices: const ['15 min', '30 min', '45 min', 'Flexible'],
+              selectedValues: {
+                if (state.cookingTime != null) state.cookingTime!,
+              },
+              onSelected: notifier.setCookingTime,
+            ),
+            _ChoiceGrid(
+              title: 'Dietary preferences',
+              choices: const [
+                'High protein',
+                'Vegetarian',
+                'Gluten-free',
+                'Low carb',
+              ],
+              selectedValues: state.dietaryPreferences,
+              onSelected: notifier.toggleDietaryPreference,
+              multiSelect: true,
+            ),
+          ],
+        ),
+      _ => _OnboardingStep(
+          title: 'Choose your goals',
+          subtitle:
+              'Optional pantry setup helps PlatePilot use what you already own.',
+          children: [
+            _ChoiceGrid(
+              title: 'What should PlatePilot optimize for?',
+              choices: const [
+                'Save money',
+                'Eat healthier',
+                'Waste less',
+                'Cook faster',
+              ],
+              selectedValues: state.goals,
+              onSelected: notifier.toggleGoal,
+              multiSelect: true,
+            ),
+            PremiumCard(
+              variant: PremiumCardVariant.glass,
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.inventory_2_outlined,
+                    color: AppColors.primaryAccentGreen,
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Text(
+                      'Pantry setup can be finished later from the Pantry tab.',
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: PremiumTheme.textSecondary(context),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
     };
   }
 
   String _stepLabel(int step) => switch (step) {
-    0 => 'Household setup',
-    1 => 'Budget & constraints',
-    _ => 'Goals & pantry',
-  };
+        0 => 'Household setup',
+        1 => 'Budget & constraints',
+        _ => 'Goals & pantry',
+      };
 }
 
 class _ProgressHeader extends StatelessWidget {
@@ -211,25 +230,23 @@ class _ProgressHeader extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Step ${step + 1} of 3', style: context.text.bodyMedium),
+            Text(
+              'Step ${step + 1} of 3',
+              style: AppTypography.bodyMedium.copyWith(
+                color: PremiumTheme.textSecondary(context),
+              ),
+            ),
             Text(
               label,
-              style: context.text.labelSmall?.copyWith(
-                color: context.colors.primary,
+              style: AppTypography.labelMedium.copyWith(
+                color: AppColors.primaryAccentGreen,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.xs),
-        LinearProgressIndicator(
-          minHeight: 8,
-          value: (step + 1) / 3,
-          borderRadius: BorderRadius.circular(99),
-          color: ColorTokens.primaryGreen,
-          backgroundColor: context.isDark
-              ? ColorTokens.darkElevatedSurface
-              : ColorTokens.surfaceContainer,
-        ),
+        AnimatedProgressBar(value: (step + 1) / 3),
       ],
     );
   }
@@ -251,12 +268,19 @@ class _OnboardingStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: context.text.headlineLarge),
+        const SizedBox(height: AppSpacing.xl),
+        Text(
+          title,
+          style: AppTypography.displaySmall.copyWith(
+            color: PremiumTheme.textPrimary(context),
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
         Text(
           subtitle,
-          style: context.text.bodyLarge?.copyWith(
-            color: context.text.bodyMedium?.color,
+          style: AppTypography.bodyLarge.copyWith(
+            color: PremiumTheme.textSecondary(context),
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -288,46 +312,46 @@ class _ChoiceGrid extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: context.text.headlineSmall),
+          Text(
+            title,
+            style: AppTypography.headlineSmall.copyWith(
+              color: PremiumTheme.textPrimary(context),
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           const SizedBox(height: AppSpacing.md),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               mainAxisSpacing: AppSpacing.md,
               crossAxisSpacing: AppSpacing.md,
-              childAspectRatio: 2.35,
+              childAspectRatio: 2.25,
             ),
             itemCount: choices.length,
             itemBuilder: (context, index) {
               final value = choices[index];
-              final isSelected = selectedValues.contains(value);
-              return AppCard(
+              final selected = selectedValues.contains(value);
+              return SelectableGlassCard(
+                selected: selected,
                 onTap: () {
                   HapticFeedback.selectionClick();
                   onSelected(value);
                 },
-                color: isSelected ? ColorTokens.primaryGreen : null,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (multiSelect && isSelected) ...[
-                      const Icon(
-                        Icons.check_circle,
-                        color: Colors.white,
-                        size: 18,
-                      ),
+                    if (multiSelect && selected) ...[
+                      const Icon(Icons.check_circle, size: 18),
                       const SizedBox(width: AppSpacing.xs),
                     ],
                     Flexible(
                       child: Text(
                         value,
                         textAlign: TextAlign.center,
-                        style: context.text.bodyLarge?.copyWith(
-                          color: isSelected ? Colors.white : null,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],

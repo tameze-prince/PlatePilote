@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/color_tokens.dart';
-import '../../app/theme/app_spacing.dart';
+import '../../core/premium_components.dart';
 import '../../core/extensions/theme_extensions.dart';
 
 class PlateScaffold extends StatelessWidget {
@@ -22,57 +21,50 @@ class PlateScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: showBack
-            ? IconButton(
-                onPressed: () => context.pop(),
-                icon: const Icon(Icons.arrow_back),
-              )
-            : null,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: ColorTokens.primaryGreen,
-                borderRadius: BorderRadius.circular(12),
+      backgroundColor: PremiumTheme.background(context),
+      body: PremiumBackground(
+        safeArea: false,
+        child: SafeArea(
+          child: Column(
+            children: [
+              FloatingHeader(
+                title: title,
+                leading: showBack
+                    ? IconButton(
+                        onPressed: () => context.pop(),
+                        icon: const Icon(Icons.arrow_back),
+                      )
+                    : null,
+                actions: [
+                  ?trailing,
+                  IconButton(
+                    tooltip: 'Search',
+                    onPressed: () => context.push('/search'),
+                    icon: Icon(Icons.search, color: context.colors.primary),
+                  ),
+                  IconButton(
+                    tooltip: 'Notifications',
+                    onPressed: () => context.push('/notifications'),
+                    icon: Icon(
+                      Icons.notifications_outlined,
+                      color: context.colors.primary,
+                    ),
+                  ),
+                ],
               ),
-              child: const Icon(
-                Icons.restaurant_menu,
-                color: Colors.white,
-                size: 20,
+              Expanded(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 680),
+                    child: child,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.xs),
-            Text(title),
-          ],
-        ),
-        actions: [
-          ?trailing,
-          IconButton(
-            onPressed: () => context.push('/search'),
-            icon: Icon(Icons.search, color: context.colors.primary),
-          ),
-          IconButton(
-            onPressed: () => context.push('/notifications'),
-            icon: Icon(
-              Icons.notifications_outlined,
-              color: context.colors.primary,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-        ],
-      ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 680),
-            child: child,
+            ],
           ),
         ),
       ),
+      extendBody: true,
     );
   }
 }

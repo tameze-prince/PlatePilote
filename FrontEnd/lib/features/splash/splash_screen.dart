@@ -30,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.forward();
     Future.delayed(const Duration(milliseconds: 2500), () {
       if (!mounted) return;
-      context.go('/onboarding');
+      context.pushReplacement('/onboarding');
     });
   }
 
@@ -48,6 +48,7 @@ class _SplashScreenState extends State<SplashScreen>
     final text = Theme.of(context).textTheme;
 
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: Padding(

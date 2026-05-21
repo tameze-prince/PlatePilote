@@ -49,9 +49,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final session = ref.read(appSessionProvider);
       final location = state.matchedLocation;
-      final publicRoutes = {'/splash', '/onboarding', '/login', '/signup'};
+      final isPublicRoute = location == '/splash' || 
+                           location == '/onboarding' || 
+                           location == '/login' || 
+                           location == '/signup' ||
+                           location.startsWith('/verify-email') ||
+                           location.startsWith('/forgot-password');
 
-      if (publicRoutes.contains(location)) {
+      if (isPublicRoute) {
         return null;
       }
 
