@@ -21,7 +21,7 @@ class SavingsCard extends StatelessWidget {
               letterSpacing: 0.8,
             ),
           ),
-          const SizedBox(height: AppSpacing.micro),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             r'$142.50',
             style: context.text.displaySmall?.copyWith(
@@ -37,7 +37,7 @@ class SavingsCard extends StatelessWidget {
                 color: ColorTokens.primaryDark,
                 size: 18,
               ),
-              const SizedBox(width: AppSpacing.micro),
+              const SizedBox(width: AppSpacing.xs),
               Text(
                 '12% more than last month',
                 style: context.text.labelSmall?.copyWith(
