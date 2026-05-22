@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../features/pantry/pantry_provider.dart';
-import '../../../shared/models/demo_data.dart';
 import '../../../shared/widgets/form_page.dart';
 import '../../../shared/widgets/plate_scaffold.dart';
 
@@ -18,10 +17,10 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _quantityController = TextEditingController();
-  final _unitController = TextEditingController();
+  final _unitController = TextEditingController(text: 'unit');
   final _expirationController = TextEditingController();
-  final _notesController = TextEditingController();
   String _category = 'Vegetables';
+  DateTime? _expirationDate;
 
   @override
   void dispose() {
@@ -29,7 +28,6 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     _quantityController.dispose();
     _unitController.dispose();
     _expirationController.dispose();
-    _notesController.dispose();
     super.dispose();
   }
 
@@ -41,30 +39,27 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (date != null) {
-      _expirationController.text = '${date.month}/${date.day}/${date.year}';
+      _expirationDate = date;
+      _expirationController.text =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
     }
   }
 
   Future<void> _submit() async {
-    await ref
-        .read(pantryProvider.notifier)
-        .addItem(
-          PantryItem(
-            name: _nameController.text,
-            quantity: '${_quantityController.text} ${_unitController.text}'
-                .trim(),
-            expires: _expirationController.text.isEmpty
-                ? 'No expiration date'
-                : 'Expires ${_expirationController.text}',
-            category: _category,
-            icon: Icons.inventory_2_outlined,
-            urgent: false,
-          ),
-        );
+    if (!_formKey.currentState!.validate()) return;
+    await ref.read(pantryProvider.notifier).addItem(
+      name: _nameController.text,
+      category: _category,
+      quantity: double.tryParse(_quantityController.text) ?? 0,
+      unit: _unitController.text,
+      expirationDate: _expirationDate != null
+          ? '${_expirationDate!.year}-${_expirationDate!.month.toString().padLeft(2, '0')}-${_expirationDate!.day.toString().padLeft(2, '0')}'
+          : null,
+    );
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Pantry item added!')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Pantry item added!')),
+    );
     Navigator.of(context).pop();
   }
 
@@ -116,12 +111,6 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
             ),
             readOnly: true,
             onTap: _pickDate,
-            validator: (v) => v?.isEmpty == true ? 'Required' : null,
-          ),
-          TextFormField(
-            controller: _notesController,
-            maxLines: 3,
-            decoration: const InputDecoration(labelText: 'Notes'),
           ),
         ],
       ),

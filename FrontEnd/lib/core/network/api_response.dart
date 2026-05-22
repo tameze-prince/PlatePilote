@@ -61,9 +61,12 @@ class PageResponse<T> {
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromItem,
   ) {
-    final contentList = (json['content'] as List<dynamic>)
-        .map((e) => fromItem(e as Map<String, dynamic>))
-        .toList();
+    final rawContent = json['content'];
+    final contentList = rawContent is List
+        ? rawContent
+            .map((e) => fromItem(e as Map<String, dynamic>))
+            .toList()
+        : <T>[];
 
     return PageResponse(
       content: contentList,

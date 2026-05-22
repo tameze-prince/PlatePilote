@@ -9,13 +9,32 @@ import '../../app/theme/app_typography.dart';
 import '../../core/premium_components.dart';
 import '../../core/widgets/meal_card.dart';
 import '../../shared/models/demo_data.dart';
+import '../../shared/widgets/shimmer_glass_skeleton.dart';
 import 'meal_plan_provider.dart';
 
-class WeeklyPlanScreen extends ConsumerWidget {
+class WeeklyPlanScreen extends ConsumerStatefulWidget {
   const WeeklyPlanScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WeeklyPlanScreen> createState() => _WeeklyPlanScreenState();
+}
+
+class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
+  bool _didInit = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didInit) {
+      _didInit = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(mealPlanProvider.notifier).refresh();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(mealPlanProvider);
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isTablet = screenWidth >= 600;
@@ -45,17 +64,10 @@ class WeeklyPlanScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.md),
               _buildActionRow(context, ref, state, isTablet, screenWidth),
               const SizedBox(height: AppSpacing.md),
-              if (state.isLoading)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.xxl),
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              else if (state.error != null)
+              if (state.error != null)
                 _buildErrorCard(context, ref)
-              else if (state.isGenerating)
-                _buildGeneratingState(context)
+              else if (state.isLoading || state.isGenerating)
+                _buildGlassSkeleton()
               else ...[
                 ...state.meals.indexed.map(
                   (entry) => Padding(
@@ -73,6 +85,18 @@ class WeeklyPlanScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildGlassSkeleton() {
+    return Column(
+      children: List.generate(7, (i) => Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+        child: ShimmerGlassSkeleton(
+          width: double.infinity,
+          height: 88,
+        ),
+      )),
     );
   }
 
@@ -112,11 +136,13 @@ class WeeklyPlanScreen extends ConsumerWidget {
     final tiles = actions.take(isTablet && screenWidth >= 900 ? 3 : 2).toList();
     return Row(
       children: tiles
-          .map((tile) => Padding(
-                padding: EdgeInsets.only(
-                  right: tiles.last == tile ? 0 : AppSpacing.sm,
+          .map((tile) => Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: tiles.last == tile ? 0 : AppSpacing.sm,
+                  ),
+                  child: tile,
                 ),
-                child: Expanded(child: tile),
               ))
           .toList(),
     );
@@ -153,26 +179,6 @@ class WeeklyPlanScreen extends ConsumerWidget {
                 icon: Icons.refresh,
                 onPressed: () =>
                     ref.read(mealPlanProvider.notifier).refresh(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGeneratingState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        child: Column(
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Generating your perfect week...',
-              style: AppTypography.bodyLarge.copyWith(
-                color: PremiumTheme.textSecondary(context),
               ),
             ),
           ],

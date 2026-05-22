@@ -464,6 +464,7 @@ class GlassTextField extends StatelessWidget {
     this.obscureText = false,
     this.keyboardType,
     this.validator,
+    this.onChanged,
     super.key,
   });
 
@@ -475,6 +476,7 @@ class GlassTextField extends StatelessWidget {
   final bool obscureText;
   final TextInputType? keyboardType;
   final FormFieldValidator<String>? validator;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -487,6 +489,7 @@ class GlassTextField extends StatelessWidget {
           obscureText: obscureText,
           keyboardType: keyboardType,
           validator: validator,
+          onChanged: onChanged,
           style: AppTypography.bodyLarge.copyWith(
             color: PremiumTheme.textPrimary(context),
           ),

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -52,13 +50,11 @@ class MealPlanRepository extends BaseRepository {
     }
   }
 
-  Future<MealPlan> generateWeeklyPlan({String? startDate}) async {
+  Future<MealPlan> generateWeeklyPlan({required String startDate}) async {
     try {
-      final query = <String, dynamic>{};
-      if (startDate != null) query['startDate'] = startDate;
       final response = await apiClient.post(
         '/meal-plans/generate',
-        query: query,
+        query: {'startDate': startDate},
       );
       return handleResponse(response, MealPlan.fromJson);
     } on DioException catch (e) {

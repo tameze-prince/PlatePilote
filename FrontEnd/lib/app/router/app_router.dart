@@ -59,6 +59,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                            location.startsWith('/forgot-password');
 
       if (isPublicRoute) {
+        if (location == '/onboarding' && session.hasSeenOnboarding) {
+          final after = state.uri.queryParameters['after'];
+          if (after == 'signup') return null;
+          return session.isAuthenticated ? '/home' : '/login';
+        }
         return null;
       }
 

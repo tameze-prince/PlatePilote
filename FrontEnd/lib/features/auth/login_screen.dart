@@ -8,6 +8,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 import '../../core/premium_components.dart';
 import '../../core/widgets/social_sign_in_buttons.dart';
+import '../onboarding/onboarding_state.dart';
 import 'providers/auth_provider.dart';
 import 'providers/auth_state.dart';
 
@@ -67,6 +68,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       emailController: _emailController,
       passwordController: _passwordController,
       onSubmit: _onSubmit,
+      onSwitchAuthMode: () {
+        ref.read(onboardingProvider.notifier).reset();
+        context.go('/onboarding?after=signup');
+      },
     );
   }
 }
@@ -138,6 +143,7 @@ class _PremiumSignupScreenState extends ConsumerState<PremiumSignupScreen> {
       emailController: _emailController,
       passwordController: _passwordController,
       onSubmit: _onSubmit,
+      onSwitchAuthMode: () => context.go('/login'),
     );
   }
 }
@@ -152,6 +158,7 @@ class _PremiumAuthShell extends StatefulWidget {
     required this.emailController,
     required this.passwordController,
     required this.onSubmit,
+    this.onSwitchAuthMode,
   });
 
   final bool isSignup;
@@ -162,6 +169,7 @@ class _PremiumAuthShell extends StatefulWidget {
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final Future<void> Function() onSubmit;
+  final VoidCallback? onSwitchAuthMode;
 
   @override
   State<_PremiumAuthShell> createState() => _PremiumAuthShellState();
@@ -291,13 +299,11 @@ class _PremiumAuthShellState extends State<_PremiumAuthShell> {
                             TextButton(
                               onPressed: widget.isLoading
                                   ? null
-                                  : () => context.go(
-                                        widget.isSignup ? '/login' : '/signup',
-                                      ),
+                                  : widget.onSwitchAuthMode,
                               child: Text(
                                 widget.isSignup
                                     ? 'Already have an account? Sign in'
-                                    : 'Do not have an account? Sign up',
+                                    : 'Create new account',
                               ),
                             ),
                           ],

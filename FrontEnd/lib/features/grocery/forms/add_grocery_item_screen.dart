@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../features/grocery/grocery_provider.dart';
-import '../../../shared/models/demo_data.dart';
 import '../../../shared/widgets/form_page.dart';
 import '../../../shared/widgets/plate_scaffold.dart';
 
@@ -18,10 +17,9 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _quantityController = TextEditingController();
-  final _unitController = TextEditingController();
+  final _unitController = TextEditingController(text: 'unit');
   final _costController = TextEditingController();
   String _category = 'Produce';
-  String _priority = 'Normal';
 
   @override
   void dispose() {
@@ -33,23 +31,18 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
   }
 
   Future<void> _submit() async {
-    await ref
-        .read(groceryProvider.notifier)
-        .addItem(
-          GroceryItem(
-            name: _nameController.text,
-            quantity: '${_quantityController.text} ${_unitController.text}'
-                .trim(),
-            price: _costController.text.isEmpty
-                ? r'$0.00'
-                : '\$${_costController.text}',
-            category: _category,
-          ),
-        );
+    if (!_formKey.currentState!.validate()) return;
+    await ref.read(groceryProvider.notifier).addItem(
+      name: _nameController.text,
+      category: _category,
+      quantity: double.tryParse(_quantityController.text) ?? 0,
+      unit: _unitController.text,
+      estimatedPrice: double.tryParse(_costController.text),
+    );
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Grocery item added!')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Grocery item added!')),
+    );
     Navigator.of(context).pop();
   }
 
@@ -88,16 +81,6 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
             ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
             onChanged: (v) => setState(() => _category = v!),
             decoration: const InputDecoration(labelText: 'Category'),
-          ),
-          DropdownButtonFormField<String>(
-            initialValue: _priority,
-            items: const [
-              'Low',
-              'Normal',
-              'High',
-            ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
-            onChanged: (v) => setState(() => _priority = v!),
-            decoration: const InputDecoration(labelText: 'Priority'),
           ),
           TextFormField(
             controller: _costController,

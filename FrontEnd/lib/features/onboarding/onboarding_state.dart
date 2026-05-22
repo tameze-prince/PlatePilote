@@ -98,6 +98,17 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
         .setStringList(_goalsKey, next.toList());
   }
 
+  Future<void> reset() async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.remove(_householdSizeKey);
+    await prefs.remove(_cookingSkillKey);
+    await prefs.remove(_weeklyBudgetKey);
+    await prefs.remove(_cookingTimeKey);
+    await prefs.remove(_dietaryPreferencesKey);
+    await prefs.remove(_goalsKey);
+    state = const OnboardingState();
+  }
+
   Future<void> _setString(String key, OnboardingState next) async {
     state = next;
     final value = switch (key) {

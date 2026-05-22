@@ -1,95 +1,108 @@
-import 'dart:convert';
-
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/providers/preferences_provider.dart';
-import '../../shared/models/demo_data.dart';
+import '../../core/repositories/base_repository.dart';
+import '../../shared/models/demo_data.dart' as demo;
+import '../../shared/models/pantry_item.dart';
+import 'pantry_repository.dart';
 
 class PantryListState {
   const PantryListState({
     this.items = const [],
     this.isLoading = false,
     this.error,
+    this.useDemoFallback = false,
   });
 
   final List<PantryItem> items;
   final bool isLoading;
   final String? error;
+  final bool useDemoFallback;
 
   PantryListState copyWith({
     List<PantryItem>? items,
     bool? isLoading,
     String? error,
+    bool? useDemoFallback,
+    bool clearError = false,
   }) {
     return PantryListState(
       items: items ?? this.items,
       isLoading: isLoading ?? this.isLoading,
-      error: error,
+      error: clearError ? null : (error ?? this.error),
+      useDemoFallback: useDemoFallback ?? this.useDemoFallback,
     );
   }
 }
 
 class PantryNotifier extends Notifier<PantryListState> {
-  static const _key = 'pantry.list';
-
   @override
   PantryListState build() {
-    final prefs = ref.watch(sharedPreferencesProvider);
-    final stored = prefs.getString(_key);
-    if (stored != null) {
-      final list = (json.decode(stored) as List)
-          .map((e) => _pantryItemFromJson(e as Map<String, dynamic>))
-          .toList();
-      return PantryListState(items: list);
-    }
-    return const PantryListState(items: pantryItems);
-  }
-
-  Future<void> addItem(PantryItem item) async {
-    state = PantryListState(items: [...state.items, item]);
-    await _persist();
-  }
-
-  Future<void> removeItem(int index) async {
-    final items = [...state.items]..removeAt(index);
-    state = PantryListState(items: items);
-    await _persist();
-  }
-
-  PantryListState filterByCategory(String category) {
-    if (category.isEmpty) return state;
-    final filtered = state.items
-        .where((item) => item.category.toLowerCase() == category.toLowerCase())
-        .toList();
-    return PantryListState(items: filtered);
-  }
-
-  Future<void> _persist() async {
-    final encoded = state.items.map(_pantryItemToJson).toList();
-    await ref
-        .read(sharedPreferencesProvider)
-        .setString(_key, jsonEncode(encoded));
-  }
-
-  Map<String, dynamic> _pantryItemToJson(PantryItem item) => {
-    'name': item.name,
-    'quantity': item.quantity,
-    'expires': item.expires,
-    'category': item.category,
-    'iconCodePoint': item.icon.codePoint,
-    'urgent': item.urgent,
-  };
-
-  PantryItem _pantryItemFromJson(Map<String, dynamic> json) {
-    return PantryItem(
-      name: json['name'] as String,
-      quantity: json['quantity'] as String,
-      expires: json['expires'] as String,
-      category: json['category'] as String,
-      icon: IconData(json['iconCodePoint'] as int, fontFamily: 'MaterialIcons'),
-      urgent: json['urgent'] as bool,
+    Future.microtask(() => _loadItems());
+    return PantryListState(
+      items: _demoItems,
+      isLoading: true,
+      useDemoFallback: true,
     );
+  }
+
+  static final List<PantryItem> _demoItems =
+      demo.pantryItems.map((d) => PantryItem(
+        id: d.name.hashCode.toString(),
+        name: d.name,
+        quantity: double.tryParse(d.quantity),
+        unit: 'unit',
+        category: d.category,
+        expirationDate: d.expires,
+        isExpired: d.urgent,
+      )).toList();
+
+  Future<void> _loadItems() async {
+    try {
+      final repo = ref.read(pantryRepositoryProvider);
+      final page = await repo.listPantryItems(size: 50);
+      if (page.content.isNotEmpty) {
+        state = PantryListState(items: page.content);
+      }
+    } on ApiException {
+      state = PantryListState(items: _demoItems, useDemoFallback: true);
+    }
+  }
+
+  Future<void> refresh() => _loadItems();
+
+  Future<void> addItem({
+    required String name,
+    String? category,
+    required double quantity,
+    required String unit,
+    String? expirationDate,
+  }) async {
+    try {
+      final repo = ref.read(pantryRepositoryProvider);
+      final item = await repo.addItem(
+        name: name,
+        category: category,
+        quantity: quantity,
+        unit: unit,
+        expirationDate: expirationDate,
+      );
+      state = state.copyWith(items: [...state.items, item]);
+    } on ApiException catch (e) {
+      state = state.copyWith(error: e.message);
+    }
+  }
+
+  Future<void> deleteItem(int index) async {
+    if (index >= state.items.length) return;
+    final item = state.items[index];
+    if (item.id.isEmpty) return;
+    try {
+      await ref.read(pantryRepositoryProvider).deleteItem(item.id);
+      final updated = [...state.items]..removeAt(index);
+      state = state.copyWith(items: updated);
+    } on ApiException catch (e) {
+      state = state.copyWith(error: e.message);
+    }
   }
 }
 

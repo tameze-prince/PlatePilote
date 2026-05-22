@@ -99,7 +99,9 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     HapticFeedback.selectionClick();
     if (step == 2) {
       await ref.read(appSessionProvider.notifier).completeOnboarding();
-      if (mounted) context.go('/login');
+      if (!mounted) return;
+      final after = GoRouterState.of(context).uri.queryParameters['after'];
+      context.go(after == 'signup' ? '/signup' : '/login');
       return;
     }
     setState(() => step += 1);

@@ -134,8 +134,8 @@ class ApiClient {
     return _dio.put(path, data: data);
   }
 
-  Future<Response<dynamic>> patch(String path, {Object? data}) {
-    return _dio.patch(path, data: data);
+  Future<Response<dynamic>> patch(String path, {Object? data, Map<String, dynamic>? query}) {
+    return _dio.patch(path, data: data, queryParameters: query);
   }
 
   Future<Response<dynamic>> delete(String path) {

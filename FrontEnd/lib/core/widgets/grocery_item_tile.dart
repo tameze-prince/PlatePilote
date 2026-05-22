@@ -2,29 +2,28 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
-import '../../shared/models/demo_data.dart';
+import '../../shared/models/grocery_list.dart';
 import 'app_card.dart';
 
-class GroceryItemTile extends StatefulWidget {
-  const GroceryItemTile({required this.item, super.key});
+class GroceryItemTile extends StatelessWidget {
+  const GroceryItemTile({
+    required this.item,
+    this.onToggle,
+    super.key,
+  });
 
   final GroceryItem item;
-
-  @override
-  State<GroceryItemTile> createState() => _GroceryItemTileState();
-}
-
-class _GroceryItemTileState extends State<GroceryItemTile> {
-  late bool _checked;
-
-  @override
-  void initState() {
-    super.initState();
-    _checked = widget.item.checked;
-  }
+  final void Function()? onToggle;
 
   @override
   Widget build(BuildContext context) {
+    final qty = item.quantity != null
+        ? '${item.quantity} ${item.unit ?? ''}'.trim()
+        : '';
+    final price = item.estimatedPrice != null
+        ? '\$${item.estimatedPrice!.toStringAsFixed(2)}'
+        : '';
+
     return AppCard(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -33,8 +32,8 @@ class _GroceryItemTileState extends State<GroceryItemTile> {
       child: Row(
         children: [
           Checkbox(
-            value: _checked,
-            onChanged: (v) => setState(() => _checked = v ?? false),
+            value: item.checked,
+            onChanged: (_) => onToggle?.call(),
           ),
           const SizedBox(width: AppSpacing.xs),
           Expanded(
@@ -42,28 +41,30 @@ class _GroceryItemTileState extends State<GroceryItemTile> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.item.name,
+                  item.name,
                   style: context.text.bodyLarge?.copyWith(
-                    decoration: _checked ? TextDecoration.lineThrough : null,
-                    color: _checked ? context.text.bodyMedium?.color : null,
+                    decoration: item.checked ? TextDecoration.lineThrough : null,
+                    color: item.checked ? context.text.bodyMedium?.color : null,
                   ),
                 ),
-                Text(
-                  'Qty: ${widget.item.quantity}',
-                  style: context.text.bodyMedium?.copyWith(
-                    decoration: _checked ? TextDecoration.lineThrough : null,
-                    color: _checked ? context.text.bodyMedium?.color : null,
+                if (qty.isNotEmpty)
+                  Text(
+                    'Qty: $qty',
+                    style: context.text.bodyMedium?.copyWith(
+                      decoration: item.checked ? TextDecoration.lineThrough : null,
+                      color: item.checked ? context.text.bodyMedium?.color : null,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
-          Text(
-            widget.item.price,
-            style: context.text.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w700,
+          if (price.isNotEmpty)
+            Text(
+              price,
+              style: context.text.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
         ],
       ),
     );

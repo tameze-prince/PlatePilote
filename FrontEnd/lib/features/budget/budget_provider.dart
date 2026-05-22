@@ -1,83 +1,116 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/providers/preferences_provider.dart';
+import '../../core/repositories/base_repository.dart';
+import '../../shared/models/budget.dart';
+import 'budget_repository.dart';
 
 class BudgetState {
   const BudgetState({
-    required this.weeklyBudget,
-    required this.spentAmount,
-    required this.history,
+    this.currentBudget,
+    this.weeklyBudget = 400,
+    this.spentAmount = 0,
+    this.history = const [],
+    this.isLoading = false,
+    this.error,
+    this.useDemoFallback = false,
   });
 
+  final Budget? currentBudget;
   final double weeklyBudget;
   final double spentAmount;
   final List<double> history;
+  final bool isLoading;
+  final String? error;
+  final bool useDemoFallback;
 
   double get remaining => weeklyBudget - spentAmount;
-  double get percentUsed => weeklyBudget == 0 ? 0 : spentAmount / weeklyBudget;
+  double get percentUsed => weeklyBudget > 0 ? (spentAmount / weeklyBudget).clamp(0, 1) : 0;
 
   BudgetState copyWith({
+    Budget? currentBudget,
     double? weeklyBudget,
     double? spentAmount,
     List<double>? history,
+    bool? isLoading,
+    String? error,
+    bool? useDemoFallback,
+    bool clearError = false,
   }) {
     return BudgetState(
+      currentBudget: currentBudget ?? this.currentBudget,
       weeklyBudget: weeklyBudget ?? this.weeklyBudget,
       spentAmount: spentAmount ?? this.spentAmount,
       history: history ?? this.history,
+      isLoading: isLoading ?? this.isLoading,
+      error: clearError ? null : (error ?? this.error),
+      useDemoFallback: useDemoFallback ?? this.useDemoFallback,
     );
   }
 }
 
 class BudgetNotifier extends Notifier<BudgetState> {
-  static const _budgetKey = 'budget.weeklyBudget';
-  static const _spentKey = 'budget.spentAmount';
-  static const _historyKey = 'budget.history';
-
   @override
   BudgetState build() {
-    final prefs = ref.watch(sharedPreferencesProvider);
-    return BudgetState(
-      weeklyBudget: prefs.getDouble(_budgetKey) ?? 400,
-      spentAmount: prefs.getDouble(_spentKey) ?? 144,
-      history: (prefs.getStringList(_historyKey) ?? [])
-          .map((e) => double.parse(e))
-          .toList(),
-    );
+    Future.microtask(() => _loadBudget());
+    return const BudgetState(isLoading: true, useDemoFallback: true);
   }
 
-  Future<void> setBudget(double value) async {
-    state = state.copyWith(weeklyBudget: value);
-    await _persist();
+  Future<void> _loadBudget() async {
+    try {
+      final repo = ref.read(budgetRepositoryProvider);
+      final page = await repo.listBudgets(size: 1);
+      if (page.content.isNotEmpty) {
+        final budget = page.content.first;
+        state = BudgetState(
+          currentBudget: budget,
+          weeklyBudget: budget.amount ?? 400,
+        );
+      }
+    } on ApiException {
+      state = const BudgetState(useDemoFallback: true);
+    }
   }
 
-  Future<void> increaseBudget(double value) async {
-    state = state.copyWith(weeklyBudget: state.weeklyBudget + value);
-    await _persist();
+  Future<void> createBudget({required double amount, String period = 'WEEKLY'}) async {
+    final now = DateTime.now();
+    final startDate = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    try {
+      final repo = ref.read(budgetRepositoryProvider);
+      final budget = await repo.createBudget(
+        amount: amount,
+        period: period,
+        startDate: startDate,
+      );
+      state = BudgetState(
+        currentBudget: budget,
+        weeklyBudget: budget.amount ?? amount,
+      );
+    } on ApiException catch (e) {
+      state = state.copyWith(weeklyBudget: amount, error: e.message);
+    }
   }
 
-  Future<void> replaceBudget(double value) async {
-    state = state.copyWith(weeklyBudget: value, spentAmount: 0);
-    await _persist();
-  }
-
-  Future<void> resetCycle() async {
+  void increaseBudget(double value) {
     state = state.copyWith(
-      spentAmount: 0,
-      history: [...state.history, state.spentAmount],
+      weeklyBudget: state.weeklyBudget + value,
     );
-    await _persist();
   }
 
-  Future<void> _persist() async {
-    final prefs = ref.read(sharedPreferencesProvider);
-    await prefs.setDouble(_budgetKey, state.weeklyBudget);
-    await prefs.setDouble(_spentKey, state.spentAmount);
-    await prefs.setStringList(
-      _historyKey,
-      state.history.map((e) => e.toString()).toList(),
+  void replaceBudget(double value) {
+    state = state.copyWith(
+      weeklyBudget: value,
+      spentAmount: 0,
     );
   }
+
+  void resetCycle() {
+    state = state.copyWith(
+      history: [...state.history, state.spentAmount],
+      spentAmount: 0,
+    );
+  }
+
+  Future<void> refresh() => _loadBudget();
 }
 
 final budgetProvider = NotifierProvider<BudgetNotifier, BudgetState>(

@@ -46,12 +46,19 @@ class MealPlanState {
 class MealPlanNotifier extends Notifier<MealPlanState> {
   @override
   MealPlanState build() {
-    _loadCurrentPlan();
-    return const MealPlanState(isLoading: true);
+    Future.microtask(() => _loadCurrentPlan());
+    return const MealPlanState(
+      meals: demoMeals,
+      isLoading: true,
+      useDemoFallback: true,
+    );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  String _nextMonday() {
+    final now = DateTime.now();
+    final daysUntilMonday = (DateTime.monday - now.weekday + 7) % 7;
+    final monday = now.add(Duration(days: daysUntilMonday == 0 ? 7 : daysUntilMonday));
+    return '${monday.year}-${monday.month.toString().padLeft(2, '0')}-${monday.day.toString().padLeft(2, '0')}';
   }
 
   List<Meal> _entriesToMeals(List<MealPlanEntry> entries) {
@@ -73,39 +80,31 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
   }
 
   Future<void> _loadCurrentPlan() async {
-    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final repo = ref.read(mealPlanRepositoryProvider);
       final page = await repo.listMealPlans(size: 1);
       if (page.content.isNotEmpty) {
         final plan = page.content.first;
         final meals = _entriesToMeals(plan.entries);
-        state = state.copyWith(
+        state = MealPlanState(
           currentPlan: plan,
           meals: meals,
-          isLoading: false,
         );
-      } else {
-        state = const MealPlanState(meals: demoMeals, useDemoFallback: true);
       }
     } on ApiException {
       state = const MealPlanState(meals: demoMeals, useDemoFallback: true);
     }
   }
 
-  Future<void> generateNewPlan({DateTime? startDate}) async {
+  Future<void> generateNewPlan() async {
     state = state.copyWith(isGenerating: true, clearError: true);
     try {
       final repo = ref.read(mealPlanRepositoryProvider);
-      final plan = await repo.generateWeeklyPlan(
-        startDate: startDate != null ? _formatDate(startDate) : null,
-      );
+      final plan = await repo.generateWeeklyPlan(startDate: _nextMonday());
       final meals = _entriesToMeals(plan.entries);
-      state = state.copyWith(
+      state = MealPlanState(
         currentPlan: plan,
         meals: meals,
-        isGenerating: false,
-        useDemoFallback: false,
       );
     } on ApiException catch (e) {
       state = state.copyWith(
