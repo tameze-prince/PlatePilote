@@ -1,445 +1,893 @@
-# PlatePilot Design System
+# PlatePilot — Documentation Complète Produit & Architecture
 
-##  A Modern Material 3 Design System for Flutter
-
-A comprehensive, production-ready design system built for PlatePilot, designed to create cohesive, accessible, and delightful user experiences across all platforms.
-
-## ✨ Features
-
-- **Material 3 Compliant**: Full implementation of Material Design 3 guidelines
-- **Theme-Aware**: Automatic light/dark mode support
-- **Accessible**: WCAG 2.1 AA compliant
-- **Performant**: Optimized for 60fps animations
-- **Consistent**: Unified patterns across all screens
-- **Extensible**: Easy to customize and extend
-
-## 📦 Installation
-
-The design system is already integrated into the PlatePilot project. No additional installation required.
-
-## 🚀 Quick Start
-
-### 1. Use Theme-Aware Colors
-```dart
-import 'package:plate_pilote/app/theme/app_colors.dart';
-
-// Light mode: #006E2F, Dark mode: #22C55E
-final color = Theme.of(context).colorScheme.primary;
-
-// Or use direct colors
-final primary = AppColors.primary;
-final primaryLight = AppColors.primaryLight;
-```
-
-### 2. Use Typography
-```dart
-import 'package:plate_pilote/app/theme/app_typography.dart';
-
-Text(
-  'Hello World',
-  style: AppTypography.headlineMedium.copyWith(
-    fontWeight: FontWeight.w600,
-  ),
-)
-```
-
-### 3. Use Spacing
-```dart
-import 'package:plate_pilote/app/theme/app_spacing.dart';
-
-Padding(
-  padding: const EdgeInsets.all(AppSpacing.md),
-  child: Text('Content'),
-)
-```
-
-### 4. Use Radius
-```dart
-import 'package:plate_pilote/app/theme/app_radius.dart';
-
-Container(
-  decoration: BoxDecoration(
-    borderRadius: BorderRadius.circular(AppRadius.card),
-  ),
-  child: Text('Card'),
-)
-```
-
-### 5. Use Modern Components
-```dart
-import 'package:plate_pilote/core/widgets/modern_components.dart';
-
-ModernCard(
-  title: 'Card Title',
-  subtitle: 'Card subtitle',
-  child: Text('Content'),
-  onTap: () {},
-)
-```
-
-## 📚 Documentation
-
-- [Design System Guide](DESIGN_SYSTEM.md) - Complete design system documentation
-- [Migration Guide](MIGRATION_GUIDE.md) - How to migrate from v1 to v2
-- [Component Reference](lib/core/widgets/) - All available components
-
-## 🎯 Design Principles
-
-### Clarity
-Every element serves a purpose. No decorative elements without function.
-
-### Consistency
-Unified patterns across all screens. Same interaction, same result.
-
-### Accessibility
-WCAG 2.1 AA compliant. Works for everyone.
-
-### Delight
-Subtle animations and micro-interactions that make the app feel alive.
-
-### Performance
-Optimized for smooth 60fps experience on all devices.
-
-## 🏗️ Architecture
-
-```
-lib/
-├── app/
-│   └── theme/
-│       ├── app_colors.dart      # Color system
-│       ├── app_typography.dart  # Typography system
-│       ├── app_spacing.dart     # Spacing system
-│       ├── app_radius.dart      # Radius system
-│       ├── app_elevation.dart   # Elevation system
-│       ├── app_animations.dart  # Animation system
-│       ├── light_theme.dart     # Light theme
-│       ├── dark_theme.dart      # Dark theme
-│       └── app_theme.dart       # Theme provider
-├── core/
-│   └── widgets/
-│       ├── modern_components.dart  # Modern UI components
-│       ├── modern_animations.dart  # Animated components
-│       └── modern_app_shell.dart   # App shell components
-└── features/
-    └── design_system_demo/         # Demo screen
-```
-
-## 🎨 Color System
-
-### Primary Palette
-| Role | Light | Dark |
-|------|-------|------|
-| Primary | `#006E2F` | `#22C55E` |
-| Primary Container | `#22C55E` (10%) | `#006E2F` (20%) |
-
-### Secondary Palette
-| Role | Light | Dark |
-|------|-------|------|
-| Secondary | `#F59E0B` | `#FBBF24` |
-| Tertiary | `#3B82F6` | `#3B82F6` |
-
-### Functional Colors
-| Role | Value |
-|------|-------|
-| Success | `#22C55E` |
-| Warning | `#F59E0B` |
-| Error | `#EF4444` |
-| Info | `#3B82F6` |
-
-## 🔤 Typography
-
-### Type Scale
-| Style | Size | Weight |
-|-------|------|--------|
-| Display Large | 32px | 800 |
-| Display Medium | 28px | 700 |
-| Display Small | 24px | 700 |
-| Headline Large | 22px | 700 |
-| Headline Medium | 20px | 600 |
-| Headline Small | 18px | 600 |
-| Title Large | 16px | 600 |
-| Title Medium | 14px | 600 |
-| Title Small | 12px | 600 |
-| Body Large | 16px | 400 |
-| Body Medium | 14px | 400 |
-| Body Small | 12px | 400 |
-| Label Large | 14px | 500 |
-| Label Medium | 12px | 500 |
-| Label Small | 11px | 500 |
-
-## 📐 Spacing System
-
-### Base Unit: 4px
-| Token | Value |
-|-------|-------|
-| xxxs | 2px |
-| xxs | 4px |
-| xs | 8px |
-| sm | 12px |
-| md | 16px |
-| lg | 24px |
-| xl | 32px |
-| xxl | 48px |
-| xxxl | 64px |
-| section | 80px |
-
-## 🔲 Radius System
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| none | 0px | Sharp edges |
-| xs | 4px | Small elements |
-| sm | 8px | Chips, badges |
-| md | 12px | Inputs, buttons |
-| lg | 16px | Large buttons |
-| xl | 24px | Cards, dialogs |
-| xxl | 32px | Modals |
-| full | 9999px | Pills, avatars |
-
-## 📊 Elevation System
-
-| Level | Value | Usage |
-|-------|-------|-------|
-| none | 0 | Flat elements |
-| level1 | 1 | Cards, chips |
-| level2 | 2 | Buttons, app bars |
-| level3 | 3 | FABs, navigation |
-| level4 | 4 | Dialogs, modals |
-| level5 | 5 | Snackbars, tooltips |
-
-## 🎬 Animation System
-
-### Durations
-| Token | Value | Usage |
-|-------|-------|-------|
-| fast | 150ms | Micro-interactions |
-| normal | 300ms | Standard transitions |
-| slow | 500ms | Progress indicators |
-| verySlow | 800ms | Hero animations |
-
-### Curves
-| Token | Curve | Usage |
-|-------|-------|-------|
-| standard | `Curves.easeInOut` | Default transitions |
-| decelerate | `Curves.easeOut` | Enter animations |
-| accelerate | `Curves.easeIn` | Exit animations |
-| elastic | `Curves.elasticOut` | Playful interactions |
-| bounce | `Curves.bounceOut` | Success states |
-
-## 🧩 Components
-
-### ModernCard
-A versatile card component with optional header, badge, and actions.
-
-```dart
-ModernCard(
-  title: 'Card Title',
-  subtitle: 'Card subtitle',
-  leading: Icon(Icons.eco),
-  trailing: Icon(Icons.arrow_forward),
-  badge: Badge(label: 'New'),
-  child: Text('Card content'),
-  onTap: () {},
-)
-```
-
-### StatCard
-A card for displaying metrics with icon, label, and value.
-
-```dart
-StatCard(
-  icon: Icons.savings,
-  label: 'Total Saved',
-  value: '\$142.50',
-  color: AppColors.primaryLight,
-  onTap: () {},
-)
-```
-
-### ProgressCard
-A card with visual progress indicator.
-
-```dart
-ProgressCard(
-  icon: Icons.account_balance_wallet,
-  label: 'Weekly Budget',
-  value: '\$256 / \$400',
-  progress: 0.64,
-  maxValue: 400,
-)
-```
-
-### InfoCard
-A card with icon, title, and description.
-
-```dart
-InfoCard(
-  icon: Icons.eco,
-  title: 'Pantry Optimization',
-  description: 'Use what you have first',
-  trailing: Icon(Icons.arrow_forward_ios),
-  onTap: () {},
-)
-```
-
-### AlertCard
-A card for warnings and notifications.
-
-```dart
-AlertCard(
-  type: AlertType.success,
-  title: 'Success',
-  message: 'Operation completed',
-  actions: [
-    TextButton(
-      onPressed: () {},
-      child: Text('OK'),
-    ),
-  ],
-)
-```
-
-### AnimatedButton
-A button with press animation.
-
-```dart
-AnimatedButton(
-  onPressed: () {},
-  child: Text('Click Me'),
-)
-```
-
-### AnimatedCard
-A card with hover animation.
-
-```dart
-AnimatedCard(
-  onTap: () {},
-  child: Text('Hover me'),
-)
-```
-
-### AnimatedListItem
-A list item with slide-in animation.
-
-```dart
-AnimatedListItem(
-  delay: index,
-  child: ListTile(
-    title: Text('Item $index'),
-  ),
-)
-```
-
-### AnimatedProgressIndicator
-A progress indicator with smooth animation.
-
-```dart
-AnimatedProgressIndicator(
-  value: 0.64,
-  minHeight: 8,
-)
-```
-
-### AnimatedCounter
-A counter with smooth animation.
-
-```dart
-AnimatedCounter(
-  value: 142.50,
-  style: AppTypography.headlineSmall,
-)
-```
-
-### AnimatedIconButton
-An icon button with press animation.
-
-```dart
-AnimatedIconButton(
-  icon: Icons.favorite,
-  onPressed: () {},
-)
-```
-
-## 🌗 Dark Mode
-
-The design system automatically adapts to dark mode. All colors, surfaces, and text are theme-aware.
-
-```dart
-final theme = Theme.of(context);
-final isDark = theme.brightness == Brightness.dark;
-
-// Theme-aware color
-final color = isDark ? AppColors.darkOnSurface : AppColors.onSurface;
-```
-
-## ♿ Accessibility
-
-### Contrast Ratios
-- Primary text on surface: 16.1:1 (AAA)
-- Secondary text on surface: 5.7:1 (AA)
-- Primary on primary container: 4.6:1 (AA)
-- Error on surface: 4.5:1 (AA)
-
-### Touch Targets
-- Minimum size: 48x48px
-- Spacing between targets: 8px
-- Icon buttons: 48x48px minimum
-
-### Semantic Labels
-- All icons have semantic labels
-- Form inputs have associated labels
-- Buttons have descriptive text
-- Images have alt text
-
-## 📱 Responsive Design
-
-### Breakpoints
-| Name | Width | Usage |
-|------|-------|-------|
-| Phone | < 600px | Single column, bottom navigation |
-| Tablet | 600-840px | Two columns, optional side navigation |
-| Desktop | > 840px | Three columns, side navigation |
-
-## 🧪 Testing
-
-### Visual Testing
-- Run the app in both light and dark modes
-- Check all screens for consistency
-- Verify animations work smoothly
-- Test on different screen sizes
-
-### Accessibility Testing
-- Check contrast ratios
-- Verify touch target sizes
-- Test with screen readers
-- Check color blindness compatibility
-
-### Performance Testing
-- Monitor frame rates
-- Check memory usage
-- Verify animation smoothness
-- Test on low-end devices
-
-##  Contributing
-
-1. Follow the design system guidelines
-2. Use semantic values (spacing, radius, elevation)
-3. Use theme-aware colors
-4. Add animations where appropriate
-5. Test in both light and dark modes
-6. Ensure accessibility compliance
-
-## 📝 License
-
-This design system is part of the PlatePilot project and is proprietary.
-
-## 🙏 Acknowledgments
-
-- Material Design 3 guidelines
-- Figma community designs
-- Flutter team for the amazing framework
+## Vision Produit, Fonctionnement, Architecture et Stratégie Technique
 
 ---
 
-Built with ❤️ by the PlatePilot team
+# 1. Introduction
+
+## 1.1 Qu’est-ce que PlatePilot ?
+
+PlatePilot est une plateforme SaaS intelligente de planification alimentaire et de gestion des courses alimentée par l’IA et des moteurs de recommandation déterministes.
+
+L’objectif principal du produit est de réduire la charge mentale liée à :
+
+* la planification des repas,
+* les courses alimentaires,
+* la gestion du budget,
+* la gestion du pantry (stock alimentaire),
+* le gaspillage alimentaire,
+* les restrictions alimentaires,
+* et les décisions quotidiennes liées à la nourriture.
+
+PlatePilot agit comme un assistant personnel intelligent capable de recommander automatiquement des repas, générer des listes de courses et optimiser les dépenses alimentaires selon les contraintes réelles de l’utilisateur.
+
+---
+
+# 2. Le Problème
+
+## 2.1 La Charge Mentale Alimentaire
+
+Aujourd’hui, des millions de personnes passent énormément de temps à décider :
+
+* quoi cuisiner,
+* quoi acheter,
+* comment respecter leur budget,
+* comment éviter le gaspillage,
+* comment manger plus sainement,
+* comment respecter leurs allergies et contraintes alimentaires.
+
+Cette problématique devient encore plus complexe lorsque l’utilisateur doit prendre en compte :
+
+* la taille du foyer,
+* le temps disponible,
+* les préférences culinaires,
+* les ingrédients déjà présents à la maison,
+* le niveau de cuisine,
+* les objectifs nutritionnels,
+* les restrictions religieuses ou médicales.
+
+---
+
+## 2.2 Les Problèmes des Solutions Existantes
+
+La majorité des applications existantes présentent plusieurs limites :
+
+### Applications de recettes
+
+* Ne prennent pas en compte le budget.
+* Ne prennent pas en compte le pantry.
+* Ne personnalisent pas réellement les recommandations.
+
+### Applications de courses
+
+* Ne génèrent pas intelligemment les repas.
+* Ne comprennent pas les contraintes utilisateur.
+
+### Applications nutritionnelles
+
+* Souvent trop complexes.
+* Peu orientées usage quotidien.
+* Manque d’automatisation.
+
+### Applications de meal planning
+
+* Peu intelligentes.
+* Peu flexibles.
+* Expérience utilisateur souvent froide ou enterprise.
+
+---
+
+# 3. Notre Vision
+
+## 3.1 Vision Produit
+
+PlatePilot veut devenir :
+
+> “Le copilote intelligent de l’alimentation quotidienne.”
+
+L’application doit permettre à un utilisateur de recevoir en moins d’une minute :
+
+* un plan de repas personnalisé,
+* une liste de courses optimisée,
+* des suggestions adaptées à son budget,
+* des recommandations respectant toutes ses contraintes.
+
+---
+
+## 3.2 Notre Objectif
+
+Nous voulons créer une application qui :
+
+* simplifie radicalement les décisions alimentaires,
+* réduit le stress lié aux repas,
+* réduit le gaspillage alimentaire,
+* optimise les dépenses,
+* améliore l’organisation du foyer,
+* et transforme la planification alimentaire en expérience simple et intelligente.
+
+---
+
+# 4. La Promesse de PlatePilot
+
+## 4.1 Promesse Principale
+
+> “En moins d’une minute, PlatePilot crée un plan de repas intelligent et une liste de courses personnalisée selon votre budget, vos goûts et les ingrédients déjà disponibles chez vous.”
+
+---
+
+## 4.2 Valeur Ajoutée
+
+PlatePilot aide les utilisateurs à :
+
+* économiser du temps,
+* économiser de l’argent,
+* réduire le gaspillage,
+* mieux manger,
+* automatiser l’organisation des repas,
+* gérer les allergies et restrictions,
+* simplifier les courses.
+
+---
+
+# 5. Comment PlatePilot Résout le Problème
+
+## 5.1 Intelligence Personnalisée
+
+PlatePilot ne fonctionne pas comme une simple application de recettes.
+
+Le système utilise :
+
+* les préférences utilisateur,
+* les contraintes budgétaires,
+* le pantry,
+* les allergies,
+* les objectifs,
+* le temps disponible,
+* les cuisines préférées,
+* les habitudes utilisateur,
+* et les données alimentaires structurées.
+
+Toutes ces informations sont utilisées pour générer des recommandations cohérentes et réellement utiles.
+
+---
+
+## 5.2 Recommendation Engine
+
+Le moteur de recommandation est le cœur du produit.
+
+Il applique des règles déterministes afin de :
+
+1. filtrer les recettes incompatibles,
+2. estimer les coûts,
+3. maximiser l’utilisation du pantry,
+4. respecter le budget,
+5. respecter les allergies,
+6. respecter le temps disponible,
+7. optimiser la variété des repas.
+
+---
+
+## 5.3 Pantry Intelligence
+
+PlatePilot peut utiliser :
+
+* des entrées manuelles,
+* du scan OCR,
+* du scan barcode,
+* et des données alimentaires structurées.
+
+Cela permet au système de comprendre :
+
+* quels ingrédients sont déjà disponibles,
+* quels ingrédients expirent bientôt,
+* quels ingrédients doivent être utilisés rapidement.
+
+---
+
+## 5.4 Budget Optimization
+
+Le moteur d’optimisation budgétaire permet de :
+
+* rester dans un budget hebdomadaire,
+* minimiser les dépenses,
+* proposer des repas plus rentables,
+* réduire les achats inutiles.
+
+---
+
+# 6. Comment Fonctionne PlatePilot
+
+## 6.1 Workflow Global
+
+Le fonctionnement du produit suit plusieurs étapes.
+
+### Étape 1 — Onboarding
+
+L’utilisateur fournit ses informations :
+
+* taille du foyer,
+* budget,
+* allergies,
+* cuisines préférées,
+* niveau de cuisine,
+* temps disponible,
+* objectifs alimentaires.
+
+---
+
+### Étape 2 — Gestion du Pantry
+
+L’utilisateur peut :
+
+* ajouter des ingrédients,
+* scanner des produits,
+* modifier les quantités,
+* suivre les dates d’expiration.
+
+---
+
+### Étape 3 — Génération du Meal Plan
+
+Le moteur de recommandation :
+
+* charge les recettes,
+* applique les contraintes,
+* estime les coûts,
+* sélectionne les meilleures combinaisons.
+
+---
+
+### Étape 4 — Génération de la Grocery List
+
+Le système compare :
+
+* les ingrédients nécessaires,
+* les ingrédients déjà disponibles.
+
+Puis génère uniquement les produits manquants.
+
+---
+
+### Étape 5 — Optimisation Continue
+
+PlatePilot peut ensuite :
+
+* ajuster les recommandations,
+* détecter le gaspillage,
+* recalculer les suggestions,
+* adapter les repas au budget restant.
+
+---
+
+# 7. Informations Nécessaires Pour des Recommandations Précises
+
+## 7.1 Informations Personnelles
+
+Certaines données personnelles permettent d’améliorer les recommandations.
+
+### Informations utilisateur
+
+* nom,
+* âge,
+* genre,
+* taille,
+* poids,
+* photo de profil.
+
+Ces données peuvent servir plus tard à :
+
+* l’analyse nutritionnelle,
+* l’estimation calorique,
+* les objectifs santé.
+
+---
+
+## 7.2 Informations de Préférences
+
+Le système a besoin de :
+
+### Foyer
+
+* nombre de personnes,
+* adultes,
+* enfants.
+
+### Budget
+
+* budget hebdomadaire,
+* flexibilité budgétaire.
+
+### Cuisine
+
+* niveau de cuisine,
+* temps maximum,
+* complexité acceptable.
+
+### Régimes alimentaires
+
+* vegan,
+* végétarien,
+* halal,
+* keto,
+* low-carb,
+* sans gluten,
+* sans lactose.
+
+### Allergies
+
+* noix,
+* poisson,
+* lactose,
+* gluten,
+* soja,
+* œufs,
+* shellfish.
+
+### Préférences culinaires
+
+* cuisines africaines,
+* asiatiques,
+* européennes,
+* méditerranéennes,
+* américaines,
+* indiennes.
+
+### Objectifs
+
+* perdre du poids,
+* gagner du muscle,
+* économiser,
+* manger plus sainement,
+* réduire le gaspillage.
+
+---
+
+# 8. Les Fonctionnalités Principales
+
+## 8.1 Authentification
+
+PlatePilot supporte :
+
+* inscription,
+* connexion,
+* JWT,
+* refresh tokens,
+* OAuth2,
+* vérification email,
+* reset password.
+
+---
+
+## 8.2 Gestion du Profil
+
+L’utilisateur peut :
+
+* modifier son profil,
+* modifier ses informations,
+* gérer son avatar,
+* supprimer son compte,
+* se déconnecter.
+
+---
+
+## 8.3 Préférences Alimentaires
+
+Toutes les préférences peuvent être :
+
+* créées,
+* modifiées,
+* supprimées,
+* mises à jour.
+
+---
+
+## 8.4 Gestion du Pantry
+
+Le pantry permet :
+
+* ajout manuel,
+* scan,
+* suivi des expirations,
+* alertes,
+* optimisation des ingrédients.
+
+---
+
+## 8.5 Meal Planning
+
+Le système génère :
+
+* breakfast,
+* lunch,
+* dinner,
+* quick meals.
+
+---
+
+## 8.6 Grocery Generation
+
+Le système génère automatiquement :
+
+* les listes de courses,
+* les quantités,
+* les catégories,
+* les coûts estimés.
+
+---
+
+## 8.7 Budget Management
+
+Le système permet :
+
+* définir un budget,
+* ajuster un budget,
+* remplacer un budget,
+* suivre les dépenses,
+* suivre l’historique.
+
+---
+
+## 8.8 Notifications
+
+PlatePilot envoie :
+
+* alertes d’expiration,
+* alertes budget,
+* rappels de meal planning,
+* rappels de courses.
+
+---
+
+## 8.9 Premium
+
+Les fonctionnalités premium incluent :
+
+* meal plans illimités,
+* recommandations avancées,
+* pantry automation,
+* analytics avancées,
+* household sharing,
+* optimisation budgétaire avancée.
+
+---
+
+# 9. Le Frontend Actuel
+
+## 9.1 État du Frontend
+
+Le frontend actuel est déjà structuré de manière moderne.
+
+Le projet utilise :
+
+* Flutter 3.x,
+* Material 3,
+* architecture modulaire,
+* Riverpod,
+* GoRouter,
+* Dio,
+* design system moderne,
+* support light/dark mode.
+
+---
+
+## 9.2 Direction UX/UI
+
+Le frontend suit une direction premium orientée :
+
+* glassmorphism,
+* profondeur visuelle,
+* animations fluides,
+* floating navigation,
+* expérience émotionnelle rassurante.
+
+Le frontend actuel ne sera pas restructuré fondamentalement pour le moment.
+
+L’objectif actuel est :
+
+* raffinement,
+* stabilisation,
+* cohérence visuelle,
+* intégration backend.
+
+---
+
+# 10. Architecture Technique Globale
+
+## 10.1 Architecture Générale
+
+PlatePilot utilise une architecture :
+
+> Modular Monolith + Domain-Driven Design (DDD)
+
+Cette architecture permet :
+
+* modularité,
+* évolutivité,
+* maintenabilité,
+* rapidité de développement,
+* faible coût d’infrastructure.
+
+---
+
+# 11. Stack Technique Backend
+
+## 11.1 Technologies Principales
+
+Le backend utilise :
+
+* Java 21,
+* Spring Boot 3.x,
+* PostgreSQL,
+* Redis,
+* Flyway,
+* Spring Security,
+* JWT,
+* OpenAPI,
+* Docker,
+* AWS.
+
+---
+
+## 11.2 Base de Données
+
+Le système utilise PostgreSQL comme base transactionnelle principale.
+
+La base contient notamment :
+
+* utilisateurs,
+* préférences,
+* pantry,
+* recettes,
+* meal plans,
+* grocery lists,
+* budgets,
+* notifications,
+* analytics.
+
+---
+
+## 11.3 Redis
+
+Redis est utilisé pour :
+
+* le cache,
+* les sessions,
+* les rate limits,
+* les meal plans générés,
+* les recommandations.
+
+---
+
+# 12. Architecture Backend
+
+## 12.1 Bounded Contexts
+
+Le backend est divisé en plusieurs modules métier.
+
+### Modules principaux
+
+* Auth
+* User Profile
+* Preferences
+* Budget
+* Pantry
+* Recipes
+* Meal Planning
+* Grocery
+* Recommendation
+* Notifications
+* Subscription
+* Analytics
+
+---
+
+## 12.2 Structure Interne
+
+Chaque module contient :
+
+* domain/
+* application/
+* infrastructure/
+* api/
+
+---
+
+## 12.3 Domain Layer
+
+Le domain layer contient :
+
+* les règles métier,
+* les entités,
+* les value objects,
+* les services métier,
+* les événements métier.
+
+---
+
+## 12.4 Application Layer
+
+L’application layer orchestre les cas d’usage.
+
+Exemples :
+
+* GenerateMealPlanUseCase,
+* RegisterUserUseCase,
+* GenerateGroceryListUseCase.
+
+---
+
+## 12.5 Infrastructure Layer
+
+L’infrastructure layer contient :
+
+* repositories JPA,
+* intégrations Redis,
+* OpenAI adapters,
+* stockage S3,
+* providers notifications.
+
+---
+
+# 13. Recommendation Engine
+
+## 13.1 Le Cœur de PlatePilot
+
+Le Recommendation Engine est le système décisionnel principal.
+
+Il utilise :
+
+* les contraintes utilisateur,
+* le budget,
+* le pantry,
+* les recettes,
+* les allergies,
+* les objectifs.
+
+---
+
+## 13.2 Pipeline de Recommandation
+
+Le pipeline suit plusieurs étapes.
+
+### 1. Chargement des recettes
+
+### 2. Filtrage des recettes incompatibles
+
+### 3. Estimation des coûts
+
+### 4. Scoring pantry
+
+### 5. Ranking
+
+### 6. Optimisation variété
+
+### 7. Génération finale du plan
+
+---
+
+## 13.3 Critères de Scoring
+
+Le moteur prend en compte :
+
+* compatibilité budget,
+* utilisation du pantry,
+* temps de préparation,
+* niveau de cuisine,
+* préférences,
+* variété.
+
+---
+
+# 14. Food Intelligence Database
+
+## 14.1 Base de Connaissances Alimentaires
+
+PlatePilot construit progressivement une base alimentaire intelligente.
+
+Elle contient :
+
+* ingrédients,
+* alias,
+* nutrition,
+* allergènes,
+* tags alimentaires,
+* prix,
+* recettes,
+* barcode mappings.
+
+---
+
+## 14.2 Sources de Données
+
+Le système peut utiliser :
+
+* USDA,
+* Open Food Facts,
+* TheMealDB,
+* Spoonacular,
+* datasets internes.
+
+---
+
+# 15. Sécurité
+
+## 15.1 Sécurité Backend
+
+Le backend implémente :
+
+* JWT,
+* refresh tokens,
+* RBAC,
+* rate limiting,
+* HTTPS,
+* BCrypt,
+* audit logs.
+
+---
+
+## 15.2 Rôles
+
+Le système supporte :
+
+* USER,
+* PREMIUM_USER,
+* ADMIN,
+* SUPER_ADMIN,
+* SUPPORT_AGENT,
+* ANALYST,
+* CONTENT_MANAGER,
+* SYSTEM.
+
+---
+
+# 16. Dashboard Administrateur
+
+## 16.1 Objectif
+
+Le dashboard admin permet :
+
+* gestion des utilisateurs,
+* gestion des abonnements,
+* suivi analytics,
+* gestion des recettes,
+* gestion des ingrédients,
+* contrôle IA,
+* monitoring système.
+
+---
+
+## 16.2 Modules Admin
+
+* Overview
+* Users
+* Revenue
+* Recipes
+* Ingredients
+* Analytics
+* AI Usage
+* Feature Flags
+* Audit Logs
+* System Health
+
+---
+
+# 17. Infrastructure Cloud
+
+## 17.1 MVP Infrastructure
+
+Le système peut fonctionner avec :
+
+* Render,
+* Neon PostgreSQL,
+* Upstash Redis,
+* Cloudinary,
+* GitHub Actions,
+* Firebase Cloud Messaging.
+
+---
+
+## 17.2 Infrastructure Production
+
+L’architecture cible utilise :
+
+* AWS App Runner,
+* Amazon ECS,
+* Amazon RDS,
+* Amazon ElastiCache,
+* Amazon S3,
+* CloudWatch,
+* Sentry,
+* Prometheus,
+* Grafana.
+
+---
+
+# 18. Architecture Frontend ↔ Backend
+
+## 18.1 Communication
+
+Le frontend communique avec le backend via :
+
+* HTTPS,
+* REST API,
+* JSON.
+
+---
+
+## 18.2 Architecture Flutter
+
+Le frontend suit le pattern :
+
+Screen → Provider → Repository → ApiClient → Backend
+
+---
+
+## 18.3 Gestion Auth
+
+Le frontend utilise :
+
+* Flutter Secure Storage,
+* interceptors Dio,
+* refresh token automatique,
+* Riverpod.
+
+---
+
+# 19. Localisation
+
+PlatePilot supporte :
+
+* anglais,
+* français,
+* architecture extensible multilingue.
+
+---
+
+# 20. Vision Long Terme
+
+## 20.1 Objectif Final
+
+PlatePilot veut devenir :
+
+* une plateforme mondiale,
+* un assistant alimentaire intelligent,
+* un copilote nutritionnel,
+* un système d’automatisation alimentaire.
+
+---
+
+## 20.2 Futures Évolutions
+
+Évolutions possibles :
+
+* household collaboration,
+* nutrition avancée,
+* AI coaching,
+* marketplace alimentaire,
+* intégration objets connectés,
+* analytics santé.
+
+---
+
+# 21. Conclusion
+
+PlatePilot est conçu comme une plateforme SaaS moderne, intelligente et évolutive permettant de résoudre l’un des problèmes quotidiens les plus universels :
+
+> décider quoi manger tout en respectant son budget, ses contraintes et son temps.
+
+Grâce à :
+
+* une architecture backend robuste,
+* un moteur de recommandation intelligent,
+* une base alimentaire structurée,
+* une expérience utilisateur premium,
+* et une approche fortement centrée utilisateur,
+
+PlatePilot possède aujourd’hui une fondation technique et stratégique capable d’évoluer vers une plateforme alimentaire mondiale.
+
+L’objectif n’est pas seulement de recommander des repas.
+
+L’objectif est de construire :
+
+> “un système intelligent qui comprend réellement les habitudes alimentaires de l’utilisateur et simplifie durablement sa vie quotidienne.”

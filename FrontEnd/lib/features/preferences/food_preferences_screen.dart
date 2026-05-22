@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -8,11 +9,40 @@ import '../../app/theme/app_typography.dart';
 import '../../core/premium_components.dart';
 import 'preferences_provider.dart';
 
-class FoodPreferencesScreen extends ConsumerWidget {
+class FoodPreferencesScreen extends ConsumerStatefulWidget {
   const FoodPreferencesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FoodPreferencesScreen> createState() =>
+      _FoodPreferencesScreenState();
+}
+
+class _FoodPreferencesScreenState
+    extends ConsumerState<FoodPreferencesScreen> {
+  bool _saving = false;
+
+  Future<void> _savePreferences() async {
+    setState(() => _saving = true);
+    try {
+      await ref.read(editablePreferencesProvider.notifier).saveToApi();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Preferences saved successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final prefs = ref.watch(editablePreferencesProvider);
     final notifier = ref.read(editablePreferencesProvider.notifier);
 
@@ -24,9 +54,28 @@ class FoodPreferencesScreen extends ConsumerWidget {
           bottom: false,
           child: Column(
             children: [
-              const FloatingHeader(
+              FloatingHeader(
                 title: 'Food Preferences',
                 subtitle: 'How PlatePilot personalizes your meals',
+                leading: GestureDetector(
+                  onTap: () => context.pop(),
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryAccentGreen,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      boxShadow: PremiumTheme.glow(context),
+                    ),
+                    child: Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: PremiumTheme.isDark(context)
+                          ? AppColors.darkBackground
+                          : Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ),
               ),
               Expanded(
                 child: ListView(
@@ -180,6 +229,37 @@ class FoodPreferencesScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: AppSpacing.xl),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _saving ? null : _savePreferences,
+                        icon: _saving
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.save_outlined, size: 18),
+                        label: Text(_saving ? 'Saving...' : 'Save Preferences'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryAccentGreen,
+                          foregroundColor: PremiumTheme.isDark(context)
+                              ? AppColors.darkBackground
+                              : Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.sm,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppRadius.md),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
                   ],
                 ),
               ),

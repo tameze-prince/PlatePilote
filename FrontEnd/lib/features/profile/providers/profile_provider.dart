@@ -20,6 +20,7 @@ class UserProfile {
     this.cookingSkill,
     this.householdSize,
     this.healthGoals,
+    this.avatarBytes,
   });
 
   final String displayName;
@@ -35,6 +36,7 @@ class UserProfile {
   final String? cookingSkill;
   final int? householdSize;
   final String? healthGoals;
+  final String? avatarBytes;
 
   int? get age {
     if (dateOfBirth == null) return null;
@@ -79,6 +81,7 @@ class UserProfile {
     String? cookingSkill,
     int? householdSize,
     String? healthGoals,
+    String? avatarBytes,
   }) {
     return UserProfile(
       displayName: displayName ?? this.displayName,
@@ -94,6 +97,7 @@ class UserProfile {
       cookingSkill: cookingSkill ?? this.cookingSkill,
       householdSize: householdSize ?? this.householdSize,
       healthGoals: healthGoals ?? this.healthGoals,
+      avatarBytes: avatarBytes ?? this.avatarBytes,
     );
   }
 
@@ -111,6 +115,7 @@ class UserProfile {
         'cookingSkill': cookingSkill,
         'householdSize': householdSize,
         'healthGoals': healthGoals,
+        'avatarBytes': avatarBytes,
       };
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -128,12 +133,16 @@ class UserProfile {
       cookingSkill: json['cookingSkill'] as String?,
       householdSize: json['householdSize'] as int?,
       healthGoals: json['healthGoals'] as String?,
+      avatarBytes: json['avatarBytes'] as String?,
     );
   }
 }
 
 class ProfileNotifier extends Notifier<UserProfile> {
   static const _key = 'profile.user';
+  bool _hasUnsavedChanges = false;
+
+  bool get hasUnsavedChanges => _hasUnsavedChanges;
 
   @override
   UserProfile build() {
@@ -167,6 +176,7 @@ class ProfileNotifier extends Notifier<UserProfile> {
         householdSize: apiProfile['householdSize'] as int?,
         healthGoals: apiProfile['healthGoals'] as String?,
       );
+      _hasUnsavedChanges = false;
       await _persist();
     } catch (_) {}
   }
@@ -184,6 +194,7 @@ class ProfileNotifier extends Notifier<UserProfile> {
     String? cookingSkill,
     int? householdSize,
     String? healthGoals,
+    String? avatarBytes,
   }) async {
     state = state.copyWith(
       displayName: displayName,
@@ -198,33 +209,39 @@ class ProfileNotifier extends Notifier<UserProfile> {
       cookingSkill: cookingSkill,
       householdSize: householdSize,
       healthGoals: healthGoals,
+      avatarBytes: avatarBytes,
     );
+    _hasUnsavedChanges = true;
     await _persist();
-    await _syncToApi();
+  }
+
+  Future<void> saveToApi() async {
+    final repo = ref.read(profileRepositoryProvider);
+    await repo.updateProfile(
+      dateOfBirth: state.dateOfBirth,
+      gender: state.gender,
+      heightCm: state.heightCm,
+      weightKg: state.weightKg,
+      activityLevel: state.activityLevel,
+      countryCode: state.countryCode,
+      currencyCode: state.currencyCode,
+      cookingSkill: state.cookingSkill,
+      householdSize: state.householdSize,
+      healthGoals: state.healthGoals,
+    );
+    _hasUnsavedChanges = false;
+  }
+
+  Future<void> setAvatarBytes(String? bytes) async {
+    state = state.copyWith(avatarBytes: bytes);
+    _hasUnsavedChanges = true;
+    await _persist();
   }
 
   Future<void> _persist() async {
     await ref
         .read(sharedPreferencesProvider)
         .setString(_key, json.encode(state.toJson()));
-  }
-
-  Future<void> _syncToApi() async {
-    try {
-      final repo = ref.read(profileRepositoryProvider);
-      await repo.updateProfile(
-        dateOfBirth: state.dateOfBirth,
-        gender: state.gender,
-        heightCm: state.heightCm,
-        weightKg: state.weightKg,
-        activityLevel: state.activityLevel,
-        countryCode: state.countryCode,
-        currencyCode: state.currencyCode,
-        cookingSkill: state.cookingSkill,
-        householdSize: state.householdSize,
-        healthGoals: state.healthGoals,
-      );
-    } catch (_) {}
   }
 
   String _buildDisplayName(Map<String, dynamic> apiProfile, String? authName) {

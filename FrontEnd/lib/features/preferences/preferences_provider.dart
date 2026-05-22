@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/preferences_provider.dart';
+import '../../core/repositories/preference_repository.dart';
+import '../../core/repositories/profile_repository.dart';
 import '../../features/onboarding/onboarding_state.dart';
 
 class EditablePreferences {
@@ -152,6 +154,24 @@ class PreferencesNotifier extends Notifier<EditablePreferences> {
       preferredCuisines: _toggle(state.preferredCuisines, value),
     );
     await _persist();
+  }
+
+  Future<void> saveToApi() async {
+    final prefRepo = ref.read(preferenceRepositoryProvider);
+    await prefRepo.updateMyPreferences(
+      dietaryPreferences: state.dietaryPreferences.toList(),
+      allergies: state.allergies
+          .map((a) => <String, String?>{'allergen': a, 'severity': null})
+          .toList(),
+      cuisines: state.preferredCuisines.toList(),
+    );
+
+    final profileRepo = ref.read(profileRepositoryProvider);
+    await profileRepo.updateProfile(
+      cookingSkill: state.cookingSkill,
+      householdSize: int.tryParse(state.householdSize),
+      healthGoals: state.goals.isNotEmpty ? state.goals.join(', ') : null,
+    );
   }
 
   Future<void> _persist() async {

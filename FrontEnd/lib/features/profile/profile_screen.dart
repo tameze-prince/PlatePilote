@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 
 import '../../app/theme/app_colors.dart';
@@ -21,6 +24,8 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _saving = false;
+
   @override
   void initState() {
     super.initState();
@@ -29,10 +34,45 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     });
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 512,
+      maxHeight: 512,
+    );
+    if (image == null) return;
+    final bytes = await image.readAsBytes();
+    final base64 = base64Encode(bytes);
+    await ref.read(profileProvider.notifier).setAvatarBytes(base64);
+  }
+
+  Future<void> _saveProfile() async {
+    setState(() => _saving = true);
+    try {
+      await ref.read(profileProvider.notifier).saveToApi();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile saved successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(profileProvider);
     final authState = ref.watch(authProvider);
+    final notifier = ref.read(profileProvider.notifier);
+    final hasChanges = notifier.hasUnsavedChanges;
 
     return Scaffold(
       backgroundColor: PremiumTheme.background(context),
@@ -42,7 +82,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           bottom: false,
           child: Column(
             children: [
-              const FloatingHeader(title: 'Profile'),
+              FloatingHeader(
+                title: 'Profile',
+                leading: GestureDetector(
+                  onTap: () => context.pop(),
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryAccentGreen,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      boxShadow: PremiumTheme.glow(context),
+                    ),
+                    child: Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: PremiumTheme.isDark(context)
+                          ? AppColors.darkBackground
+                          : Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              ),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(
@@ -50,7 +111,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                   children: [
                     const SizedBox(height: AppSpacing.md),
-                    _ProfileHeaderCard(profile: profile, authState: authState),
+                    _ProfileHeaderCard(
+                      profile: profile,
+                      authState: authState,
+                      onAvatarTap: _pickImage,
+                    ),
                     const SizedBox(height: AppSpacing.md),
                     _ProfileCompleteness(profile: profile),
                     const SizedBox(height: AppSpacing.lg),
@@ -115,6 +180,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       onTap: () {},
                     ),
                     const SizedBox(height: AppSpacing.xl),
+                    _SaveProfileButton(
+                      hasChanges: hasChanges,
+                      saving: _saving,
+                      onSave: _saveProfile,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
                     _DangerZone(),
                     const SizedBox(height: AppSpacing.lg),
                   ],
@@ -250,10 +321,15 @@ class _ProfileCompleteness extends ConsumerWidget {
 }
 
 class _ProfileHeaderCard extends ConsumerWidget {
-  const _ProfileHeaderCard({required this.profile, required this.authState});
+  const _ProfileHeaderCard({
+    required this.profile,
+    required this.authState,
+    required this.onAvatarTap,
+  });
 
   final UserProfile profile;
   final AuthState authState;
+  final VoidCallback onAvatarTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -262,31 +338,41 @@ class _ProfileHeaderCard extends ConsumerWidget {
       elevated: true,
       child: Row(
         children: [
-          Stack(
-            children: [
-              CircleAvatar(
-                radius: 32,
-                backgroundColor: AppColors.primaryAccentGreen.withOpacity(0.2),
-                child: Icon(
-                  Icons.person,
-                  size: 32,
-                  color: AppColors.primaryAccentGreen,
+          GestureDetector(
+            onTap: onAvatarTap,
+            child: Stack(
+              children: [
+                CircleAvatar(
+                  radius: 32,
+                  backgroundColor: AppColors.primaryAccentGreen.withOpacity(0.2),
+                  backgroundImage: profile.avatarBytes != null
+                      ? MemoryImage(
+                          base64Decode(profile.avatarBytes!),
+                        )
+                      : null,
+                  child: profile.avatarBytes == null
+                      ? Icon(
+                          Icons.person,
+                          size: 32,
+                          color: AppColors.primaryAccentGreen,
+                        )
+                      : null,
                 ),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryAccentGreen,
-                    shape: BoxShape.circle,
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: const BoxDecoration(
+                      color: AppColors.primaryAccentGreen,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.edit, size: 12, color: Colors.white),
                   ),
-                  child: const Icon(Icons.edit, size: 12, color: Colors.white),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -754,6 +840,83 @@ class _ThemeSelector extends ConsumerWidget {
               ref.read(themeModeProvider.notifier).set(selection.first);
             },
             showSelectedIcon: false,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SaveProfileButton extends StatelessWidget {
+  const _SaveProfileButton({
+    required this.hasChanges,
+    required this.saving,
+    required this.onSave,
+  });
+
+  final bool hasChanges;
+  final bool saving;
+  final VoidCallback onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!hasChanges && !saving) return const SizedBox.shrink();
+    return GlassContainer(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      elevated: true,
+      backgroundColor: AppColors.primaryAccentGreen.withOpacity(0.08),
+      borderColor: AppColors.primaryAccentGreen.withOpacity(0.2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (hasChanges)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: AppColors.primaryAccentGreen,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      'You have unsaved changes',
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: PremiumTheme.textSecondary(context),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: saving ? null : onSave,
+              icon: saving
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.save_outlined, size: 18),
+              label: Text(saving ? 'Saving...' : 'Save All Changes'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryAccentGreen,
+                foregroundColor: PremiumTheme.isDark(context)
+                    ? AppColors.darkBackground
+                    : Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+              ),
+            ),
           ),
         ],
       ),
