@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
+import '../../app/theme/app_typography.dart';
 import '../../core/premium_components.dart';
 import '../../shared/models/pantry_item.dart';
 import '../../shared/widgets/shimmer_glass_skeleton.dart';
@@ -63,6 +65,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
     final textTheme = Theme.of(context).textTheme;
     final filtered = _filteredItems(state.items);
     final expiring = state.items.where((i) => i.isExpired || i.expirationDate != null).take(5).toList();
+    final isEmpty = !state.isLoading && state.items.isEmpty;
 
     return Scaffold(
       backgroundColor: PremiumTheme.background(context),
@@ -70,7 +73,9 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
         child: RefreshIndicator(
           onRefresh: () => ref.read(pantryProvider.notifier).refresh(),
           child: ListView(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md, AppSpacing.md, AppSpacing.md, 80,
+            ),
             children: [
               FloatingHeader(title: 'Pantry', subtitle: 'Your kitchen inventory'),
               const SizedBox(height: AppSpacing.md),
@@ -88,6 +93,8 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                 ))
               else if (state.error != null)
                 _buildErrorCard(context)
+              else if (isEmpty)
+                _buildEmptyState()
               else ...[
                 Wrap(
                   spacing: AppSpacing.xs,
@@ -96,11 +103,6 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                     label: label, selected: _selectedFilter == label,
                     onTap: () => setState(() => _selectedFilter = label),
                   )).toList(),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                GlassButton(
-                  label: 'Add to Pantry', icon: Icons.add_circle_outline,
-                  onPressed: () => context.push('/pantry/add'),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 if (expiring.isNotEmpty) ...[
@@ -123,26 +125,69 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                   padding: const EdgeInsets.only(bottom: AppSpacing.md),
                   child: _PantryItemCard(item: item),
                 )),
-                PremiumCard(
-                  variant: PremiumCardVariant.glass,
-                  child: Row(
-                    children: [
-                      Icon(Icons.recycling, color: AppColors.primaryAccentGreen),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Text(
-                          'Track expiring items to reduce waste and save money.',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: PremiumTheme.textSecondary(context)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.xxl),
+      child: Column(
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: AppColors.primaryAccentGreen.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Icon(
+              Icons.kitchen_outlined,
+              size: 36,
+              color: AppColors.primaryAccentGreen,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            'Your pantry is empty',
+            style: AppTypography.titleLarge.copyWith(
+              fontWeight: FontWeight.w700,
+              color: PremiumTheme.textPrimary(context),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Add ingredients to get started',
+            style: AppTypography.bodyMedium.copyWith(
+              color: PremiumTheme.textSecondary(context),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          _ActionCard(
+            icon: Icons.edit_note_rounded,
+            title: 'Add Manually',
+            subtitle: 'Enter ingredient details by hand',
+            onTap: () => context.push('/pantry/add'),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _ActionCard(
+            icon: Icons.explore_outlined,
+            title: 'Browse Ingredients',
+            subtitle: 'Search our ingredient database',
+            onTap: () => context.push('/pantry/add'),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _ActionCard(
+            icon: Icons.qr_code_scanner,
+            title: 'Scan Barcode',
+            subtitle: 'Coming soon — scan product barcodes to auto-fill',
+            badge: 'Soon',
+          ),
+        ],
       ),
     );
   }
@@ -172,6 +217,76 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                 onPressed: () => ref.read(pantryProvider.notifier).refresh(),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionCard extends StatelessWidget {
+  const _ActionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.onTap,
+    this.badge,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+  final String? badge;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: GlassContainer(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        elevated: true,
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.primaryAccentGreen.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: Icon(icon, color: AppColors.primaryAccentGreen, size: 22),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                    style: AppTypography.bodyLarge.copyWith(
+                      color: PremiumTheme.textPrimary(context),
+                      fontWeight: FontWeight.w700,
+                    )),
+                  Text(subtitle,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: PremiumTheme.textTertiary(context),
+                    )),
+                ],
+              ),
+            ),
+            if (badge != null)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+                child: Text(badge!,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: AppColors.warning,
+                    fontWeight: FontWeight.w700,
+                  )),
+              ),
           ],
         ),
       ),

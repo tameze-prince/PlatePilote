@@ -45,7 +45,9 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
         child: RefreshIndicator(
           onRefresh: () => ref.read(mealPlanProvider.notifier).refresh(),
           child: ListView(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md, AppSpacing.md, AppSpacing.md, 80,
+            ),
             children: [
               FloatingHeader(
                 title: 'Your Week',

@@ -42,10 +42,8 @@ class GroceryNotifier extends Notifier<GroceryListState> {
   @override
   GroceryListState build() {
     Future.microtask(() => _loadCurrentList());
-    return GroceryListState(
-      items: _demoItems,
+    return const GroceryListState(
       isLoading: true,
-      useDemoFallback: true,
     );
   }
 
@@ -69,7 +67,9 @@ class GroceryNotifier extends Notifier<GroceryListState> {
           currentList: list,
           items: list.items,
         );
+        return;
       }
+      state = const GroceryListState(useDemoFallback: true);
     } on ApiException {
       state = GroceryListState(items: _demoItems, useDemoFallback: true);
     }
@@ -98,6 +98,29 @@ class GroceryNotifier extends Notifier<GroceryListState> {
     } on ApiException {
       items[index] = item;
       state = state.copyWith(items: items);
+    }
+  }
+
+  Future<void> updateItemQuantity(int index, double quantity, String unit) async {
+    if (index >= state.items.length) return;
+    final item = state.items[index];
+    final updated = item.copyWith(quantity: quantity, unit: unit);
+    final items = [...state.items];
+    items[index] = updated;
+    state = state.copyWith(items: items);
+  }
+
+  Future<void> removeItem(int index) async {
+    if (index >= state.items.length) return;
+    final item = state.items[index];
+    final items = [...state.items]..removeAt(index);
+    state = state.copyWith(items: items);
+    if (item.id != null) {
+      try {
+        await ref.read(groceryRepositoryProvider).removeItem(item.id!);
+      } on ApiException {
+        // ignore API errors for optimistic removal
+      }
     }
   }
 

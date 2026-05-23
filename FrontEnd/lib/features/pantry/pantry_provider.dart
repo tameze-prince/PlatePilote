@@ -60,11 +60,9 @@ class PantryNotifier extends Notifier<PantryListState> {
     try {
       final repo = ref.read(pantryRepositoryProvider);
       final page = await repo.listPantryItems(size: 50);
-      if (page.content.isNotEmpty) {
-        state = PantryListState(items: page.content);
-      }
-    } on ApiException {
-      state = PantryListState(items: _demoItems, useDemoFallback: true);
+      state = PantryListState(items: page.content, isLoading: false);
+    } catch (_) {
+      state = PantryListState(items: _demoItems, useDemoFallback: true, isLoading: false);
     }
   }
 

@@ -66,17 +66,23 @@ class GroceryItem {
   final int? sortOrder;
   final String? ingredientId;
 
-  GroceryItem copyWith({bool? checked}) {
+  GroceryItem copyWith({
+    bool? checked,
+    double? quantity,
+    String? unit,
+    String? name,
+    String? notes,
+  }) {
     return GroceryItem(
       id: id,
-      name: name,
+      name: name ?? this.name,
       category: category,
-      quantity: quantity,
-      unit: unit,
+      quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
       estimatedPrice: estimatedPrice,
       priceConfidence: priceConfidence,
       checked: checked ?? this.checked,
-      notes: notes,
+      notes: notes ?? this.notes,
       sortOrder: sortOrder,
       ingredientId: ingredientId,
     );

@@ -58,7 +58,11 @@ class BaseRepository {
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
-      return PageResponse.fromJson(body, fromJson);
+      final data = body['data'];
+      if (data != null && data is Map<String, dynamic>) {
+        return PageResponse.fromJson(data, fromJson);
+      }
+      throw ApiException('Page response data is missing or invalid', response.statusCode);
     }
     throw ApiException(
       (body['message'] as String?) ?? 'Unexpected error',

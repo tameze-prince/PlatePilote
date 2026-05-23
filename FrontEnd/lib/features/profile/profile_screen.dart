@@ -107,7 +107,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.md, 0, AppSpacing.md, AppSpacing.lg,
+                    AppSpacing.md, 0, AppSpacing.md, 80,
                   ),
                   children: [
                     const SizedBox(height: AppSpacing.md),

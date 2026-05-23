@@ -1,8 +1,7 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 
 import '../../app/theme/app_radius.dart';
+import '../../core/premium_components.dart';
 
 class ShimmerGlassSkeleton extends StatefulWidget {
   const ShimmerGlassSkeleton({
@@ -45,9 +44,12 @@ class _ShimmerGlassSkeletonState extends State<ShimmerGlassSkeleton>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = PremiumTheme.isDark(context);
+    final baseColor = isDark ? Colors.white : Colors.black;
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
+        final value = _animation.value.clamp(0.0, 1.0);
         return ClipRRect(
           borderRadius: BorderRadius.circular(widget.borderRadius ?? AppRadius.lg),
           child: ShaderMask(
@@ -55,14 +57,14 @@ class _ShimmerGlassSkeletonState extends State<ShimmerGlassSkeleton>
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
               colors: [
-                Colors.white.withValues(alpha: 0.04),
-                Colors.white.withValues(alpha: 0.12),
-                Colors.white.withValues(alpha: 0.04),
+                baseColor.withValues(alpha: 0.04),
+                baseColor.withValues(alpha: 0.12),
+                baseColor.withValues(alpha: 0.04),
               ],
               stops: [
-                _animation.value - 0.3,
-                _animation.value,
-                _animation.value + 0.3,
+                (value - 0.3).clamp(0.0, 1.0),
+                value.clamp(0.0, 1.0),
+                (value + 0.3).clamp(0.0, 1.0),
               ],
             ).createShader(bounds),
             blendMode: BlendMode.srcATop,
@@ -72,14 +74,10 @@ class _ShimmerGlassSkeletonState extends State<ShimmerGlassSkeleton>
               decoration: BoxDecoration(
                 borderRadius:
                     BorderRadius.circular(widget.borderRadius ?? AppRadius.lg),
-                color: Colors.white.withValues(alpha: 0.05),
+                color: baseColor.withValues(alpha: 0.05),
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08),
+                  color: baseColor.withValues(alpha: 0.08),
                 ),
-              ),
-              child: BackdropFilter(
-                filter: ui.ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                child: Container(color: Colors.transparent),
               ),
             ),
           ),
