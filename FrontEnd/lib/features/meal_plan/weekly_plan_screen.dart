@@ -41,7 +41,9 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
 
     return Scaffold(
       backgroundColor: PremiumTheme.background(context),
+      extendBody: true,
       body: PremiumBackground(
+        safeArea: false,
         child: RefreshIndicator(
           onRefresh: () => ref.read(mealPlanProvider.notifier).refresh(),
           child: ListView(

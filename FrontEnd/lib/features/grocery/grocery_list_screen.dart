@@ -133,7 +133,8 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     }
 
     return Scaffold(
-      // backgroundColor: PremiumTheme.background(context),
+      backgroundColor: PremiumTheme.background(context),
+      extendBody: true,
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: FloatingActionButton(
@@ -147,6 +148,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: PremiumBackground(
+        safeArea: false,
         child: state.isLoading
             ? ListView(
                 padding: const EdgeInsets.all(AppSpacing.md),

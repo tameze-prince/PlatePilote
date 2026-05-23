@@ -69,7 +69,9 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
 
     return Scaffold(
       backgroundColor: PremiumTheme.background(context),
+      extendBody: true,
       body: PremiumBackground(
+        safeArea: false,
         child: RefreshIndicator(
           onRefresh: () => ref.read(pantryProvider.notifier).refresh(),
           child: ListView(
