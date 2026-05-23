@@ -15,6 +15,7 @@ import '../../features/grocery/forms/add_grocery_item_screen.dart';
 import '../../features/grocery/forms/edit_grocery_item_screen.dart';
 import '../../features/grocery/grocery_list_screen.dart';
 import '../../features/grocery/cost_breakdown_screen.dart';
+import '../../features/grocery/purchase_history_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/localization/language_settings_screen.dart';
 import '../../features/meal_details/meal_details_screen.dart';
@@ -278,6 +279,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const GroceryCostBreakdownScreen(),
       ),
       GoRoute(
+        path: '/grocery/history',
+        name: AppRoute.groceryHistory.name,
+        builder: (context, state) => const PurchaseHistoryScreen(),
+      ),
+      GoRoute(
         path: '/recipes/add',
         name: AppRoute.addRecipe.name,
         builder: (context, state) => const AddRecipeScreen(),
@@ -381,6 +387,7 @@ enum AppRoute {
   addGroceryItem,
   editGroceryItem,
   groceryBreakdown,
+  groceryHistory,
   addRecipe,
   planHistory,
 }

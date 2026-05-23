@@ -9,6 +9,7 @@ import '../../core/premium_components.dart';
 import '../../core/widgets/grocery_item_tile.dart';
 import '../../shared/models/grocery_list.dart';
 import '../../shared/widgets/shimmer_glass_skeleton.dart';
+import '../budget/budget_provider.dart';
 import 'grocery_provider.dart';
 
 class GroceryListScreen extends ConsumerStatefulWidget {
@@ -30,6 +31,128 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
         ref.read(groceryProvider.notifier).refresh();
       });
     }
+  }
+
+  void _showAddItemDialog() {
+    final nameCtrl = TextEditingController();
+    final qtyCtrl = TextEditingController(text: '1');
+    final unitCtrl = TextEditingController(text: 'unit');
+    final priceCtrl = TextEditingController();
+    final notesCtrl = TextEditingController();
+    String? selectedCategory;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Add Item'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Item name *',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                DropdownButtonFormField<String>(
+                  value: selectedCategory,
+                  decoration: const InputDecoration(
+                    labelText: 'Category',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: null, child: Text('None')),
+                    DropdownMenuItem(value: 'Produce', child: Text('Produce')),
+                    DropdownMenuItem(value: 'Dairy & Eggs', child: Text('Dairy & Eggs')),
+                    DropdownMenuItem(value: 'Protein', child: Text('Protein')),
+                    DropdownMenuItem(value: 'Pantry Staples', child: Text('Pantry Staples')),
+                    DropdownMenuItem(value: 'Frozen', child: Text('Frozen')),
+                    DropdownMenuItem(value: 'Bakery', child: Text('Bakery')),
+                    DropdownMenuItem(value: 'Spices', child: Text('Spices')),
+                    DropdownMenuItem(value: 'Beverages', child: Text('Beverages')),
+                  ],
+                  onChanged: (v) => setDialogState(() => selectedCategory = v),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: qtyCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Quantity',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: TextField(
+                        controller: unitCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Unit',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                TextField(
+                  controller: priceCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Est. price (\$)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                TextField(
+                  controller: notesCtrl,
+                  maxLines: 2,
+                  decoration: const InputDecoration(
+                    labelText: 'Notes',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final name = nameCtrl.text.trim();
+                if (name.isEmpty) return;
+                final qty = double.tryParse(qtyCtrl.text) ?? 1;
+                final price = double.tryParse(priceCtrl.text);
+                ref.read(groceryProvider.notifier).addItem(
+                  name: name,
+                  category: selectedCategory,
+                  quantity: qty,
+                  unit: unitCtrl.text.trim().isEmpty ? 'unit' : unitCtrl.text.trim(),
+                  estimatedPrice: price,
+                  notes: notesCtrl.text.trim().isEmpty ? null : notesCtrl.text.trim(),
+                );
+                Navigator.pop(ctx);
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primaryAccentGreen,
+              ),
+              child: const Text('Add'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _editItem(int index, GroceryItem item) {
@@ -126,6 +249,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(groceryProvider);
+    final budgetState = ref.watch(budgetProvider);
     final textTheme = Theme.of(context).textTheme;
     final grouped = <String, List<GroceryItem>>{};
     for (final item in state.items) {
@@ -136,9 +260,9 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
       backgroundColor: PremiumTheme.background(context),
       extendBody: true,
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(bottom: 90),
         child: FloatingActionButton(
-          onPressed: () => context.push('/grocery/add'),
+          onPressed: _showAddItemDialog,
           backgroundColor: AppColors.primaryAccentGreen,
           foregroundColor: PremiumTheme.isDark(context)
               ? AppColors.darkBackground
@@ -173,7 +297,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
                 ? _buildErrorView(context)
                 : state.items.isEmpty
                     ? _buildEmptyView(context)
-                    : _buildListView(context, state, textTheme, grouped),
+                    : _buildListView(context, state, budgetState, textTheme, grouped),
       ),
     );
   }
@@ -181,9 +305,13 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
   Widget _buildListView(
     BuildContext context,
     GroceryListState state,
+    BudgetState budgetState,
     TextTheme textTheme,
     Map<String, List<GroceryItem>> grouped,
   ) {
+    final total = state.totalEstimatedPrice;
+    final overBudget = budgetState.weeklyBudget > 0 && total > budgetState.weeklyBudget;
+
     return RefreshIndicator(
       onRefresh: () => ref.read(groceryProvider.notifier).refresh(),
       child: ListView(
@@ -197,9 +325,43 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
           FloatingHeader(
             title: 'Grocery List',
             subtitle: state.currentList?.name ?? 'Your shopping list',
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.history),
+                tooltip: 'Purchase History',
+                onPressed: () => context.push('/grocery/history'),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.md),
-          _buildSummaryCard(context, state),
+          _buildSummaryCard(context, state, budgetState, overBudget),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: GlassButton(
+                  label: state.isSaving ? 'Saving...' : 'Save List',
+                  icon: Icons.save_outlined,
+                  onPressed: state.isSaving
+                      ? null
+                      : () => ref.read(groceryProvider.notifier).saveList(),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: GlassButton(
+                  label: 'Mark Bought',
+                  icon: Icons.check_circle_outline,
+                  variant: state.checkedCount == 0
+                      ? GlassButtonVariant.outlined
+                      : GlassButtonVariant.filled,
+                  onPressed: state.checkedCount == 0
+                      ? null
+                      : () => ref.read(groceryProvider.notifier).markItemsAsBought(),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: AppSpacing.lg),
           for (final entry in grouped.entries) ...[
             Row(
@@ -245,11 +407,15 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     );
   }
 
-  Widget _buildSummaryCard(BuildContext context, GroceryListState state) {
+  Widget _buildSummaryCard(
+    BuildContext context,
+    GroceryListState state,
+    BudgetState budgetState,
+    bool overBudget,
+  ) {
     final textTheme = Theme.of(context).textTheme;
-    final total = state.items
-        .fold<double>(0, (sum, item) => sum + (item.estimatedPrice ?? 0));
-    final checkedCount = state.items.where((i) => i.checked).length;
+    final total = state.totalEstimatedPrice;
+    final checkedCount = state.checkedCount;
     return PremiumCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,6 +465,32 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
                 ),
               ],
             ),
+          if (overBudget) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.warning.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded,
+                      color: AppColors.warning, size: 18),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      'Total exceeds your \$${budgetState.weeklyBudget.toStringAsFixed(0)} weekly budget by \$${(total - budgetState.weeklyBudget).toStringAsFixed(2)}',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: AppColors.warning,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -324,6 +516,13 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
         FloatingHeader(
           title: 'Grocery List',
           subtitle: 'Your shopping list',
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.history),
+              tooltip: 'Purchase History',
+              onPressed: () => context.push('/grocery/history'),
+            ),
+          ],
         ),
         const SizedBox(height: AppSpacing.md),
         Center(
@@ -359,6 +558,12 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
                   style: AppTypography.bodyMedium.copyWith(
                     color: PremiumTheme.textSecondary(context),
                   ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                GlassButton(
+                  label: 'Browse Ingredients',
+                  icon: Icons.search,
+                  onPressed: () => context.push('/grocery/add'),
                 ),
               ],
             ),

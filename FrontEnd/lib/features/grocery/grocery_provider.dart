@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/repositories/base_repository.dart';
 import '../../shared/models/demo_data.dart' as demo;
 import '../../shared/models/grocery_list.dart';
+import '../../shared/models/purchase_record.dart';
+import '../pantry/pantry_provider.dart';
 import 'grocery_repository.dart';
 
 class GroceryListState {
@@ -12,6 +14,8 @@ class GroceryListState {
     this.isLoading = false,
     this.error,
     this.useDemoFallback = false,
+    this.purchaseHistory = const [],
+    this.isSaving = false,
   });
 
   final GroceryList? currentList;
@@ -19,6 +23,13 @@ class GroceryListState {
   final bool isLoading;
   final String? error;
   final bool useDemoFallback;
+  final List<PurchaseRecord> purchaseHistory;
+  final bool isSaving;
+
+  double get totalEstimatedPrice =>
+      items.fold<double>(0, (sum, item) => sum + (item.estimatedPrice ?? 0));
+
+  int get checkedCount => items.where((i) => i.checked).length;
 
   GroceryListState copyWith({
     GroceryList? currentList,
@@ -26,6 +37,8 @@ class GroceryListState {
     bool? isLoading,
     String? error,
     bool? useDemoFallback,
+    List<PurchaseRecord>? purchaseHistory,
+    bool? isSaving,
     bool clearError = false,
   }) {
     return GroceryListState(
@@ -34,6 +47,8 @@ class GroceryListState {
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
       useDemoFallback: useDemoFallback ?? this.useDemoFallback,
+      purchaseHistory: purchaseHistory ?? this.purchaseHistory,
+      isSaving: isSaving ?? this.isSaving,
     );
   }
 }
@@ -161,6 +176,52 @@ class GroceryNotifier extends Notifier<GroceryListState> {
       notes: notes,
     );
     state = state.copyWith(items: [...state.items, newItem]);
+  }
+
+  Future<void> markItemsAsBought() async {
+    final checkedItems = state.items.where((i) => i.checked).toList();
+    if (checkedItems.isEmpty) return;
+
+    final pantryNotifier = ref.read(pantryProvider.notifier);
+    for (final item in checkedItems) {
+      await pantryNotifier.addItem(
+        name: item.name,
+        category: item.category,
+        quantity: item.quantity ?? 1,
+        unit: item.unit ?? 'unit',
+      );
+    }
+
+    final total = checkedItems.fold<double>(
+      0, (sum, item) => sum + (item.estimatedPrice ?? 0),
+    );
+
+    final record = PurchaseRecord(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      itemNames: checkedItems.map((i) => i.name).toList(),
+      totalPrice: total,
+      boughtDate: DateTime.now(),
+    );
+
+    final remaining = state.items.where((i) => !i.checked).toList();
+    state = state.copyWith(
+      items: remaining,
+      purchaseHistory: [...state.purchaseHistory, record],
+    );
+  }
+
+  Future<void> saveList() async {
+    state = state.copyWith(isSaving: true);
+    final listId = state.currentList?.id;
+    if (listId != null) {
+      try {
+        final repo = ref.read(groceryRepositoryProvider);
+        await repo.completeList(listId);
+      } on ApiException {
+        // ignore save errors
+      }
+    }
+    state = state.copyWith(isSaving: false);
   }
 
   Future<void> refresh() => _loadCurrentList();

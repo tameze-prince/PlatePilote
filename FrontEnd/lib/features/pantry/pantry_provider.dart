@@ -90,6 +90,15 @@ class PantryNotifier extends Notifier<PantryListState> {
     }
   }
 
+  Future<void> updateItemQuantity(int index, double quantity, String unit) async {
+    if (index >= state.items.length) return;
+    final item = state.items[index];
+    final updated = item.copyWith(quantity: quantity, unit: unit);
+    final items = [...state.items];
+    items[index] = updated;
+    state = state.copyWith(items: items);
+  }
+
   Future<void> deleteItem(int index) async {
     if (index >= state.items.length) return;
     final item = state.items[index];

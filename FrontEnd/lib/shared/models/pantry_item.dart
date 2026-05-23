@@ -23,6 +23,32 @@ class PantryItem {
   final String? createdAt;
   final String? updatedAt;
 
+  PantryItem copyWith({
+    String? id,
+    String? name,
+    String? category,
+    double? quantity,
+    String? unit,
+    String? expirationDate,
+    String? ingredientId,
+    bool? isExpired,
+    String? createdAt,
+    String? updatedAt,
+  }) {
+    return PantryItem(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      category: category ?? this.category,
+      quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
+      expirationDate: expirationDate ?? this.expirationDate,
+      ingredientId: ingredientId ?? this.ingredientId,
+      isExpired: isExpired ?? this.isExpired,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   factory PantryItem.fromJson(Map<String, dynamic> json) {
     return PantryItem(
       id: json['id']?.toString() ?? '',

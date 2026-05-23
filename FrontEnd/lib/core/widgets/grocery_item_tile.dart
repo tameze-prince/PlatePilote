@@ -44,6 +44,11 @@ class _GroceryItemTileState extends State<GroceryItemTile>
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _slideAnimation = Tween<Offset>(
       begin: Offset.zero,
       end: Offset(-(_revealWidth / MediaQuery.of(context).size.width), 0),
@@ -91,9 +96,7 @@ class _GroceryItemTileState extends State<GroceryItemTile>
     final qty = widget.item.quantity != null
         ? '${widget.item.quantity} ${widget.item.unit ?? ''}'.trim()
         : '';
-    final price = widget.item.estimatedPrice != null
-        ? '\$${widget.item.estimatedPrice!.toStringAsFixed(2)}'
-        : '';
+    final price = '\$${(widget.item.estimatedPrice ?? 0).toStringAsFixed(2)}';
     final hasActions = widget.onEdit != null || widget.onDelete != null;
 
     final tileContent = Row(
@@ -136,16 +139,15 @@ class _GroceryItemTileState extends State<GroceryItemTile>
             ],
           ),
         ),
-        if (price.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
-            child: Text(
-              price,
-              style: context.text.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+        Padding(
+          padding: const EdgeInsets.only(right: AppSpacing.sm),
+          child: Text(
+            price,
+            style: context.text.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w700,
             ),
           ),
+        ),
       ],
     );
 
