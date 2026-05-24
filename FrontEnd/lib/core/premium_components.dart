@@ -24,14 +24,16 @@ class PremiumTheme {
   static Color surface(BuildContext context) =>
       isDark(context) ? AppColors.darkSurface : AppColors.surface;
 
-  static Color elevatedSurface(BuildContext context) =>
-      isDark(context) ? AppColors.darkElevatedSurface : AppColors.elevatedSurface;
+  static Color elevatedSurface(BuildContext context) => isDark(context)
+      ? AppColors.darkElevatedSurface
+      : AppColors.elevatedSurface;
 
   static Color textPrimary(BuildContext context) =>
       isDark(context) ? AppColors.darkOnSurface : AppColors.onSurface;
 
-  static Color textSecondary(BuildContext context) =>
-      isDark(context) ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant;
+  static Color textSecondary(BuildContext context) => isDark(context)
+      ? AppColors.darkOnSurfaceVariant
+      : AppColors.onSurfaceVariant;
 
   static Color textTertiary(BuildContext context) => isDark(context)
       ? AppColors.darkOnSurfaceTertiary
@@ -96,14 +98,14 @@ class PremiumTheme {
   }
 
   static List<BoxShadow> glow(BuildContext context, {Color? color}) => [
-        BoxShadow(
-          color: (color ?? AppColors.primaryAccentGreen).withOpacity(
-            isDark(context) ? 0.26 : 0.16,
-          ),
-          blurRadius: 24,
-          spreadRadius: -4,
-        ),
-      ];
+    BoxShadow(
+      color: (color ?? AppColors.primaryAccentGreen).withOpacity(
+        isDark(context) ? 0.26 : 0.16,
+      ),
+      blurRadius: 24,
+      spreadRadius: -4,
+    ),
+  ];
 
   static LinearGradient pageGradient(BuildContext context) {
     final dark = isDark(context);
@@ -226,7 +228,8 @@ class GlassContainer extends StatelessWidget {
       margin: margin,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: shadows ??
+        boxShadow:
+            shadows ??
             (elevated
                 ? PremiumTheme.floatingShadow(context)
                 : PremiumTheme.softShadow(context)),
@@ -238,11 +241,13 @@ class GlassContainer extends StatelessWidget {
           child: Container(
             padding: padding,
             decoration: BoxDecoration(
-              color: backgroundColor ??
+              color:
+                  backgroundColor ??
                   PremiumTheme.glass(context, elevated: elevated),
               borderRadius: BorderRadius.circular(borderRadius),
               border: Border.all(
-                color: borderColor ??
+                color:
+                    borderColor ??
                     (PremiumTheme.isDark(context)
                         ? Colors.white.withOpacity(0.08)
                         : Colors.white.withOpacity(0.82)),
@@ -292,9 +297,10 @@ class PremiumCard extends StatelessWidget {
     final surface = switch (variant) {
       PremiumCardVariant.standard => PremiumTheme.surface(context),
       PremiumCardVariant.elevated => PremiumTheme.elevatedSurface(context),
-      PremiumCardVariant.accent => dark
-          ? AppColors.primaryAccentGreen.withOpacity(0.14)
-          : AppColors.primaryAccentGreen.withOpacity(0.09),
+      PremiumCardVariant.accent =>
+        dark
+            ? AppColors.primaryAccentGreen.withOpacity(0.14)
+            : AppColors.primaryAccentGreen.withOpacity(0.09),
       PremiumCardVariant.glass => PremiumTheme.surface(context),
     };
 
@@ -319,7 +325,9 @@ class PremiumCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(borderRadius),
               border: Border.all(
                 color: variant == PremiumCardVariant.accent
-                    ? AppColors.primaryAccentGreen.withOpacity(dark ? 0.22 : 0.18)
+                    ? AppColors.primaryAccentGreen.withOpacity(
+                        dark ? 0.22 : 0.18,
+                      )
                     : PremiumTheme.border(context),
               ),
             ),
@@ -349,9 +357,15 @@ class _PressableState extends State<_Pressable> {
     return GestureDetector(
       onTap: widget.onTap,
       behavior: HitTestBehavior.opaque,
-      onTapDown: widget.onTap == null ? null : (_) => setState(() => _pressed = true),
-      onTapUp: widget.onTap == null ? null : (_) => setState(() => _pressed = false),
-      onTapCancel: widget.onTap == null ? null : () => setState(() => _pressed = false),
+      onTapDown: widget.onTap == null
+          ? null
+          : (_) => setState(() => _pressed = true),
+      onTapUp: widget.onTap == null
+          ? null
+          : (_) => setState(() => _pressed = false),
+      onTapCancel: widget.onTap == null
+          ? null
+          : () => setState(() => _pressed = false),
       child: AnimatedScale(
         duration: AppAnimations.fast,
         curve: Curves.easeOutCubic,
@@ -383,7 +397,9 @@ class GlassButton extends StatelessWidget {
     final filled = variant == GlassButtonVariant.filled;
     final outlined = variant == GlassButtonVariant.outlined;
     final foreground = filled
-        ? (PremiumTheme.isDark(context) ? AppColors.darkBackground : Colors.white)
+        ? (PremiumTheme.isDark(context)
+              ? AppColors.darkBackground
+              : Colors.white)
         : AppColors.primaryAccentGreen;
     final background = filled
         ? AppColors.primaryAccentGreen
@@ -527,11 +543,7 @@ class GlassTextField extends StatelessWidget {
 }
 
 class AnimatedProgressBar extends StatelessWidget {
-  const AnimatedProgressBar({
-    required this.value,
-    this.height = 8,
-    super.key,
-  });
+  const AnimatedProgressBar({required this.value, this.height = 8, super.key});
 
   final double value;
   final double height;
@@ -592,7 +604,9 @@ class SelectableGlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final foreground = selected
-        ? (PremiumTheme.isDark(context) ? AppColors.darkBackground : Colors.white)
+        ? (PremiumTheme.isDark(context)
+              ? AppColors.darkBackground
+              : Colors.white)
         : PremiumTheme.textPrimary(context);
 
     return AnimatedScale(
@@ -607,8 +621,9 @@ class SelectableGlassCard extends StatelessWidget {
         borderColor: selected
             ? AppColors.primaryAccentGreen
             : PremiumTheme.border(context),
-        shadows:
-            selected ? PremiumTheme.glow(context) : PremiumTheme.softShadow(context),
+        shadows: selected
+            ? PremiumTheme.glow(context)
+            : PremiumTheme.softShadow(context),
         child: GestureDetector(
           onTap: onTap,
           behavior: HitTestBehavior.opaque,
@@ -843,8 +858,7 @@ class FloatingBottomNavigation extends StatelessWidget {
                             child: _FloatingNavItem(
                               destination: entry.$2,
                               selected: entry.$1 == currentIndex,
-                              onTap: () =>
-                                  onDestinationSelected(entry.$1),
+                              onTap: () => onDestinationSelected(entry.$1),
                             ),
                           ),
                         ),
@@ -892,8 +906,9 @@ class _FloatingNavItemState extends State<_FloatingNavItem> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedForeground =
-        PremiumTheme.isDark(context) ? AppColors.darkBackground : Colors.white;
+    final selectedForeground = PremiumTheme.isDark(context)
+        ? AppColors.darkBackground
+        : Colors.white;
     final color = widget.selected
         ? selectedForeground
         : PremiumTheme.textSecondary(context).withOpacity(0.78);
@@ -930,8 +945,9 @@ class _FloatingNavItemState extends State<_FloatingNavItem> {
                   boxShadow: widget.selected
                       ? [
                           BoxShadow(
-                            color: AppColors.primaryAccentGreen
-                                .withOpacity(0.35),
+                            color: AppColors.primaryAccentGreen.withOpacity(
+                              0.35,
+                            ),
                             blurRadius: 24,
                             spreadRadius: 0,
                           ),
@@ -945,25 +961,26 @@ class _FloatingNavItemState extends State<_FloatingNavItem> {
                     Icon(
                       widget.selected
                           ? widget.destination.selectedIcon ??
-                              widget.destination.icon
+                                widget.destination.icon
                           : widget.destination.icon,
                       color: color,
                       size: widget.selected ? 24 : 22,
                     ),
-                    if (widget.selected)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Text(
-                          widget.destination.label,
-                          style: AppTypography.labelSmall.copyWith(
-                            color: color,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 9,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        widget.destination.label,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: color,
+                          fontWeight: widget.selected
+                              ? FontWeight.w700
+                              : FontWeight.w600,
+                          fontSize: 9,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                    ),
                   ],
                 ),
               ),
