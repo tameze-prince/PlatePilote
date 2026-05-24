@@ -27,6 +27,7 @@ class Ingredient {
   final bool? lowCarb;
   final bool? ketoFriendly;
   final double? averagePricePerKg;
+  final int popularityScore;
 
   const Ingredient({
     required this.id,
@@ -57,6 +58,7 @@ class Ingredient {
     this.lowCarb,
     this.ketoFriendly,
     this.averagePricePerKg,
+    this.popularityScore = 0,
   });
 
   factory Ingredient.fromJson(Map<String, dynamic> json) {
@@ -89,6 +91,10 @@ class Ingredient {
       lowCarb: json['lowCarb'] as bool?,
       ketoFriendly: json['ketoFriendly'] as bool?,
       averagePricePerKg: (json['averagePricePerKg'] as num?)?.toDouble(),
+      popularityScore:
+          (json['popularityScore'] as num? ?? json['popularity'] as num?)
+              ?.toInt() ??
+          0,
     );
   }
 }

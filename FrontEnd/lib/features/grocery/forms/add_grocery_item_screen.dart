@@ -9,6 +9,8 @@ import '../../../app/theme/app_radius.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../core/premium_components.dart';
+import '../../../core/utils/search_utils.dart';
+import '../../../core/widgets/search_result_item.dart';
 import '../../../shared/models/ingredient.dart';
 import '../../pantry/ingredient_repository.dart';
 import '../grocery_provider.dart';
@@ -34,6 +36,7 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
   bool _isSearching = false;
   bool _showResults = false;
   List<Ingredient> _searchResults = [];
+  List<String> _recentSearches = [];
   final Set<Ingredient> _selectedIngredients = {};
 
   static const _categories = [
@@ -85,7 +88,11 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
       final results = await repo.search(query);
       if (!mounted) return;
       setState(() {
-        _searchResults = results;
+        _searchResults = SearchUtils.sortIngredients(results, query);
+        _recentSearches = [
+          query,
+          ..._recentSearches.where((item) => item != query),
+        ].take(5).toList();
         _showResults = true;
         _isSearching = false;
       });
@@ -108,7 +115,7 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
       final results = await repo.getByCategory(category);
       if (!mounted) return;
       setState(() {
-        _searchResults = results;
+        _searchResults = SearchUtils.sortIngredients(results, '');
         _isSearching = false;
       });
     } catch (_) {
@@ -129,6 +136,10 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
     });
   }
 
+  void _selectAllResults() {
+    setState(() => _selectedIngredients.addAll(_searchResults));
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -137,8 +148,12 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
       final notifier = ref.read(groceryProvider.notifier);
 
       final qty = double.tryParse(_manualQuantityController.text) ?? 1;
-      final unit = _unitController.text.trim().isEmpty ? 'unit' : _unitController.text.trim();
-      final notes = _notesController.text.isNotEmpty ? _notesController.text.trim() : null;
+      final unit = _unitController.text.trim().isEmpty
+          ? 'unit'
+          : _unitController.text.trim();
+      final notes = _notesController.text.isNotEmpty
+          ? _notesController.text.trim()
+          : null;
 
       if (_selectedIngredients.isNotEmpty) {
         for (final ing in _selectedIngredients) {
@@ -172,15 +187,15 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
       final count = _selectedIngredients.isNotEmpty
           ? _selectedIngredients.length
           : 1;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$count item(s) added!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('$count item(s) added!')));
       context.pop();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to add: $e')));
     } finally {
       if (mounted) setState(() => _adding = false);
     }
@@ -226,7 +241,10 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
                   key: _formKey,
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.xl,
+                      AppSpacing.md,
+                      AppSpacing.sm,
+                      AppSpacing.md,
+                      AppSpacing.xl,
                     ),
                     children: [
                       _buildSearchSection(),
@@ -245,6 +263,52 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
         ),
       ),
       extendBody: true,
+      bottomNavigationBar: _selectedIngredients.isEmpty
+          ? null
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  AppSpacing.xs,
+                  AppSpacing.md,
+                  AppSpacing.sm,
+                ),
+                child: GlassContainer(
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  elevated: true,
+                  backgroundColor: AppColors.primaryAccentGreen.withValues(
+                    alpha: 0.12,
+                  ),
+                  borderColor: AppColors.primaryAccentGreen.withValues(
+                    alpha: 0.28,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${_selectedIngredients.length} selected',
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: PremiumTheme.textPrimary(context),
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () =>
+                            setState(() => _selectedIngredients.clear()),
+                        child: const Text('Clear'),
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      FilledButton.icon(
+                        onPressed: _adding ? null : _submit,
+                        icon: const Icon(Icons.add_shopping_cart, size: 18),
+                        label: const Text('Add'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
     );
   }
 
@@ -284,14 +348,14 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
                       ),
                     )
                   : (_searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, size: 18),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() => _searchResults = []);
-                          },
-                        )
-                      : null),
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 18),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _searchResults = []);
+                            },
+                          )
+                        : null),
               filled: true,
               fillColor: PremiumTheme.glass(context, elevated: false),
               border: OutlineInputBorder(
@@ -301,6 +365,33 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
             ),
           ),
           if (_searchController.text.isEmpty && !_showResults) ...[
+            if (_recentSearches.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'Recent searches',
+                style: AppTypography.labelMedium.copyWith(
+                  color: PremiumTheme.textSecondary(context),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(
+                spacing: AppSpacing.xs,
+                runSpacing: AppSpacing.xs,
+                children: _recentSearches
+                    .map(
+                      (term) => ActionChip(
+                        label: Text(term),
+                        avatar: const Icon(Icons.history, size: 16),
+                        onPressed: () {
+                          _searchController.text = term;
+                          _search(term);
+                        },
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
             Text(
               'Browse by category',
@@ -313,102 +404,108 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
             Wrap(
               spacing: AppSpacing.xs,
               runSpacing: AppSpacing.xs,
-              children: _categories.map((cat) => _BrowseChip(
-                label: cat,
-                icon: _categoryIcon(cat),
-                onTap: () => _browseCategory(cat.toLowerCase()),
-              )).toList(),
+              children: _categories
+                  .map(
+                    (cat) => _BrowseChip(
+                      label: _categoryCountLabel(cat),
+                      icon: _categoryIcon(cat),
+                      onTap: () => _browseCategory(cat.toLowerCase()),
+                    ),
+                  )
+                  .toList(),
             ),
           ],
           if (_showResults && _searchResults.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${_searchResults.length} results',
+                    style: AppTypography.labelMedium.copyWith(
+                      color: PremiumTheme.textSecondary(context),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: _selectAllResults,
+                  icon: const Icon(Icons.done_all, size: 18),
+                  label: const Text('Select all'),
+                ),
+              ],
+            ),
             Container(
-              constraints: const BoxConstraints(maxHeight: 240),
               decoration: BoxDecoration(
                 color: PremiumTheme.glass(context, elevated: true),
                 borderRadius: BorderRadius.circular(AppRadius.md),
                 border: Border.all(color: PremiumTheme.border(context)),
               ),
-              child: ListView.separated(
-                shrinkWrap: true,
-                itemCount: _searchResults.length,
-                separatorBuilder: (_, _) =>
-                    Divider(height: 1, color: PremiumTheme.border(context)),
-                itemBuilder: (context, index) {
-                  final ing = _searchResults[index];
-                  final selected = _selectedIngredients.contains(ing);
-                  return InkWell(
-                    onTap: () => _toggleIngredient(ing),
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.sm),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: selected
-                                  ? AppColors.primaryAccentGreen
-                                  : AppColors.primaryAccentGreen
-                                      .withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(AppRadius.sm),
-                            ),
-                            child: Icon(
-                              selected ? Icons.check : Icons.shopping_basket_outlined,
-                              size: 18,
-                              color: selected ? Colors.white : AppColors.primaryAccentGreen,
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  ing.canonicalName,
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: PremiumTheme.textPrimary(context),
-                                  ),
-                                ),
-                                Text(
-                                  '${ing.category} \u2022 ${ing.defaultUnit}',
-                                  style: AppTypography.bodySmall.copyWith(
-                                    color: PremiumTheme.textSecondary(context),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            selected
-                                ? Icons.check_circle
-                                : Icons.add_circle_outline,
-                            size: 20,
-                            color: selected
-                                ? AppColors.primaryAccentGreen
-                                : PremiumTheme.textTertiary(context),
-                          ),
-                        ],
+              child: Column(
+                children: [
+                  for (
+                    var index = 0;
+                    index < _searchResults.length;
+                    index++
+                  ) ...[
+                    SearchResultItem(
+                      ingredient: _searchResults[index],
+                      query: _searchController.text,
+                      icon: _categoryIcon(_searchResults[index].category),
+                      selected: _selectedIngredients.contains(
+                        _searchResults[index],
                       ),
+                      onTap: () => _toggleIngredient(_searchResults[index]),
                     ),
-                  );
-                },
+                    if (index != _searchResults.length - 1)
+                      Divider(height: 1, color: PremiumTheme.border(context)),
+                  ],
+                ],
               ),
             ),
           ],
           if (_showResults && _searchResults.isEmpty && !_isSearching)
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.sm),
-              child: Text(
-                'No ingredients found. Select another category or search again.',
-                style: AppTypography.bodySmall.copyWith(
-                  color: PremiumTheme.textTertiary(context),
-                ),
+            _buildNoResults(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoResults() {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: GlassContainer(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        elevated: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'No ingredients found',
+              style: AppTypography.bodyMedium.copyWith(
+                color: PremiumTheme.textPrimary(context),
+                fontWeight: FontWeight.w800,
               ),
             ),
-        ],
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Add "${_searchController.text.trim()}" as a custom grocery item.',
+              style: AppTypography.bodySmall.copyWith(
+                color: PremiumTheme.textSecondary(context),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            FilledButton.icon(
+              onPressed: () {
+                _manualNameController.text = _searchController.text.trim();
+                _searchController.clear();
+                setState(() => _showResults = false);
+              },
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Add Custom'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -425,7 +522,11 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.checklist, size: 18, color: AppColors.primaryAccentGreen),
+              Icon(
+                Icons.checklist,
+                size: 18,
+                color: AppColors.primaryAccentGreen,
+              ),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'Selected Ingredients',
@@ -451,16 +552,25 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
           Wrap(
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
-            children: _selectedIngredients.map((ing) => Chip(
-              label: Text(ing.canonicalName, style: const TextStyle(fontSize: 13)),
-              deleteIcon: const Icon(Icons.close, size: 16),
-              onDeleted: () => _toggleIngredient(ing),
-              backgroundColor: AppColors.primaryAccentGreen.withValues(alpha: 0.12),
-              side: BorderSide.none,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.full),
-              ),
-            )).toList(),
+            children: _selectedIngredients
+                .map(
+                  (ing) => Chip(
+                    label: Text(
+                      ing.canonicalName,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                    deleteIcon: const Icon(Icons.close, size: 16),
+                    onDeleted: () => _toggleIngredient(ing),
+                    backgroundColor: AppColors.primaryAccentGreen.withValues(
+                      alpha: 0.12,
+                    ),
+                    side: BorderSide.none,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.full),
+                    ),
+                  ),
+                )
+                .toList(),
           ),
         ],
       ),
@@ -476,7 +586,11 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.edit_note, size: 18, color: AppColors.primaryAccentGreen),
+              Icon(
+                Icons.edit_note,
+                size: 18,
+                color: AppColors.primaryAccentGreen,
+              ),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 _selectedIngredients.isNotEmpty
@@ -499,7 +613,8 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
                 prefixIcon: Icon(Icons.shopping_basket_outlined, size: 20),
               ),
               validator: (v) {
-                if (_selectedIngredients.isEmpty && (v?.trim().isEmpty ?? true)) {
+                if (_selectedIngredients.isEmpty &&
+                    (v?.trim().isEmpty ?? true)) {
                   return 'Enter a name or select ingredients above';
                 }
                 return null;
@@ -578,8 +693,8 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
           _adding
               ? 'Adding...'
               : _selectedIngredients.isNotEmpty
-                  ? 'Add ${_selectedIngredients.length} item${_selectedIngredients.length > 1 ? 's' : ''}'
-                  : 'Add to List',
+              ? 'Add ${_selectedIngredients.length} item${_selectedIngredients.length > 1 ? 's' : ''}'
+              : 'Add to List',
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryAccentGreen,
@@ -607,6 +722,16 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
       'beverages' => Icons.local_drink,
       _ => Icons.inventory_2_outlined,
     };
+  }
+
+  String _categoryCountLabel(String category) {
+    final count = _searchResults
+        .where(
+          (ingredient) =>
+              ingredient.category.toLowerCase() == category.toLowerCase(),
+        )
+        .length;
+    return count > 0 ? '$category ($count)' : category;
   }
 }
 

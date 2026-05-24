@@ -20,9 +20,9 @@ class GroceryList {
       id: json['id']?.toString() ?? '',
       name: json['name'] as String?,
       status: json['status'] as String?,
-      items: (json['items'] as List<dynamic>?)
-              ?.map(
-                  (e) => GroceryItem.fromJson(e as Map<String, dynamic>))
+      items:
+          (json['items'] as List<dynamic>?)
+              ?.map((e) => GroceryItem.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       createdAt: json['createdAt'] as String?,
@@ -52,6 +52,8 @@ class GroceryItem {
     this.notes,
     this.sortOrder,
     this.ingredientId,
+    this.isHighPriority = false,
+    this.lastPurchased,
   });
 
   final String? id;
@@ -65,6 +67,8 @@ class GroceryItem {
   final String? notes;
   final int? sortOrder;
   final String? ingredientId;
+  final bool isHighPriority;
+  final String? lastPurchased;
 
   GroceryItem copyWith({
     bool? checked,
@@ -72,6 +76,8 @@ class GroceryItem {
     String? unit,
     String? name,
     String? notes,
+    bool? isHighPriority,
+    String? lastPurchased,
   }) {
     return GroceryItem(
       id: id,
@@ -85,6 +91,8 @@ class GroceryItem {
       notes: notes ?? this.notes,
       sortOrder: sortOrder,
       ingredientId: ingredientId,
+      isHighPriority: isHighPriority ?? this.isHighPriority,
+      lastPurchased: lastPurchased ?? this.lastPurchased,
     );
   }
 
@@ -95,14 +103,17 @@ class GroceryItem {
       category: json['category'] as String?,
       quantity: (json['quantity'] as num?)?.toDouble(),
       unit: json['unit'] as String?,
-      estimatedPrice:
-          (json['estimatedPrice'] as num?)?.toDouble(),
-      priceConfidence:
-          (json['priceConfidence'] as num?)?.toDouble(),
+      estimatedPrice: (json['estimatedPrice'] as num?)?.toDouble(),
+      priceConfidence: (json['priceConfidence'] as num?)?.toDouble(),
       checked: json['checked'] as bool? ?? false,
       notes: json['notes'] as String?,
       sortOrder: json['sortOrder'] as int?,
       ingredientId: json['ingredientId']?.toString(),
+      isHighPriority:
+          json['isHighPriority'] as bool? ??
+          json['highPriority'] as bool? ??
+          false,
+      lastPurchased: json['lastPurchased'] as String?,
     );
   }
 
@@ -116,6 +127,8 @@ class GroceryItem {
       'checked': checked,
       'notes': notes,
       'sortOrder': sortOrder,
+      'isHighPriority': isHighPriority,
+      'lastPurchased': lastPurchased,
     };
   }
 }

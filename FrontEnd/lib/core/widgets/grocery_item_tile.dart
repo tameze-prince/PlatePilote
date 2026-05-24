@@ -98,6 +98,7 @@ class _GroceryItemTileState extends State<GroceryItemTile>
         : '';
     final price = '\$${(widget.item.estimatedPrice ?? 0).toStringAsFixed(2)}';
     final hasActions = widget.onEdit != null || widget.onDelete != null;
+    final icon = _categoryIcon(widget.item.category);
 
     final tileContent = Row(
       children: [
@@ -109,6 +110,24 @@ class _GroceryItemTileState extends State<GroceryItemTile>
           },
         ),
         const SizedBox(width: AppSpacing.xs),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: widget.item.isHighPriority
+                ? AppColors.warning.withValues(alpha: 0.16)
+                : AppColors.primaryAccentGreen.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+          ),
+          child: Icon(
+            widget.item.isHighPriority ? Icons.priority_high_rounded : icon,
+            color: widget.item.isHighPriority
+                ? AppColors.warning
+                : AppColors.primaryAccentGreen,
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,7 +145,10 @@ class _GroceryItemTileState extends State<GroceryItemTile>
               ),
               if (qty.isNotEmpty)
                 Text(
-                  'Qty: $qty',
+                  [
+                    if (widget.item.category != null) widget.item.category!,
+                    'Qty: $qty',
+                  ].join('  |  '),
                   style: context.text.bodyMedium?.copyWith(
                     decoration: widget.item.checked
                         ? TextDecoration.lineThrough
@@ -205,10 +227,7 @@ class _GroceryItemTileState extends State<GroceryItemTile>
             animation: _slideAnimation,
             builder: (context, child) {
               return Transform.translate(
-                offset: Offset(
-                  _slideAnimation.value.dx * screenWidth,
-                  0,
-                ),
+                offset: Offset(_slideAnimation.value.dx * screenWidth, 0),
                 child: child,
               );
             },
@@ -238,9 +257,7 @@ class _GroceryItemTileState extends State<GroceryItemTile>
       onTap: onTap,
       child: Container(
         width: _actionWidth,
-        decoration: BoxDecoration(
-          color: color,
-        ),
+        decoration: BoxDecoration(color: color),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -259,6 +276,18 @@ class _GroceryItemTileState extends State<GroceryItemTile>
       ),
     );
   }
+
+  IconData _categoryIcon(String? category) {
+    return switch (category) {
+      'Produce' => Icons.eco,
+      'Dairy & Eggs' => Icons.egg_alt,
+      'Protein' => Icons.set_meal,
+      'Pantry Staples' => Icons.inventory_2_outlined,
+      'Frozen' => Icons.ac_unit,
+      'Bakery' => Icons.bakery_dining,
+      'Spices' => Icons.blender,
+      'Beverages' => Icons.local_drink,
+      _ => Icons.shopping_basket_outlined,
+    };
+  }
 }
-
-

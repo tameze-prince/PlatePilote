@@ -12,7 +12,7 @@ PlatePilot est une plateforme SaaS intelligente de planification alimentaire et 
 
 L’objectif principal du produit est de réduire la charge mentale liée à :
 
-* la planification des repas,
+* la planification des repas, 
 * les courses alimentaires,
 * la gestion du budget,
 * la gestion du pantry (stock alimentaire),

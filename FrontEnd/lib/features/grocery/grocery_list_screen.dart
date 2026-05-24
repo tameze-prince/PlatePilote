@@ -59,7 +59,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 DropdownButtonFormField<String>(
-                  value: selectedCategory,
+                  initialValue: selectedCategory,
                   decoration: const InputDecoration(
                     labelText: 'Category',
                     border: OutlineInputBorder(),
@@ -67,13 +67,22 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
                   items: const [
                     DropdownMenuItem(value: null, child: Text('None')),
                     DropdownMenuItem(value: 'Produce', child: Text('Produce')),
-                    DropdownMenuItem(value: 'Dairy & Eggs', child: Text('Dairy & Eggs')),
+                    DropdownMenuItem(
+                      value: 'Dairy & Eggs',
+                      child: Text('Dairy & Eggs'),
+                    ),
                     DropdownMenuItem(value: 'Protein', child: Text('Protein')),
-                    DropdownMenuItem(value: 'Pantry Staples', child: Text('Pantry Staples')),
+                    DropdownMenuItem(
+                      value: 'Pantry Staples',
+                      child: Text('Pantry Staples'),
+                    ),
                     DropdownMenuItem(value: 'Frozen', child: Text('Frozen')),
                     DropdownMenuItem(value: 'Bakery', child: Text('Bakery')),
                     DropdownMenuItem(value: 'Spices', child: Text('Spices')),
-                    DropdownMenuItem(value: 'Beverages', child: Text('Beverages')),
+                    DropdownMenuItem(
+                      value: 'Beverages',
+                      child: Text('Beverages'),
+                    ),
                   ],
                   onChanged: (v) => setDialogState(() => selectedCategory = v),
                 ),
@@ -134,14 +143,20 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
                 if (name.isEmpty) return;
                 final qty = double.tryParse(qtyCtrl.text) ?? 1;
                 final price = double.tryParse(priceCtrl.text);
-                ref.read(groceryProvider.notifier).addItem(
-                  name: name,
-                  category: selectedCategory,
-                  quantity: qty,
-                  unit: unitCtrl.text.trim().isEmpty ? 'unit' : unitCtrl.text.trim(),
-                  estimatedPrice: price,
-                  notes: notesCtrl.text.trim().isEmpty ? null : notesCtrl.text.trim(),
-                );
+                ref
+                    .read(groceryProvider.notifier)
+                    .addItem(
+                      name: name,
+                      category: selectedCategory,
+                      quantity: qty,
+                      unit: unitCtrl.text.trim().isEmpty
+                          ? 'unit'
+                          : unitCtrl.text.trim(),
+                      estimatedPrice: price,
+                      notes: notesCtrl.text.trim().isEmpty
+                          ? null
+                          : notesCtrl.text.trim(),
+                    );
                 Navigator.pop(ctx);
               },
               style: FilledButton.styleFrom(
@@ -159,9 +174,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     final qtyController = TextEditingController(
       text: item.quantity?.toStringAsFixed(1) ?? '1',
     );
-    final unitController = TextEditingController(
-      text: item.unit ?? 'unit',
-    );
+    final unitController = TextEditingController(text: item.unit ?? 'unit');
 
     showDialog(
       context: context,
@@ -170,7 +183,12 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(item.name, style: AppTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700)),
+            Text(
+              item.name,
+              style: AppTypography.bodyLarge.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
@@ -207,14 +225,20 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
             onPressed: () {
               final qty = double.tryParse(qtyController.text);
               if (qty == null || qty <= 0) return;
-              ref.read(groceryProvider.notifier).updateItemQuantity(
-                index,
-                qty,
-                unitController.text.trim().isEmpty ? 'unit' : unitController.text.trim(),
-              );
+              ref
+                  .read(groceryProvider.notifier)
+                  .updateItemQuantity(
+                    index,
+                    qty,
+                    unitController.text.trim().isEmpty
+                        ? 'unit'
+                        : unitController.text.trim(),
+                  );
               Navigator.pop(ctx);
             },
-            style: TextButton.styleFrom(foregroundColor: AppColors.primaryAccentGreen),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primaryAccentGreen,
+            ),
             child: const Text('Save'),
           ),
         ],
@@ -252,7 +276,8 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     final budgetState = ref.watch(budgetProvider);
     final textTheme = Theme.of(context).textTheme;
     final grouped = <String, List<GroceryItem>>{};
-    for (final item in state.items) {
+    final pinned = state.items.where(_isPinnedItem).toList();
+    for (final item in state.items.where((item) => !_isPinnedItem(item))) {
       grouped.putIfAbsent(item.category ?? 'Other', () => []).add(item);
     }
 
@@ -287,17 +312,25 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
                     (_) => const Padding(
                       padding: EdgeInsets.only(bottom: AppSpacing.md),
                       child: ShimmerGlassSkeleton(
-                        width: double.infinity, height: 72,
+                        width: double.infinity,
+                        height: 72,
                       ),
                     ),
                   ),
                 ],
               )
             : state.error != null
-                ? _buildErrorView(context)
-                : state.items.isEmpty
-                    ? _buildEmptyView(context)
-                    : _buildListView(context, state, budgetState, textTheme, grouped),
+            ? _buildErrorView(context)
+            : state.items.isEmpty
+            ? _buildEmptyView(context)
+            : _buildListView(
+                context,
+                state,
+                budgetState,
+                textTheme,
+                grouped,
+                pinned,
+              ),
       ),
     );
   }
@@ -308,9 +341,11 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     BudgetState budgetState,
     TextTheme textTheme,
     Map<String, List<GroceryItem>> grouped,
+    List<GroceryItem> pinned,
   ) {
     final total = state.totalEstimatedPrice;
-    final overBudget = budgetState.weeklyBudget > 0 && total > budgetState.weeklyBudget;
+    final overBudget =
+        budgetState.weeklyBudget > 0 && total > budgetState.weeklyBudget;
 
     return RefreshIndicator(
       onRefresh: () => ref.read(groceryProvider.notifier).refresh(),
@@ -357,49 +392,63 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
                       : GlassButtonVariant.filled,
                   onPressed: state.checkedCount == 0
                       ? null
-                      : () => ref.read(groceryProvider.notifier).markItemsAsBought(),
+                      : () => ref
+                            .read(groceryProvider.notifier)
+                            .markItemsAsBought(),
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          for (final entry in grouped.entries) ...[
-            Row(
-              children: [
-                Icon(_categoryIcon(entry.key),
-                    color: PremiumTheme.textPrimary(context)),
-                const SizedBox(width: AppSpacing.xs),
-                Expanded(
-                  child: Text(
-                    entry.key,
-                    style: textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                ),
-                Text(
-                  '${entry.value.length} items',
-                  style: textTheme.bodySmall?.copyWith(
-                      color: PremiumTheme.textSecondary(context)),
-                ),
-              ],
+          _buildSwipeHint(context),
+          const SizedBox(height: AppSpacing.md),
+          if (pinned.isNotEmpty) ...[
+            _buildSectionHeader(
+              context,
+              icon: Icons.priority_high_rounded,
+              title: 'Priority',
+              count:
+                  '${pinned.where((item) => item.checked).length}/${pinned.length}',
+              color: AppColors.warning,
             ),
             const SizedBox(height: AppSpacing.xs),
-            ...entry.value.map(
-              (item) {
-                final index = state.items.indexOf(item);
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                  child: GroceryItemTile(
-                    item: item,
-                    onToggle: () => ref.read(groceryProvider.notifier).toggleItem(
-                      index,
-                    ),
-                    onEdit: () => _editItem(index, item),
-                    onDelete: () => _deleteItem(index, item),
-                  ),
-                );
-              },
+            ...pinned.map((item) {
+              final index = state.items.indexOf(item);
+              return Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                child: GroceryItemTile(
+                  item: item.copyWith(isHighPriority: true),
+                  onToggle: () =>
+                      ref.read(groceryProvider.notifier).toggleItem(index),
+                  onEdit: () => _editItem(index, item),
+                  onDelete: () => _deleteItem(index, item),
+                ),
+              );
+            }),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          for (final entry in grouped.entries) ...[
+            _buildSectionHeader(
+              context,
+              icon: _categoryIcon(entry.key),
+              title: entry.key,
+              count:
+                  '${entry.value.where((item) => item.checked).length}/${entry.value.length}',
             ),
+            const SizedBox(height: AppSpacing.xs),
+            ...entry.value.map((item) {
+              final index = state.items.indexOf(item);
+              return Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                child: GroceryItemTile(
+                  item: item,
+                  onToggle: () =>
+                      ref.read(groceryProvider.notifier).toggleItem(index),
+                  onEdit: () => _editItem(index, item),
+                  onDelete: () => _deleteItem(index, item),
+                ),
+              );
+            }),
             const SizedBox(height: AppSpacing.md),
           ],
         ],
@@ -416,6 +465,9 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     final textTheme = Theme.of(context).textTheme;
     final total = state.totalEstimatedPrice;
     final checkedCount = state.checkedCount;
+    final progress = state.items.isEmpty
+        ? 0.0
+        : checkedCount / state.items.length;
     return PremiumCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -426,18 +478,62 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Estimated Total',
-                        style: textTheme.bodyMedium?.copyWith(
-                            color: PremiumTheme.textSecondary(context))),
-                    Text('\$${total.toStringAsFixed(2)}',
-                        style: textTheme.displaySmall?.copyWith(
-                            color: AppColors.primaryAccentGreen,
-                            fontWeight: FontWeight.w800)),
+                    Text(
+                      'Estimated Total',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: PremiumTheme.textSecondary(context),
+                      ),
+                    ),
+                    Text(
+                      '\$${total.toStringAsFixed(2)}',
+                      style: textTheme.displaySmall?.copyWith(
+                        color: AppColors.primaryAccentGreen,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                   ],
                 ),
               ),
+              SizedBox(
+                width: 76,
+                height: 76,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      value: progress,
+                      strokeWidth: 7,
+                      backgroundColor: Colors.white.withValues(alpha: 0.1),
+                      valueColor: const AlwaysStoppedAnimation(
+                        AppColors.primaryAccentGreen,
+                      ),
+                    ),
+                    Text(
+                      '${(progress * 100).round()}%',
+                      style: textTheme.labelLarge?.copyWith(
+                        color: PremiumTheme.textPrimary(context),
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
               _buildChip(
-                  context, '${state.items.length} items', AppColors.primaryAccentGreen),
+                context,
+                '$checkedCount/${state.items.length} items',
+                AppColors.primaryAccentGreen,
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              _buildChip(
+                context,
+                '${state.items.length - checkedCount} left',
+                AppColors.info,
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
@@ -454,14 +550,16 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
                     minHeight: 8,
                     backgroundColor: Colors.white.withValues(alpha: 0.1),
                     valueColor: const AlwaysStoppedAnimation(
-                        AppColors.primaryAccentGreen),
+                      AppColors.primaryAccentGreen,
+                    ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   '$checkedCount of ${state.items.length} items checked',
                   style: textTheme.bodySmall?.copyWith(
-                      color: PremiumTheme.textSecondary(context)),
+                    color: PremiumTheme.textSecondary(context),
+                  ),
                 ),
               ],
             ),
@@ -475,8 +573,11 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded,
-                      color: AppColors.warning, size: 18),
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: AppColors.warning,
+                    size: 18,
+                  ),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
@@ -503,9 +604,72 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(label,
-          style: TextStyle(
-              color: color, fontWeight: FontWeight.w700, fontSize: 13)),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.w700,
+          fontSize: 13,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String count,
+    Color? color,
+  }) {
+    final theme = Theme.of(context).textTheme;
+    final accent = color ?? PremiumTheme.textPrimary(context);
+    return Row(
+      children: [
+        Icon(icon, color: accent, size: 20),
+        const SizedBox(width: AppSpacing.xs),
+        Expanded(
+          child: Text(
+            title,
+            style: theme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+        ),
+        _buildChip(context, count, color ?? AppColors.primaryAccentGreen),
+      ],
+    );
+  }
+
+  Widget _buildSwipeHint(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.info.withValues(alpha: 0.12),
+            AppColors.primaryAccentGreen.withValues(alpha: 0.08),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.swipe_left, color: AppColors.info, size: 18),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              'Swipe an item left for quick quantity and delete actions.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: PremiumTheme.textSecondary(context),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -609,5 +773,9 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
       'Pantry Staples' => Icons.inventory_2_outlined,
       _ => Icons.inventory_2_outlined,
     };
+  }
+
+  bool _isPinnedItem(GroceryItem item) {
+    return item.isHighPriority || (item.notes?.trim().startsWith('!') ?? false);
   }
 }

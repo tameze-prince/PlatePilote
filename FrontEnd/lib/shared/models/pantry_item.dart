@@ -1,3 +1,5 @@
+import '../../core/utils/date_utils.dart';
+
 class PantryItem {
   const PantryItem({
     required this.id,
@@ -22,6 +24,20 @@ class PantryItem {
   final bool isExpired;
   final String? createdAt;
   final String? updatedAt;
+
+  int? get daysToExpiry => AppDateUtils.daysUntil(expirationDate);
+
+  bool get isUrgent {
+    final days = daysToExpiry;
+    return isExpired || (days != null && days <= 2);
+  }
+
+  bool get isExpiringSoon {
+    final days = daysToExpiry;
+    return isExpired || (days != null && days <= 7);
+  }
+
+  bool get isLowStock => (quantity ?? 0) < 1;
 
   PantryItem copyWith({
     String? id,

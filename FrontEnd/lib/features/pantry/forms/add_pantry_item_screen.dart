@@ -9,6 +9,8 @@ import '../../../app/theme/app_radius.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../core/premium_components.dart';
+import '../../../core/utils/search_utils.dart';
+import '../../../core/widgets/search_result_item.dart';
 import '../../../shared/models/ingredient.dart';
 import '../ingredient_repository.dart';
 import '../pantry_provider.dart';
@@ -36,6 +38,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
   Timer? _debounce;
   bool _showResults = false;
   bool _saving = false;
+  List<String> _recentSearches = [];
 
   static const _categories = [
     'Vegetables',
@@ -86,7 +89,11 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
       final results = await repo.search(query);
       if (!mounted) return;
       setState(() {
-        _searchResults = results;
+        _searchResults = SearchUtils.sortIngredients(results, query);
+        _recentSearches = [
+          query,
+          ..._recentSearches.where((item) => item != query),
+        ].take(5).toList();
         _showResults = true;
         _isSearching = false;
       });
@@ -109,7 +116,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
       final results = await repo.getByCategory(category);
       if (!mounted) return;
       setState(() {
-        _searchResults = results;
+        _searchResults = SearchUtils.sortIngredients(results, '');
         _isSearching = false;
       });
     } catch (_) {
@@ -126,7 +133,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
       _nameController.text = ingredient.canonicalName;
       _category = ingredient.category.isNotEmpty
           ? ingredient.category[0].toUpperCase() +
-              ingredient.category.substring(1)
+                ingredient.category.substring(1)
           : 'Vegetables';
       if (_categories.contains(_category)) {
         _category = _category;
@@ -166,25 +173,27 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
     try {
-      await ref.read(pantryProvider.notifier).addItem(
-        name: _nameController.text,
-        category: _category,
-        quantity: double.tryParse(_quantityController.text) ?? 0,
-        unit: _unitController.text,
-        expirationDate: _expirationDate != null
-            ? '${_expirationDate!.year}-${_expirationDate!.month.toString().padLeft(2, '0')}-${_expirationDate!.day.toString().padLeft(2, '0')}'
-            : null,
-      );
+      await ref
+          .read(pantryProvider.notifier)
+          .addItem(
+            name: _nameController.text,
+            category: _category,
+            quantity: double.tryParse(_quantityController.text) ?? 0,
+            unit: _unitController.text,
+            expirationDate: _expirationDate != null
+                ? '${_expirationDate!.year}-${_expirationDate!.month.toString().padLeft(2, '0')}-${_expirationDate!.day.toString().padLeft(2, '0')}'
+                : null,
+          );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pantry item added!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Pantry item added!')));
       context.pop();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add item: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to add item: $e')));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -227,7 +236,10 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
                   key: _formKey,
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.md, 0, AppSpacing.md, AppSpacing.xl,
+                      AppSpacing.md,
+                      0,
+                      AppSpacing.md,
+                      AppSpacing.xl,
                     ),
                     children: [
                       const SizedBox(height: AppSpacing.md),
@@ -319,27 +331,52 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
                           ),
                         )
                       : (_searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear, size: 18),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() => _searchResults = []);
-                              },
-                            )
-                          : null),
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, size: 18),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _searchResults = []);
+                                },
+                              )
+                            : null),
                   filled: true,
                   fillColor: PremiumTheme.glass(context, elevated: false),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: BorderSide(
-                      color: PremiumTheme.border(context),
-                    ),
+                    borderSide: BorderSide(color: PremiumTheme.border(context)),
                   ),
                 ),
               ),
               if (_searchController.text.isEmpty &&
                   _selectedIngredient == null &&
                   !_showResults) ...[
+                if (_recentSearches.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Recent searches',
+                    style: AppTypography.labelMedium.copyWith(
+                      color: PremiumTheme.textSecondary(context),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.xs,
+                    runSpacing: AppSpacing.xs,
+                    children: _recentSearches
+                        .map(
+                          (term) => ActionChip(
+                            label: Text(term),
+                            avatar: const Icon(Icons.history, size: 16),
+                            onPressed: () {
+                              _searchController.text = term;
+                              _search(term);
+                            },
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   'Browse by category',
@@ -352,11 +389,15 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
                 Wrap(
                   spacing: AppSpacing.xs,
                   runSpacing: AppSpacing.xs,
-                  children: _categories.map((cat) => _BrowseCategoryChip(
-                    label: cat,
-                    icon: _categoryIcon(cat),
-                    onTap: () => _browseCategory(cat.toLowerCase()),
-                  )).toList(),
+                  children: _categories
+                      .map(
+                        (cat) => _BrowseCategoryChip(
+                          label: _categoryCountLabel(cat),
+                          icon: _categoryIcon(cat),
+                          onTap: () => _browseCategory(cat.toLowerCase()),
+                        ),
+                      )
+                      .toList(),
                 ),
               ],
               if (_selectedIngredient != null) ...[
@@ -365,87 +406,47 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
               ],
               if (_showResults && _searchResults.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.sm),
+                Text(
+                  '${_searchResults.length} results',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: PremiumTheme.textSecondary(context),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
                 Container(
-                  constraints: const BoxConstraints(maxHeight: 240),
                   decoration: BoxDecoration(
                     color: PremiumTheme.glass(context, elevated: true),
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    border: Border.all(
-                      color: PremiumTheme.border(context),
-                    ),
+                    border: Border.all(color: PremiumTheme.border(context)),
                   ),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: _searchResults.length,
-                    separatorBuilder: (_, _) =>
-                        Divider(height: 1, color: PremiumTheme.border(context)),
-                    itemBuilder: (context, index) {
-                      final ing = _searchResults[index];
-                      return InkWell(
-                        onTap: () => _selectIngredient(ing),
-                        borderRadius: BorderRadius.circular(AppRadius.sm),
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.sm),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryAccentGreen
-                                      .withValues(alpha: 0.15),
-                                  borderRadius:
-                                      BorderRadius.circular(AppRadius.sm),
-                                ),
-                                child: Icon(
-                                  Icons.shopping_basket_outlined,
-                                  size: 18,
-                                  color: AppColors.primaryAccentGreen,
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.sm),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      ing.canonicalName,
-                                      style: AppTypography.bodyMedium.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: PremiumTheme.textPrimary(context),
-                                      ),
-                                    ),
-                                    Text(
-                                      '${ing.category} \u2022 ${ing.defaultUnit}',
-                                      style: AppTypography.bodySmall.copyWith(
-                                        color:
-                                            PremiumTheme.textSecondary(context),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Icon(
-                                Icons.add_circle_outline,
-                                size: 20,
-                                color: AppColors.primaryAccentGreen,
-                              ),
-                            ],
-                          ),
+                  child: Column(
+                    children: [
+                      for (
+                        var index = 0;
+                        index < _searchResults.length;
+                        index++
+                      ) ...[
+                        SearchResultItem(
+                          ingredient: _searchResults[index],
+                          query: _searchController.text,
+                          icon: _categoryIcon(_searchResults[index].category),
+                          trailingIcon: Icons.add_circle_outline,
+                          onTap: () => _selectIngredient(_searchResults[index]),
                         ),
-                      );
-                    },
+                        if (index != _searchResults.length - 1)
+                          Divider(
+                            height: 1,
+                            color: PremiumTheme.border(context),
+                          ),
+                      ],
+                    ],
                   ),
                 ),
               ],
               if (_showResults && _searchResults.isEmpty && !_isSearching) ...[
                 const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'No ingredients found. Fill the form below manually.',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: PremiumTheme.textTertiary(context),
-                  ),
-                ),
+                _buildNoResultsCard(),
               ],
             ],
           ),
@@ -459,11 +460,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
             borderColor: AppColors.info.withValues(alpha: 0.15),
             child: Row(
               children: [
-                Icon(
-                  Icons.info_outline,
-                  size: 18,
-                  color: AppColors.info,
-                ),
+                Icon(Icons.info_outline, size: 18, color: AppColors.info),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
@@ -480,6 +477,48 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
           _buildBarcodeCard(),
         ],
       ],
+    );
+  }
+
+  Widget _buildNoResultsCard() {
+    final query = _searchController.text.trim();
+    return GlassContainer(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      elevated: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'No ingredients found',
+            style: AppTypography.bodyMedium.copyWith(
+              color: PremiumTheme.textPrimary(context),
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          if (_recentSearches.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Did you mean ${_recentSearches.first}?',
+              style: AppTypography.bodySmall.copyWith(
+                color: PremiumTheme.textSecondary(context),
+              ),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.sm),
+          FilledButton.icon(
+            onPressed: query.isEmpty
+                ? null
+                : () {
+                    _nameController.text = query;
+                    _showResults = false;
+                    _searchController.clear();
+                    setState(() {});
+                  },
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Add Custom'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -515,7 +554,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
                   ),
                 ),
                 Text(
-                  'Coming soon — scan product barcodes to auto-fill',
+                  'Coming soon - scan product barcodes to auto-fill',
                   style: AppTypography.bodySmall.copyWith(
                     color: PremiumTheme.textTertiary(context),
                   ),
@@ -591,11 +630,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
               _nutrientChip('Carbs', ing.carbohydratesPer100g, 'g'),
               _nutrientChip('Fat', ing.fatPer100g, 'g'),
               if (ing.averagePricePerKg != null)
-                _nutrientChip(
-                  'Price',
-                  ing.averagePricePerKg,
-                  '\$/kg',
-                ),
+                _nutrientChip('Price', ing.averagePricePerKg, '\$/kg'),
             ],
           ),
           if (ing.description != null && ing.description!.isNotEmpty) ...[
@@ -615,26 +650,28 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
               spacing: 4,
               runSpacing: 4,
               children: _dietaryTags(ing)
-                  .map((tag) => Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
+                  .map(
+                    (tag) => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryAccentGreen.withValues(
+                          alpha: 0.12,
                         ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryAccentGreen
-                              .withValues(alpha: 0.12),
-                          borderRadius:
-                              BorderRadius.circular(AppRadius.sm),
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                      ),
+                      child: Text(
+                        tag,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: AppColors.primaryAccentGreen,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
                         ),
-                        child: Text(
-                          tag,
-                          style: AppTypography.labelSmall.copyWith(
-                            color: AppColors.primaryAccentGreen,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ))
+                      ),
+                    ),
+                  )
                   .toList(),
             ),
           ],
@@ -709,9 +746,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
           DropdownButtonFormField<String>(
             initialValue: _category,
             items: _categories
-                .map(
-                  (v) => DropdownMenuItem(value: v, child: Text(v)),
-                )
+                .map((v) => DropdownMenuItem(value: v, child: Text(v)))
                 .toList(),
             onChanged: (v) => setState(() => _category = v!),
             decoration: const InputDecoration(labelText: 'Category *'),
@@ -771,6 +806,16 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
       _ => Icons.inventory_2_outlined,
     };
   }
+
+  String _categoryCountLabel(String category) {
+    final count = _searchResults
+        .where(
+          (ingredient) =>
+              ingredient.category.toLowerCase() == category.toLowerCase(),
+        )
+        .length;
+    return count > 0 ? '$category ($count)' : category;
+  }
 }
 
 class _BrowseCategoryChip extends StatelessWidget {
@@ -818,6 +863,5 @@ class _BrowseCategoryChip extends StatelessWidget {
 }
 
 extension on Ingredient {
-  bool get glutenFree =>
-      containsGluten == false;
+  bool get glutenFree => containsGluten == false;
 }
