@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: orchestration-service
+  amqp:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+server:
+  port: 8095
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
