@@ -5,6 +5,7 @@ import '../../core/network/api_client.dart';
 import '../../core/network/api_response.dart';
 import '../../core/repositories/base_repository.dart';
 import '../../shared/models/grocery_list.dart';
+import '../../shared/models/purchase_record.dart';
 
 class GroceryRepository extends BaseRepository {
   GroceryRepository(super.apiClient);
@@ -113,6 +114,40 @@ class GroceryRepository extends BaseRepository {
   Future<void> deleteGroceryList(String listId) async {
     try {
       await apiClient.delete('/grocery-lists/$listId');
+    } on DioException catch (e) {
+      throw ApiException(extractMessage(e), e.response?.statusCode);
+    }
+  }
+
+  Future<void> checkoutList(
+    String listId, {
+    required List<String> checkedItemIds,
+    Map<String, double>? actualPrices,
+  }) async {
+    try {
+      final checkedUuids = checkedItemIds;
+      await apiClient.post(
+        '/grocery-lists/$listId/checkout',
+        data: {
+          'checkedItemIds': checkedUuids,
+          if (actualPrices != null) 'actualPrices': actualPrices,
+        },
+      );
+    } on DioException catch (e) {
+      throw ApiException(extractMessage(e), e.response?.statusCode);
+    }
+  }
+
+  Future<PageResponse<PurchaseRecord>> getPurchaseHistory({
+    int page = 0,
+    int size = 20,
+  }) async {
+    try {
+      final response = await apiClient.get(
+        '/grocery-lists/history',
+        query: {'page': page, 'size': size},
+      );
+      return handlePageResponse(response, PurchaseRecord.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }

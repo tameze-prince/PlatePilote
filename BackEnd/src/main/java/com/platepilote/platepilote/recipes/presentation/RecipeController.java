@@ -6,8 +6,13 @@ import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.recipes.application.dto.RecipeRequest;
 import com.platepilote.platepilote.recipes.application.dto.RecipeResponse;
 import com.platepilote.platepilote.recipes.application.service.RecipeService;
+import com.platepilote.platepilote.recipes.domain.entity.Recipe;
+import com.platepilote.platepilote.recipes.domain.entity.RecipeFavorite;
+import com.platepilote.platepilote.recipes.domain.repository.RecipeFavoriteRepository;
+import com.platepilote.platepilote.recipes.domain.repository.RecipeRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -25,7 +30,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/recipes")
@@ -33,8 +42,9 @@ import java.util.UUID;
 public class RecipeController {
 
     private final RecipeService recipeService;
-
     private final SecurityUtils securityUtils;
+    private final RecipeFavoriteRepository recipeFavoriteRepository;
+    private final RecipeRepository recipeRepository;
 
     @GetMapping("/public")
     public ResponseEntity<ApiResponse<PagedResponse<RecipeResponse>>> getPublicRecipes(
@@ -127,5 +137,76 @@ public class RecipeController {
         UUID userId = securityUtils.getCurrentUserId(userDetails);
         recipeService.deleteRecipe(userId, recipeId);
         return ResponseEntity.ok(ApiResponse.success("Recipe deleted", null));
+    }
+
+    @PostMapping("/{recipeId}/favorite")
+    public ResponseEntity<ApiResponse<Void>> favoriteRecipe(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable UUID recipeId) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        if (!recipeFavoriteRepository.existsByRecipeIdAndUserId(recipeId, userId)) {
+            RecipeFavorite favorite = RecipeFavorite.builder()
+                    .recipeId(recipeId)
+                    .userId(userId)
+                    .build();
+            recipeFavoriteRepository.save(favorite);
+        }
+        return ResponseEntity.ok(ApiResponse.success("Recipe favorited", null));
+    }
+
+    @DeleteMapping("/{recipeId}/favorite")
+    public ResponseEntity<ApiResponse<Void>> unfavoriteRecipe(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable UUID recipeId) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        recipeFavoriteRepository.deleteByRecipeIdAndUserId(recipeId, userId);
+        return ResponseEntity.ok(ApiResponse.success("Recipe unfavorited", null));
+    }
+
+    @GetMapping("/favorites")
+    public ResponseEntity<ApiResponse<PagedResponse<RecipeResponse>>> getFavoriteRecipes(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<RecipeFavorite> favorites = recipeFavoriteRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+
+        List<UUID> recipeIds = favorites.getContent().stream()
+                .map(RecipeFavorite::getRecipeId)
+                .toList();
+
+        List<Recipe> recipes = recipeRepository.findByIds(recipeIds);
+        Map<UUID, Recipe> recipeMap = recipes.stream()
+                .collect(Collectors.toMap(Recipe::getId, r -> r));
+
+        List<RecipeResponse> content = favorites.getContent().stream()
+                .map(fav -> recipeMap.get(fav.getRecipeId()))
+                .filter(Objects::nonNull)
+                .map(this::toSummaryResponse)
+                .toList();
+
+        PagedResponse<RecipeResponse> paged = PagedResponse.of(
+                content, favorites.getNumber(), favorites.getSize(), favorites.getTotalElements());
+        return ResponseEntity.ok(ApiResponse.success(paged));
+    }
+
+    private RecipeResponse toSummaryResponse(Recipe recipe) {
+        return RecipeResponse.builder()
+                .id(recipe.getId())
+                .name(recipe.getName())
+                .description(recipe.getDescription())
+                .prepTimeMinutes(recipe.getPrepTimeMinutes())
+                .cookTimeMinutes(recipe.getCookTimeMinutes())
+                .totalTimeMinutes(recipe.getTotalTimeMinutes())
+                .servings(recipe.getServings())
+                .difficulty(recipe.getDifficulty())
+                .cuisineType(recipe.getCuisineType())
+                .mealType(recipe.getMealType())
+                .imageUrl(recipe.getImageUrl())
+                .isPublic(recipe.getIsPublic())
+                .createdAt(recipe.getCreatedAt())
+                .updatedAt(recipe.getUpdatedAt())
+                .build();
     }
 }

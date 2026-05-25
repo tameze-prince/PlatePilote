@@ -6,6 +6,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../core/widgets/app_card.dart';
+import 'budget_repository.dart';
 
 class BudgetAnalyticsScreen extends ConsumerStatefulWidget {
   const BudgetAnalyticsScreen({super.key});
@@ -16,18 +17,56 @@ class BudgetAnalyticsScreen extends ConsumerStatefulWidget {
 }
 
 class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
-  final double _weeklyBudget = 400;
-  final double _spentAmount = 256;
-  final List<double> _weeklyHistory = [320, 280, 350, 290, 310, 280, 256];
-  final List<String> _weekLabels = ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7'];
+  double _weeklyBudget = 0;
+  double _spentAmount = 0;
+  List<double> _weeklyHistory = [];
+  List<String> _weekLabels = [];
+  bool _isLoading = true;
 
   double get _remaining => _weeklyBudget - _spentAmount;
-  double get _percentUsed => _spentAmount / _weeklyBudget;
+  double get _percentUsed => _spentAmount > 0 && _weeklyBudget > 0 ? _spentAmount / _weeklyBudget : 0;
   double get _avgWeeklySpend =>
-      _weeklyHistory.reduce((a, b) => a + b) / _weeklyHistory.length;
+      _weeklyHistory.isEmpty ? 0 : _weeklyHistory.reduce((a, b) => a + b) / _weeklyHistory.length;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadAnalytics());
+  }
+
+  Future<void> _loadAnalytics() async {
+    try {
+      final repo = ref.read(budgetRepositoryProvider);
+      final analytics = await repo.getAnalytics();
+      await repo.getSavings();
+
+      setState(() {
+        _weeklyBudget = (analytics['totalBudget'] as num?)?.toDouble() ?? 400;
+        _spentAmount = (analytics['totalSpent'] as num?)?.toDouble() ?? 0;
+        final weeklyRaw = analytics['weeklyHistory'] as List?;
+        if (weeklyRaw != null) {
+          _weeklyHistory = weeklyRaw.map((e) => (e as num).toDouble()).toList();
+        }
+        final labelsRaw = analytics['weekLabels'] as List?;
+        if (labelsRaw != null) {
+          _weekLabels = labelsRaw.map((e) => e.toString()).toList();
+        }
+        _isLoading = false;
+      });
+    } catch (_) {
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Budget Analytics')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Budget Analytics'),

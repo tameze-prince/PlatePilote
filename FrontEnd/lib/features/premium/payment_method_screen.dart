@@ -48,12 +48,12 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
             PrimaryButton(
               label: 'Save Payment Method',
               icon: Icons.check,
-              onPressed: () {
+              onPressed: () async {
                 if (!_formKey.currentState!.validate()) return;
-                ref
-                    .read(subscriptionProvider.notifier)
-                    .setPaymentMethod(_cardController.text);
-                context.pop();
+                final url = await ref.read(subscriptionProvider.notifier).createCustomerPortal();
+                if (url != null && context.mounted) {
+                  context.pop();
+                }
               },
             ),
           ],

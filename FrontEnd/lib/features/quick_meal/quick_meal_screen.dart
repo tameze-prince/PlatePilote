@@ -1,144 +1,119 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/theme/app_colors.dart';
-import '../../app/theme/app_radius.dart';
-import '../../app/theme/app_spacing.dart';
-import '../../app/theme/app_typography.dart';
 import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
-import '../../core/premium_components.dart';
-import '../../core/widgets/app_card.dart';
-import '../../core/widgets/primary_button.dart';
-import '../../core/widgets/secondary_button.dart';
-import '../../shared/models/demo_data.dart';
-import '../../shared/widgets/recipe_image.dart';
+import '../../core/repositories/recommendation_repository.dart';
+import '../../core/widgets/empty_state.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 
-class QuickMealScreen extends StatelessWidget {
+class QuickMealScreen extends ConsumerStatefulWidget {
   const QuickMealScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final isTablet = screenWidth >= 600;
+  ConsumerState<QuickMealScreen> createState() => _QuickMealScreenState();
+}
 
+class _QuickMealScreenState extends ConsumerState<QuickMealScreen> {
+  List<Map<String, dynamic>> _meals = [];
+  bool _isLoading = true;
+  int _maxTime = 30;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadMeals());
+  }
+
+  Future<void> _loadMeals() async {
+    setState(() => _isLoading = true);
+    try {
+      final repo = ref.read(recommendationRepositoryProvider);
+      final meals = await repo.getQuickMeals(maxTime: _maxTime, limit: 10);
+      setState(() {
+        _meals = meals;
+        _isLoading = false;
+      });
+    } catch (_) {
+      setState(() {
+        _meals = [];
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return PlateScaffold(
-      title: 'Quick Meal',
-      showBack: true,
-      child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+      title: 'Quick Meals',
+      child: Column(
         children: [
-          AppCard(
-            color: ColorTokens.primaryGreen,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
               children: [
-                const Icon(Icons.bolt, color: Colors.white, size: 34),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  'Dinner in 18 minutes',
-                  style: context.text.headlineMedium?.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  'Based on your pantry, budget, and low-prep preference.',
-                  style: context.text.bodyLarge?.copyWith(
-                    color: Colors.white70,
-                  ),
+                const Text('Max time: '),
+                const SizedBox(width: AppSpacing.sm),
+                SegmentedButton<int>(
+                  segments: const [
+                    ButtonSegment(value: 15, label: Text('15m')),
+                    ButtonSegment(value: 30, label: Text('30m')),
+                    ButtonSegment(value: 45, label: Text('45m')),
+                  ],
+                  selected: {_maxTime},
+                  onSelectionChanged: (v) {
+                    setState(() => _maxTime = v.first);
+                    _loadMeals();
+                  },
                 ),
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Text('Best Matches', style: context.text.headlineMedium),
-          const SizedBox(height: AppSpacing.md),
-          ...demoMeals
-              .take(isTablet ? demoMeals.length : 3)
-              .map(
-                (meal) => Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                  child: AppCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            RecipeImage(
-                              imageUrl: meal.imageUrl,
-                              cuisine: meal.title,
-                              width: 48,
-                              height: 48,
-                            ),
-                            const SizedBox(width: AppSpacing.md),
-                            Expanded(
-                              child: Text(
-                                meal.title,
-                                style: AppTypography.titleMedium.copyWith(
-                                  color: PremiumTheme.textPrimary(context),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.sm,
-                                vertical: AppSpacing.xxs,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryAccentGreen.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(AppRadius.full),
-                              ),
-                              child: Text(
-                                '${meal.minutes}m',
-                                style: AppTypography.labelSmall.copyWith(
-                                  color: AppColors.primaryAccentGreen,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          'Uses spinach, yogurt, quinoa, and pantry staples already available.',
-                          style: context.text.bodyMedium,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: SecondaryButton(
-                                label: 'Swap',
-                                icon: Icons.swap_horiz,
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Swapping meal suggestion...',
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _meals.isEmpty
+                    ? const EmptyState(
+                        icon: Icons.restaurant,
+                        title: 'No quick meals found',
+                        message: 'Try increasing the time limit.',
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        itemCount: _meals.length,
+                        itemBuilder: (context, index) {
+                          final meal = _meals[index];
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                            child: ListTile(
+                              leading: meal['imageUrl'] != null
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        meal['imageUrl'] as String,
+                                        width: 56,
+                                        height: 56,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => const Icon(Icons.restaurant, size: 40),
                                       ),
-                                    ),
-                                  );
-                                },
+                                    )
+                                  : const Icon(Icons.restaurant, size: 40),
+                              title: Text(meal['name'] as String? ?? 'Quick Meal'),
+                              subtitle: Text(
+                                '${meal['totalTimeMinutes'] ?? '?'} min · ${meal['cuisineType'] ?? ''}',
                               ),
+                              trailing: meal['estimatedCost'] != null
+                                  ? Text('\$${(meal['estimatedCost'] as num).toStringAsFixed(0)}')
+                                  : null,
+                              onTap: () {
+                                // TODO: Navigate to recipe detail
+                              },
                             ),
-                            const SizedBox(width: AppSpacing.xs),
-                            Expanded(
-                              child: PrimaryButton(
-                                label: 'Cook',
-                                icon: Icons.restaurant,
-                                onPressed: () => context.push('/recipe/0'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+                          );
+                        },
+                      ),
+          ),
         ],
       ),
     );

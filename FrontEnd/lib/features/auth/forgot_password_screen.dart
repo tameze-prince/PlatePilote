@@ -8,6 +8,7 @@ import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/primary_button.dart';
+import '../../core/repositories/auth_repository.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -33,11 +34,20 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
-    setState(() {
-      _isLoading = false;
-      _emailSent = true;
-    });
+
+    try {
+      final repo = ref.read(authRepositoryProvider);
+      await repo.forgotPassword(_emailController.text.trim());
+      setState(() {
+        _isLoading = false;
+        _emailSent = true;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _emailSent = true;
+      });
+    }
   }
 
   @override

@@ -251,6 +251,38 @@ public class AuthService {
         refreshTokenRepository.revokeAllActiveForUser(userId);
     }
 
+    @Transactional
+    public void forgotPassword(String email) {
+        // Always return success to prevent email enumeration
+        userRepository.findByEmail(email).ifPresent(user -> {
+            String resetToken = jwtService.generateResetToken(user.getEmail());
+            // In production, send email with reset link
+            // For now, just log it
+            System.out.println("Password reset token for " + email + ": " + resetToken);
+        });
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        String email = jwtService.extractUsername(token);
+        if (email == null) {
+            throw new BusinessRuleViolationException("Invalid or expired reset token");
+        }
+
+        OurUser user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessRuleViolationException("Invalid or expired reset token"));
+
+        if (!jwtService.isResetTokenValid(token, email)) {
+            throw new BusinessRuleViolationException("Invalid or expired reset token");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // Revoke all existing refresh tokens for security
+        refreshTokenRepository.revokeAllActiveForUser(user.getId());
+    }
+
     private String issueRefreshToken(OurUser user, UserDetails userDetails) {
         String refreshToken = jwtService.generateRefreshToken(userDetails);
         refreshTokenRepository.save(RefreshToken.builder()

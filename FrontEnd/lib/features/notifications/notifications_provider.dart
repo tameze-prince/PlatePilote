@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/providers/preferences_provider.dart';
-import '../../shared/models/mvp_entities.dart';
+import '../../core/network/api_client.dart';
+import '../../shared/models/notification.dart' as ntf;
+import 'notification_repository.dart';
 
 class NotificationPreferences {
   const NotificationPreferences({
@@ -32,114 +33,102 @@ class NotificationPreferences {
   }
 }
 
-class NotificationsNotifier extends Notifier<List<AppNotification>> {
+class NotificationsNotifier extends Notifier<AsyncValue<List<ntf.AppNotification>>> {
   @override
-  List<AppNotification> build() {
-    final now = DateTime.now();
-    return [
-      AppNotification(
-        id: 'milk',
-        title: 'Pantry alert',
-        message: 'Your milk expires tomorrow.',
-        category: NotificationCategory.pantry,
-        createdAt: now.subtract(const Duration(hours: 1)),
-      ),
-      AppNotification(
-        id: 'budget-80',
-        title: 'Budget alert',
-        message: 'You have used 80% of your weekly budget.',
-        category: NotificationCategory.budget,
-        createdAt: now.subtract(const Duration(hours: 4)),
-      ),
-      AppNotification(
-        id: 'plan-ready',
-        title: 'Meal plan ready',
-        message: 'Your new weekly meal plan is ready.',
-        category: NotificationCategory.mealPlan,
-        createdAt: now.subtract(const Duration(days: 1)),
-        isRead: true,
-      ),
-      AppNotification(
-        id: 'grocery-left',
-        title: 'Grocery reminder',
-        message: 'Don’t forget to buy 5 remaining items.',
-        category: NotificationCategory.grocery,
-        createdAt: now.subtract(const Duration(days: 1, hours: 5)),
-      ),
-      AppNotification(
-        id: 'premium',
-        title: 'Premium',
-        message: 'Unlock advanced pantry automation.',
-        category: NotificationCategory.premium,
-        createdAt: now.subtract(const Duration(days: 2)),
-        isRead: true,
-      ),
-    ];
+  AsyncValue<List<ntf.AppNotification>> build() {
+    Future.microtask(() => _loadNotifications());
+    return const AsyncValue.loading();
   }
 
-  void markAllRead() {
-    state = [
-      for (final notification in state) notification.copyWith(isRead: true),
-    ];
+  Future<void> _loadNotifications() async {
+    try {
+      final repo = ref.read(notificationRepositoryProvider);
+      final page = await repo.getNotifications(size: 50);
+      state = AsyncValue.data(page.content);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
   }
 
-  void toggleRead(String id) {
-    state = [
-      for (final notification in state)
-        notification.id == id
-            ? notification.copyWith(isRead: !notification.isRead)
-            : notification,
-    ];
+  Future<void> markAllRead() async {
+    await ref.read(notificationRepositoryProvider).markAllAsRead();
+    state = state.whenData(
+      (notifications) => notifications.map((n) => n.copyWith(isRead: true)).toList(),
+    );
   }
 
-  void delete(String id) {
-    state = state.where((notification) => notification.id != id).toList();
+  Future<void> toggleRead(String id) async {
+    await ref.read(notificationRepositoryProvider).markAsRead(id);
+    state = state.whenData(
+      (notifications) => notifications.map((n) => n.id == id ? n.copyWith(isRead: true) : n).toList(),
+    );
   }
+
+  Future<void> delete(String id) async {
+    await ref.read(notificationRepositoryProvider).deleteNotification(id);
+    state = state.whenData(
+      (notifications) => notifications.where((n) => n.id != id).toList(),
+    );
+  }
+
+  Future<void> refresh() => _loadNotifications();
 }
 
 class NotificationPreferencesNotifier
     extends Notifier<NotificationPreferences> {
-  static const _pantryAlertsKey = 'notifications.pantryAlerts';
-  static const _budgetAlertsKey = 'notifications.budgetAlerts';
-  static const _weeklyRemindersKey = 'notifications.weeklyReminders';
-  static const _promoKey = 'notifications.promotionalNotifications';
-
   @override
   NotificationPreferences build() {
-    final prefs = ref.watch(sharedPreferencesProvider);
-    return NotificationPreferences(
-      pantryAlerts: prefs.getBool(_pantryAlertsKey) ?? true,
-      budgetAlerts: prefs.getBool(_budgetAlertsKey) ?? true,
-      weeklyReminders: prefs.getBool(_weeklyRemindersKey) ?? true,
-      promotionalNotifications: prefs.getBool(_promoKey) ?? false,
-    );
+    Future.microtask(() => _loadPreferences());
+    return const NotificationPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    try {
+      final response = await ref.read(apiClientProvider).get('/notification-preferences');
+      final data = response.data['data'] as Map<String, dynamic>;
+      state = NotificationPreferences(
+        pantryAlerts: data['pantryReminders'] as bool? ?? true,
+        budgetAlerts: data['groceryReminders'] as bool? ?? true,
+        weeklyReminders: data['mealPlanReminders'] as bool? ?? true,
+        promotionalNotifications: data['recipeRecommendations'] as bool? ?? false,
+      );
+    } catch (_) {}
   }
 
   Future<void> setPantryAlerts(bool value) async {
     state = state.copyWith(pantryAlerts: value);
-    await ref.read(sharedPreferencesProvider).setBool(_pantryAlertsKey, value);
+    await _syncPreferences();
   }
 
   Future<void> setBudgetAlerts(bool value) async {
     state = state.copyWith(budgetAlerts: value);
-    await ref.read(sharedPreferencesProvider).setBool(_budgetAlertsKey, value);
+    await _syncPreferences();
   }
 
   Future<void> setWeeklyReminders(bool value) async {
     state = state.copyWith(weeklyReminders: value);
-    await ref
-        .read(sharedPreferencesProvider)
-        .setBool(_weeklyRemindersKey, value);
+    await _syncPreferences();
   }
 
   Future<void> setPromotionalNotifications(bool value) async {
     state = state.copyWith(promotionalNotifications: value);
-    await ref.read(sharedPreferencesProvider).setBool(_promoKey, value);
+    await _syncPreferences();
+  }
+
+  Future<void> _syncPreferences() async {
+    try {
+      await ref.read(apiClientProvider).put('/notification-preferences', data: {
+        'pantryReminders': state.pantryAlerts,
+        'groceryReminders': state.budgetAlerts,
+        'mealPlanReminders': state.weeklyReminders,
+        'recipeRecommendations': state.promotionalNotifications,
+      });
+    } catch (_) {}
   }
 }
 
 final notificationsProvider =
-    NotifierProvider<NotificationsNotifier, List<AppNotification>>(
+    NotifierProvider<NotificationsNotifier, AsyncValue<List<ntf.AppNotification>>>(
       NotificationsNotifier.new,
     );
 

@@ -6,6 +6,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../core/widgets/app_card.dart';
+import 'budget_repository.dart';
 
 class SavingsTrackerScreen extends ConsumerStatefulWidget {
   const SavingsTrackerScreen({super.key});
@@ -16,49 +17,58 @@ class SavingsTrackerScreen extends ConsumerStatefulWidget {
 }
 
 class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
-  final double _totalSaved = 142.50;
-  final double _monthlyGoal = 200;
-  final List<Map<String, dynamic>> _monthlyHistory = [
-    {'month': 'Jan', 'saved': 85.00, 'target': 150},
-    {'month': 'Feb', 'saved': 92.50, 'target': 150},
-    {'month': 'Mar', 'saved': 110.00, 'target': 180},
-    {'month': 'Apr', 'saved': 125.00, 'target': 180},
-    {'month': 'May', 'saved': 142.50, 'target': 200},
-  ];
+  double _totalSaved = 0;
+  double _monthlyGoal = 0;
+  List<Map<String, dynamic>> _monthlyHistory = [];
+  List<Map<String, dynamic>> _savingsSources = [];
+  bool _isLoading = true;
 
-  final List<Map<String, dynamic>> _savingsSources = [
-    {
-      'source': 'Pantry optimization',
-      'icon': Icons.eco,
-      'amount': 48.50,
-      'percentage': 0.34,
-      'color': ColorTokens.primaryGreen,
-    },
-    {
-      'source': 'Budget-friendly meals',
-      'icon': Icons.restaurant,
-      'amount': 52.00,
-      'percentage': 0.36,
-      'color': ColorTokens.accentBlue,
-    },
-    {
-      'source': 'Reduced waste',
-      'icon': Icons.delete_sweep,
-      'amount': 28.00,
-      'percentage': 0.20,
-      'color': ColorTokens.accentAmber,
-    },
-    {
-      'source': 'Smart shopping',
-      'icon': Icons.shopping_bag,
-      'amount': 14.00,
-      'percentage': 0.10,
-      'color': Color(0xFF8B5CF6),
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadSavings());
+  }
+
+  Future<void> _loadSavings() async {
+    try {
+      final repo = ref.read(budgetRepositoryProvider);
+      final savings = await repo.getSavings();
+
+      setState(() {
+        _totalSaved = (savings['totalSaved'] as num?)?.toDouble() ?? 0;
+        _monthlyGoal = (savings['monthlyGoal'] as num?)?.toDouble() ?? 0;
+
+        final historyRaw = savings['monthlyHistory'] as List?;
+        if (historyRaw != null) {
+          _monthlyHistory = historyRaw.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+        }
+
+        final sourcesRaw = savings['savingsSources'] as List?;
+        if (sourcesRaw != null) {
+          _savingsSources = sourcesRaw.map((e) {
+            final m = Map<String, dynamic>.from(e as Map);
+            if (!m.containsKey('icon')) m['icon'] = Icons.savings;
+            if (!m.containsKey('color')) m['color'] = ColorTokens.primaryGreen;
+            return m;
+          }).toList();
+        }
+
+        _isLoading = false;
+      });
+    } catch (_) {
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Savings Tracker')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Savings Tracker'),

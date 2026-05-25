@@ -641,7 +641,10 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return child;
+    return SizedBox(
+      height: height,
+      child: child,
+    );
   }
 
   @override

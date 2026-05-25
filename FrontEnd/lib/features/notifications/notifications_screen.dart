@@ -10,7 +10,6 @@ import '../../core/widgets/app_card.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/secondary_button.dart';
-import '../../shared/models/mvp_entities.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 import 'notifications_provider.dart';
 
@@ -23,15 +22,16 @@ class NotificationsScreen extends ConsumerStatefulWidget {
 }
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
-  NotificationCategory? filter;
+  String? filter;
 
   @override
   Widget build(BuildContext context) {
-    final notifications = ref.watch(notificationsProvider);
+    final notificationsAsync = ref.watch(notificationsProvider);
+    final notifications = notificationsAsync.asData?.value ?? [];
     final visible = filter == null
         ? notifications
         : notifications
-              .where((notification) => notification.category == filter)
+              .where((notification) => notification.type == filter)
               .toList();
 
     return PlateScaffold(
@@ -62,11 +62,11 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                         selected: filter == null,
                         onSelected: (_) => setState(() => filter = null),
                       ),
-                      for (final category in NotificationCategory.values)
+                      for (final type in ['pantry', 'budget', 'mealPlan', 'grocery', 'premium'])
                         ChoiceChip(
-                          label: Text(_categoryLabel(category)),
-                          selected: filter == category,
-                          onSelected: (_) => setState(() => filter = category),
+                          label: Text(_typeLabel(type)),
+                          selected: filter == type,
+                          onSelected: (_) => setState(() => filter = type),
                         ),
                     ],
                   ),
@@ -159,7 +159,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                   )
                 : RefreshIndicator(
                     onRefresh: () async {
-                      await Future.delayed(const Duration(seconds: 1));
+                      await ref.read(notificationsProvider.notifier).refresh();
                     },
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(
@@ -186,20 +186,20 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                           ),
                           child: ListTile(
                             leading: Icon(
-                              _categoryIcon(notification.category),
+                              _typeIcon(notification.type),
                               color: notification.isRead
                                   ? context.text.bodyMedium?.color
                                   : context.colors.primary,
                             ),
                             title: Text(
-                              notification.title,
+                              notification.title ?? '',
                               style: context.text.bodyLarge?.copyWith(
                                 fontWeight: notification.isRead
                                     ? FontWeight.w500
                                     : FontWeight.w800,
                               ),
                             ),
-                            subtitle: Text(notification.message),
+                            subtitle: Text(notification.body ?? ''),
                             trailing: notification.isRead
                                 ? null
                                 : const Icon(
@@ -221,23 +221,25 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     );
   }
 
-  String _categoryLabel(NotificationCategory category) {
-    return switch (category) {
-      NotificationCategory.pantry => 'Pantry',
-      NotificationCategory.budget => 'Budget',
-      NotificationCategory.mealPlan => 'Plan',
-      NotificationCategory.grocery => 'Grocery',
-      NotificationCategory.premium => 'Premium',
+  String _typeLabel(String type) {
+    return switch (type) {
+      'pantry' => 'Pantry',
+      'budget' => 'Budget',
+      'mealPlan' => 'Plan',
+      'grocery' => 'Grocery',
+      'premium' => 'Premium',
+      _ => type,
     };
   }
 
-  IconData _categoryIcon(NotificationCategory category) {
-    return switch (category) {
-      NotificationCategory.pantry => Icons.kitchen_outlined,
-      NotificationCategory.budget => Icons.account_balance_wallet_outlined,
-      NotificationCategory.mealPlan => Icons.calendar_month_outlined,
-      NotificationCategory.grocery => Icons.shopping_cart_outlined,
-      NotificationCategory.premium => Icons.workspace_premium_outlined,
+  IconData _typeIcon(String? type) {
+    return switch (type) {
+      'pantry' => Icons.kitchen_outlined,
+      'budget' => Icons.account_balance_wallet_outlined,
+      'mealPlan' => Icons.calendar_month_outlined,
+      'grocery' => Icons.shopping_cart_outlined,
+      'premium' => Icons.workspace_premium_outlined,
+      _ => Icons.notifications_outlined,
     };
   }
 }

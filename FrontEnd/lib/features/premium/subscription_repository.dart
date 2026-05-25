@@ -12,5 +12,5 @@ class SubscriptionRepository {
   final Ref _ref;
 
   SubscriptionState read() => _ref.read(subscriptionProvider);
-  void startTrial() => _ref.read(subscriptionProvider.notifier).startTrial();
+  Future<void> refresh() => _ref.read(subscriptionProvider.notifier).refresh();
 }

@@ -2,6 +2,8 @@ package com.platepilote.platepilote.recommendation.presentation;
 
 import com.platepilote.platepilote.common.dto.ApiResponse;
 import com.platepilote.platepilote.common.security.SecurityUtils;
+import com.platepilote.platepilote.recommendation.domain.entity.UserInteraction;
+import com.platepilote.platepilote.recommendation.domain.repository.UserInteractionRepository;
 import com.platepilote.platepilote.recommendation.domain.service.RecommendationEngine;
 import com.platepilote.platepilote.recommendation.domain.service.RecommendationEngine.RecommendationResult;
 import lombok.RequiredArgsConstructor;
@@ -10,10 +12,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
 public class RecommendationController {
 
     private final RecommendationEngine recommendationEngine;
+    private final UserInteractionRepository userInteractionRepository;
     private final SecurityUtils securityUtils;
 
     @GetMapping
@@ -55,6 +60,29 @@ public class RecommendationController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(dtoPlan));
     }
+
+    @PostMapping("/feedback")
+    public ResponseEntity<ApiResponse<Void>> submitFeedback(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody FeedbackRequest request) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+
+        UserInteraction interaction = UserInteraction.builder()
+                .userId(userId)
+                .recipeId(request.recipeId())
+                .interactionType(request.interactionType())
+                .weight(request.weight() != null ? request.weight() : BigDecimal.ONE)
+                .build();
+        userInteractionRepository.save(interaction);
+
+        return ResponseEntity.ok(ApiResponse.success("Feedback recorded", null));
+    }
+
+    public record FeedbackRequest(
+            UUID recipeId,
+            String interactionType,
+            BigDecimal weight
+    ) {}
 
     private List<RecipeRecommendation> toDto(List<RecommendationResult> results) {
         return results.stream()

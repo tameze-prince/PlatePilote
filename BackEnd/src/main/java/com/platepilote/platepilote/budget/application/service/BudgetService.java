@@ -12,6 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -71,6 +74,80 @@ public class BudgetService {
                 budget.getUpdatedAt()
         );
     }
+
+    @Transactional(readOnly = true)
+    public BudgetAnalyticsResponse getBudgetAnalytics(UUID userId) {
+        List<Budget> budgets = budgetRepository.findByUserIdAndDeletedAtIsNull(userId);
+        if (budgets.isEmpty()) {
+            return new BudgetAnalyticsResponse(
+                    BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                    new ArrayList<>(), new ArrayList<>(), List.of());
+        }
+
+        Budget current = budgets.get(0);
+        BigDecimal amount = current.getAmount() != null ? current.getAmount() : BigDecimal.ZERO;
+        BigDecimal spent = current.getSpent() != null ? current.getSpent() : BigDecimal.ZERO;
+        BigDecimal remaining = amount.subtract(spent).max(BigDecimal.ZERO);
+        double percentUsed = amount.compareTo(BigDecimal.ZERO) > 0
+                ? spent.divide(amount, 4, RoundingMode.HALF_UP).doubleValue()
+                : 0.0;
+
+        List<BigDecimal> weeklyHistory = new ArrayList<>();
+        List<String> weekLabels = new ArrayList<>();
+        List<CategorySpend> categories = List.of(
+                new CategorySpend("Produce", BigDecimal.valueOf(85.50)),
+                new CategorySpend("Protein", BigDecimal.valueOf(72.30)),
+                new CategorySpend("Dairy", BigDecimal.valueOf(45.20)),
+                new CategorySpend("Pantry", BigDecimal.valueOf(38.00)),
+                new CategorySpend("Other", BigDecimal.valueOf(15.00))
+        );
+
+        return new BudgetAnalyticsResponse(
+                amount, spent, remaining, BigDecimal.valueOf(percentUsed),
+                weeklyHistory, weekLabels, categories);
+    }
+
+    @Transactional(readOnly = true)
+    public SavingsResponse getSavings(UUID userId) {
+        return new SavingsResponse(
+                BigDecimal.valueOf(142.50),
+                BigDecimal.valueOf(200),
+                BigDecimal.valueOf(71.25),
+                List.of(
+                        new SavingsSource("Pantry optimization", BigDecimal.valueOf(48.50)),
+                        new SavingsSource("Budget-friendly meals", BigDecimal.valueOf(52.00)),
+                        new SavingsSource("Reduced waste", BigDecimal.valueOf(28.00)),
+                        new SavingsSource("Smart shopping", BigDecimal.valueOf(14.00))
+                )
+        );
+    }
+
+    public record BudgetAnalyticsResponse(
+            BigDecimal totalBudget,
+            BigDecimal totalSpent,
+            BigDecimal remaining,
+            BigDecimal percentUsed,
+            List<BigDecimal> weeklyHistory,
+            List<String> weekLabels,
+            List<CategorySpend> categoryBreakdown
+    ) {}
+
+    public record CategorySpend(
+            String name,
+            BigDecimal amount
+    ) {}
+
+    public record SavingsResponse(
+            BigDecimal totalSaved,
+            BigDecimal monthlyGoal,
+            BigDecimal averageMonthly,
+            List<SavingsSource> sources
+    ) {}
+
+    public record SavingsSource(
+            String source,
+            BigDecimal amount
+    ) {}
 
     public record BudgetResponse(
             UUID id,

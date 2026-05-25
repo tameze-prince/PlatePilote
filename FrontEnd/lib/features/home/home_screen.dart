@@ -7,14 +7,10 @@ import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 import '../../core/premium_components.dart';
+import '../../core/repositories/dashboard_repository.dart';
 import '../../core/widgets/floating_components.dart';
 import '../../core/widgets/modern_animations.dart';
 import '../../core/widgets/modern_components.dart';
-import '../../features/budget/budget_provider.dart';
-import '../../features/grocery/grocery_provider.dart';
-import '../../features/meal_plan/meal_plan_provider.dart';
-import '../../features/pantry/pantry_provider.dart';
-import '../../shared/models/demo_data.dart';
 import '../../shared/widgets/recipe_image.dart';
 import 'home_provider.dart';
 
@@ -30,35 +26,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      ref.read(homeProvider.notifier).loadRecommendations();
+      ref.read(homeProvider.notifier).loadHome();
     });
   }
 
   Future<void> _onRefresh() async {
-    await Future.wait([
-      ref.read(homeProvider.notifier).loadRecommendations(),
-      ref.read(budgetProvider.notifier).refresh(),
-      ref.read(groceryProvider.notifier).refresh(),
-      ref.read(pantryProvider.notifier).refresh(),
-      ref.read(mealPlanProvider.notifier).refresh(),
-    ]);
+    await ref.read(homeProvider.notifier).loadHome();
   }
 
   @override
   Widget build(BuildContext context) {
     final homeState = ref.watch(homeProvider);
-    final budgetState = ref.watch(budgetProvider);
-    final groceryState = ref.watch(groceryProvider);
-    final pantryState = ref.watch(pantryProvider);
-    final mealPlanState = ref.watch(mealPlanProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final isLoading =
-        homeState.isLoading &&
-        budgetState.isLoading &&
-        pantryState.isLoading &&
-        groceryState.isLoading &&
-        mealPlanState.isLoading;
+    final isLoading = homeState.isLoading;
 
     return Scaffold(
       backgroundColor: PremiumTheme.background(context),
@@ -79,7 +60,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ? AppColors.darkPrimaryContainer
                             : AppColors.primaryContainer,
                         child: Text(
-                          _avatarInitial(homeState.userName),
+                          _avatarInitial(homeState.dashboard?.firstName),
                           style: AppTypography.labelMedium.copyWith(
                             color: isDark
                                 ? AppColors.primaryLight
@@ -131,10 +112,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           context: context,
                           isDark: isDark,
                           homeState: homeState,
-                          budgetState: budgetState,
-                          groceryState: groceryState,
-                          pantryState: pantryState,
-                          mealPlanState: mealPlanState,
                         ),
                       ),
               ),
@@ -150,25 +127,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required BuildContext context,
     required bool isDark,
     required HomeState homeState,
-    required BudgetState budgetState,
-    required GroceryListState groceryState,
-    required PantryListState pantryState,
-    required MealPlanState mealPlanState,
   }) {
-    final urgentPantry =
-        pantryState.items.where((item) => item.isExpiringSoon).toList()..sort(
-          (a, b) => (a.daysToExpiry ?? 999).compareTo(b.daysToExpiry ?? 999),
-        );
-    final groceryTotal = groceryState.items.length;
-    final groceryDone = groceryState.checkedCount;
-    final groceryProgress = groceryTotal == 0
-        ? 0.0
-        : groceryDone / groceryTotal;
-    final meals = mealPlanState.meals.isNotEmpty
-        ? mealPlanState.meals
-        : todayMeals;
-    final recommendations = homeState.recommendations;
-    final quickMeals = homeState.quickMeals;
+    final dashboard = homeState.dashboard;
+    final recommendations = dashboard?.recommendations ?? [];
+    final groceryList = dashboard?.groceryList;
+    final pantry = dashboard?.pantry;
+    final budget = dashboard?.budget;
+    final activePlan = dashboard?.activePlan;
+
+    final urgentCount = pantry?.alertCount ?? 0;
+    final groceryProgress = groceryList?.progress ?? 0.0;
+    final groceryTotal = groceryList?.totalItems ?? 0;
+    final groceryDone = groceryList?.checkedItems ?? 0;
+    final mealCount = activePlan?.entryCount ?? 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,9 +148,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: _buildWelcomePanel(
             context: context,
             isDark: isDark,
-            name: homeState.userName,
-            budgetState: budgetState,
-            urgentCount: urgentPantry.length,
+            name: dashboard?.firstName,
+            budgetRemaining: budget?.remaining,
+            budgetWeekly: budget?.amount,
+            urgentCount: urgentCount,
           ),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -188,10 +160,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: _buildNextBestAction(
             context: context,
             isDark: isDark,
-            groceryTotal: groceryTotal,
-            urgentCount: urgentPantry.length,
-            mealCount: mealPlanState.meals.length,
-            hasRecommendations: recommendations.isNotEmpty,
+            nextAction: dashboard?.nextAction,
           ),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -203,7 +172,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: StatCard(
                   icon: Icons.restaurant_menu,
                   label: 'Meals ready',
-                  value: meals.length.toString(),
+                  value: mealCount.toString(),
                   color: isDark ? AppColors.primaryLight : AppColors.primary,
                 ),
               ),
@@ -212,8 +181,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: StatCard(
                   icon: Icons.kitchen_outlined,
                   label: 'Use soon',
-                  value: urgentPantry.length.toString(),
-                  color: urgentPantry.isEmpty
+                  value: urgentCount.toString(),
+                  color: urgentCount == 0
                       ? AppColors.tertiary
                       : AppColors.warning,
                 ),
@@ -237,7 +206,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             context: context,
             isDark: isDark,
             recommendations: recommendations,
-            meals: meals,
           ),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -246,10 +214,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: _buildOperationsGrid(
             context: context,
             isDark: isDark,
-            budgetState: budgetState,
+            budgetRemaining: budget?.remaining,
+            budgetPercent: budget?.percentUsed,
+            budgetWeekly: budget?.amount,
             groceryProgress: groceryProgress,
             groceryTotal: groceryTotal,
-            urgentPantry: urgentPantry,
+            urgentCount: urgentCount,
           ),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -258,7 +228,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: _buildQuickMealCard(
             context: context,
             isDark: isDark,
-            quickMeals: quickMeals,
+            quickMeals: recommendations,
           ),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -271,11 +241,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required BuildContext context,
     required bool isDark,
     required String? name,
-    required BudgetState budgetState,
+    required double? budgetRemaining,
+    required double? budgetWeekly,
     required int urgentCount,
   }) {
-    final remaining = budgetState.remaining;
-    final budgetLine = budgetState.weeklyBudget > 0
+    final remaining = budgetRemaining ?? 0;
+    final budgetLine = (budgetWeekly ?? 0) > 0
         ? '\$${remaining.clamp(0, double.infinity).toStringAsFixed(0)} left this week'
         : 'Set a weekly budget when you are ready';
 
@@ -331,17 +302,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildNextBestAction({
     required BuildContext context,
     required bool isDark,
-    required int groceryTotal,
-    required int urgentCount,
-    required int mealCount,
-    required bool hasRecommendations,
+    required String? nextAction,
   }) {
-    final action = _homeAction(
-      groceryTotal: groceryTotal,
-      urgentCount: urgentCount,
-      mealCount: mealCount,
-      hasRecommendations: hasRecommendations,
-    );
+    final action = _homeAction(nextAction);
 
     return PremiumCard(
       child: Row(
@@ -394,8 +357,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildPrimaryPlanCard({
     required BuildContext context,
     required bool isDark,
-    required List<Map<String, dynamic>> recommendations,
-    required List<Meal> meals,
+    required List<RecommendationItem> recommendations,
   }) {
     final hasRecommendations = recommendations.isNotEmpty;
 
@@ -403,7 +365,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       title: hasRecommendations ? 'Recommended for you' : 'Today at a glance',
       subtitle: hasRecommendations
           ? 'From the recommendation engine'
-          : 'A simple fallback plan while data loads',
+          : 'No recommendations yet',
       trailing: TextButton(
         onPressed: () => context.push('/plan'),
         child: Text(
@@ -429,19 +391,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   )
                   .toList()
-            : meals
-                  .take(3)
-                  .map(
-                    (meal) => Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                      child: _buildMealItem(
-                        context: context,
-                        isDark: isDark,
-                        meal: meal,
-                      ),
+            : [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                  child: Text(
+                    'Generate a meal plan to see recommendations here.',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: isDark
+                          ? AppColors.darkOnSurfaceVariant
+                          : AppColors.onSurfaceVariant,
                     ),
-                  )
-                  .toList(),
+                  ),
+                ),
+              ],
       ),
     );
   }
@@ -449,20 +411,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildOperationsGrid({
     required BuildContext context,
     required bool isDark,
-    required BudgetState budgetState,
+    required double? budgetRemaining,
+    required double? budgetPercent,
+    required double? budgetWeekly,
     required double groceryProgress,
     required int groceryTotal,
-    required List<dynamic> urgentPantry,
+    required int urgentCount,
   }) {
     return Column(
       children: [
         ProgressCard(
           icon: Icons.account_balance_wallet,
           label: 'Weekly Budget',
-          value:
-              '${(budgetState.percentUsed * 100).round()}% spent - \$${budgetState.remaining.toStringAsFixed(0)} left',
-          progress: budgetState.percentUsed,
-          maxValue: budgetState.weeklyBudget,
+          value: (budgetWeekly ?? 0) > 0
+              ? '${((budgetPercent ?? 0) * 100).round()}% spent - \$${(budgetRemaining ?? 0).toStringAsFixed(0)} left'
+              : 'Set a weekly budget when ready',
+          progress: budgetPercent ?? 0,
+          maxValue: budgetWeekly ?? 0,
           color: isDark ? AppColors.primaryLight : AppColors.primary,
         ),
         const SizedBox(height: AppSpacing.md),
@@ -484,9 +449,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: _ActionTile(
                 icon: Icons.kitchen_outlined,
                 title: 'Pantry',
-                subtitle: urgentPantry.isEmpty
+                subtitle: urgentCount == 0
                     ? 'Inventory is steady'
-                    : '${urgentPantry.length} use soon',
+                    : '$urgentCount use soon',
                 onTap: () => context.push('/pantry'),
               ),
             ),
@@ -499,7 +464,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildQuickMealCard({
     required BuildContext context,
     required bool isDark,
-    required List<Map<String, dynamic>> quickMeals,
+    required List<RecommendationItem> quickMeals,
   }) {
     if (quickMeals.isEmpty) {
       return AlertCard(
@@ -603,46 +568,65 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  _HomeAction _homeAction({
-    required int groceryTotal,
-    required int urgentCount,
-    required int mealCount,
-    required bool hasRecommendations,
-  }) {
-    if (urgentCount > 0) {
-      return const _HomeAction(
-        icon: Icons.kitchen_outlined,
-        title: 'Use pantry first',
-        subtitle: 'Start with ingredients that may expire soon.',
-        route: '/pantry',
-        color: AppColors.warning,
-      );
+  _HomeAction _homeAction(String? nextAction) {
+    switch (nextAction) {
+      case 'generate_plan':
+        return _HomeAction(
+          icon: Icons.auto_awesome,
+          title: 'Plan Your First Week',
+          subtitle: 'Get started with a personalized meal plan.',
+          route: '/plan',
+          color: AppColors.primary,
+        );
+      case 'activate_plan':
+        return _HomeAction(
+          icon: Icons.play_circle_outline,
+          title: 'Activate Your Meal Plan',
+          subtitle: 'Your plan is ready — activate it to begin.',
+          route: '/plan',
+          color: AppColors.primary,
+        );
+      case 'generate_grocery':
+        return _HomeAction(
+          icon: Icons.shopping_cart_outlined,
+          title: 'Generate Grocery List',
+          subtitle: 'Turn your plan into a shopping list.',
+          route: '/grocery',
+          color: AppColors.secondary,
+        );
+      case 'shop_grocery':
+        return _HomeAction(
+          icon: Icons.shopping_cart_outlined,
+          title: 'Continue Shopping',
+          subtitle: 'Pick up where you left off.',
+          route: '/grocery',
+          color: AppColors.secondary,
+        );
+      case 'use_pantry':
+        return _HomeAction(
+          icon: Icons.kitchen_outlined,
+          title: 'Use Expiring Items',
+          subtitle: 'Ingredients that need to be used soon.',
+          route: '/pantry',
+          color: AppColors.warning,
+        );
+      case 'explore_recipes':
+        return _HomeAction(
+          icon: Icons.explore_outlined,
+          title: 'Explore Recipes',
+          subtitle: 'Discover something new to cook.',
+          route: '/search',
+          color: AppColors.primary,
+        );
+      default:
+        return _HomeAction(
+          icon: Icons.bolt,
+          title: 'Find a quick meal',
+          subtitle: 'Get something practical for today.',
+          route: '/quick-meal',
+          color: AppColors.primary,
+        );
     }
-    if (mealCount == 0 && hasRecommendations) {
-      return _HomeAction(
-        icon: Icons.auto_awesome,
-        title: 'Turn recommendations into a plan',
-        subtitle: 'Your backend suggestions are ready to review.',
-        route: '/plan',
-        color: AppColors.primary,
-      );
-    }
-    if (groceryTotal > 0) {
-      return const _HomeAction(
-        icon: Icons.shopping_cart_outlined,
-        title: 'Finish the grocery list',
-        subtitle: 'Check off items as you shop.',
-        route: '/grocery',
-        color: AppColors.secondary,
-      );
-    }
-    return _HomeAction(
-      icon: Icons.bolt,
-      title: 'Find a quick meal',
-      subtitle: 'Get something practical for today.',
-      route: '/quick-meal',
-      color: AppColors.primary,
-    );
   }
 
   Widget _buildLoadingState() {
@@ -746,16 +730,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildRecoItem({
     required BuildContext context,
     required bool isDark,
-    required Map<String, dynamic> reco,
+    required RecommendationItem reco,
   }) {
-    final name = reco['name'] as String? ?? 'Recipe';
-    final time = reco['totalTimeMinutes'] as int? ?? 30;
-    final cost = reco['estimatedCost'];
-    final costStr = cost != null ? '\$${(cost as num).toStringAsFixed(0)}' : '';
-    final cuisine = reco['cuisineType'] as String? ?? '';
+    final name = reco.name ?? 'Recipe';
+    final time = reco.totalTimeMinutes ?? 30;
+    final cost = reco.estimatedCost;
+    final costStr = cost != null ? '\$${cost.toStringAsFixed(0)}' : '';
+    final cuisine = reco.cuisineType ?? '';
 
     return GestureDetector(
-      onTap: () => context.push('/recipe/${reco['id']}'),
+      onTap: () => context.push('/recipe/${reco.id}'),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
@@ -767,7 +751,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Row(
           children: [
             RecipeImage(
-              imageUrl: reco['imageUrl'] as String?,
+              imageUrl: reco.imageUrl,
               cuisine: cuisine,
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -810,68 +794,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildMealItem({
-    required BuildContext context,
-    required bool isDark,
-    required dynamic meal,
-  }) {
-    return GestureDetector(
-      onTap: () => context.push('/recipe/0'),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: isDark
-              ? AppColors.darkSurfaceContainerLow
-              : AppColors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.xs),
-              decoration: BoxDecoration(
-                color: meal.tint.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-              ),
-              child: Icon(meal.icon, color: meal.tint, size: 20),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    meal.title,
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: isDark
-                          ? AppColors.darkOnSurface
-                          : AppColors.onSurface,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    '${meal.minutes} min | ${meal.kcal} kcal',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: isDark
-                          ? AppColors.darkOnSurfaceVariant
-                          : AppColors.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios,
-              color: isDark
-                  ? AppColors.darkOnSurfaceVariant
-                  : AppColors.onSurfaceVariant,
-              size: 16,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 }
 
 class _StatusPill extends StatelessWidget {

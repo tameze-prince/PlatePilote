@@ -40,4 +40,7 @@ public class Budget extends BaseEntity {
 
     @Column(name = "end_date")
     private LocalDate endDate;
+
+    @Column(nullable = false)
+    private BigDecimal spent = BigDecimal.ZERO;
 }

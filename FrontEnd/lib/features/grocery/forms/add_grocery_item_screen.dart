@@ -299,10 +299,12 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
                         child: const Text('Clear'),
                       ),
                       const SizedBox(width: AppSpacing.xs),
-                      FilledButton.icon(
-                        onPressed: _adding ? null : _submit,
-                        icon: const Icon(Icons.add_shopping_cart, size: 18),
-                        label: const Text('Add'),
+                      Flexible(
+                        child: FilledButton.icon(
+                          onPressed: _adding ? null : _submit,
+                          icon: const Icon(Icons.add_shopping_cart, size: 18),
+                          label: const Text('Add'),
+                        ),
                       ),
                     ],
                   ),

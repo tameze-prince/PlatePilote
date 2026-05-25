@@ -125,6 +125,20 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("All sessions revoked", null));
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request.email());
+        return ResponseEntity.ok(ApiResponse.success("If an account exists, a reset email has been sent", null));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request.token(), request.newPassword());
+        return ResponseEntity.ok(ApiResponse.success("Password has been reset successfully", null));
+    }
+
     public record RefreshTokenRequest(String refreshToken) {}
     public record ResendVerificationRequest(String email) {}
+    public record ForgotPasswordRequest(String email) {}
+    public record ResetPasswordRequest(String token, String newPassword) {}
 }

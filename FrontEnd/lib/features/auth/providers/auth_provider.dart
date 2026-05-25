@@ -57,6 +57,7 @@ class AuthNotifier extends Notifier<AuthState> {
       }
       await secureStorage.clearTokens();
       state = const AuthState();
+      await ref.read(appSessionProvider.notifier).signOut();
     }
   }
 

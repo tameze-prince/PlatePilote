@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme/color_tokens.dart';
 import '../../app/theme/app_spacing.dart';
+import '../../core/providers/app_session_provider.dart';
 import '../auth/providers/auth_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -38,7 +39,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     if (!mounted) return;
     await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
-    context.pushReplacement('/onboarding');
+    final session = ref.read(appSessionProvider);
+    if (!session.hasSeenOnboarding) {
+      context.pushReplacement('/onboarding');
+    } else if (!session.isAuthenticated) {
+      context.pushReplacement('/login');
+    } else {
+      context.pushReplacement('/home');
+    }
   }
 
   @override

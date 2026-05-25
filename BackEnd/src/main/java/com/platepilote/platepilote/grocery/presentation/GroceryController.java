@@ -6,7 +6,9 @@ import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.grocery.application.dto.GroceryItemRequest;
 import com.platepilote.platepilote.grocery.application.dto.GroceryListRequest;
 import com.platepilote.platepilote.grocery.application.service.GroceryService;
+import com.platepilote.platepilote.grocery.application.service.GroceryService.CheckoutResponse;
 import com.platepilote.platepilote.grocery.application.service.GroceryService.GroceryListResponse;
+import com.platepilote.platepilote.grocery.application.service.GroceryService.PurchaseRecordResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +28,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -112,6 +117,33 @@ public class GroceryController {
         groceryService.completeList(userId, listId);
         return ResponseEntity.ok(ApiResponse.success("List completed", null));
     }
+
+    @PostMapping("/{listId}/checkout")
+    public ResponseEntity<ApiResponse<CheckoutResponse>> checkoutList(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable UUID listId,
+            @RequestBody CheckoutRequest request) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        CheckoutResponse result = groceryService.checkoutList(
+                userId, listId, request.checkedItemIds(), request.actualPrices());
+        return ResponseEntity.ok(ApiResponse.success("Checkout completed", result));
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<ApiResponse<PagedResponse<PurchaseRecordResponse>>> getPurchaseHistory(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("updatedAt").descending());
+        PagedResponse<PurchaseRecordResponse> history = groceryService.getPurchaseHistory(userId, pageable);
+        return ResponseEntity.ok(ApiResponse.success(history));
+    }
+
+    public record CheckoutRequest(
+            List<UUID> checkedItemIds,
+            Map<UUID, BigDecimal> actualPrices
+    ) {}
 
     @DeleteMapping("/{listId}")
     public ResponseEntity<ApiResponse<Void>> deleteList(

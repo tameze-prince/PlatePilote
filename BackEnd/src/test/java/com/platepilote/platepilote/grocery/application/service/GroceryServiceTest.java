@@ -1,5 +1,6 @@
 package com.platepilote.platepilote.grocery.application.service;
 
+import com.platepilote.platepilote.budget.domain.repository.BudgetRepository;
 import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.grocery.domain.entity.GroceryItem;
 import com.platepilote.platepilote.grocery.domain.entity.GroceryList;
@@ -48,6 +49,7 @@ class GroceryServiceTest {
     @Mock private PricingService pricingService;
     @Mock private UserProfileRepository userProfileRepository;
     @Mock private SecurityUtils securityUtils;
+    @Mock private BudgetRepository budgetRepository;
 
     private GroceryService groceryService;
 
@@ -55,7 +57,7 @@ class GroceryServiceTest {
     void setUp() {
         groceryService = new GroceryService(groceryListRepository, groceryItemRepository, mealPlanRepository,
                 mealPlanEntryRepository, recipeIngredientRepository, pantryItemRepository, pricingService,
-                userProfileRepository, securityUtils);
+                userProfileRepository, budgetRepository, securityUtils);
         when(groceryListRepository.save(any(GroceryList.class))).thenAnswer(invocation -> {
             GroceryList list = invocation.getArgument(0);
             list.setId(UUID.randomUUID());

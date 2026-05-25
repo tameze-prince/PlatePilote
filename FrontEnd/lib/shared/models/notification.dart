@@ -32,6 +32,28 @@ class AppNotification {
     );
   }
 
+  AppNotification copyWith({
+    String? id,
+    String? type,
+    String? title,
+    String? body,
+    String? dataPayload,
+    bool? isRead,
+    String? readAt,
+    String? createdAt,
+  }) {
+    return AppNotification(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      title: title ?? this.title,
+      body: body ?? this.body,
+      dataPayload: dataPayload ?? this.dataPayload,
+      isRead: isRead ?? this.isRead,
+      readAt: readAt ?? this.readAt,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'type': type,

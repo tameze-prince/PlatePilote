@@ -24,4 +24,6 @@ public interface GroceryListRepository extends JpaRepository<GroceryList, UUID> 
      * Get all active (non-deleted) grocery lists for a user with pagination.
      */
     Page<GroceryList> findByUserIdAndDeletedAtIsNull(UUID userId, Pageable pageable);
+
+    Page<GroceryList> findByUserIdAndStatusAndDeletedAtIsNull(UUID userId, String status, Pageable pageable);
 }

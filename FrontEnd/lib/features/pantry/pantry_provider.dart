@@ -93,10 +93,17 @@ class PantryNotifier extends Notifier<PantryListState> {
   Future<void> updateItemQuantity(int index, double quantity, String unit) async {
     if (index >= state.items.length) return;
     final item = state.items[index];
-    final updated = item.copyWith(quantity: quantity, unit: unit);
-    final items = [...state.items];
-    items[index] = updated;
-    state = state.copyWith(items: items);
+    if (item.id.isEmpty) return;
+
+    try {
+      final repo = ref.read(pantryRepositoryProvider);
+      await repo.consumeItem(item.id, quantity);
+
+      // Refresh to get actual state from backend
+      await _loadItems();
+    } on ApiException catch (e) {
+      state = state.copyWith(error: e.message);
+    }
   }
 
   Future<void> deleteItem(int index) async {

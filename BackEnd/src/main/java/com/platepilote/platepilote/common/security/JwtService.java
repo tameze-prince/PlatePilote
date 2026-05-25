@@ -160,6 +160,23 @@ public class JwtService {
                 .getPayload();
     }
 
+    public String generateResetToken(String email) {
+        return Jwts.builder()
+                .subject(email)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30)) // 30 minutes
+                .signWith(getSignInKey())
+                .compact();
+    }
+
+    public boolean isResetTokenValid(String token, String email) {
+        try {
+            return extractUsername(token).equals(email) && !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     /**
      * Convert the base64-encoded secret key string into a cryptographic key.
      */

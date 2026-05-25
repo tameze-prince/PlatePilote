@@ -3,7 +3,9 @@ package com.platepilote.platepilote.budget.presentation;
 import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.budget.application.dto.BudgetRequest;
 import com.platepilote.platepilote.budget.application.service.BudgetService;
+import com.platepilote.platepilote.budget.application.service.BudgetService.BudgetAnalyticsResponse;
 import com.platepilote.platepilote.budget.application.service.BudgetService.BudgetResponse;
+import com.platepilote.platepilote.budget.application.service.BudgetService.SavingsResponse;
 import com.platepilote.platepilote.common.dto.ApiResponse;
 import com.platepilote.platepilote.common.dto.PagedResponse;
 import jakarta.validation.Valid;
@@ -62,5 +64,21 @@ public class BudgetController {
         UUID userId = securityUtils.getCurrentUserId(userDetails);
         budgetService.deleteBudget(userId, budgetId);
         return ResponseEntity.ok(ApiResponse.success("Budget deleted", null));
+    }
+
+    @GetMapping("/analytics")
+    public ResponseEntity<ApiResponse<BudgetAnalyticsResponse>> getBudgetAnalytics(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        BudgetAnalyticsResponse analytics = budgetService.getBudgetAnalytics(userId);
+        return ResponseEntity.ok(ApiResponse.success(analytics));
+    }
+
+    @GetMapping("/savings")
+    public ResponseEntity<ApiResponse<SavingsResponse>> getSavings(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        SavingsResponse savings = budgetService.getSavings(userId);
+        return ResponseEntity.ok(ApiResponse.success(savings));
     }
 }

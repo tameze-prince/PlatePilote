@@ -1,35 +1,26 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/repositories/recommendation_repository.dart';
-import '../auth/providers/auth_provider.dart';
+import '../../core/repositories/dashboard_repository.dart';
 
 class HomeState {
   const HomeState({
     this.isLoading = true,
-    this.recommendations = const [],
-    this.quickMeals = const [],
-    this.userName,
+    this.dashboard,
     this.errorMessage,
   });
 
   final bool isLoading;
-  final List<Map<String, dynamic>> recommendations;
-  final List<Map<String, dynamic>> quickMeals;
-  final String? userName;
+  final DashboardData? dashboard;
   final String? errorMessage;
 
   HomeState copyWith({
     bool? isLoading,
-    List<Map<String, dynamic>>? recommendations,
-    List<Map<String, dynamic>>? quickMeals,
-    String? userName,
+    DashboardData? dashboard,
     String? errorMessage,
   }) {
     return HomeState(
       isLoading: isLoading ?? this.isLoading,
-      recommendations: recommendations ?? this.recommendations,
-      quickMeals: quickMeals ?? this.quickMeals,
-      userName: userName ?? this.userName,
+      dashboard: dashboard ?? this.dashboard,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -38,27 +29,25 @@ class HomeState {
 class HomeNotifier extends Notifier<HomeState> {
   @override
   HomeState build() {
-    final authState = ref.watch(authProvider);
-    return HomeState(userName: authState.name);
+    Future.microtask(() => loadHome());
+    return const HomeState(isLoading: true);
   }
 
-  Future<void> loadRecommendations() async {
+  Future<void> loadHome() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final repo = ref.read(recommendationRepositoryProvider);
-      final recommendations = await repo.getRecommendations(limit: 5);
-      final quickMeals = await repo.getQuickMeals(maxTime: 30, limit: 3);
+      final repo = ref.read(dashboardRepositoryProvider);
+      final dashboard = await repo.getHomeDashboard();
 
-      state = state.copyWith(
+      state = HomeState(
         isLoading: false,
-        recommendations: recommendations,
-        quickMeals: quickMeals,
+        dashboard: dashboard,
       );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'Failed to load recommendations',
+        errorMessage: 'Failed to load dashboard',
       );
     }
   }

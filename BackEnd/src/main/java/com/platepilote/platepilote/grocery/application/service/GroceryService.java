@@ -14,6 +14,7 @@ import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanEntry;
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanEntryRepository;
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanRepository;
 import com.platepilote.platepilote.pantry.domain.entity.PantryItem;
+import com.platepilote.platepilote.budget.domain.repository.BudgetRepository;
 import com.platepilote.platepilote.pantry.domain.repository.PantryItemRepository;
 import com.platepilote.platepilote.pricing.application.service.PricingService;
 import com.platepilote.platepilote.recipes.domain.entity.RecipeIngredient;
@@ -27,6 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,6 +52,7 @@ public class GroceryService {
     private final PantryItemRepository pantryItemRepository;
     private final PricingService pricingService;
     private final UserProfileRepository userProfileRepository;
+    private final BudgetRepository budgetRepository;
     private final SecurityUtils securityUtils;
 
     @Transactional(readOnly = true)
@@ -203,6 +208,112 @@ public class GroceryService {
         }
 
         return toFullListResponse(saved);
+    }
+
+    @Transactional
+    public CheckoutResponse checkoutList(UUID userId, UUID listId, List<UUID> checkedItemIds, Map<UUID, BigDecimal> actualPrices) {
+        GroceryList list = groceryListRepository.findById(listId)
+                .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", listId.toString()));
+        securityUtils.verifyOwnership(list.getUserId(), userId, "GroceryList", listId.toString());
+
+        List<GroceryItem> items = groceryItemRepository.findByGroceryListIdOrderBySortOrderAsc(listId);
+        List<GroceryItem> checkedItems = items.stream()
+                .filter(item -> checkedItemIds.contains(item.getId()))
+                .toList();
+
+        BigDecimal totalSpent = BigDecimal.ZERO;
+        List<PantryAddition> pantryAdditions = new ArrayList<>();
+
+        for (GroceryItem item : checkedItems) {
+            BigDecimal actualPrice = actualPrices != null ? actualPrices.get(item.getId()) : item.getEstimatedPrice();
+            if (actualPrice != null) {
+                totalSpent = totalSpent.add(actualPrice);
+            }
+
+            if (item.getIngredientId() != null) {
+                pantryItemRepository.findByUserIdAndIngredientIdIn(userId, Set.of(item.getIngredientId()))
+                        .stream()
+                        .filter(p -> p.getExpirationDate() != null && p.getExpirationDate().isBefore(LocalDate.now()))
+                        .forEach(p -> pantryItemRepository.delete(p));
+            }
+
+            PantryItem pantryItem = PantryItem.builder()
+                    .userId(userId)
+                    .name(item.getName())
+                    .category(item.getCategory())
+                    .quantity(item.getQuantity())
+                    .unit(item.getUnit())
+                    .ingredientId(item.getIngredientId())
+                    .build();
+            pantryItemRepository.save(pantryItem);
+
+            pantryAdditions.add(new PantryAddition(
+                    pantryItem.getId(),
+                    item.getName(),
+                    item.getQuantity(),
+                    item.getUnit()
+            ));
+
+            groceryItemRepository.delete(item);
+        }
+
+        if (totalSpent.compareTo(BigDecimal.ZERO) > 0) {
+            final BigDecimal finalTotalSpent = totalSpent;
+            budgetRepository.findByUserIdAndDeletedAtIsNull(userId, PageRequest.of(0, 1))
+                    .stream()
+                    .findFirst()
+                    .ifPresent(budget -> {
+                        BigDecimal currentSpent = budget.getSpent() != null ? budget.getSpent() : BigDecimal.ZERO;
+                        budget.setSpent(currentSpent.add(finalTotalSpent));
+                        budgetRepository.save(budget);
+                    });
+        }
+
+        boolean allChecked = items.stream().allMatch(item -> checkedItemIds.contains(item.getId()));
+        if (allChecked) {
+            list.setStatus("COMPLETED");
+            groceryListRepository.save(list);
+        }
+
+        PurchaseRecordResponse purchaseRecord = new PurchaseRecordResponse(
+                UUID.randomUUID(),
+                checkedItems.stream().map(GroceryItem::getName).toList(),
+                totalSpent,
+                Instant.now()
+        );
+
+        GroceryListResponse updatedList = toFullListResponse(list);
+
+        return new CheckoutResponse(
+                updatedList,
+                pantryAdditions,
+                purchaseRecord,
+                totalSpent
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<PurchaseRecordResponse> getPurchaseHistory(UUID userId, Pageable pageable) {
+        Page<GroceryList> completedLists = groceryListRepository.findByUserIdAndStatusAndDeletedAtIsNull(
+                userId, "COMPLETED", pageable);
+
+        List<PurchaseRecordResponse> records = completedLists.getContent().stream()
+                .map(list -> {
+                    List<GroceryItem> items = groceryItemRepository.findByGroceryListIdOrderBySortOrderAsc(list.getId());
+                    BigDecimal total = items.stream()
+                            .map(GroceryItem::getEstimatedPrice)
+                            .filter(java.util.Objects::nonNull)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    return new PurchaseRecordResponse(
+                            list.getId(),
+                            items.stream().map(GroceryItem::getName).toList(),
+                            total,
+                            list.getUpdatedAt()
+                    );
+                })
+                .toList();
+
+        return PagedResponse.of(records, completedLists.getNumber(), completedLists.getSize(), completedLists.getTotalElements());
     }
 
     public void deleteList(UUID userId, UUID listId) {
@@ -417,6 +528,27 @@ public class GroceryService {
             String notes,
             Integer sortOrder,
             UUID ingredientId
+    ) {}
+
+    public record CheckoutResponse(
+            GroceryListResponse list,
+            List<PantryAddition> pantryAdditions,
+            PurchaseRecordResponse purchaseRecord,
+            BigDecimal totalSpent
+    ) {}
+
+    public record PantryAddition(
+            UUID id,
+            String name,
+            BigDecimal quantity,
+            String unit
+    ) {}
+
+    public record PurchaseRecordResponse(
+            UUID id,
+            List<String> itemNames,
+            BigDecimal totalPrice,
+            Instant boughtDate
     ) {}
 
     private record GroceryItemAggregate(

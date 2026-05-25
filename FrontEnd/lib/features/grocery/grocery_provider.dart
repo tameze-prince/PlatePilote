@@ -182,6 +182,36 @@ class GroceryNotifier extends Notifier<GroceryListState> {
     final checkedItems = state.items.where((i) => i.checked).toList();
     if (checkedItems.isEmpty) return;
 
+    state = state.copyWith(isSaving: true);
+
+    final listId = state.currentList?.id;
+    if (listId != null) {
+      try {
+        final repo = ref.read(groceryRepositoryProvider);
+        final checkedIds = checkedItems
+            .map((i) => i.id)
+            .whereType<String>()
+            .toList();
+
+        if (checkedIds.isNotEmpty) {
+          await repo.checkoutList(listId, checkedItemIds: checkedIds);
+        }
+
+        // Refresh grocery list state after checkout
+        await _loadCurrentList();
+
+        // Refresh pantry to reflect additions
+        ref.read(pantryProvider.notifier).refresh();
+
+        state = state.copyWith(isSaving: false);
+        return;
+      } on ApiException catch (e) {
+        state = state.copyWith(isSaving: false, error: e.message);
+        return;
+      }
+    }
+
+    // Fallback for local-only items (no list)
     final pantryNotifier = ref.read(pantryProvider.notifier);
     for (final item in checkedItems) {
       await pantryNotifier.addItem(
@@ -192,22 +222,8 @@ class GroceryNotifier extends Notifier<GroceryListState> {
       );
     }
 
-    final total = checkedItems.fold<double>(
-      0, (sum, item) => sum + (item.estimatedPrice ?? 0),
-    );
-
-    final record = PurchaseRecord(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      itemNames: checkedItems.map((i) => i.name).toList(),
-      totalPrice: total,
-      boughtDate: DateTime.now(),
-    );
-
     final remaining = state.items.where((i) => !i.checked).toList();
-    state = state.copyWith(
-      items: remaining,
-      purchaseHistory: [...state.purchaseHistory, record],
-    );
+    state = state.copyWith(items: remaining, isSaving: false);
   }
 
   Future<void> saveList() async {

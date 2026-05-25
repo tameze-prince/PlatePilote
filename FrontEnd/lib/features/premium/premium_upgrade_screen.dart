@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/theme/color_tokens.dart';
 import '../../app/theme/app_spacing.dart';
@@ -111,9 +112,15 @@ class PremiumUpgradeScreen extends ConsumerWidget {
           PrimaryButton(
             label: 'Start Premium Trial',
             icon: Icons.arrow_forward,
-            onPressed: () {
-              ref.read(subscriptionProvider.notifier).startTrial();
-              context.push('/subscription');
+            onPressed: () async {
+              final url = await ref.read(subscriptionProvider.notifier).createCheckoutSession();
+              if (url != null && context.mounted) {
+                await launchUrl(Uri.parse(url));
+              } else if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Failed to start checkout')),
+                );
+              }
             },
           ),
         ],

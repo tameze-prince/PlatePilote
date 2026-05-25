@@ -13,7 +13,6 @@ class MealPlanState {
     this.isLoading = false,
     this.isGenerating = false,
     this.error,
-    this.useDemoFallback = false,
   });
 
   final MealPlan? currentPlan;
@@ -21,7 +20,6 @@ class MealPlanState {
   final bool isLoading;
   final bool isGenerating;
   final String? error;
-  final bool useDemoFallback;
 
   MealPlanState copyWith({
     MealPlan? currentPlan,
@@ -29,7 +27,6 @@ class MealPlanState {
     bool? isLoading,
     bool? isGenerating,
     String? error,
-    bool? useDemoFallback,
     bool clearError = false,
   }) {
     return MealPlanState(
@@ -38,7 +35,6 @@ class MealPlanState {
       isLoading: isLoading ?? this.isLoading,
       isGenerating: isGenerating ?? this.isGenerating,
       error: clearError ? null : (error ?? this.error),
-      useDemoFallback: useDemoFallback ?? this.useDemoFallback,
     );
   }
 }
@@ -47,11 +43,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
   @override
   MealPlanState build() {
     Future.microtask(() => _loadCurrentPlan());
-    return const MealPlanState(
-      meals: demoMeals,
-      isLoading: true,
-      useDemoFallback: true,
-    );
+    return const MealPlanState(isLoading: true);
   }
 
   String _nextMonday() {
@@ -91,8 +83,8 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
           meals: meals,
         );
       }
-    } on ApiException {
-      state = const MealPlanState(meals: demoMeals, useDemoFallback: true);
+    } on ApiException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
     }
   }
 
@@ -193,7 +185,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     try {
       final repo = ref.read(mealPlanRepositoryProvider);
       await repo.deleteMealPlan(plan.id);
-      state = const MealPlanState(meals: demoMeals, useDemoFallback: true);
+      state = const MealPlanState();
     } on ApiException catch (e) {
       state = state.copyWith(error: e.message);
     }

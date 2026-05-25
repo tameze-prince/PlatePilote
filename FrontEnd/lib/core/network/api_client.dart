@@ -97,9 +97,19 @@ class _AuthTokenInterceptor extends Interceptor {
 
       await onTokensRefreshed(newAccessToken, newRefreshToken);
 
-      final retryOptions = err.requestOptions;
-      retryOptions.headers['Authorization'] = 'Bearer $newAccessToken';
-      final retryResponse = await Dio().fetch(retryOptions);
+      // Retry the original request with the new token using the original Dio
+      err.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
+      
+      // Use the Dio from the request options to retry
+      final dio = Dio(BaseOptions(
+        baseUrl: err.requestOptions.baseUrl,
+        connectTimeout: err.requestOptions.connectTimeout,
+        receiveTimeout: err.requestOptions.receiveTimeout,
+        headers: err.requestOptions.headers,
+        contentType: err.requestOptions.contentType,
+      ));
+      
+      final retryResponse = await dio.fetch(err.requestOptions);
       handler.resolve(retryResponse);
     } catch (_) {
       await onRefreshFailed();

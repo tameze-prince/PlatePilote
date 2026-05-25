@@ -33,6 +33,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -64,5 +65,5 @@ public interface PantryItemRepository extends JpaRepository<PantryItem, UUID> {
     List<PantryItem> searchByUserIdAndQuery(@Param("userId") UUID userId, @Param("query") String query);
 
     @Query("SELECT p FROM PantryItem p WHERE p.userId = :userId AND p.deletedAt IS NULL AND p.ingredientId IN :ingredientIds")
-    List<PantryItem> findByUserIdAndIngredientIdIn(@Param("userId") UUID userId, @Param("ingredientIds") Set<UUID> ingredientIds);
+    List<PantryItem> findByUserIdAndIngredientIdIn(@Param("userId") UUID userId, @Param("ingredientIds") Collection<UUID> ingredientIds);
 }

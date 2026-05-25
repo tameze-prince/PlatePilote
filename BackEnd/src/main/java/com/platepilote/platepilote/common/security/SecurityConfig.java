@@ -73,6 +73,8 @@ public class SecurityConfig {
             "/v3/api-docs/**",           // OpenAPI documentation
             "/swagger-ui/**",            // Swagger UI
             "/swagger-ui.html",
+            "/api/v1/auth/forgot-password",
+            "/api/v1/auth/reset-password",
             "/actuator/health",          // Health check
             "/actuator/info"
     };

@@ -55,9 +55,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
                 title: 'Your Week',
                 subtitle: state.currentPlan != null
                     ? '${state.currentPlan!.startDate} – ${state.currentPlan!.endDate}'
-                    : state.useDemoFallback
-                        ? 'Sample plan — tap to generate'
-                        : 'Plan your meals',
+                    : 'Plan your meals',
                 actions: [
                   IconButton(
                     onPressed: () => context.push('/plan-history'),

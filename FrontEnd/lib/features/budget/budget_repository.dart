@@ -52,6 +52,32 @@ class BudgetRepository extends BaseRepository {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }
   }
+
+  Future<Map<String, dynamic>> getAnalytics() async {
+    try {
+      final response = await apiClient.get('/budgets/analytics');
+      final data = response.data;
+      if (data is Map && data['data'] is Map) {
+        return data['data'] as Map<String, dynamic>;
+      }
+      return {};
+    } on DioException catch (e) {
+      throw ApiException(extractMessage(e), e.response?.statusCode);
+    }
+  }
+
+  Future<Map<String, dynamic>> getSavings() async {
+    try {
+      final response = await apiClient.get('/budgets/savings');
+      final data = response.data;
+      if (data is Map && data['data'] is Map) {
+        return data['data'] as Map<String, dynamic>;
+      }
+      return {};
+    } on DioException catch (e) {
+      throw ApiException(extractMessage(e), e.response?.statusCode);
+    }
+  }
 }
 
 final budgetRepositoryProvider = Provider<BudgetRepository>((ref) {
