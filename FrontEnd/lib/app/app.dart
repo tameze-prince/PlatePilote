@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import '../core/providers/app_session_provider.dart';
 import '../core/providers/theme_provider.dart';
 import '../features/localization/locale_provider.dart';
 import '../l10n/app_localizations.dart';
@@ -16,6 +17,16 @@ class PlatePilotApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(localeProvider);
     final router = ref.watch(appRouterProvider);
+
+    ref.listen(appSessionProvider, (prev, next) {
+      if (prev == null) return;
+      if (prev.isAuthenticated && !next.isAuthenticated) {
+        router.go('/login');
+      } else if (!prev.hasSeenOnboarding && next.hasSeenOnboarding) {
+        router.go('/login');
+      }
+    });
+
     return MaterialApp.router(
       title: 'PlatePilot',
       debugShowCheckedModeBanner: false,
