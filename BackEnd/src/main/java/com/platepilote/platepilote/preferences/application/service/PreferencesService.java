@@ -168,9 +168,7 @@ public class PreferencesService {
 
     public void updateAllPreferences(UUID userId, UserPreferencesRequest request) {
         if (request.getDietaryPreferences() != null) {
-            List<DietaryPreference> existing = dietaryPreferenceRepository.findByUserId(userId);
-            existing.forEach(DietaryPreference::softDelete);
-            dietaryPreferenceRepository.saveAll(existing);
+            dietaryPreferenceRepository.deleteAll(dietaryPreferenceRepository.findByUserId(userId));
 
             List<DietaryPreference> newDiets = request.getDietaryPreferences().stream()
                     .filter(diet -> diet != null && !diet.isBlank())
@@ -183,9 +181,7 @@ public class PreferencesService {
         }
 
         if (request.getAllergies() != null) {
-            List<Allergy> existing = allergyRepository.findByUserId(userId);
-            existing.forEach(Allergy::softDelete);
-            allergyRepository.saveAll(existing);
+            allergyRepository.deleteAll(allergyRepository.findByUserId(userId));
 
             List<Allergy> newAllergies = request.getAllergies().stream()
                     .filter(a -> a.getAllergen() != null && !a.getAllergen().isBlank())
@@ -199,9 +195,7 @@ public class PreferencesService {
         }
 
         if (request.getCuisines() != null) {
-            List<CuisinePreference> existing = cuisinePreferenceRepository.findByUserId(userId);
-            existing.forEach(CuisinePreference::softDelete);
-            cuisinePreferenceRepository.saveAll(existing);
+            cuisinePreferenceRepository.deleteAll(cuisinePreferenceRepository.findByUserId(userId));
 
             List<CuisinePreference> newCuisines = request.getCuisines().stream()
                     .filter(cuisine -> cuisine != null && !cuisine.isBlank())

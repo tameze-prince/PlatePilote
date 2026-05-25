@@ -76,7 +76,20 @@ class BaseRepository {
       final msg = (response!.data as Map)['message'];
       if (msg is String && msg.isNotEmpty) return msg;
     }
-    return 'An unexpected error occurred';
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+        return 'Server is not responding (timeout). Please check that the backend is running.';
+      case DioExceptionType.sendTimeout:
+        return 'Request timed out while sending data.';
+      case DioExceptionType.receiveTimeout:
+        return 'Server took too long to respond.';
+      case DioExceptionType.connectionError:
+        return 'Cannot connect to server. Please check your connection and ensure the backend is running on port 8081.';
+      case DioExceptionType.badResponse:
+        return 'Server error (${e.response?.statusCode ?? "unknown"})';
+      default:
+        return 'An unexpected error occurred. Please try again.';
+    }
   }
 }
 

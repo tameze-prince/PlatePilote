@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/repositories/base_repository.dart';
+import '../../core/repositories/recipe_repository.dart';
 import '../../shared/models/demo_data.dart';
 import '../../shared/models/meal_plan.dart';
 import 'meal_plan_repository.dart';
@@ -13,6 +13,8 @@ class MealPlanState {
     this.isLoading = false,
     this.isGenerating = false,
     this.error,
+    this.availablePlans = const [],
+    this.selectedPlanIndex = 0,
   });
 
   final MealPlan? currentPlan;
@@ -20,6 +22,11 @@ class MealPlanState {
   final bool isLoading;
   final bool isGenerating;
   final String? error;
+  final List<MealPlan> availablePlans;
+  final int selectedPlanIndex;
+
+  bool get hasPrevPlan => selectedPlanIndex < availablePlans.length - 1;
+  bool get hasNextPlan => selectedPlanIndex > 0;
 
   MealPlanState copyWith({
     MealPlan? currentPlan,
@@ -27,6 +34,8 @@ class MealPlanState {
     bool? isLoading,
     bool? isGenerating,
     String? error,
+    List<MealPlan>? availablePlans,
+    int? selectedPlanIndex,
     bool clearError = false,
   }) {
     return MealPlanState(
@@ -35,6 +44,8 @@ class MealPlanState {
       isLoading: isLoading ?? this.isLoading,
       isGenerating: isGenerating ?? this.isGenerating,
       error: clearError ? null : (error ?? this.error),
+      availablePlans: availablePlans ?? this.availablePlans,
+      selectedPlanIndex: selectedPlanIndex ?? this.selectedPlanIndex,
     );
   }
 }
@@ -53,38 +64,112 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     return '${monday.year}-${monday.month.toString().padLeft(2, '0')}-${monday.day.toString().padLeft(2, '0')}';
   }
 
-  List<Meal> _entriesToMeals(List<MealPlanEntry> entries) {
+  Future<List<Meal>> _entriesToMeals(List<MealPlanEntry> entries) async {
+    const concurrency = 3;
     final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return entries.map((entry) {
-      final date = entry.mealDate != null ? DateTime.tryParse(entry.mealDate!) : null;
-      final dayName = date != null ? dayNames[date.weekday - 1] : (entry.mealDate ?? '');
-      return Meal(
-        day: dayName,
-        type: entry.mealType ?? 'Meal',
-        title: entry.recipeName ?? 'Unknown Recipe',
-        minutes: 25,
-        kcal: 450,
-        icon: Icons.restaurant,
-        tint: Colors.green,
-        imageUrl: null,
-      );
-    }).toList();
+    final repo = ref.read(recipeRepositoryProvider);
+    final meals = <Meal>[];
+    for (var i = 0; i < entries.length; i += concurrency) {
+      final batch = entries.skip(i).take(concurrency);
+      final results = await Future.wait(batch.map((entry) async {
+        final date = entry.mealDate != null ? DateTime.tryParse(entry.mealDate!) : null;
+        final dayName = date != null ? dayNames[date.weekday - 1] : (entry.mealDate ?? '');
+        String title = entry.recipeName ?? 'Unknown Recipe';
+        int minutes = 25;
+        int kcal = 450;
+        String? imageUrl;
+        IconData icon = Icons.restaurant;
+        Color tint = Colors.green;
+        if (entry.recipeId != null) {
+          try {
+            final detail = await repo.getRecipeDetail(entry.recipeId!);
+            title = detail.name ?? title;
+            minutes = detail.totalTimeMinutes ??
+                ((detail.prepTimeMinutes ?? 0) + (detail.cookTimeMinutes ?? 0));
+            imageUrl = detail.imageUrl;
+          } catch (_) {}
+        }
+        switch (entry.mealType?.toLowerCase()) {
+          case 'breakfast':
+            icon = Icons.wb_sunny;
+            tint = Colors.orange;
+            break;
+          case 'lunch':
+            icon = Icons.lunch_dining;
+            tint = Colors.amber;
+            break;
+          case 'dinner':
+            icon = Icons.dinner_dining;
+            tint = Colors.deepPurple;
+            break;
+          case 'snack':
+            icon = Icons.cookie;
+            tint = Colors.brown;
+            break;
+        }
+        return Meal(
+          day: dayName,
+          type: entry.mealType ?? 'Meal',
+          title: title,
+          minutes: minutes,
+          kcal: kcal,
+          icon: icon,
+          tint: tint,
+          imageUrl: imageUrl,
+          recipeId: entry.recipeId,
+        );
+      }));
+      meals.addAll(results);
+    }
+    return meals;
   }
 
   Future<void> _loadCurrentPlan() async {
     try {
       final repo = ref.read(mealPlanRepositoryProvider);
-      final page = await repo.listMealPlans(size: 1);
+      final page = await repo.listMealPlans(size: 20);
       if (page.content.isNotEmpty) {
-        final plan = page.content.first;
-        final meals = _entriesToMeals(plan.entries);
+        final plans = page.content;
+        final plan = plans.first;
+        final meals = await _entriesToMeals(plan.entries);
         state = MealPlanState(
           currentPlan: plan,
           meals: meals,
+          availablePlans: plans,
         );
+      } else {
+        state = const MealPlanState();
       }
     } on ApiException catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<void> selectPlan(int index) async {
+    final plans = state.availablePlans;
+    if (index < 0 || index >= plans.length) return;
+    final plan = plans[index];
+    final meals = await _entriesToMeals(plan.entries);
+    state = state.copyWith(
+      currentPlan: plan,
+      meals: meals,
+      selectedPlanIndex: index,
+    );
+  }
+
+  void navigatePrev() {
+    final idx = state.selectedPlanIndex;
+    if (idx < state.availablePlans.length - 1) {
+      selectPlan(idx + 1);
+    }
+  }
+
+  void navigateNext() {
+    final idx = state.selectedPlanIndex;
+    if (idx > 0) {
+      selectPlan(idx - 1);
     }
   }
 
@@ -93,15 +178,22 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     try {
       final repo = ref.read(mealPlanRepositoryProvider);
       final plan = await repo.generateWeeklyPlan(startDate: _nextMonday());
-      final meals = _entriesToMeals(plan.entries);
+      final meals = await _entriesToMeals(plan.entries);
+      final updatedPlans = [plan, ...state.availablePlans];
       state = MealPlanState(
         currentPlan: plan,
         meals: meals,
+        availablePlans: updatedPlans,
       );
     } on ApiException catch (e) {
       state = state.copyWith(
         isGenerating: false,
         error: e.message,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isGenerating: false,
+        error: e.toString(),
       );
     }
   }
@@ -123,7 +215,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
         servings: newEntry.servings ?? 1,
         notes: newEntry.notes,
       );
-      final meals = _entriesToMeals(updatedPlan.entries);
+      final meals = await _entriesToMeals(updatedPlan.entries);
       state = state.copyWith(currentPlan: updatedPlan, meals: meals);
     } on ApiException catch (e) {
       state = state.copyWith(error: e.message);
@@ -149,7 +241,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
         createdAt: plan.createdAt,
         updatedAt: plan.updatedAt,
       );
-      final meals = _entriesToMeals(updatedEntries);
+      final meals = await _entriesToMeals(updatedEntries);
       state = state.copyWith(currentPlan: updatedPlan, meals: meals);
     } on ApiException catch (e) {
       state = state.copyWith(error: e.message);
@@ -185,7 +277,10 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     try {
       final repo = ref.read(mealPlanRepositoryProvider);
       await repo.deleteMealPlan(plan.id);
-      state = const MealPlanState();
+      final updatedPlans = state.availablePlans.where((p) => p.id != plan.id).toList();
+      state = updatedPlans.isNotEmpty
+          ? MealPlanState(availablePlans: updatedPlans)
+          : const MealPlanState();
     } on ApiException catch (e) {
       state = state.copyWith(error: e.message);
     }

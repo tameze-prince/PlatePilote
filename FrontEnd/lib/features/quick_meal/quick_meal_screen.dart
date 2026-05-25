@@ -95,7 +95,7 @@ class _QuickMealScreenState extends ConsumerState<QuickMealScreen> {
                                         width: 56,
                                         height: 56,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => const Icon(Icons.restaurant, size: 40),
+                                        errorBuilder: (_, _, _) => const Icon(Icons.restaurant, size: 40),
                                       ),
                                     )
                                   : const Icon(Icons.restaurant, size: 40),

@@ -54,8 +54,26 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
               FloatingHeader(
                 title: 'Your Week',
                 subtitle: state.currentPlan != null
-                    ? '${state.currentPlan!.startDate} – ${state.currentPlan!.endDate}'
+                    ? '${state.currentPlan!.startDate} – ${state.currentPlan!.endDate}${state.currentPlan!.status == 'ACTIVE' ? '  •  Saved' : ''}'
                     : 'Plan your meals',
+                leading: state.availablePlans.length > 1
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _WeekArrow(
+                            icon: Icons.chevron_left,
+                            enabled: state.hasPrevPlan,
+                            onTap: () => ref.read(mealPlanProvider.notifier).navigatePrev(),
+                          ),
+                          const SizedBox(width: 4),
+                          _WeekArrow(
+                            icon: Icons.chevron_right,
+                            enabled: state.hasNextPlan,
+                            onTap: () => ref.read(mealPlanProvider.notifier).navigateNext(),
+                          ),
+                        ],
+                      )
+                    : null,
                 actions: [
                   IconButton(
                     onPressed: () => context.push('/plan-history'),
@@ -70,16 +88,10 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
                 _buildErrorCard(context, ref)
               else if (state.isLoading || state.isGenerating)
                 _buildGlassSkeleton()
+              else if (state.meals.isEmpty)
+                _buildEmptyState(context, ref)
               else ...[
-                ...state.meals.indexed.map(
-                  (entry) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                    child: MealCard(
-                      meal: entry.$2,
-                      onTap: () => _onMealTap(context, ref, entry.$1, entry.$2),
-                    ),
-                  ),
-                ),
+                ..._buildGroupedMeals(context, ref, state),
                 const SizedBox(height: AppSpacing.md),
                 _buildBudgetCard(context, ref, state),
               ],
@@ -109,6 +121,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     bool isTablet,
     double screenWidth,
   ) {
+    final isSaved = state.currentPlan?.status == 'ACTIVE';
     final actions = [
       _ActionTile(
         icon: Icons.auto_awesome,
@@ -119,6 +132,24 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
             : () => ref.read(mealPlanProvider.notifier).generateNewPlan(),
       ),
       _ActionTile(
+        icon: isSaved ? Icons.check_circle : Icons.save_outlined,
+        label: isSaved ? 'Saved' : 'Save Week',
+        color: isSaved ? AppColors.primaryAccentGreen : AppColors.warmAccent,
+        onTap: state.currentPlan != null && !state.isGenerating && !isSaved
+            ? () async {
+                await ref.read(mealPlanProvider.notifier).activatePlan();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Meal plan saved!'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              }
+            : null,
+      ),
+      _ActionTile(
         icon: Icons.shopping_cart_outlined,
         label: 'Grocery List',
         color: AppColors.premiumCyanAccent,
@@ -126,22 +157,14 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
             ? () => context.go('/grocery')
             : null,
       ),
-      if (isTablet && screenWidth >= 900)
-        _ActionTile(
-          icon: Icons.bolt,
-          label: 'Quick Meal',
-          color: AppColors.warmAccent,
-          onTap: () => context.push('/quick-meal'),
-        ),
     ];
 
-    final tiles = actions.take(isTablet && screenWidth >= 900 ? 3 : 2).toList();
     return Row(
-      children: tiles
+      children: actions
           .map((tile) => Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(
-                    right: tiles.last == tile ? 0 : AppSpacing.sm,
+                    right: actions.last == tile ? 0 : AppSpacing.sm,
                   ),
                   child: tile,
                 ),
@@ -187,6 +210,110 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+      child: Column(
+        children: [
+          Icon(Icons.restaurant_menu, size: 80,
+              color: PremiumTheme.textSecondary(context).withValues(alpha: 0.3)),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'No meal plan yet',
+            style: AppTypography.titleLarge.copyWith(
+              color: PremiumTheme.textPrimary(context),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Generate a weekly plan based on your preferences',
+            textAlign: TextAlign.center,
+            style: AppTypography.bodyMedium.copyWith(
+              color: PremiumTheme.textSecondary(context),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          GlassButton(
+            label: 'Generate My First Plan',
+            icon: Icons.auto_awesome,
+            onPressed: () =>
+                ref.read(mealPlanProvider.notifier).generateNewPlan(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildGroupedMeals(
+    BuildContext context,
+    WidgetRef ref,
+    MealPlanState state,
+  ) {
+    const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final grouped = <String, List<(int, Meal)>>{};
+    for (final entry in state.meals.indexed) {
+      grouped.putIfAbsent(entry.$2.day, () => []).add(entry);
+    }
+    final sortedDays = grouped.entries.toList()
+      ..sort((a, b) => dayOrder.indexOf(a.key).compareTo(dayOrder.indexOf(b.key)));
+
+    return [
+      for (final dayGroup in sortedDays) ...[
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+          child: Text(
+            _fullDayName(dayGroup.key),
+            style: AppTypography.titleSmall.copyWith(
+              color: PremiumTheme.textPrimary(context),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        for (final entry in dayGroup.value)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: Dismissible(
+              key: ValueKey('meal_${entry.$2.recipeId}_${entry.$1}'),
+              direction: DismissDirection.endToStart,
+              confirmDismiss: (_) async {
+                await ref.read(mealPlanProvider.notifier).removeEntry(entry.$1);
+                return true;
+              },
+              background: Container(
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                ),
+                child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
+              ),
+              child: MealCard(
+                meal: entry.$2,
+                onTap: () => _onMealTap(context, ref, entry.$1, entry.$2),
+                onSwap: entry.$2.recipeId != null
+                    ? () => _onMealSwap(context, ref, entry.$1, entry.$2)
+                    : null,
+              ),
+            ),
+          ),
+      ],
+    ];
+  }
+
+  String _fullDayName(String abbrev) {
+    switch (abbrev) {
+      case 'Mon': return 'Monday';
+      case 'Tue': return 'Tuesday';
+      case 'Wed': return 'Wednesday';
+      case 'Thu': return 'Thursday';
+      case 'Fri': return 'Friday';
+      case 'Sat': return 'Saturday';
+      case 'Sun': return 'Sunday';
+      default: return abbrev;
+    }
   }
 
   Widget _buildBudgetCard(
@@ -253,6 +380,17 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     int index,
     Meal meal,
   ) {
+    if (meal.recipeId != null) {
+      context.push('/recipe/${meal.recipeId}');
+    }
+  }
+
+  void _onMealSwap(
+    BuildContext context,
+    WidgetRef ref,
+    int index,
+    Meal meal,
+  ) {
     final plan = ref.read(mealPlanProvider).currentPlan;
     final entry = plan != null && plan.entries.length > index
         ? plan.entries[index]
@@ -263,6 +401,33 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
         'meal': meal,
         'entry': entry,
       },
+    );
+  }
+}
+
+class _WeekArrow extends StatelessWidget {
+  const _WeekArrow({
+    required this.icon,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Opacity(
+        opacity: enabled ? 1.0 : 0.3,
+        child: GlassContainer(
+          padding: const EdgeInsets.all(6),
+          borderRadius: AppRadius.full,
+          child: Icon(icon, size: 18, color: PremiumTheme.textPrimary(context)),
+        ),
+      ),
     );
   }
 }

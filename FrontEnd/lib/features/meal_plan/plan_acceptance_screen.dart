@@ -7,7 +7,6 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_typography.dart';
 import '../../core/premium_components.dart';
-import '../../shared/models/demo_data.dart';
 import '../../shared/models/meal_plan.dart';
 import 'meal_plan_provider.dart';
 

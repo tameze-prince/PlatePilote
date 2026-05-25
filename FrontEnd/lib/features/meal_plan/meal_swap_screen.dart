@@ -7,6 +7,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_typography.dart';
 import '../../core/premium_components.dart';
+import '../../core/repositories/recipe_repository.dart';
 import '../../shared/models/demo_data.dart';
 import '../../shared/models/meal_plan.dart';
 import 'meal_plan_provider.dart';
@@ -42,19 +43,52 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
 
   Future<void> _loadAlternatives() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 800));
-    setState(() {
-      _alternatives = demoMeals.where((m) => m.type == widget.mealType).toList();
-      if (_alternatives.isEmpty) _alternatives = demoMeals;
-      _isLoading = false;
-    });
+    try {
+      final repo = ref.read(recipeRepositoryProvider);
+      final page = await repo.getByMealType(widget.mealType, size: 20);
+      setState(() {
+        _alternatives = page.content.map((detail) {
+          IconData icon = Icons.restaurant;
+          Color tint = Colors.green;
+          switch (widget.mealType.toLowerCase()) {
+            case 'breakfast':
+              icon = Icons.wb_sunny; tint = Colors.orange; break;
+            case 'lunch':
+              icon = Icons.lunch_dining; tint = Colors.amber; break;
+            case 'dinner':
+              icon = Icons.dinner_dining; tint = Colors.deepPurple; break;
+            case 'snack':
+              icon = Icons.cookie; tint = Colors.brown; break;
+          }
+          return Meal(
+            day: '',
+            type: widget.mealType,
+            title: detail.name ?? 'Unknown',
+            minutes: detail.totalTimeMinutes ??
+                ((detail.prepTimeMinutes ?? 0) + (detail.cookTimeMinutes ?? 0)),
+            kcal: detail.caloriesPerServing ?? 450,
+            icon: icon,
+            tint: tint,
+            imageUrl: detail.imageUrl,
+            recipeId: detail.id,
+          );
+        }).toList();
+        _isLoading = false;
+      });
+    } catch (_) {
+      setState(() {
+        _alternatives = demoMeals.where((m) => m.type == widget.mealType).toList();
+        if (_alternatives.isEmpty) _alternatives = demoMeals;
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _swapMeal() async {
     if (_selectedMeal == null) return;
-    if (widget.currentEntry != null) {
+    if (widget.currentEntry != null && _selectedMeal!.recipeId != null) {
       final newEntry = MealPlanEntry(
-        recipeId: widget.currentEntry!.recipeId,
+        recipeId: _selectedMeal!.recipeId,
         recipeName: _selectedMeal!.title,
         mealDate: widget.currentEntry!.mealDate,
         mealType: widget.mealType,

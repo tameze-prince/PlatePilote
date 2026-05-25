@@ -1,16 +1,12 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
-import 'package:plate_pilote/app/app.dart';
 import 'package:plate_pilote/core/network/api_client.dart';
 import 'package:plate_pilote/core/providers/app_session_provider.dart';
 import 'package:plate_pilote/core/providers/preferences_provider.dart';
 import 'package:plate_pilote/core/repositories/auth_repository.dart';
 import 'package:plate_pilote/core/services/secure_storage_service.dart';
 import 'package:plate_pilote/features/auth/providers/auth_provider.dart';
-import 'package:plate_pilote/features/auth/providers/auth_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockTokenStorage extends TokenStorage {

@@ -132,6 +132,7 @@ class RecipeDetail {
     this.source,
     this.isPublic,
     this.userId,
+    this.caloriesPerServing,
     this.ingredients = const [],
     this.steps = const [],
     this.createdAt,
@@ -152,6 +153,7 @@ class RecipeDetail {
   final String? source;
   final bool? isPublic;
   final String? userId;
+  final int? caloriesPerServing;
   final List<RecipeIngredient> ingredients;
   final List<RecipeStep> steps;
   final String? createdAt;
@@ -173,6 +175,7 @@ class RecipeDetail {
       source: json['source'] as String?,
       isPublic: json['isPublic'] as bool?,
       userId: json['userId'] as String?,
+      caloriesPerServing: json['caloriesPerServing'] as int?,
       ingredients: (json['ingredients'] as List?)
               ?.map((e) => RecipeIngredient.fromJson(e as Map<String, dynamic>))
               .toList() ??

@@ -78,7 +78,7 @@ class MealPlanRepository extends BaseRepository {
           'mealDate': mealDate,
           'mealType': mealType,
           'servings': servings,
-          if (notes != null) 'notes': notes,
+          'notes': ?notes,
         },
       );
       return handleResponse(response, MealPlan.fromJson);

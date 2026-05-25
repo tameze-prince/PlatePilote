@@ -37,7 +37,7 @@ class BudgetRepository extends BaseRepository {
         'currency': currency,
         'period': period,
         'startDate': startDate,
-        if (endDate != null) 'endDate': endDate,
+        'endDate': ?endDate,
       });
       return handleResponse(response, Budget.fromJson);
     } on DioException catch (e) {

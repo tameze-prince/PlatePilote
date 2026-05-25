@@ -162,7 +162,7 @@ class FloatingSearchBar extends StatefulWidget {
 
 class _FloatingSearchBarState extends State<FloatingSearchBar> {
   late TextEditingController _controller;
-  bool _isFocused = false;
+  final bool _isFocused = false;
 
   @override
   void initState() {
@@ -423,7 +423,7 @@ class FloatingAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
                 child: Row(
                   children: [
-                    if (leading != null) leading!,
+                    ?leading,
                     Expanded(
                       child: title ??
                           Text(

@@ -8,6 +8,9 @@ import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/empty_state.dart';
+import '../../shared/models/meal_plan.dart';
+import 'meal_plan_repository.dart';
+import 'meal_plan_provider.dart';
 
 class MealPlanHistoryScreen extends ConsumerStatefulWidget {
   const MealPlanHistoryScreen({super.key});
@@ -19,7 +22,7 @@ class MealPlanHistoryScreen extends ConsumerStatefulWidget {
 
 class _MealPlanHistoryScreenState
     extends ConsumerState<MealPlanHistoryScreen> {
-  List<Map<String, dynamic>> _history = [];
+  List<MealPlan> _history = [];
   bool _isLoading = true;
 
   @override
@@ -30,40 +33,25 @@ class _MealPlanHistoryScreenState
 
   Future<void> _loadHistory() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      _history = [
-        {
-          'week': 'May 12-18, 2026',
-          'meals': 21,
-          'avgCalories': 450,
-          'cost': 142.50,
-          'saved': true,
-        },
-        {
-          'week': 'May 5-11, 2026',
-          'meals': 21,
-          'avgCalories': 480,
-          'cost': 156.00,
-          'saved': true,
-        },
-        {
-          'week': 'Apr 28-May 4, 2026',
-          'meals': 18,
-          'avgCalories': 420,
-          'cost': 128.75,
-          'saved': false,
-        },
-        {
-          'week': 'Apr 21-27, 2026',
-          'meals': 21,
-          'avgCalories': 465,
-          'cost': 138.25,
-          'saved': true,
-        },
-      ];
-      _isLoading = false;
-    });
+    try {
+      final repo = ref.read(mealPlanRepositoryProvider);
+      final page = await repo.listMealPlans(size: 20);
+      setState(() {
+        _history = page.content;
+        _isLoading = false;
+      });
+    } catch (_) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  String _formatDateRange(MealPlan plan) {
+    final start = plan.startDate ?? '';
+    final end = plan.endDate ?? '';
+    if (start.length >= 10 && end.length >= 10) {
+      return '${start.substring(5)}-${end.substring(5, 10)}, ${end.substring(0, 4)}';
+    }
+    return '$start – $end';
   }
 
   @override
@@ -84,14 +72,15 @@ class _MealPlanHistoryScreenState
                   padding: const EdgeInsets.all(AppSpacing.md),
                   itemCount: _history.length,
                   itemBuilder: (context, index) {
-                    final week = _history[index];
-                    return _buildHistoryCard(week);
+                    final plan = _history[index];
+                    return _buildHistoryCard(plan, index);
                   },
                 ),
     );
   }
 
-  Widget _buildHistoryCard(Map<String, dynamic> week) {
+  Widget _buildHistoryCard(MealPlan plan, int index) {
+    final mealCount = plan.entries.length;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: AppCard(
@@ -103,16 +92,16 @@ class _MealPlanHistoryScreenState
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: week['saved'] == true
+                    color: plan.status == 'ACTIVE'
                         ? ColorTokens.primaryGreen.withOpacity(0.1)
                         : ColorTokens.textSecondary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(AppRadius.input),
                   ),
                   child: Icon(
-                    week['saved'] == true
+                    plan.status == 'ACTIVE'
                         ? Icons.check_circle
                         : Icons.pending,
-                    color: week['saved'] == true
+                    color: plan.status == 'ACTIVE'
                         ? ColorTokens.primaryGreen
                         : ColorTokens.textSecondary,
                     size: 20,
@@ -124,25 +113,18 @@ class _MealPlanHistoryScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        week['week'] as String,
+                        _formatDateRange(plan),
                         style: context.text.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       Text(
-                        '${week['meals']} meals • ${week['avgCalories']} avg cal',
+                        '$mealCount meals',
                         style: context.text.bodySmall?.copyWith(
                           color: ColorTokens.textSecondary,
                         ),
                       ),
                     ],
-                  ),
-                ),
-                Text(
-                  '\$${(week['cost'] as double).toStringAsFixed(2)}',
-                  style: context.text.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: ColorTokens.primaryGreen,
                   ),
                 ),
               ],
@@ -152,7 +134,10 @@ class _MealPlanHistoryScreenState
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      ref.read(mealPlanProvider.notifier).selectPlan(index);
+                      context.pop();
+                    },
                     icon: const Icon(Icons.visibility_outlined, size: 16),
                     label: const Text('View'),
                     style: OutlinedButton.styleFrom(
@@ -168,9 +153,12 @@ class _MealPlanHistoryScreenState
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      ref.read(mealPlanProvider.notifier).selectPlan(index);
+                      context.pop();
+                    },
                     icon: const Icon(Icons.refresh_outlined, size: 16),
-                    label: const Text('Reuse'),
+                    label: const Text('Load'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: ColorTokens.accentBlue,
                       side: const BorderSide(color: ColorTokens.accentBlue),

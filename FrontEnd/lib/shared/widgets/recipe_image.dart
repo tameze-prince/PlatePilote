@@ -30,7 +30,7 @@ class RecipeImage extends StatelessWidget {
             ? Image.network(
                 imageUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _fallback(),
+                errorBuilder: (_, _, _) => _fallback(),
                 loadingBuilder: (_, child, progress) =>
                     progress == null ? child : _fallback(),
               )
@@ -85,7 +85,7 @@ class RecipeHeroImage extends StatelessWidget {
                   Image.network(
                     imageUrl!,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _heroFallback(),
+                    errorBuilder: (_, _, _) => _heroFallback(),
                     loadingBuilder: (_, child, progress) =>
                         progress == null ? child : _heroFallback(),
                   ),

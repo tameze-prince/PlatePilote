@@ -67,10 +67,10 @@ class PantryRepository extends BaseRepository {
     try {
       final response = await apiClient.post('/pantry', data: {
         'name': name,
-        if (category != null) 'category': category,
+        'category': ?category,
         'quantity': quantity,
         'unit': unit,
-        if (expirationDate != null) 'expirationDate': expirationDate,
+        'expirationDate': ?expirationDate,
       });
       return handleResponse(response, PantryItem.fromJson);
     } on DioException catch (e) {
@@ -89,10 +89,10 @@ class PantryRepository extends BaseRepository {
     try {
       final response = await apiClient.put('/pantry/$itemId', data: {
         'name': name,
-        if (category != null) 'category': category,
+        'category': ?category,
         'quantity': quantity,
         'unit': unit,
-        if (expirationDate != null) 'expirationDate': expirationDate,
+        'expirationDate': ?expirationDate,
       });
       return handleResponse(response, PantryItem.fromJson);
     } on DioException catch (e) {

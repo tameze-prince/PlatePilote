@@ -85,7 +85,7 @@ class PreferenceRepository extends BaseRepository {
     try {
       await apiClient.post('/preferences/allergies', data: {
         'allergen': allergen,
-        if (severity != null) 'severity': severity,
+        'severity': ?severity,
       });
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);

@@ -48,6 +48,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -223,7 +224,8 @@ public class RecommendationEngine {
                 + varietyScore * data.weights.variety()
                 + locationScore * data.weights.location()
                 + feedbackScore
-                + (expiringPantryMatch ? 0.05 : 0.0);
+                + (expiringPantryMatch ? 0.05 : 0.0)
+                + ThreadLocalRandom.current().nextDouble(0.0, 0.05);
 
         List<String> reasons = buildReasons(recipe, pantryScore, budgetScore, preferenceScore,
                 nutritionScore, timeScore, locationScore, context);

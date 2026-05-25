@@ -277,7 +277,7 @@ class _EditPantryItemScreenState extends ConsumerState<EditPantryItemScreen> {
                       onChanged: (value) {
                         setState(() => _isUrgent = value);
                       },
-                      activeColor: ColorTokens.primaryGreen,
+                      activeThumbColor: ColorTokens.primaryGreen,
                     ),
                   ],
                 ),

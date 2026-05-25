@@ -11,6 +11,7 @@ class Meal {
     required this.tint,
     this.locked = false,
     this.imageUrl,
+    this.recipeId,
   });
 
   final String day;
@@ -22,6 +23,7 @@ class Meal {
   final Color tint;
   final bool locked;
   final String? imageUrl;
+  final String? recipeId;
 }
 
 class GroceryItem {

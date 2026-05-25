@@ -13,12 +13,14 @@ class MealCard extends StatelessWidget {
     required this.meal,
     this.compact = false,
     this.onTap,
+    this.onSwap,
     super.key,
   });
 
   final Meal meal;
   final bool compact;
   final VoidCallback? onTap;
+  final VoidCallback? onSwap;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,7 @@ class MealCard extends StatelessWidget {
                   ? Image.network(
                       meal.imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _mealIcon(context),
+                      errorBuilder: (_, _, _) => _mealIcon(context),
                       loadingBuilder: (_, child, progress) =>
                           progress == null ? child : _mealIcon(context),
                     )
@@ -70,12 +72,14 @@ class MealCard extends StatelessWidget {
               ],
             ),
           ),
-            Icon(
-            meal.locked ? Icons.lock_outline : Icons.more_vert,
+            GestureDetector(
+            onTap: onSwap,
+            child: Icon(
+            meal.locked ? Icons.lock_outline : (onSwap != null ? Icons.swap_horiz : Icons.more_vert),
             color: meal.locked
                 ? ColorTokens.accentAmber
                 : context.text.bodyMedium?.color,
-          ),
+          ),),
         ],
       ),
     );
