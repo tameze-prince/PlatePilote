@@ -1,12 +1,8 @@
 package com.plateplate.recipe;
 
 import com.plateplate.common.util.IngredientLineParser;
-import com.plateplate.recipe.application.service.RecipeProcessingService;
-import com.plateplate.recipe.domain.model.Recipe;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,20 +10,15 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Recipe Processing Service Tests")
-@SpringBootTest
-@ActiveProfiles("test")
 public class RecipeProcessingServiceTest {
 
     @Test
     @DisplayName("Should parse ingredient line with quantity and unit")
     void testParseIngredientLine() {
-        // Arrange
         String line = "2 tbsp olive oil";
 
-        // Act
         IngredientLineParser.ParsedIngredient parsed = IngredientLineParser.parse(line);
 
-        // Assert
         assertNotNull(parsed);
         assertEquals(2.0, parsed.quantity);
         assertEquals("tbsp", parsed.unit);
@@ -37,13 +28,10 @@ public class RecipeProcessingServiceTest {
     @Test
     @DisplayName("Should parse ingredient line with fraction")
     void testParseIngredientLineWithFraction() {
-        // Arrange
         String line = "1 1/2 cups flour";
 
-        // Act
         IngredientLineParser.ParsedIngredient parsed = IngredientLineParser.parse(line);
 
-        // Assert
         assertNotNull(parsed);
         assertEquals(1.5, parsed.quantity, 0.01);
         assertEquals("cups", parsed.unit);
@@ -53,13 +41,10 @@ public class RecipeProcessingServiceTest {
     @Test
     @DisplayName("Should parse ingredient line without quantity")
     void testParseIngredientLineNoQuantity() {
-        // Arrange
         String line = "salt and pepper";
 
-        // Act
         IngredientLineParser.ParsedIngredient parsed = IngredientLineParser.parse(line);
 
-        // Assert
         assertNotNull(parsed);
         assertNull(parsed.quantity);
         assertNull(parsed.unit);
@@ -69,7 +54,6 @@ public class RecipeProcessingServiceTest {
     @Test
     @DisplayName("Should process complete recipe")
     void testProcessCompleteRecipe() {
-        // Arrange
         String title = "Tomato Pasta";
         String cuisine = "Italian";
         List<String> ingredients = Arrays.asList(
@@ -85,8 +69,6 @@ public class RecipeProcessingServiceTest {
             "Mix pasta with sauce"
         );
 
-        // Act
-        // Recipe processing would happen here
         assertNotNull(title);
         assertNotNull(cuisine);
         assertEquals(4, ingredients.size());

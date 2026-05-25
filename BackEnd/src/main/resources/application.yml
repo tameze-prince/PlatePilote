@@ -127,6 +127,13 @@ app:
   api:
     usda-key: ${USDA_API_KEY:}
     themealdb-key: ${THEMEALDB_API_KEY:1}
+    edamam-app-id: ${EDAMAM_APP_ID:}
+    edamam-app-key: ${EDAMAM_APP_KEY:}
+    spoonacular-key: ${SPOONACULAR_API_KEY:}
+    nutritionix-app-id: ${NUTRITIONIX_APP_ID:}
+    nutritionix-app-key: ${NUTRITIONIX_APP_KEY:}
+    upcitemdb-key: ${UPCITEMDB_API_KEY:}
+    barcode-lookup-key: ${BARCODE_LOOKUP_API_KEY:}
   jwt:
     # Secret key for signing JWT tokens (Base64 encoded)
     # CHANGE THIS IN PRODUCTION to a long random string!

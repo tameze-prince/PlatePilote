@@ -28,26 +28,15 @@
     </properties>
 
     <modules>
-        <!-- Core Shared Libraries -->
         <module>common</module>
         <module>domain-events</module>
-        
-        <!-- Pipeline Services -->
         <module>ingestion-service</module>
         <module>normalization-service</module>
         <module>deduplication-service</module>
-        <module>enrichment-service</module>
-        <module>validation-service</module>
         <module>recipe-processing-service</module>
         <module>nutrition-service</module>
-        <module>classification-service</module>
-        <module>image-service</module>
-        <module>pricing-service</module>
-        <module>knowledge-graph-service</module>
-        <module>moderation-service</module>
-        <module>analytics-service</module>
-        <module>monitoring-service</module>
         <module>orchestration-service</module>
+        <module>ai-service</module>
     </modules>
 
     <dependencies>

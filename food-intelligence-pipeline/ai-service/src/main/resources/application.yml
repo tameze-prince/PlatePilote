@@ -1,0 +1,30 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: ai-service
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+
+app:
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      model: gpt-4
+      max-tokens: 2000
+      temperature: 0.3
+    claude:
+      api-key: ${ANTHROPIC_API_KEY:}
+      model: claude-3-haiku-20240307
+    vision:
+      provider: openai
+    estimation-mode: local
+
+logging:
+  level:
+    com.plateplate.ai: DEBUG

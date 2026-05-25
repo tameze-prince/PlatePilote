@@ -20,6 +20,11 @@ public class ImportService {
     private final UsdaImporter usdaImporter;
     private final OpenFoodFactsImporter openFoodFactsImporter;
     private final MealDbImporter mealDbImporter;
+    private final EdamamImporter edamamImporter;
+    private final SpoonacularImporter spoonacularImporter;
+    private final NutritionixImporter nutritionixImporter;
+    private final TastyImporter tastyImporter;
+    private final BarcodeLookupImporter barcodeLookupImporter;
 
     @Async
     public CompletableFuture<ImportJob> importFromUsda(String query, int maxResults) {
@@ -57,12 +62,57 @@ public class ImportService {
         return CompletableFuture.completedFuture(job);
     }
 
+    @Async
+    public CompletableFuture<ImportJob> importFromEdamam(String query, int maxResults) {
+        ImportJob job = createJob("EDAMAM");
+        try { edamamImporter.importData(query, maxResults, job); markCompleted(job);
+        } catch (Exception e) { markFailed(job, e.getMessage()); }
+        return CompletableFuture.completedFuture(job);
+    }
+
+    @Async
+    public CompletableFuture<ImportJob> importFromSpoonacular(String query, int maxResults) {
+        ImportJob job = createJob("SPOONACULAR");
+        try { spoonacularImporter.importData(query, maxResults, job); markCompleted(job);
+        } catch (Exception e) { markFailed(job, e.getMessage()); }
+        return CompletableFuture.completedFuture(job);
+    }
+
+    @Async
+    public CompletableFuture<ImportJob> importFromNutritionix(String query, int maxResults) {
+        ImportJob job = createJob("NUTRITIONIX");
+        try { nutritionixImporter.importData(query, maxResults, job); markCompleted(job);
+        } catch (Exception e) { markFailed(job, e.getMessage()); }
+        return CompletableFuture.completedFuture(job);
+    }
+
+    @Async
+    public CompletableFuture<ImportJob> importFromTasty(String query, int maxResults) {
+        ImportJob job = createJob("TASTY");
+        try { tastyImporter.importData(query, maxResults, job); markCompleted(job);
+        } catch (Exception e) { markFailed(job, e.getMessage()); }
+        return CompletableFuture.completedFuture(job);
+    }
+
+    @Async
+    public CompletableFuture<ImportJob> importFromBarcodeLookup(String query, int maxResults) {
+        ImportJob job = createJob("BARCODE_LOOKUP");
+        try { barcodeLookupImporter.importData(query, maxResults, job); markCompleted(job);
+        } catch (Exception e) { markFailed(job, e.getMessage()); }
+        return CompletableFuture.completedFuture(job);
+    }
+
     @Scheduled(cron = "0 0 2 * * ?") // Run at 2:00 AM daily
     public void scheduledNightlyImport() {
         log.info("Starting scheduled nightly import");
         importFromUsda("chicken,rice,beans,tomato,onion", 20);
         importFromOpenFoodFacts("rice,pasta,sauce,oil", 20);
         importFromMealDb("chicken,beef,pasta,curry,salad", 10);
+        importFromEdamam("pasta,chicken,salad,soup,curry", 10);
+        importFromSpoonacular("pasta,chicken,rice,beef,salad", 10);
+        importFromNutritionix("chicken,rice,beans,oil,cheese", 15);
+        importFromTasty("pasta,chicken,salad,dessert,soup", 10);
+        importFromBarcodeLookup("rice,pasta,sauce,oil,cereal", 10);
     }
 
     private ImportJob createJob(String source) {

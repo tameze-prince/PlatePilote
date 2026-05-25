@@ -137,6 +137,11 @@ public class AdminController {
             case "usda" -> importService.importFromUsda(query, maxResults).join();
             case "open-food-facts", "off" -> importService.importFromOpenFoodFacts(query, maxResults).join();
             case "themealdb", "mealdb" -> importService.importFromMealDb(query, maxResults).join();
+            case "edamam" -> importService.importFromEdamam(query, maxResults).join();
+            case "spoonacular" -> importService.importFromSpoonacular(query, maxResults).join();
+            case "nutritionix" -> importService.importFromNutritionix(query, maxResults).join();
+            case "tasty" -> importService.importFromTasty(query, maxResults).join();
+            case "barcode-lookup", "barcode" -> importService.importFromBarcodeLookup(query, maxResults).join();
             default -> throw new IllegalArgumentException("Unsupported import source: " + source);
         };
         return ResponseEntity.ok(ApiResponse.success("Import started", job));

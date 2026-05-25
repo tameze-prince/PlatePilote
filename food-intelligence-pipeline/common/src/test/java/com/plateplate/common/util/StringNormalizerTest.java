@@ -19,7 +19,7 @@ public class StringNormalizerTest {
     @DisplayName("Should remove accents")
     void testRemoveAccents() {
         assertEquals("cafe", StringNormalizer.normalize("café"));
-        assertEquals("naieve", StringNormalizer.normalize("naïve"));
+        assertEquals("naive", StringNormalizer.normalize("naïve"));
         assertEquals("creme", StringNormalizer.normalize("crème"));
     }
 
