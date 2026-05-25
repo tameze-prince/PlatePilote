@@ -54,8 +54,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final location = state.matchedLocation;
       final isPublicRoute = location == '/splash' || 
                            location == '/onboarding' || 
-                           location == '/login' || 
-                           location == '/signup' ||
+                           location == '/signup' || 
+                           location == '/login' ||
                            location.startsWith('/verify-email') ||
                            location.startsWith('/forgot-password');
 
