@@ -41,6 +41,8 @@ spring:
       path: /h2-console
 
 app:
+  ai:
+    service-url: ${AI_SERVICE_URL:http://localhost:8086/api/v1/ai}
   api:
     usda-key: test-usda-key
     themealdb-key: 1
@@ -51,6 +53,8 @@ app:
     nutritionix-app-key: test-nutritionix-key
     upcitemdb-key: test-upcitemdb-key
     barcode-lookup-key: test-barcode-key
+    chomp-key: test-chomp-key
+    recipeapi-key: test-recipeapi-key
   jwt:
     # Test-only secret (not secure, but fine for tests)
     secret: dGVzdC1zZWNyZXQta2V5LWZvci1kZXZlbG9wbWVudC1vbmx5LWRvLW5vdC11c2UtaW4tcHJvZA==

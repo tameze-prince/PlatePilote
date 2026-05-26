@@ -142,6 +142,8 @@ public class AdminController {
             case "nutritionix" -> importService.importFromNutritionix(query, maxResults).join();
             case "tasty" -> importService.importFromTasty(query, maxResults).join();
             case "barcode-lookup", "barcode" -> importService.importFromBarcodeLookup(query, maxResults).join();
+            case "chomp" -> importService.importFromChomp(query, maxResults).join();
+            case "recipe-api", "recipeapi" -> importService.importFromRecipeAPI(query, maxResults).join();
             default -> throw new IllegalArgumentException("Unsupported import source: " + source);
         };
         return ResponseEntity.ok(ApiResponse.success("Import started", job));

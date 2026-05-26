@@ -124,6 +124,8 @@ server:
 # APPLICATION-SPECIFIC SETTINGS
 # ==========================================
 app:
+  ai:
+    service-url: ${AI_SERVICE_URL:http://localhost:8086/api/v1/ai}
   api:
     usda-key: ${USDA_API_KEY:}
     themealdb-key: ${THEMEALDB_API_KEY:1}
@@ -134,6 +136,9 @@ app:
     nutritionix-app-key: ${NUTRITIONIX_APP_KEY:}
     upcitemdb-key: ${UPCITEMDB_API_KEY:}
     barcode-lookup-key: ${BARCODE_LOOKUP_API_KEY:}
+    chomp-key: ${CHOMP_API_KEY:}
+    recipeapi-key: ${RECIPEAPI_API_KEY:}
+    serp-api-key: ${SERP_API_KEY:}
   jwt:
     # Secret key for signing JWT tokens (Base64 encoded)
     # CHANGE THIS IN PRODUCTION to a long random string!

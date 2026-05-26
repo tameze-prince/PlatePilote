@@ -25,6 +25,8 @@ public class ImportService {
     private final NutritionixImporter nutritionixImporter;
     private final TastyImporter tastyImporter;
     private final BarcodeLookupImporter barcodeLookupImporter;
+    private final ChompImporter chompImporter;
+    private final RecipeAPIImporter recipeAPIImporter;
 
     @Async
     public CompletableFuture<ImportJob> importFromUsda(String query, int maxResults) {
@@ -102,6 +104,22 @@ public class ImportService {
         return CompletableFuture.completedFuture(job);
     }
 
+    @Async
+    public CompletableFuture<ImportJob> importFromChomp(String query, int maxResults) {
+        ImportJob job = createJob("CHOMP");
+        try { chompImporter.importData(query, maxResults, job); markCompleted(job);
+        } catch (Exception e) { markFailed(job, e.getMessage()); }
+        return CompletableFuture.completedFuture(job);
+    }
+
+    @Async
+    public CompletableFuture<ImportJob> importFromRecipeAPI(String query, int maxResults) {
+        ImportJob job = createJob("RECIPE_API");
+        try { recipeAPIImporter.importData(query, maxResults, job); markCompleted(job);
+        } catch (Exception e) { markFailed(job, e.getMessage()); }
+        return CompletableFuture.completedFuture(job);
+    }
+
     @Scheduled(cron = "0 0 2 * * ?") // Run at 2:00 AM daily
     public void scheduledNightlyImport() {
         log.info("Starting scheduled nightly import");
@@ -113,6 +131,8 @@ public class ImportService {
         importFromNutritionix("chicken,rice,beans,oil,cheese", 15);
         importFromTasty("pasta,chicken,salad,dessert,soup", 10);
         importFromBarcodeLookup("rice,pasta,sauce,oil,cereal", 10);
+        importFromChomp("rice,pasta,sauce,oil,cereal", 10);
+        importFromRecipeAPI("pasta,chicken,rice,beef,salad", 10);
     }
 
     private ImportJob createJob(String source) {

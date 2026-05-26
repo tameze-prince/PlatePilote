@@ -9,21 +9,36 @@ spring:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
       - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 3000
+          max-attempts: 3
 
 app:
   ai:
-    openai:
-      api-key: ${OPENAI_API_KEY:}
-      model: gpt-4
-      max-tokens: 2000
-      temperature: 0.3
-    claude:
-      api-key: ${ANTHROPIC_API_KEY:}
-      model: claude-3-haiku-20240307
+    primary-provider: openrouter
+    providers:
+      openrouter:
+        base-url: https://openrouter.ai/api/v1
+        api-key: ${OPENROUTER_API_KEY:}
+        model: gpt-oss-120b
+      nvidia:
+        base-url: https://api.nvcf.nvidia.com/v2/nvcf
+        api-key: ${NVIDIA_API_KEY:}
+        model: gemma-2-2b
+      opencode:
+        base-url: https://api.opencode.ai/v1
+        api-key: ${OPENCODE_API_KEY:}
+        model: deepseek-v4-flash
     vision:
-      provider: openai
-    estimation-mode: local
+      provider: openrouter
+    estimation:
+      mode: hybrid
 
 logging:
   level:

@@ -98,4 +98,24 @@ public class ImportController {
         ImportJob job = future.join();
         return ResponseEntity.ok(ApiResponse.success("Barcode Lookup import started", job));
     }
+
+    @PostMapping("/chomp")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER','SYSTEM')")
+    public ResponseEntity<ApiResponse<ImportJob>> importFromChomp(
+            @RequestParam(defaultValue = "rice") String query,
+            @RequestParam(defaultValue = "10") int maxResults) {
+        CompletableFuture<ImportJob> future = importService.importFromChomp(query, maxResults);
+        ImportJob job = future.join();
+        return ResponseEntity.ok(ApiResponse.success("Chomp import started", job));
+    }
+
+    @PostMapping("/recipe-api")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER','SYSTEM')")
+    public ResponseEntity<ApiResponse<ImportJob>> importFromRecipeAPI(
+            @RequestParam(defaultValue = "pasta") String query,
+            @RequestParam(defaultValue = "10") int maxResults) {
+        CompletableFuture<ImportJob> future = importService.importFromRecipeAPI(query, maxResults);
+        ImportJob job = future.join();
+        return ResponseEntity.ok(ApiResponse.success("RecipeAPI import started", job));
+    }
 }
