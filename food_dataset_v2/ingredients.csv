@@ -1,0 +1,1344 @@
+id,name,category
+95,Honey,sweetener
+423,Shredded coconut,nut
+571,Banana,fruit
+826,Mixed berry,fruit
+956,Frozen acai puree,fruit
+958,Granola,grain
+961,Almond milk,nut
+104,Apple juice,beverage
+1337,Berry,fruit
+34,Avocado,fruit
+37,Garlic,vegetable
+111,Scallion,herb
+177,Soy sauce,condiment
+274,Sesame seed,nut
+300,Rice vinegar,condiment
+301,Sesame oil,oil
+302,Ginger,spice
+308,Cucumber,vegetable
+433,Sriracha,condiment
+445,Ahi tuna,fish
+446,Sushi rice,grain
+447,Seaweed flake,other
+448,Pickled ginger,vegetable
+5,Olive oil,oil
+6,Salt,condiment
+126,Lemon juice,fruit
+531,Egg yolk,egg
+7,Black pepper,condiment
+215,Dijon mustard,condiment
+13,Mayonnaise,condiment
+22,Garlic powder,spice
+73,Cayenne,spice
+79,Cider vinegar,condiment
+110,Yellow mustard,condiment
+128,Sugar,sweetener
+598,Prepared horseradish,condiment
+125,Chicken,poultry
+127,Horseradish,spice
+25,Butter,dairy
+190,Heavy cream,dairy
+191,Parmesan,dairy
+141,Sour cream,dairy
+759,Pineapple chunk,fruit
+760,Mandarin orange segment,fruit
+761,Maraschino cherry,fruit
+791,Marshmallow,sweetener
+2,Mushroom,vegetable
+11,Onion,vegetable
+18,Mustard,condiment
+26,Flour,grain
+30,Vegetable oil,oil
+96,Parsley,herb
+115,Beef broth,other
+124,Worcestershire sauce,condiment
+224,Beef sirloin,meat
+225,Egg noodle,grain
+10,Tomato,fruit
+1107,Saffron,spice
+1173,Fish broth,other
+66,Pepper,condiment
+139,Potato,vegetable
+236,Cheese,dairy
+29,Egg,egg
+258,Baking powder,other
+312,Vanilla extract,spice
+541,Confectioner sugar,sweetener
+1304,Ground almond,nut
+742,Croissant,grain
+832,Almond flour,nut
+1176,Sliced almond,nut
+530,Egg white,egg
+168,Lemon,fruit
+1175,Trout fillet,fish
+14,Bacon,meat
+80,Water,other
+242,Nutmeg,spice
+341,Spinach,vegetable
+306,Bread,grain
+359,Sauerkraut,vegetable
+1394,Knack sausage,meat
+87,Dried thyme,spice
+101,Dried oregano,spice
+113,Bell pepper,vegetable
+167,Dill,herb
+231,White wine,beverage
+1674,Whole fish,fish
+1319,Pistachio,nut
+1768,Rose water,condiment
+516,Artichoke,vegetable
+2568,Broad bean,legume
+772,White bean,legume
+33,Red onion,vegetable
+102,Chicken thigh,poultry
+144,Oregano,herb
+511,Feta cheese,dairy
+682,Greek yogurt,dairy
+3039,Kalamata olive,fruit
+232,Crushed tomato,vegetable
+279,Basil,herb
+442,Pasta,grain
+487,Cherry tomato,fruit
+1818,Mixed green,vegetable
+3189,Agrinio salami,meat
+303,Almond,nut
+317,Orange juice,fruit
+319,Orange zest,fruit
+138,Rosemary,herb
+388,Sage,herb
+1153,Lamb,meat
+151,Carrot,vegetable
+182,Celery,vegetable
+498,Vegetable broth,other
+12,Pickle,vegetable
+248,Prosciutto,meat
+562,Salami,meat
+563,Mortadella,meat
+692,Olive,vegetable
+2106,Coppa,meat
+573,Vanilla ice cream,dairy
+901,Espresso,beverage
+305,Red wine vinegar,condiment
+105,Lamb shoulder,meat
+122,Ground pork,meat
+1037,Veal,meat
+1116,Rabbit,meat
+2012,Parmigiano,dairy
+367,Pork,meat
+2122,Agretti,vegetable
+1434,Bamboo shoot,vegetable
+1919,Chili oil,oil
+3266,Nori,other
+3306,Ramen noodle,grain
+3215,Dashi stock,other
+3216,Miso paste,condiment
+3217,Wakame seaweed,vegetable
+3256,Abura-age,other
+3287,Natto,legume
+3323,Aburaage,other
+165,Salmon fillet,fish
+3244,Wasabi,condiment
+499,Green bean,vegetable
+272,Mirin,condiment
+507,Eggplant,vegetable
+3223,Bonito flake,other
+3229,Daikon,vegetable
+3238,Dashi broth,other
+3240,Potato starch,other
+172,Cabbage,vegetable
+3377,Gyoza wrapper,grain
+3422,Mochi rice cake,grain
+64,Milk,dairy
+183,Shrimp,seafood
+401,Wonton wrapper,grain
+407,White pepper,condiment
+38,Cilantro,herb
+39,Lime juice,condiment
+686,Chili,spice
+2429,Abalone,seafood
+51,Smoked paprika,spice
+75,Brown sugar,sweetener
+324,Vinegar,condiment
+1465,Dried chili,spice
+28,Paprika,spice
+59,Cumin,spice
+118,Pork chop,meat
+61,Pork shoulder,meat
+221,Bay leaf,herb
+336,Black peppercorn,spice
+2336,Annatto powder,spice
+67,White onion,vegetable
+376,Dried guajillo chili,spice
+623,Clove,spice
+364,White vinegar,condiment
+955,Ancho chili,spice
+2458,Dried hibiscus petal,fruit
+2459,Tamarind pod,fruit
+150,Tortilla chip,grain
+1192,Red chili,vegetable
+223,Red wine,beverage
+2255,Chorizo,meat
+2268,Beef shoulder,meat
+3676,Baby potato,vegetable
+775,Lemon zest,fruit
+1978,Vermicelli,grain
+3699,Alheira sausage,meat
+53,Breadcrumb,grain
+310,Bread slice,grain
+774,Almond extract,condiment
+893,Gelatin,other
+3754,Toasted almond slice,nut
+616,Corn syrup,sweetener
+619,Baking soda,spice
+429,Cold water,other
+1022,Sherry vinegar,condiment
+485,Vodka,beverage
+842,Ice cube,other
+862,Gin,beverage
+880,Orange,fruit
+887,Sugar syrup,sweetener
+2766,Cava,beverage
+114,Tomato paste,condiment
+211,Red bell pepper,vegetable
+1178,Cod,fish
+912,White wine vinegar,condiment
+1102,Grape,fruit
+255,White bread,grain
+1040,Melon,fruit
+1097,Green grape,fruit
+998,Fava bean,legume
+479,Seafood mix,seafood
+2704,Albarino wine,beverage
+1005,Salt cod,fish
+213,Shallot,vegetable
+646,Turmeric powder,spice
+1159,Fish sauce,condiment
+1435,Kaffir lime leaf,herb
+1441,Lemongrass,vegetable
+1466,Fresh chili,vegetable
+1563,Banana leaf,other
+1804,Freshwater fish,fish
+460,Ice,other
+121,Lime,fruit
+524,Green chili,vegetable
+1158,Five-spice powder,spice
+1442,Coriander root,herb
+1591,Pork bone,meat
+1617,Leafy green,vegetable
+1631,Pickled chili,vegetable
+2282,Pork crackling,meat
+257,Chicken broth,other
+286,Chili flake,spice
+354,Roasted pork,meat
+1521,Chinese kale,vegetable
+650,Warm water,beverage
+845,Mint,herb
+1436,Palm sugar,sweetener
+1795,Bael fruit pulp,fruit
+1796,Lime slice,fruit
+299,Oyster sauce,condiment
+320,Roasted peanut,nut
+342,Kitchen twine,other
+1503,Dried shiitake mushroom,vegetable
+1550,Salted egg yolk,dairy
+1654,Glutinous rice,grain
+1681,Chinese sausage,meat
+1700,Roasted mung bean,legume
+1701,Bamboo leaf,other
+454,Mussel,seafood
+1506,Chinese broccoli,vegetable
+1507,Light soy sauce,condiment
+1325,Whole almond,nut
+2955,Bitter almond,nut
+134,Red pepper flake,spice
+656,Green pepper,vegetable
+2912,Red pepper paste,condiment
+2913,Pomegranate molasse,condiment
+339,Poppy seed,nut
+661,Yeast,other
+657,Dry yeast,other
+2296,White cheese,dairy
+2974,Sesame,condiment
+2961,Turkish coffee,beverage
+50,Ground lamb,meat
+689,Chickpea,legume
+27,Cornstarch,grain
+879,Crushed ice,other
+2969,Rose syrup,condiment
+1069,Wooden skewer,other
+659,Flatbread,grain
+2873,Sumac,spice
+3010,Metal skewer,other
+68,Chicken breast,poultry
+325,White rice,grain
+326,Mixed vegetable,vegetable
+17,Ketchup,condiment
+239,Rice,grain
+282,Cooked chicken,poultry
+443,Pea,vegetable
+771,Egg (fried),egg
+8,Cheddar cheese,dairy
+9,Lettuce,vegetable
+297,Crouton,grain
+378,Radish,vegetable
+4,Burger bun,grain
+180,Mozzarella,dairy
+426,Cornmeal,grain
+380,Dumpling wrapper,grain
+381,Chili sauce,condiment
+316,Hoisin sauce,condiment
+159,Cream cheese,dairy
+914,Anchovy,seafood
+391,Andouille sausage,meat
+335,Cinnamon,spice
+643,Apple,fruit
+246,Puff pastry,grain
+830,Apricot jam,fruit
+1290,Apricot,fruit
+1288,Tart pastry dough,grain
+160,Chive,herb
+558,Pork liver,meat
+993,Leek,vegetable
+1405,Pork casing,other
+1305,Orange blossom water,other
+3158,Almond slice,nut
+510,Orzo pasta,grain
+1174,Fish,fish
+1177,Fish bone,fish
+1195,Fish head,fish
+2074,Goat meat,meat
+2169,Slivered almond,nut
+2071,Lamb leg,meat
+188,Coriander seed,spice
+197,Thyme,herb
+3114,Pine wood chip,other
+486,Zucchini,vegetable
+2107,Red pepper,spice
+860,Simple syrup,sweetener
+2195,Amaretto,beverage
+1942,Guanciale,meat
+1958,Peeled tomato,fruit
+2184,Pecorino,dairy
+856,Sweet vermouth,beverage
+2191,Campari,beverage
+2193,Soda water,other
+2069,Polenta,grain
+1,Ground beef,meat
+2000,Anelletti pasta,grain
+1483,Tofu,other
+1509,Firm tofu,legume
+3419,Grated daikon,vegetable
+3510,Red bean paste,legume
+163,Panko breadcrumb,grain
+3085,Horse mackerel,fish
+3375,Tonkatsu sauce,condiment
+1587,Daikon radish,vegetable
+1218,Octopu,seafood
+273,Sake,beverage
+3225,Burdock root,vegetable
+3230,Mitsuba,herb
+3348,Azuki bean,legume
+528,Tostada shell,grain
+60,Jalapeno,vegetable
+58,Chili powder,spice
+176,Beef,meat
+235,Flour tortilla,grain
+46,Pineapple,fruit
+120,Corn tortilla,grain
+875,Pineapple juice,fruit
+2245,Achiote paste,condiment
+294,Guacamole,vegetable
+2231,Chipotle pepper in adobo,condiment
+307,Tomato sauce,condiment
+2319,Piloncillo,sweetener
+2485,Amaranth grain,grain
+2427,Pismo clam,seafood
+344,Cinnamon stick,spice
+975,Artichoke heart,vegetable
+42,Arugula,vegetable
+3706,Presunto,meat
+217,Asparagus,vegetable
+385,Lard,oil
+2664,Grated tomato,fruit
+2512,Dulce de leche,dairy
+1172,Eel,fish
+2619,Sweet paprika,spice
+318,Red chili flake,spice
+399,Clam,seafood
+2042,Short-grain rice,grain
+2533,Seafood broth,other
+1875,Fried garlic oil,oil
+1856,Vinegar with chili,condiment
+1906,BBQ pork,meat
+1907,Bok choy,vegetable
+1908,Chopped green onion,herb
+1909,Broth,other
+1007,Duck leg,poultry
+1497,White peppercorn,spice
+1598,Chili vinegar,condiment
+1616,Duck bone,poultry
+783,Coconut milk,other
+1589,Rice flour,grain
+54,Peanut butter,nut
+155,Coriander,spice
+1108,Curry powder,spice
+1791,Black jelly powder,other
+1559,Black sticky rice,grain
+1054,Turnip,vegetable
+2909,Bulgur wheat,grain
+2960,Kaymak (clotted cream),dairy
+3070,Ekmek kadayifi bread,grain
+1669,Natural pork casing,other
+503,Black olive,fruit
+55,Cheese slice,dairy
+691,Ham slice,meat
+234,Dried basil,spice
+281,Spaghetti,grain
+142,Diced tomato,vegetable
+161,Macaroni,grain
+210,Green bell pepper,vegetable
+868,White rum,beverage
+869,Club soda,beverage
+546,Dried hominy,grain
+69,Buttermilk,dairy
+74,Unsalted butter,dairy
+508,Canned tomato,fruit
+1256,Butternut squash,vegetable
+1094,Prune,fruit
+520,Cooked rice,grain
+1065,Tripe,meat
+1004,Pork fat,oil
+1271,Tomme cheese,dairy
+1140,Leg of lamb,meat
+1188,Parchment paper,other
+1146,Lamb broth,other
+228,Pepperoncini,vegetable
+245,Giardiniera,vegetable
+1354,Roasted red pepper,vegetable
+2073,Italian bread,grain
+2094,Soppressata,meat
+2095,Provolone,dairy
+2096,Breadstick,grain
+574,Raisin,fruit
+2178,Strudel dough,grain
+278,Marinara sauce,other
+1259,Arborio rice,grain
+1220,Risotto rice,grain
+154,Pork loin,meat
+3550,Rice koji,grain
+3458,Amazake,other
+818,Flavoring extract,condiment
+819,Food coloring,other
+3385,Sweet red bean paste,legume
+3363,Conger eel,fish
+3258,Saltwater eel,seafood
+3259,Eel sauce,condiment
+3417,Ice-cold water,other
+3345,Cooked yakisoba noodle,grain
+2425,Chocolate clam,seafood
+2484,Mamey,fruit
+920,Pine nut,nut
+184,Hot sauce,condiment
+384,Masa harina,grain
+527,Refried bean,legume
+2259,Mexican crema,dairy
+2265,Pico de gallo,vegetable
+332,Sweetened condensed milk,dairy
+734,Nut,nut
+202,Skirt steak,meat
+2433,Chepil,herb
+538,Corn kernel,vegetable
+3714,Rustic white bread,grain
+2598,Day-old bread,grain
+3648,Dried codfish,fish
+333,Walnut,nut
+1264,Camembert cheese,dairy
+1397,Crusty bread,grain
+1244,Ground meat,meat
+1251,Hard cheese,dairy
+2719,Spicy pepper,vegetable
+2798,Spicy pepper paste,condiment
+265,Pastry dough,grain
+72,Black bean,legume
+1391,Pig trotter,meat
+2590,Blood sausage,meat
+2591,Morcilla,meat
+2602,Ham bone,meat
+2711,Tolosa bean,legume
+1903,Fresh small fish,fish
+1565,Butterfly pea flower,vegetable
+909,Black tea leaf,beverage
+1794,Chang beer,beverage
+331,Turmeric,spice
+478,Fish fillet,fish
+1437,Thai basil,herb
+1477,Choo chee curry paste,condiment
+1481,Coconut oil,oil
+1009,Salmon,fish
+1440,Red curry paste,condiment
+1786,Dried chrysanthemum flower,vegetable
+1861,Rock sugar,sweetener
+2981,Wheat,grain
+2089,Trout,fish
+991,Lentil,legume
+2875,Bulgur,grain
+1926,Liver,meat
+328,Yogurt,dairy
+683,Pita bread,grain
+2889,Grape leaf,vegetable
+1283,Hot water,other
+542,Strawberry,fruit
+718,Blueberry,fruit
+892,Pound cake,grain
+894,Vanilla pudding,dairy
+269,Ranch dressing,condiment
+525,Tortilla,grain
+425,Tartar sauce,condiment
+430,White fish fillet,fish
+863,Sparkling water,beverage
+392,Long grain rice,grain
+933,Biscuit baking mix,grain
+934,Vegetable shortening,oil
+781,Cream of tartar,spice
+801,Cake flour,grain
+506,Angel hair pasta,grain
+31,American cheese,dairy
+57,Lettuce leaf,vegetable
+81,Yellow onion,vegetable
+82,Pickle relish,condiment
+461,French bread,grain
+1388,Dried cod,fish
+916,Chervil,herb
+1000,Sorrel,vegetable
+1030,Creme fraiche,dairy
+229,Beef chuck,meat
+449,Smoked sausage,meat
+1384,Smoked pork belly,meat
+78,Beef brisket,meat
+2186,Quince,fruit
+3090,Orzo,grain
+280,Caper,vegetable
+1716,Chicken piece,poultry
+2078,Pork shoulder piece,meat
+2079,Beef chuck piece,meat
+572,Rum,beverage
+1568,Glutinous rice flour,grain
+1181,Monkfish,fish
+1247,Shiitake mushroom,vegetable
+1484,Napa cabbage,vegetable
+3222,Kombu,other
+806,Cherry,fruit
+1889,Agar-agar powder,other
+3520,Kuromitsu syrup,sweetener
+3525,Canned fruit cocktail,fruit
+3526,Mandarin orange,fruit
+556,Red bean,legume
+613,Peach,fruit
+3547,Matcha ice cream,dairy
+3548,Black syrup,condiment
+779,Whipped cream,dairy
+3340,Aonori,other
+3219,White miso paste,condiment
+3220,Dashi stock powder,other
+1585,Chili pepper,spice
+2072,Pork slice,meat
+412,Corn,vegetable
+2242,Poblano pepper,vegetable
+1905,Black rice,grain
+2434,Black bean broth,other
+603,Long grain white rice,grain
+451,Fish stock,other
+477,Calamari,seafood
+764,Flavored gelatin powder,other
+2482,Unflavored gelatin powder,other
+237,Beef roast,meat
+2294,Serrano chili,vegetable
+1947,Ricotta,dairy
+1197,Sea bass fillet,fish
+2080,Sea bream,fish
+554,Kale,vegetable
+3026,Barley,grain
+2752,Barnacle,seafood
+3655,Sea water,other
+413,Small potato,vegetable
+2836,Green asparagu,vegetable
+1584,Fresh chili pepper,vegetable
+2700,Baby eel,seafood
+2146,Anise seed,spice
+2733,Anise liqueur,beverage
+596,White fish,fish
+2621,Alioli,condiment
+85,Pork rib,meat
+379,Sausage,meat
+2593,Garbanzo bean,legume
+363,Pork broth,other
+921,Tamarind paste,condiment
+1473,Cumin powder,spice
+1570,Coriander powder,spice
+876,Coconut cream,other
+1767,Pandan extract,other
+621,Coconut,nut
+903,Coconut water,beverage
+1445,Shrimp paste,condiment
+1504,Rice noodle,grain
+322,Toasted sesame seed,nut
+902,Mango,fruit
+896,Coffee,beverage
+1560,Sticky rice,grain
+1895,Corn milk,other
+940,Warm milk,dairy
+624,Allspice,spice
+3013,Red meat,meat
+577,White sugar,sweetener
+361,Apple cider,beverage
+327,Bourbon,beverage
+581,Pie dough,grain
+843,Iced tea,beverage
+844,Lemonade,beverage
+15,Hamburger bun,grain
+16,Barbecue sauce,condiment
+170,Baked bean,legume
+171,Molasses,sweetener
+169,Beef brisket flat,meat
+1265,Mont d'or cheese,dairy
+1422,Pastry cream,dairy
+284,Ham,meat
+1077,Chicken leg quarter,poultry
+1078,Pimenton,spice
+1186,Hake fillet,fish
+799,Dark chocolate,sweetener
+1241,Kirsch,beverage
+1268,Beaufort cheese,dairy
+731,Plain yogurt,dairy
+665,Fig,fruit
+2906,Phyllo dough,other
+216,Lobster,seafood
+436,Lemon wedge,fruit
+3107,Tzatziki sauce,dairy
+3121,Sand smelt,fish
+1328,Hazelnut,nut
+103,Pork belly,meat
+1048,Sardine,fish
+3410,Thick fried tofu,other
+3630,Sanma,fish
+3369,Ayu fish,fish
+3370,Sudachi,fruit
+3470,Shimeji mushroom,vegetable
+589,Pork roast,meat
+137,Beer,beverage
+2453,Guava paste,fruit
+2488,Tejocote fruit,fruit
+1756,Guava,fruit
+2274,Corn masa harina,grain
+465,Corn cob,vegetable
+533,Corn masa flour,grain
+2045,Bean,legume
+2603,Chorizo sausage,meat
+548,Canned diced tomato,vegetable
+1412,Dried white bean,legume
+206,Beef tenderloin,meat
+3765,Dried oyster,seafood
+1243,Parsnip,vegetable
+129,Beef cheek,meat
+3673,Beef mince,meat
+967,Beef fillet,meat
+1002,Foie gras,poultry
+1399,Rustic bread,grain
+3650,Madeira wine,beverage
+453,Crab,seafood
+969,Squid,seafood
+2652,Secreto iberico pork,meat
+2654,Carabinero prawn,seafood
+2039,Scampi,seafood
+1740,Corn flour,grain
+1762,Dragon fruit,fruit
+1735,Durian,fruit
+1439,Fish ball,seafood
+610,Sweet potato,vegetable
+1653,Roasted chili flake,spice
+1757,Green apple,fruit
+504,Tahini,other
+2957,Pistachio nut,nut
+2965,Filo pastry sheet,grain
+109,Beef brisket point,meat
+99,Beef sausage,meat
+112,Beef short rib,meat
+23,Onion powder,spice
+147,Pinto bean,legume
+130,Chicken leg,poultry
+179,Pizza dough,grain
+98,Chicken quarter,poultry
+70,Sandwich bun,grain
+1064,Beef aiguillette,meat
+634,Pearl onion,vegetable
+997,Chestnut,vegetable
+3199,Tsipouro,beverage
+472,Cod fillet,fish
+3129,Hilopite,grain
+2021,Cuttlefish,seafood
+758,Balsamic vinegar,condiment
+1977,Bavette pasta,grain
+493,Cannellini bean,legume
+243,Italian seasoning,spice
+1092,Beef slice,meat
+1052,Black truffle,vegetable
+441,Tuna,fish
+3260,Fresh salmon,fish
+3262,Nori sheet,other
+3282,Tamagoyaki,egg
+3270,Shiso leaf,herb
+3440,Horse meat,meat
+3441,Karashi mustard,condiment
+3591,Horse meat dipping sauce,condiment
+3269,Mackerel fillet,fish
+3589,Konbu,other
+3283,Pickled kelp,other
+3446,Red shiso leaf,herb
+3558,Purple sweet potato,vegetable
+314,Broccoli,vegetable
+473,Scallop,seafood
+708,Iceberg lettuce,vegetable
+2539,Spiny lobster,seafood
+2308,Plantain,fruit
+2542,Beef heart,meat
+1597,Beef liver,meat
+633,Oxtail,meat
+106,Dried rosemary,spice
+3677,Beef rump roast,meat
+1180,Prawn,seafood
+143,Kidney bean,legume
+1087,Duck broth,other
+1088,Duck,poultry
+1456,Galangal,vegetable
+1838,Indigo bush leaf,vegetable
+1839,Pennywort leaf,vegetable
+1486,Holy basil,herb
+1487,Culantro,herb
+1495,Taro stem,vegetable
+644,Cumin seed,spice
+1460,Dried red chili,spice
+1496,Dried shrimp,seafood
+1678,Tamarind juice,other
+1446,Thai basil leaf,herb
+1821,Dried northern mushroom,vegetable
+1822,Mushroom stem,vegetable
+1629,Roasted rice powder,grain
+1837,Village mushroom,vegetable
+1455,Long bean,vegetable
+1472,Gaeng hung lay curry paste,condiment
+1443,Kaffir lime zest,spice
+1492,Straw mushroom,vegetable
+1841,Roasted dry rice,grain
+156,Crushed red pepper,spice
+754,Wheat flour,grain
+1289,Pear,fruit
+140,Barbecue chicken,poultry
+174,Pork sausage,meat
+97,Brisket,meat
+153,Jackfruit,vegetable
+192,Pulled pork,meat
+193,Fried onion,vegetable
+208,Rib tip,meat
+917,Tarragon,herb
+1070,Beef pave,meat
+1063,Beef tongue,meat
+1055,String,other
+1073,Beef steak,meat
+3103,Giant bean,legume
+3025,Lamb head,meat
+457,Oyster,seafood
+482,Penne,grain
+645,Dried chili flake,spice
+1023,Beet,vegetable
+874,Prosecco,beverage
+1972,Bigoli pasta,grain
+2154,Biscotto,grain
+2062,T-bone steak,meat
+2013,Squid ink,seafood
+2165,Blood orange juice,fruit
+1784,Black sesame seed,nut
+3516,Regular rice,grain
+3517,Soybean flour,legume
+3261,Yellowtail,fish
+3294,Japanese rice,grain
+3366,Yellowtail fillet,fish
+3308,Sesame paste,condiment
+3400,Enoki mushroom,vegetable
+3406,Ponzu,condiment
+2339,Dried chile ancho,vegetable
+537,Cotija cheese,dairy
+2371,Barbacoa beef,meat
+240,Salsa,condiment
+2399,Maguey leaf,vegetable
+569,Beef shank,meat
+1003,Cognac,beverage
+1041,Porto,beverage
+872,Green olive,fruit
+2634,Wild mushroom,vegetable
+1529,Ground white pepper,spice
+1618,Unripe mango,fruit
+1502,Bitter melon,vegetable
+1491,White radish,vegetable
+1494,Glass noodle,grain
+1448,Yellow curry powder,spice
+3073,Artvin cheese,dairy
+1152,Dried apricot,fruit
+1327,Dried fig,fruit
+2408,Pomegranate seed,fruit
+2911,Crushed red chili,spice
+185,Cajun seasoning,spice
+94,Baby back rib,meat
+394,Goat cheese,dairy
+1393,Rennet,other
+1161,Black pudding,meat
+3122,Ouzo,beverage
+777,Graham cracker,grain
+3157,Baklava,other
+3051,Filo dough,grain
+2076,Marrow bone,meat
+230,Veal shank,meat
+2067,Cotechino sausage,meat
+1276,Jam,fruit
+618,Cocoa powder,spice
+2009,Amaretti biscuit,sweetener
+2059,Borlotti bean,legume
+3231,Konnyaku,other
+3277,Japanese short-grain rice,grain
+3278,Cooked crabstick,seafood
+3290,Krab stick,seafood
+899,Matcha powder,spice
+1862,Lotus root,vegetable
+2554,Pickled vegetable,vegetable
+3493,Vinegared rice,grain
+3494,Seaweed salad,vegetable
+3495,Seasonal fruit,fruit
+3496,Adzuki bean paste,legume
+356,Dried bean,legume
+383,Corn husk,vegetable
+2303,Guajillo chili paste,condiment
+293,Enchilada sauce,other
+93,Beef rib,meat
+469,Queso fresco,dairy
+2385,Beef tip,meat
+2387,Beef sirloin steak,meat
+568,Beef tripe,meat
+3764,Portuguese chourico,meat
+1438,Jasmine rice,grain
+204,Flank steak,meat
+233,Short rib,meat
+1845,Southern Thai curry paste,condiment
+1470,Thai eggplant,vegetable
+1485,Pak ruam (mixed vegetable),vegetable
+1488,Schizandra leaf,herb
+1453,Pea eggplant,vegetable
+1461,Kaffir lime peel,fruit
+1900,Dog herb,herb
+1823,Young jackfruit,fruit
+1433,Green curry paste,condiment
+992,Pumpkin,vegetable
+2166,Ground pistachio,nut
+2950,Clotted cream,dairy
+2772,Blanched almond,nut
+2894,Bluefish,fish
+393,Date,fruit
+455,Bagel,grain
+456,Smoked salmon,fish
+609,Navy bean,legume
+1189,Blue trout,fish
+2020,Mascarpone,dairy
+1248,Porcini mushroom,vegetable
+1025,Fennel,vegetable
+1168,Fennel seed,spice
+1179,Snapper,fish
+580,Okra,vegetable
+1191,Red mullet,fish
+1049,Sea bas,fish
+2037,Barolo wine,beverage
+2032,Bresaola,meat
+1939,Broccoli rabe,vegetable
+1505,Bean sprout,vegetable
+3311,Champon noodle,grain
+3237,Shichimi togarashi,spice
+3320,Udon noodle,grain
+3343,Fish cake,seafood
+3639,Fish cake tube,seafood
+3640,Processed cheese,dairy
+372,Tomatillo,vegetable
+536,Green chili pepper,vegetable
+2243,Pumpkin seed,nut
+2320,Anise,spice
+2391,Avocado oil,oil
+2389,Chile de arbol,spice
+1766,Grated coconut,nut
+2232,Dried pasilla chili,spice
+1016,Tuna steak,fish
+321,Dried chili pepper,spice
+2678,Dried salted cod,fish
+2812,Cooked chickpea,legume
+1562,Thai red curry paste,condiment
+1923,Lotus stem,vegetable
+1924,Pea aubergine,vegetable
+1463,Yardlong bean,vegetable
+1471,Moringa leaf,vegetable
+1478,Turmeric root,vegetable
+1479,Turmeric stem,vegetable
+1480,Banana blossom,vegetable
+1450,Massaman curry paste,other
+1501,Green mango,fruit
+1099,Quail,poultry
+1855,Smoked eggplant,vegetable
+1474,Wild ginger leaf,herb
+1489,Sawtooth coriander,herb
+1490,Cha-om leaf,herb
+2890,Dried mint,spice
+483,Ziti pasta,grain
+517,Cooked bean,legume
+287,Diced tomato with green chili,vegetable
+519,Hard taco shell,grain
+1286,Tart dough,grain
+1061,Beef mode,meat
+360,Caraway seed,spice
+1017,Endive,vegetable
+3138,Beet green,vegetable
+452,Firm white fish,fish
+1194,Mixed fish,fish
+2060,Assorted fish,fish
+2061,Seafood,seafood
+1853,Beef bone,meat
+2001,Nduja,meat
+757,Brussels sprout,vegetable
+1239,Pickled cucumber,vegetable
+1558,Boiled egg,egg
+90,Chicken wing,poultry
+343,Star anise,spice
+3228,Mochi,other
+3411,Chikuwa,seafood
+3423,Seaweed sheet,other
+1739,Taro,vegetable
+212,Steak,meat
+2384,Pasilla chile sauce,condiment
+2508,Black sapote,fruit
+2438,Blue corn masa harina,grain
+858,Tequila,beverage
+2487,Fruit flavoring,condiment
+1015,Salad green,vegetable
+3661,Portuguese roll,grain
+3662,Piri-piri sauce,condiment
+3737,Portuguese bread roll,grain
+3666,Black pork loin,meat
+2682,Gilthead bream,fish
+1548,Chili paste,condiment
+1805,Vietnamese coriander,herb
+1475,Wild basil,herb
+1452,Baby corn,vegetable
+1819,Mushroom broth,other
+1813,Northern sweet leaf,vegetable
+1482,Red pork,poultry
+1447,Roasted duck,poultry
+1476,Baby eggplant,vegetable
+1934,Long basil,herb
+1851,Bee hive cabbage,vegetable
+1500,Catfish,fish
+2871,Ground red pepper,spice
+1260,Semolina,grain
+3075,Balikesir cheese,dairy
+3022,Yufka dough,grain
+431,Cold beer,beverage
+86,Whole chicken,poultry
+595,Ham hock,meat
+1144,Lamb shank,meat
+1162,Pork neck,meat
+1121,Veal broth,other
+1131,Veal rump,meat
+1379,Venison shoulder,meat
+2369,Pig foot,meat
+1206,Saithe fillet,fish
+973,Black-eyed pea,legume
+3030,Phyllo dough sheet,other
+2891,Phyllo pastry,grain
+3060,Phyllo sheet,grain
+1959,Pecorino romano,dairy
+2207,Bucatini,grain
+1941,Bucatini pasta,grain
+2035,Buffalo Mozzarella,dairy
+2003,Burrata cheese,dairy
+1969,Busiate pasta,grain
+3319,Toasted sesame oil,oil
+3263,Sushi vinegar,condiment
+3271,Tobiko,seafood
+418,Snow pea,vegetable
+1812,Dried beef,meat
+2221,Chipotle pepper,vegetable
+2467,Ancho chili powder,spice
+3689,Goat kid,meat
+2468,Kid,meat
+3763,Black pork rib,meat
+3762,Black pork secreto,meat
+3667,Black pork tenderloin,meat
+3668,Acorn,fruit
+1613,Pork blood,meat
+1214,Langoustine,seafood
+2423,Red snapper,fish
+2681,Turbot,fish
+2614,Mexican green chili,vegetable
+2615,Pickled jalapeno slice,vegetable
+2616,Pickled pearl onion,vegetable
+2670,Spanish chorizo,meat
+1935,Young eggplant,vegetable
+329,Oil,oil
+1498,Stink bean,vegetable
+1499,Lime leaf,herb
+1730,Tamarind,fruit
+1583,Tamarind pulp,fruit
+1904,Fish (snakehead white fish),fish
+976,Bread roll,grain
+1193,Mackerel,fish
+2910,Cranberry bean,legume
+2897,Dried red kidney bean,legume
+2813,Aniseed,spice
+3004,Batman wheat,grain
+873,Sparkling wine,beverage
+47,Beyond meat plant burger patty,other
+48,Vegan mayo,condiment
+49,Vegan cheese slice,other
+522,Breakfast sausage,meat
+725,Self-rising biscuit mix,grain
+45,Ground bison,meat
+605,Smoked ham,meat
+612,Blackberry,fruit
+1119,Veal escalope,meat
+1400,Bresse chicken,poultry
+1273,Salted butter,dairy
+2967,Kasseri cheese,dairy
+3094,Phyllo pastry sheet,other
+2048,Dried crustacean shell,seafood
+2049,Rustic bread slice,grain
+214,Brandy,beverage
+2149,Grappa,beverage
+2188,Sambuca,beverage
+218,Crab meat,seafood
+3514,Kuromitsu,sweetener
+3545,Kanten agar strip,other
+745,Beaten egg,egg
+3329,Soba noodle,grain
+3333,Dashi powder,condiment
+330,Garam masala,spice
+2470,Goat blood,other
+3691,Goat kid meat,meat
+295,Romaine lettuce,vegetable
+1783,Ground coffee,beverage
+2480,Goat milk,dairy
+20,Jalapeno pepper,vegetable
+2226,Squash,vegetable
+2424,Squid ink sac,seafood
+2504,Meringue powder,other
+2558,Royal icing,dairy
+1299,Coffee liqueur,beverage
+3745,Marie biscuit,grain
+3747,Madeira honey,sweetener
+1334,Mixed dried fruit,fruit
+3780,Almond sliver,nut
+1322,Candied fruit,fruit
+2799,Licor 43,beverage
+935,Vanilla,spice
+678,Baguette,grain
+2613,Piquillo pepper,vegetable
+2759,Idiazabal cheese,dairy
+2761,Jamon,meat
+2832,Sheep milk cheese,dairy
+2833,Toothpick,other
+994,Cauliflower,vegetable
+1459,Sour orange,fruit
+1462,Fish organ,fish
+1920,Fermented fish sauce,condiment
+1526,Thai bird chili,vegetable
+1860,Steamed rice,grain
+2973,Bazlama bread,grain
+3031,Vegetable broth cube,other
+2879,Lamb meat,meat
+3027,Lamb bone,meat
+2283,Tomato puree,vegetable
+2868,Lamb mince,meat
+2869,Lavash,grain
+352,Split pea,legume
+247,Sweet pepper,vegetable
+2707,Currant,fruit
+435,Catfish fillet,fish
+557,Redfish fillet,fish
+795,White chocolate chip,sweetener
+881,Tomato juice,vegetable
+40,Blue cheese,dairy
+313,Maple syrup,sweetener
+1046,Brioche bread,grain
+755,Buckwheat flour,grain
+1072,Mustard sauce,condiment
+1006,Snail,seafood
+1252,Salsify,vegetable
+1190,Dried tarragon,spice
+2904,Celery root,vegetable
+3152,Ghee,oil
+2134,Calabrese salami,meat
+2017,Calamarata pasta,grain
+1127,Calf liver,meat
+1561,Basmati rice,grain
+3233,Katsuobushi,seafood
+2220,Serrano pepper,vegetable
+1081,Hen,poultry
+2238,Fresh river fish,fish
+2239,Clean river stone,other
+2236,Wild green,vegetable
+3767,Lamb belly,meat
+3043,Lamb neck,meat
+1024,Red cabbage,vegetable
+3652,Chourico,meat
+3684,Chicken escalope,poultry
+2683,Bream,fish
+2173,Cinnamon powder,spice
+2606,Squid ring,seafood
+2779,White baguette,grain
+586,Sherry,beverage
+2617,Iberian ham,meat
+2618,Manchego cheese,dairy
+2805,Bonito fish,fish
+1524,Cashew nut,nut
+1525,Thai red chili paste,condiment
+3059,Crushed roasted pistachio,nut
+2982,Chard leaf,vegetable
+3074,Bingol cheese,dairy
+3007,Cut noodle,grain
+2959,Tea biscuit,grain
+776,Pie crust dough,grain
+951,Bittersweet chocolate,sweetener
+566,Boudin sausage,poultry
+559,Sausage casing,other
+850,Sugar cube,sweetener
+851,Bitter,condiment
+790,Boysenberry,fruit
+251,Peppercorn,spice
+1126,Calf head,meat
+1315,Candied orange peel,fruit
+1424,Almond kernel,nut
+1425,Candied melon,fruit
+1130,Calvado,beverage
+1326,Peppermint oil,condiment
+1014,Chicken liver,poultry
+71,Ground chicken,poultry
+1986,Campanelle pasta,grain
+357,Cooked ham,meat
+1992,Cannelloni pasta tube,grain
+1993,Cannelloni tube,grain
+949,Mini chocolate chip,sweetener
+1685,Fish paste,seafood
+3622,Hanpen fish cake,seafood
+3615,Leaf,herb
+2240,Chayote,vegetable
+534,Fresh cheese,dairy
+2223,Epazote,herb
+2410,Mezcal,beverage
+358,Pork cutlet,meat
+3750,Chocolate sprinkle,sweetener
+3728,Broa,grain
+1034,Canned tuna,fish
+2684,Bonito del norte fillet,fish
+2763,Borage,vegetable
+2769,Botifarra sausage,meat
+2660,Veal cheek,meat
+1615,Cilantro root,herb
+1551,Coriander stem,herb
+1830,Ground roasted rice,grain
+1831,Cooking oil,oil
+1680,River prawn,seafood
+345,Dark soy sauce,condiment
+1865,Vermicelli noodle,grain
+540,Evaporated milk,dairy
+1532,Celery leaf,herb
+2724,Kidney,meat
+1033,Zucchini flower,vegetable
+2991,Lake trout,fish
+3002,Lake fish,fish
+1253,Cardoon,vegetable
+1329,Glucose syrup,sweetener
+1035,Duck confit,poultry
+1157,Duck stock,other
+3120,Vine leaf,vegetable
+3097,Halloumi,dairy
+2099,Mozzarella ball,dairy
+277,Marsala wine,beverage
+309,Sandwich bread,grain
+3279,Japanese mayonnaise,condiment
+746,Fruit jam,fruit
+1031,Puff pastry sheet,grain
+2551,Shark fillet,fish
+290,Taco seasoning,spice
+2479,Bolillo bread,grain
+3709,Smoked pork sausage,meat
+3708,Cacholeira sausage,meat
+415,Hot dog bun,grain
+3740,Hot dog sausage,meat
+2722,Chistorra,meat
+2693,Brown crab,seafood
+2671,Butifarra,meat
+1512,Bird's eye chili,vegetable
+1859,Giant river prawn,seafood
+432,Sweet chili sauce,condiment
+1705,Rice vermicelli noodle,grain
+1682,Tempura flour,grain
+3044,Millet,grain
+3045,Roasted chickpea,legume
+2972,Breakfast frankfurter,poultry
+1235,Sunflower oil,oil
+362,Pork shank,meat
+740,Wheat bran,grain
+741,Whole wheat flour,grain
+389,Bratwurst sausage,meat
+252,Mustard seed,spice
+611,Celery seed,spice
+62,Hash brown,vegetable
+1013,Celeriac,vegetable
+1057,Cornichon,vegetable
+3,Swiss cheese,dairy
+41,Gruyere,dairy
+1987,Casarecce pasta,grain
+1988,Swordfish,fish
+2140,Sponge cake,grain
+2161,Citron,fruit
+2162,Glace cherry,fruit
+2141,Liqueur,beverage
+2150,Chestnut flour,grain
+3430,Chilled water,other
+3431,Bamboo stick,other
+3334,Buckwheat soba noodle,grain
+3257,Edamame,legume
+3265,Unagi sauce,condiment
+3248,Egg tofu,dairy
+3268,Nori seaweed,other
+3281,Kanpyo,vegetable
+3627,Oboro,seafood
+3296,Cooked eel,fish
+3297,Pickled gourd,vegetable
+3499,Umeboshi,fruit
+578,Pecan,nut
+833,Peanut,nut
+2261,Nopal,vegetable
+3778,Carob powder,other
+1403,Chickpea flour,grain
+1137,Veal cutlet,meat
+1125,Veal slice,meat
+373,Cilantro stem,herb
+107,Duck breast,poultry
+769,Tapioca flour,grain
+1748,Pandan leaf extract,other
+2944,Shredded pastry,other
+2052,Meat broth,other
+2876,Pide bread,grain
+3083,Meatball,meat
+715,English muffin,grain
+419,Lobster tail,seafood
+966,Almond paste,nut
+512,Sun-dried tomato,vegetable
+3119,Trahana,grain
+3160,Mastiha resin,spice
+1994,Cavatappi,grain
+1995,Spicy sausage,meat
+1971,Cavatelli,grain
+1416,Fruit juice,fruit
+1318,Kiwi,fruit
+3392,Wheat gluten,grain
+3227,Dried bonito flake,other
+3401,Ponzu sauce,condiment
+3408,Blowfish meat,fish
+3444,Momiji oroshi,vegetable
+3605,Blowfish flesh,fish
+3606,Small mushroom,vegetable
+3443,Blowfish sashimi,fish
+3409,Butterbur stalk,vegetable
+2251,Pork stomach,meat
+981,Salsa verde,condiment
+2392,Chicharron,meat
+2228,Squash blossom,vegetable
+2263,Huitlacoche,vegetable
+450,Corn on the cob,vegetable
+1520,Morning glory,vegetable
+1508,Wide rice noodle,grain
+1602,Thin rice noodle,grain
+1683,Blood cockle,seafood
+1531,Roasted chili paste,condiment
+2893,Red lentil,legume
+1321,Mixed nut,nut
+2996,Fenugreek seed,spice
+2958,Ground walnut,nut
+803,Chocolate syrup,condiment
+814,Caramel sauce,condiment
+539,Shortening,oil
+798,Semi sweet chocolate chip,sweetener
+268,Buffalo wing sauce,condiment
+658,Buffalo sauce,condiment
+266,Blue cheese dressing,dairy
+2304,Shredded chicken,poultry
+1042,Chicken carcas,poultry
+1043,Chicken skin,poultry
+1008,Duck fat,oil
+1079,Dry cider,beverage
+2818,Short pasta,grain
+3361,Furikake seasoning,condiment
+3280,Tamago,egg
+2380,Pambazo roll,grain
+897,Sweetener,sweetener
+2293,Corn masa,grain
+2584,Achiote,spice
+2585,Hibiscu,fruit
+626,Pickled jalapeno,vegetable
+2555,Tamal,other
+694,Asadero cheese,dairy
+2375,Cemita bread roll,grain
+2376,Milanesa,meat
+2377,Papalo leaf,herb
+768,Cornbread,grain
+1788,Passion fruit,fruit
+3736,Queijo sao jorge cheese,dairy
+675,Bacon slice,meat
+2033,Brie,dairy
+2102,Fig jam,sweetener
+3727,Mixed dried herb,spice
+552,Turnip green,vegetable
+2647,Beef trotter,meat
+2767,Calcot,vegetable
+2594,Dried red pepper,vegetable
+861,Lime wedge,fruit
+1534,Fingerroot,vegetable
+817,Cornflake,grain
+1530,Toasted rice powder,spice
+1770,Jackfruit seed,legume
+2970,Cecil cheese,dairy
+2918,Bitter orange,fruit
+2407,Walnut kernel,nut
+2748,Grape must,beverage
+3056,Thread,other
+601,Butter bean,legume
+311,Melted butter,dairy
+1112,Comte cheese,dairy
+463,Crawfish tail,seafood
+1082,Morel mushroom,vegetable
+3197,Parsley root,vegetable
+2143,Chocolate jam,sweetener
+387,Biscuit,grain
+2019,Durum wheat flour,grain
+3462,Kuzu powder,other
+3463,White sesame paste,other
+2650,Noodle,grain
+2418,Black mezcal,beverage
+2359,Mild chili powder,spice
+2490,Chamoy sauce,condiment
+2312,Mexican chocolate,dairy
+476,Fettuccine,grain
+2720,Cane honey,sweetener
+2690,Scarlet prawn,seafood
+1659,Pork skin,meat
+1725,Dried sun-dried chili,vegetable
+1899,Dried jujube,fruit
+1912,Coconut flake,nut
+2939,Dried chamomile flower,herb
+640,Cracker,grain
+283,Fettuccine pasta,grain
+555,Crawfish,seafood
