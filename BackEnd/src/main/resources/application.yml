@@ -19,16 +19,20 @@ spring:
   # ==========================================
   # Laragon default: localhost:5432, postgres/postgres
   datasource:
-    url: jdbc:postgresql://localhost:5432/platepilote
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/platepilote}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 20    # Max connections to database (increased from 10 for concurrent load)
-      minimum-idle: 5          # Min connections kept alive
-      idle-timeout: 300000     # Close idle connections after 5min (was 30s, too aggressive)
-      connection-timeout: 20000 # Wait max 20s for connection
-      max-lifetime: 1200000    # Max connection lifetime: 20min (prevents stale connections)
+      maximum-pool-size: 10    # Neon free tier: 10 connections max
+      minimum-idle: 2          # Min connections kept alive
+      idle-timeout: 300000     # Close idle connections after 5min
+      connection-timeout: 30000 # Wait max 30s for connection (Neon cold start)
+      max-lifetime: 600000     # Max connection lifetime: 10min (Neon recycles connections)
+      connection-test-query: SELECT 1
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+      data-source-properties:
+        ApplicationName: PlatePilote
 
   # ==========================================
   # JPA / HIBERNATE CONFIGURATION
