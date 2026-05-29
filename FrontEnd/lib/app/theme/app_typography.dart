@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 abstract final class AppTypography {
   static const fontFamily = 'Inter';
@@ -151,6 +150,6 @@ abstract final class AppTypography {
       labelMedium: labelMedium.copyWith(color: secondary),
       labelSmall: labelSmall.copyWith(color: secondary),
     );
-    return GoogleFonts.interTextTheme(theme);
+    return theme;
   }
 }
