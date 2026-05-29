@@ -2,18 +2,17 @@ package com.platepilote.platepilote.dashboard.application.service;
 
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
 import com.platepilote.platepilote.budget.domain.repository.BudgetRepository;
-import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.grocery.domain.entity.GroceryItem;
 import com.platepilote.platepilote.grocery.domain.entity.GroceryList;
 import com.platepilote.platepilote.grocery.domain.repository.GroceryItemRepository;
 import com.platepilote.platepilote.grocery.domain.repository.GroceryListRepository;
 import com.platepilote.platepilote.mealplanning.domain.entity.MealPlan;
+import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanEntryRepository;
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanRepository;
 import com.platepilote.platepilote.notification.application.service.NotificationService;
 import com.platepilote.platepilote.pantry.domain.entity.PantryItem;
 import com.platepilote.platepilote.pantry.domain.repository.PantryItemRepository;
-import com.platepilote.platepilote.recommendation.domain.service.RecommendationEngine;
-import com.platepilote.platepilote.recommendation.domain.service.RecommendationEngine.RecommendationResult;
+import com.platepilote.platepilote.recipes.domain.repository.RecipeRepository;
 import com.platepilote.platepilote.subscription.domain.repository.SubscriptionRepository;
 import com.platepilote.platepilote.userprofile.domain.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,13 +34,14 @@ public class DashboardService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
     private final MealPlanRepository mealPlanRepository;
+    private final MealPlanEntryRepository mealPlanEntryRepository;
     private final GroceryListRepository groceryListRepository;
     private final GroceryItemRepository groceryItemRepository;
     private final PantryItemRepository pantryItemRepository;
     private final BudgetRepository budgetRepository;
     private final NotificationService notificationService;
     private final SubscriptionRepository subscriptionRepository;
-    private final RecommendationEngine recommendationEngine;
+    private final RecipeRepository recipeRepository;
 
     public DashboardResponse getHomeDashboard(UUID userId) {
         // Greeting - firstName is on OurUser entity, not UserProfile
@@ -89,28 +89,23 @@ public class DashboardService {
         // Unread notifications count
         long unreadCount = notificationService.getUnreadCount(userId);
 
-        // Top recommendations (limit 3) — gracefully skip if quota reached
-        List<RecommendationDTO> recDTOs = List.of();
-        try {
-            List<RecommendationResult> recommendations = recommendationEngine.getRecommendations(userId, 3);
-            recDTOs = recommendations.stream()
-                    .map(r -> new RecommendationDTO(
-                            r.recipe().getId(),
-                            r.recipe().getName(),
-                            r.recipe().getDescription(),
-                            r.recipe().getImageUrl(),
-                            r.recipe().getTotalTimeMinutes(),
-                            r.recipe().getServings(),
-                            r.recipe().getCuisineType(),
-                            r.recipe().getMealType(),
-                            r.estimatedCost(),
-                            r.finalScore()
-                    ))
-                    .toList();
-        } catch (BusinessRuleViolationException e) {
-            // Recommendation quota reached — dashboard still works
-        }
-
+        // Top recipes: keep dashboard fast.
+        List<RecommendationDTO> recDTOs = recipeRepository
+                .findDashboardRecipes(PageRequest.of(0, 3))
+                .stream()
+                .map(recipe -> new RecommendationDTO(
+                        recipe.getId(),
+                        recipe.getName(),
+                        recipe.getDescription(),
+                        recipe.getImageUrl(),
+                        recipe.getTotalTimeMinutes(),
+                        recipe.getServings(),
+                        recipe.getCuisineType(),
+                        recipe.getMealType(),
+                        recipe.getEstimatedCost(),
+                        0.0
+                ))
+                .toList();
         // Determine next best action
         String nextAction = determineNextAction(activePlan, grocerySummary, pantrySummary);
 
@@ -143,7 +138,7 @@ public class DashboardService {
                 plan.getStatus(),
                 plan.getStartDate() != null ? plan.getStartDate().toString() : null,
                 plan.getEndDate() != null ? plan.getEndDate().toString() : null,
-                0 // entries are in a separate table, not directly on MealPlan
+                (int) mealPlanEntryRepository.countByMealPlanId(plan.getId())
         );
     }
 

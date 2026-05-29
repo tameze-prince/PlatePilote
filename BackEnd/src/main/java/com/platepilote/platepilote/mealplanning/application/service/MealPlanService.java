@@ -38,6 +38,7 @@ public class MealPlanService {
     private final RecipeRepository recipeRepository;
     private final RecommendationEngine recommendationEngine;
     private final SecurityUtils securityUtils;
+    private final SmartSwapService smartSwapService;
 
     @Transactional(readOnly = true)
     public PagedResponse<MealPlanResponse> getUserMealPlans(UUID userId, Pageable pageable) {
@@ -160,6 +161,33 @@ public class MealPlanService {
         return toFullResponse(saved);
     }
 
+    public List<SmartSwapService.SwapOption> getSwapOptions(UUID userId, UUID entryId, int limit) {
+        MealPlanEntry entry = mealPlanEntryRepository.findById(entryId)
+                .orElseThrow(() -> new ResourceNotFoundException("MealPlanEntry", "id", entryId.toString()));
+        MealPlan mealPlan = mealPlanRepository.findById(entry.getMealPlanId())
+                .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", entry.getMealPlanId().toString()));
+        securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", entry.getMealPlanId().toString());
+        return smartSwapService.getSwapOptions(userId, entryId, limit);
+    }
+
+    public MealPlanResponse applySwap(UUID userId, UUID entryId, UUID newRecipeId) {
+        MealPlanEntry entry = mealPlanEntryRepository.findById(entryId)
+                .orElseThrow(() -> new ResourceNotFoundException("MealPlanEntry", "id", entryId.toString()));
+
+        MealPlan mealPlan = mealPlanRepository.findById(entry.getMealPlanId())
+                .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", entry.getMealPlanId().toString()));
+
+        securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", entry.getMealPlanId().toString());
+
+        Recipe newRecipe = recipeRepository.findById(newRecipeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", newRecipeId.toString()));
+
+        entry.setRecipeId(newRecipeId);
+        mealPlanEntryRepository.save(entry);
+
+        return toFullResponse(mealPlan);
+    }
+
     public void deleteMealPlan(UUID userId, UUID mealPlanId) {
         MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
@@ -204,6 +232,10 @@ public class MealPlanService {
                             .mealType(entry.getMealType())
                             .servings(entry.getServings())
                             .notes(entry.getNotes())
+                            .totalTimeMinutes(recipe != null ? recipe.getTotalTimeMinutes() : null)
+                            .caloriesPerServing(recipe != null ? recipe.getCaloriesPerServing() : null)
+                            .estimatedCost(recipe != null ? recipe.getEstimatedCost() : null)
+                            .imageUrl(recipe != null ? recipe.getImageUrl() : null)
                             .build();
                 })
                 .collect(Collectors.toList());

@@ -45,4 +45,7 @@ public class GroceryList extends BaseEntity {
 
     @Column(nullable = false)
     private String status = "ACTIVE";  // "ACTIVE", "COMPLETED", "ARCHIVED"
+
+    @Column(name = "meal_plan_id")
+    private UUID mealPlanId;
 }

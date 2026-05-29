@@ -22,14 +22,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() {
-      ref.read(homeProvider.notifier).loadHome();
-    });
-  }
-
   Future<void> _onRefresh() async {
     await ref.read(homeProvider.notifier).loadHome();
   }
@@ -264,7 +256,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Here is the calmest path through meals, groceries, and pantry today.',
+            'Plan the week, turn it into groceries, and use what you already have.',
             style: AppTypography.bodyMedium.copyWith(
               color: isDark
                   ? AppColors.darkOnSurfaceVariant
@@ -574,7 +566,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return _HomeAction(
           icon: Icons.auto_awesome,
           title: 'Plan Your First Week',
-          subtitle: 'Get started with a personalized meal plan.',
+          subtitle: 'Get meals and groceries moving in under a minute.',
           route: '/plan',
           color: AppColors.primary,
         );
@@ -590,7 +582,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return _HomeAction(
           icon: Icons.shopping_cart_outlined,
           title: 'Generate Grocery List',
-          subtitle: 'Turn your plan into a shopping list.',
+          subtitle: 'Subtract pantry items and keep the budget visible.',
           route: '/grocery',
           color: AppColors.secondary,
         );
@@ -598,7 +590,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return _HomeAction(
           icon: Icons.shopping_cart_outlined,
           title: 'Continue Shopping',
-          subtitle: 'Pick up where you left off.',
+          subtitle: 'Finish checkout and update pantry automatically.',
           route: '/grocery',
           color: AppColors.secondary,
         );
@@ -606,7 +598,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return _HomeAction(
           icon: Icons.kitchen_outlined,
           title: 'Use Expiring Items',
-          subtitle: 'Ingredients that need to be used soon.',
+          subtitle: 'Reduce waste before planning more meals.',
           route: '/pantry',
           color: AppColors.warning,
         );

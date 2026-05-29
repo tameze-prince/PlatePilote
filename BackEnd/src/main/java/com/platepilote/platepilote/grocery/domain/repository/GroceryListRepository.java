@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -26,4 +27,7 @@ public interface GroceryListRepository extends JpaRepository<GroceryList, UUID> 
     Page<GroceryList> findByUserIdAndDeletedAtIsNull(UUID userId, Pageable pageable);
 
     Page<GroceryList> findByUserIdAndStatusAndDeletedAtIsNull(UUID userId, String status, Pageable pageable);
+
+    Optional<GroceryList> findByUserIdAndMealPlanIdAndStatusAndDeletedAtIsNull(
+            UUID userId, UUID mealPlanId, String status);
 }

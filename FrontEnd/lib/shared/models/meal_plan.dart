@@ -56,6 +56,10 @@ class MealPlanEntry {
     this.mealType,
     this.servings,
     this.notes,
+    this.totalTimeMinutes,
+    this.caloriesPerServing,
+    this.estimatedCost,
+    this.imageUrl,
   });
 
   final String? id;
@@ -65,6 +69,10 @@ class MealPlanEntry {
   final String? mealType;
   final int? servings;
   final String? notes;
+  final int? totalTimeMinutes;
+  final int? caloriesPerServing;
+  final double? estimatedCost;
+  final String? imageUrl;
 
   factory MealPlanEntry.fromJson(Map<String, dynamic> json) {
     return MealPlanEntry(
@@ -75,6 +83,10 @@ class MealPlanEntry {
       mealType: json['mealType'] as String?,
       servings: json['servings'] as int?,
       notes: json['notes'] as String?,
+      totalTimeMinutes: (json['totalTimeMinutes'] as num?)?.toInt(),
+      caloriesPerServing: (json['caloriesPerServing'] as num?)?.toInt(),
+      estimatedCost: (json['estimatedCost'] as num?)?.toDouble(),
+      imageUrl: json['imageUrl'] as String?,
     );
   }
 

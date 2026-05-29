@@ -691,18 +691,29 @@ class _EditableRow extends StatelessWidget {
               Icon(icon, size: 18, color: AppColors.primaryAccentGreen),
               const SizedBox(width: AppSpacing.sm),
             ],
-            Text(
-              label,
-              style: AppTypography.bodyMedium.copyWith(
-                color: PremiumTheme.textTertiary(context),
+            Expanded(
+              flex: 2,
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: PremiumTheme.textTertiary(context),
+                ),
               ),
             ),
-            const Spacer(),
-            Text(
-              value,
-              style: AppTypography.bodyLarge.copyWith(
-                color: PremiumTheme.textPrimary(context),
-                fontWeight: FontWeight.w500,
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              flex: 3,
+              child: Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+                style: AppTypography.bodyLarge.copyWith(
+                  color: PremiumTheme.textPrimary(context),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
             if (onTap != null) ...[

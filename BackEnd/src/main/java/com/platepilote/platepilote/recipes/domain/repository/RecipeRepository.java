@@ -48,6 +48,12 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      */
     Page<Recipe> findByIsPublicTrueAndDeletedAtIsNull(Pageable pageable);
 
+    @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.deletedAt IS NULL " +
+           "AND r.enabled = true AND r.imageUrl IS NOT NULL " +
+           "AND (r.caloriesPerServing IS NULL OR r.caloriesPerServing > 0) " +
+           "ORDER BY r.verified DESC, r.confidenceScore DESC, r.updatedAt DESC")
+    Page<Recipe> findDashboardRecipes(Pageable pageable);
+
     /**
      * Get a specific user's personal recipes.
      */

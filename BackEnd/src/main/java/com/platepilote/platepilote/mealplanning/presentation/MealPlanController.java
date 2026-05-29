@@ -7,6 +7,7 @@ import com.platepilote.platepilote.mealplanning.application.dto.MealPlanEntryReq
 import com.platepilote.platepilote.mealplanning.application.dto.MealPlanRequest;
 import com.platepilote.platepilote.mealplanning.application.dto.MealPlanResponse;
 import com.platepilote.platepilote.mealplanning.application.service.MealPlanService;
+import com.platepilote.platepilote.mealplanning.application.service.SmartSwapService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -102,6 +104,26 @@ public class MealPlanController {
         UUID userId = securityUtils.getCurrentUserId(userDetails);
         mealPlanService.activateMealPlan(userId, mealPlanId);
         return ResponseEntity.ok(ApiResponse.success("Meal plan activated", null));
+    }
+
+    @GetMapping("/entries/{entryId}/swap-options")
+    public ResponseEntity<ApiResponse<List<SmartSwapService.SwapOption>>> getSwapOptions(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable UUID entryId,
+            @RequestParam(defaultValue = "10") int limit) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        List<SmartSwapService.SwapOption> options = mealPlanService.getSwapOptions(userId, entryId, limit);
+        return ResponseEntity.ok(ApiResponse.success(options));
+    }
+
+    @PostMapping("/entries/{entryId}/swap")
+    public ResponseEntity<ApiResponse<MealPlanResponse>> applySwap(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable UUID entryId,
+            @RequestParam UUID newRecipeId) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        MealPlanResponse plan = mealPlanService.applySwap(userId, entryId, newRecipeId);
+        return ResponseEntity.ok(ApiResponse.success("Entry swapped", plan));
     }
 
     @DeleteMapping("/{mealPlanId}")

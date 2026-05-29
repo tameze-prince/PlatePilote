@@ -10,6 +10,7 @@ import '../../core/premium_components.dart';
 import '../../core/widgets/meal_card.dart';
 import '../../shared/models/demo_data.dart';
 import '../../shared/widgets/shimmer_glass_skeleton.dart';
+import '../grocery/grocery_provider.dart';
 import 'meal_plan_provider.dart';
 
 class WeeklyPlanScreen extends ConsumerStatefulWidget {
@@ -91,6 +92,8 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
               else if (state.meals.isEmpty)
                 _buildEmptyState(context, ref)
               else ...[
+                _buildValueSummary(context, state),
+                const SizedBox(height: AppSpacing.md),
                 ..._buildGroupedMeals(context, ref, state),
                 const SizedBox(height: AppSpacing.md),
                 _buildBudgetCard(context, ref, state),
@@ -98,6 +101,41 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildValueSummary(BuildContext context, MealPlanState state) {
+    final cost = state.estimatedCost;
+    final minutes = state.totalMinutes;
+    final avgMinutes = state.meals.isEmpty ? 0 : (minutes / state.meals.length).round();
+
+    return PremiumCard(
+      variant: PremiumCardVariant.accent,
+      child: Row(
+        children: [
+          Expanded(
+            child: _ValueMetric(
+              icon: Icons.restaurant_menu,
+              label: 'Meals',
+              value: '${state.meals.length}',
+            ),
+          ),
+          Expanded(
+            child: _ValueMetric(
+              icon: Icons.schedule,
+              label: 'Time',
+              value: avgMinutes > 0 ? '$avgMinutes min avg' : 'Fast',
+            ),
+          ),
+          Expanded(
+            child: _ValueMetric(
+              icon: Icons.savings_outlined,
+              label: 'Estimate',
+              value: cost > 0 ? '\$${cost.toStringAsFixed(0)}' : 'Budget',
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -154,7 +192,13 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
         label: 'Grocery List',
         color: AppColors.premiumCyanAccent,
         onTap: state.currentPlan != null
-            ? () => context.go('/grocery')
+            ? () async {
+                final planId = state.currentPlan?.id;
+                if (planId != null) {
+                  await ref.read(groceryProvider.notifier).generateFromMealPlan(planId);
+                }
+                if (context.mounted) context.go('/grocery');
+              }
             : null,
       ),
     ];
@@ -326,7 +370,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Estimated Budget',
+            'Turn this plan into groceries',
             style: AppTypography.titleLarge.copyWith(
               color: PremiumTheme.textPrimary(context),
               fontWeight: FontWeight.w700,
@@ -335,8 +379,8 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
           const SizedBox(height: AppSpacing.xs),
           Text(
             state.currentPlan != null
-                ? '${state.meals.length} meals planned for the week.'
-                : r'$142.85 for 24 grocery items, including 8 pantry ingredients already on hand.',
+                ? 'Generate a shopping list, subtract pantry items, and keep checkout tied to your weekly budget.'
+                : 'Generate a plan first to unlock your optimized grocery list.',
             style: AppTypography.bodyMedium.copyWith(
               color: PremiumTheme.textSecondary(context),
             ),
@@ -347,13 +391,15 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
               children: [
                 Expanded(
                   child: GlassButton(
-                    label: 'Replace',
-                    icon: Icons.swap_horiz,
+                    label: 'Grocery',
+                    icon: Icons.shopping_cart_outlined,
                     variant: GlassButtonVariant.outlined,
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Tap a meal to swap')),
-                      );
+                    onPressed: () async {
+                      final planId = state.currentPlan?.id;
+                      if (planId != null) {
+                        await ref.read(groceryProvider.notifier).generateFromMealPlan(planId);
+                      }
+                      if (context.mounted) context.go('/grocery');
                     },
                   ),
                 ),
@@ -401,6 +447,47 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
         'meal': meal,
         'entry': entry,
       },
+    );
+  }
+}
+
+class _ValueMetric extends StatelessWidget {
+  const _ValueMetric({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, color: AppColors.primaryAccentGreen, size: 20),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: AppTypography.titleSmall.copyWith(
+            color: PremiumTheme.textPrimary(context),
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: AppTypography.labelSmall.copyWith(
+            color: PremiumTheme.textSecondary(context),
+          ),
+        ),
+      ],
     );
   }
 }

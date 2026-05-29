@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,5 +38,9 @@ public class MealPlanResponse {
         private String mealType;
         private Integer servings;
         private String notes;
+        private Integer totalTimeMinutes;
+        private Integer caloriesPerServing;
+        private BigDecimal estimatedCost;
+        private String imageUrl;
     }
 }

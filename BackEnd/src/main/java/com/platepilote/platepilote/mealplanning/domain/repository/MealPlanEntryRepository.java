@@ -32,6 +32,8 @@ public interface MealPlanEntryRepository extends JpaRepository<MealPlanEntry, UU
      */
     List<MealPlanEntry> findByMealPlanId(UUID mealPlanId);
 
+    long countByMealPlanId(UUID mealPlanId);
+
     /**
      * Get all meals planned for a specific date within a meal plan.
      * Returns Breakfast, Lunch, Dinner, etc. for that day.

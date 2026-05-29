@@ -12,6 +12,7 @@ import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -34,18 +35,34 @@ public class BudgetOptimizer {
         }
 
         List<RecipeIngredient> allIngredients = recipeIngredientRepository.findByRecipeIdIn(recipeIds);
+        Map<UUID, BigDecimal> prices = pricingService.getLatestPricesPerUnit(
+                allIngredients.stream()
+                        .map(RecipeIngredient::getIngredientId)
+                        .filter(Objects::nonNull)
+                        .distinct()
+                        .toList(),
+                countryCode
+        );
         Map<UUID, List<RecipeIngredient>> ingredientsByRecipe = allIngredients.stream()
                 .collect(Collectors.groupingBy(ri -> ri.getRecipe().getId()));
 
         Map<UUID, BigDecimal> costs = new HashMap<>();
         for (UUID recipeId : recipeIds) {
             List<RecipeIngredient> ingredients = ingredientsByRecipe.getOrDefault(recipeId, List.of());
-            costs.put(recipeId, sumIngredientCost(ingredients, countryCode));
+            costs.put(recipeId, sumIngredientCost(ingredients, countryCode, prices));
         }
         return costs;
     }
 
     private BigDecimal sumIngredientCost(List<RecipeIngredient> ingredients, String countryCode) {
+        return sumIngredientCost(ingredients, countryCode, Map.of());
+    }
+
+    private BigDecimal sumIngredientCost(
+            List<RecipeIngredient> ingredients,
+            String countryCode,
+            Map<UUID, BigDecimal> prices
+    ) {
         BigDecimal totalCost = BigDecimal.ZERO;
         for (RecipeIngredient ri : ingredients) {
             UUID ingredientId = ri.getIngredientId();
@@ -55,8 +72,9 @@ public class BudgetOptimizer {
             if (ingredientId == null) {
                 continue;
             }
-            BigDecimal pricePerUnit = pricingService.getLatestPricePerUnit(ingredientId, countryCode)
-                    .orElse(BigDecimal.ZERO);
+            BigDecimal pricePerUnit = prices.isEmpty()
+                    ? pricingService.getLatestPricePerUnit(ingredientId, countryCode).orElse(BigDecimal.ZERO)
+                    : prices.getOrDefault(ingredientId, BigDecimal.ZERO);
             totalCost = totalCost.add(pricePerUnit.multiply(ri.getQuantity()));
         }
         return totalCost.setScale(2, RoundingMode.HALF_UP);

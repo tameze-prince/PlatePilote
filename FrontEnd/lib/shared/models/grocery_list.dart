@@ -4,6 +4,7 @@ class GroceryList {
     this.name,
     this.status,
     this.items = const [],
+    this.mealPlanId,
     this.createdAt,
     this.updatedAt,
   });
@@ -12,6 +13,7 @@ class GroceryList {
   final String? name;
   final String? status;
   final List<GroceryItem> items;
+  final String? mealPlanId;
   final String? createdAt;
   final String? updatedAt;
 
@@ -20,6 +22,7 @@ class GroceryList {
       id: json['id']?.toString() ?? '',
       name: json['name'] as String?,
       status: json['status'] as String?,
+      mealPlanId: json['mealPlanId']?.toString(),
       items:
           (json['items'] as List<dynamic>?)
               ?.map((e) => GroceryItem.fromJson(e as Map<String, dynamic>))

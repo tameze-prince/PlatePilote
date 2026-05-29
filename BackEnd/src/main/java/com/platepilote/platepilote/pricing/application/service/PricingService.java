@@ -12,8 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,20 @@ public class PricingService {
         return ingredientPriceRepository
                 .findTopByIngredientIdAndCountryCodeOrderByEffectiveDateDesc(ingredientId, countryCode)
                 .map(IngredientPrice::getAveragePricePerUnit);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<UUID, BigDecimal> getLatestPricesPerUnit(List<UUID> ingredientIds, String countryCode) {
+        if (ingredientIds.isEmpty()) {
+            return Map.of();
+        }
+        return ingredientPriceRepository
+                .findLatestByIngredientIdsAndCountryCode(ingredientIds, countryCode)
+                .stream()
+                .collect(Collectors.toMap(
+                        IngredientPrice::getIngredientId,
+                        IngredientPrice::getAveragePricePerUnit
+                ));
     }
 
     @Transactional(readOnly = true)

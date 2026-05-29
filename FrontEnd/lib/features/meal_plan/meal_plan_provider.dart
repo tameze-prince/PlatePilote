@@ -27,6 +27,12 @@ class MealPlanState {
 
   bool get hasPrevPlan => selectedPlanIndex < availablePlans.length - 1;
   bool get hasNextPlan => selectedPlanIndex > 0;
+  int get totalMinutes => currentPlan?.entries
+      .map((entry) => entry.totalTimeMinutes ?? 0)
+      .fold<int>(0, (sum, value) => sum + value) ?? 0;
+  double get estimatedCost => currentPlan?.entries
+      .map((entry) => entry.estimatedCost ?? 0)
+      .fold<double>(0, (sum, value) => sum + value) ?? 0;
 
   MealPlanState copyWith({
     MealPlan? currentPlan,
@@ -77,10 +83,13 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
         String title = entry.recipeName ?? 'Unknown Recipe';
         int minutes = 25;
         int kcal = 450;
-        String? imageUrl;
+        String? imageUrl = entry.imageUrl;
         IconData icon = Icons.restaurant;
         Color tint = Colors.green;
-        if (entry.recipeId != null) {
+        if (entry.totalTimeMinutes != null || entry.caloriesPerServing != null) {
+          minutes = entry.totalTimeMinutes ?? minutes;
+          kcal = entry.caloriesPerServing ?? kcal;
+        } else if (entry.recipeId != null) {
           try {
             final detail = await repo.getRecipeDetail(entry.recipeId!);
             title = detail.name ?? title;
@@ -130,7 +139,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
       final page = await repo.listMealPlans(size: 20);
       if (page.content.isNotEmpty) {
         final plans = page.content;
-        final plan = plans.first;
+        final plan = await repo.getMealPlan(plans.first.id);
         final meals = await _entriesToMeals(plan.entries);
         state = MealPlanState(
           currentPlan: plan,
@@ -150,7 +159,8 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
   Future<void> selectPlan(int index) async {
     final plans = state.availablePlans;
     if (index < 0 || index >= plans.length) return;
-    final plan = plans[index];
+    final repo = ref.read(mealPlanRepositoryProvider);
+    final plan = await repo.getMealPlan(plans[index].id);
     final meals = await _entriesToMeals(plan.entries);
     state = state.copyWith(
       currentPlan: plan,

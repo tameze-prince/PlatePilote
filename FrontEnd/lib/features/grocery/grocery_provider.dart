@@ -77,7 +77,7 @@ class GroceryNotifier extends Notifier<GroceryListState> {
       final repo = ref.read(groceryRepositoryProvider);
       final page = await repo.listGroceryLists(size: 1);
       if (page.content.isNotEmpty) {
-        final list = page.content.first;
+        final list = await repo.getGroceryList(page.content.first.id);
         state = GroceryListState(
           currentList: list,
           items: list.items,

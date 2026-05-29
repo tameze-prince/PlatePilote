@@ -7,8 +7,10 @@ import com.platepilote.platepilote.grocery.application.dto.GroceryItemRequest;
 import com.platepilote.platepilote.grocery.application.dto.GroceryListRequest;
 import com.platepilote.platepilote.grocery.domain.entity.GroceryItem;
 import com.platepilote.platepilote.grocery.domain.entity.GroceryList;
+import com.platepilote.platepilote.grocery.domain.entity.PurchaseRecord;
 import com.platepilote.platepilote.grocery.domain.repository.GroceryItemRepository;
 import com.platepilote.platepilote.grocery.domain.repository.GroceryListRepository;
+import com.platepilote.platepilote.grocery.domain.repository.PurchaseRecordRepository;
 import com.platepilote.platepilote.mealplanning.domain.entity.MealPlan;
 import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanEntry;
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanEntryRepository;
@@ -54,6 +56,7 @@ public class GroceryService {
     private final UserProfileRepository userProfileRepository;
     private final BudgetRepository budgetRepository;
     private final SecurityUtils securityUtils;
+    private final PurchaseRecordRepository purchaseRecordRepository;
 
     @Transactional(readOnly = true)
     public PagedResponse<GroceryListResponse> getUserLists(UUID userId, Pageable pageable) {
@@ -179,12 +182,27 @@ public class GroceryService {
                 .map(profile -> profile.getCountryCode() == null ? "US" : profile.getCountryCode())
                 .orElse("US");
 
-        GroceryList list = GroceryList.builder()
-                .userId(userId)
-                .name("Grocery List for " + mealPlan.getName())
-                .status("ACTIVE")
-                .build();
-        GroceryList saved = groceryListRepository.save(list);
+        GroceryList saved = groceryListRepository
+                .findByUserIdAndMealPlanIdAndStatusAndDeletedAtIsNull(userId, mealPlanId, "ACTIVE")
+                .map(existing -> {
+                    groceryItemRepository.deleteByGroceryListId(existing.getId());
+                    existing.setName("Grocery List for " + mealPlan.getName());
+                    return groceryListRepository.save(existing);
+                })
+                .orElseGet(() -> groceryListRepository.save(GroceryList.builder()
+                        .userId(userId)
+                        .mealPlanId(mealPlanId)
+                        .name("Grocery List for " + mealPlan.getName())
+                        .status("ACTIVE")
+                        .build()));
+        Map<UUID, BigDecimal> prices = pricingService.getLatestPricesPerUnit(
+                aggregatedItems.values().stream()
+                        .map(item -> item.ingredientId)
+                        .filter(java.util.Objects::nonNull)
+                        .distinct()
+                        .toList(),
+                countryCode
+        );
 
         int sortOrder = 0;
         for (Map.Entry<String, GroceryItemAggregate> entry : aggregatedItems.entrySet()) {
@@ -197,7 +215,7 @@ public class GroceryService {
                     .name(agg.name)
                     .quantity(agg.totalQuantity)
                     .unit(agg.unit)
-                    .estimatedPrice(estimateItemPrice(agg, countryCode))
+                    .estimatedPrice(estimateItemPrice(agg, prices))
                     .priceConfidence(agg.ingredientId == null ? BigDecimal.ZERO : new BigDecimal("0.70"))
                     .checked(false)
                     .notes(itemNotes(agg))
@@ -254,6 +272,19 @@ public class GroceryService {
                     item.getUnit()
             ));
 
+            PurchaseRecord record = PurchaseRecord.builder()
+                    .userId(userId).groceryListId(listId)
+                    .itemName(item.getName()).category(item.getCategory())
+                    .quantity(item.getQuantity()).unit(item.getUnit())
+                    .unitPrice(actualPrice != null && item.getQuantity() != null
+                            && item.getQuantity().compareTo(BigDecimal.ZERO) > 0
+                            ? actualPrice.divide(item.getQuantity(), 2, java.math.RoundingMode.HALF_UP)
+                            : actualPrice)
+                    .totalPrice(actualPrice != null ? actualPrice : BigDecimal.ZERO)
+                    .ingredientId(item.getIngredientId())
+                    .purchasedAt(Instant.now()).build();
+            purchaseRecordRepository.save(record);
+
             groceryItemRepository.delete(item);
         }
 
@@ -275,11 +306,9 @@ public class GroceryService {
             groceryListRepository.save(list);
         }
 
+        List<String> purchaseItemNames = checkedItems.stream().map(GroceryItem::getName).toList();
         PurchaseRecordResponse purchaseRecord = new PurchaseRecordResponse(
-                UUID.randomUUID(),
-                checkedItems.stream().map(GroceryItem::getName).toList(),
-                totalSpent,
-                Instant.now()
+                listId, purchaseItemNames, totalSpent, Instant.now()
         );
 
         GroceryListResponse updatedList = toFullListResponse(list);
@@ -294,26 +323,29 @@ public class GroceryService {
 
     @Transactional(readOnly = true)
     public PagedResponse<PurchaseRecordResponse> getPurchaseHistory(UUID userId, Pageable pageable) {
-        Page<GroceryList> completedLists = groceryListRepository.findByUserIdAndStatusAndDeletedAtIsNull(
-                userId, "COMPLETED", pageable);
+        Page<PurchaseRecord> records = purchaseRecordRepository
+                .findByUserIdAndDeletedAtIsNullOrderByPurchasedAtDesc(userId, pageable);
 
-        List<PurchaseRecordResponse> records = completedLists.getContent().stream()
-                .map(list -> {
-                    List<GroceryItem> items = groceryItemRepository.findByGroceryListIdOrderBySortOrderAsc(list.getId());
+        List<PurchaseRecordResponse> dtos = records.getContent().stream()
+                .collect(Collectors.groupingBy(PurchaseRecord::getGroceryListId))
+                .entrySet().stream()
+                .map(entry -> {
+                    List<PurchaseRecord> items = entry.getValue();
                     BigDecimal total = items.stream()
-                            .map(GroceryItem::getEstimatedPrice)
+                            .map(PurchaseRecord::getTotalPrice)
                             .filter(java.util.Objects::nonNull)
                             .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    List<String> names = items.stream().map(PurchaseRecord::getItemName).toList();
                     return new PurchaseRecordResponse(
-                            list.getId(),
-                            items.stream().map(GroceryItem::getName).toList(),
+                            entry.getKey() != null ? entry.getKey() : UUID.randomUUID(),
+                            names,
                             total,
-                            list.getUpdatedAt()
+                            items.getFirst().getPurchasedAt()
                     );
                 })
                 .toList();
 
-        return PagedResponse.of(records, completedLists.getNumber(), completedLists.getSize(), completedLists.getTotalElements());
+        return PagedResponse.of(dtos, records.getNumber(), records.getSize(), records.getTotalElements());
     }
 
     public void deleteList(UUID userId, UUID listId) {
@@ -333,6 +365,7 @@ public class GroceryService {
                 list.getName(),
                 list.getStatus(),
                 null,
+                list.getMealPlanId(),
                 list.getCreatedAt(),
                 list.getUpdatedAt()
         );
@@ -350,6 +383,7 @@ public class GroceryService {
                 list.getName(),
                 list.getStatus(),
                 items,
+                list.getMealPlanId(),
                 list.getCreatedAt(),
                 list.getUpdatedAt()
         );
@@ -494,13 +528,12 @@ public class GroceryService {
         return item.notes + " | " + warning;
     }
 
-    private BigDecimal estimateItemPrice(GroceryItemAggregate item, String countryCode) {
+    private BigDecimal estimateItemPrice(GroceryItemAggregate item, Map<UUID, BigDecimal> prices) {
         if (item.ingredientId == null) {
             return null;
         }
-        return pricingService.getLatestPricePerUnit(item.ingredientId, countryCode)
-                .map(price -> price.multiply(item.totalQuantity))
-                .orElse(null);
+        BigDecimal price = prices.get(item.ingredientId);
+        return price == null ? null : price.multiply(item.totalQuantity);
     }
 
     private String normalizeName(String value) {
@@ -512,6 +545,7 @@ public class GroceryService {
             String name,
             String status,
             List<GroceryItemResponse> items,
+            UUID mealPlanId,
             java.time.Instant createdAt,
             java.time.Instant updatedAt
     ) {}
