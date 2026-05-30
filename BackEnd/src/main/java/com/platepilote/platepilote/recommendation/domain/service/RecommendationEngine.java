@@ -4,6 +4,7 @@ import com.platepilote.platepilote.admin.domain.entity.SystemSetting;
 import com.platepilote.platepilote.admin.domain.repository.SystemSettingRepository;
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
+import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanMode;
 import com.platepilote.platepilote.budget.domain.entity.Budget;
 import com.platepilote.platepilote.budget.domain.repository.BudgetRepository;
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
@@ -97,7 +98,12 @@ public class RecommendationEngine {
 
     @Transactional
     public List<List<RecommendationResult>> generateWeeklyMealPlan(UUID userId) {
-        List<RecommendationResult> allRecommendations = recommend(userId, "WEEKLY_PLAN", null, 50);
+        return generateWeeklyMealPlan(userId, MealPlanMode.STANDARD);
+    }
+
+    @Transactional
+    public List<List<RecommendationResult>> generateWeeklyMealPlan(UUID userId, MealPlanMode mode) {
+        List<RecommendationResult> allRecommendations = recommend(userId, mode != null ? mode.name() : "WEEKLY_PLAN", null, 50, mode);
         List<List<RecommendationResult>> weeklyPlan = new ArrayList<>();
 
         int recipeIndex = 0;
@@ -114,6 +120,10 @@ public class RecommendationEngine {
     }
 
     private List<RecommendationResult> recommend(UUID userId, String requestType, Integer maxTime, int limit) {
+        return recommend(userId, requestType, maxTime, limit, MealPlanMode.STANDARD);
+    }
+
+    private List<RecommendationResult> recommend(UUID userId, String requestType, Integer maxTime, int limit, MealPlanMode mode) {
         Instant started = Instant.now();
 
         // PHASE 1: Load user context (cached where possible)
@@ -136,7 +146,7 @@ public class RecommendationEngine {
         List<UUID> candidateIds = candidates.stream().map(Recipe::getId).collect(Collectors.toList());
 
         // PHASE 3: Batch-load ALL scoring data upfront (~5 queries total)
-        ScoringData scoringData = loadScoringData(candidateIds, context);
+        ScoringData scoringData = loadScoringData(candidateIds, context, mode);
 
         // PHASE 4: Score purely in-memory — ZERO database calls
         List<RecommendationResult> scoredResults = candidates.stream()
@@ -181,23 +191,33 @@ public class RecommendationEngine {
     }
 
     private ScoringData loadScoringData(List<UUID> candidateIds, UserContext context) {
-        // 1. Allergen context (2 queries)
+        return loadScoringData(candidateIds, context, MealPlanMode.STANDARD);
+    }
+
+    private ScoringData loadScoringData(List<UUID> candidateIds, UserContext context, MealPlanMode mode) {
         AllergenContext allergenCtx = buildAllergenContext(candidateIds, context.allergies());
 
-        // 2. Batch recipe costs (1 query via batch method)
-        Map<UUID, BigDecimal> recipeCosts = budgetOptimizer.estimateMultipleRecipeCosts(candidateIds, context.countryCode());
+        Map<UUID, BigDecimal> recipeCosts = budgetOptimizer.batchCostEstimate(candidateIds);
 
-        // 3. Batch pantry scores (2 queries via batch method)
-        Map<UUID, Double> pantryScores = pantryUtilizationScorer.calculatePantryScoresForRecipes(context.userId(), candidateIds);
+        Map<UUID, Double> pantryScores = pantryUtilizationScorer.batchScore(candidateIds, context.userId());
 
-        // 4. Batch expiring pantry matches (1 query via batch method)
-        Map<UUID, Boolean> expiringMatches = pantryUtilizationScorer.findRecipesUsingExpiringPantry(
-                context.userId(), context.expiringIngredientIds(), candidateIds);
+        Set<UUID> expiringMatches = context.expiringIngredientIds();
+        Map<UUID, Boolean> expiringMap = new HashMap<>();
+        for (UUID recipeId : candidateIds) {
+            expiringMap.put(recipeId, false);
+        }
+        if (!expiringMatches.isEmpty()) {
+            List<RecipeIngredient> recipeIngredients = recipeIngredientRepository.findByRecipeIdIn(candidateIds);
+            for (RecipeIngredient ri : recipeIngredients) {
+                if (ri.getIngredientId() != null && expiringMatches.contains(ri.getIngredientId())) {
+                    expiringMap.put(ri.getRecipe().getId(), true);
+                }
+            }
+        }
 
-        // 5. Load weights once (cached via system settings)
-        RecommendationWeights weights = loadWeights();
+        RecommendationWeights weights = loadWeights(mode);
 
-        return new ScoringData(allergenCtx, recipeCosts, pantryScores, expiringMatches, weights);
+        return new ScoringData(allergenCtx, recipeCosts, pantryScores, expiringMap, weights);
     }
 
     private RecommendationResult scoreInMemory(Recipe recipe, UserContext context, ScoringData data) {
@@ -399,18 +419,40 @@ public class RecommendationEngine {
     }
 
     private RecommendationWeights loadWeights() {
+        return loadWeights(MealPlanMode.STANDARD);
+    }
+
+    private RecommendationWeights loadWeights(MealPlanMode mode) {
+        if (mode == null) mode = MealPlanMode.STANDARD;
+        double wp, wb, wpref, wn, wt, wv, wl;
+        switch (mode) {
+            case WASTELESS:
+                wp = 0.40; wb = 0.20; wpref = 0.10; wn = 0.10; wt = 0.10; wv = 0.05; wl = 0.05;
+                break;
+            case ENDOFMONTH:
+                wp = 0.30; wb = 0.40; wpref = 0.10; wn = 0.05; wt = 0.10; wv = 0.05; wl = 0.00;
+                break;
+            case BUSYWEEK:
+                wp = 0.10; wb = 0.15; wpref = 0.10; wn = 0.10; wt = 0.45; wv = 0.05; wl = 0.05;
+                break;
+            case FAMILY:
+                wp = 0.15; wb = 0.25; wpref = 0.15; wn = 0.15; wt = 0.15; wv = 0.10; wl = 0.05;
+                break;
+            default:
+                wp = 0.25; wb = 0.20; wpref = 0.20; wn = 0.15; wt = 0.10; wv = 0.05; wl = 0.05;
+        }
         RecommendationWeights configured = new RecommendationWeights(
-                getWeight("recommendation_weight_pantry", 0.25),
-                getWeight("recommendation_weight_budget", 0.20),
-                getWeight("recommendation_weight_preference", 0.20),
-                getWeight("recommendation_weight_nutrition", 0.15),
-                getWeight("recommendation_weight_time", 0.10),
-                getWeight("recommendation_weight_variety", 0.05),
-                getWeight("recommendation_weight_location", 0.05)
+                getWeight("recommendation_weight_pantry", wp),
+                getWeight("recommendation_weight_budget", wb),
+                getWeight("recommendation_weight_preference", wpref),
+                getWeight("recommendation_weight_nutrition", wn),
+                getWeight("recommendation_weight_time", wt),
+                getWeight("recommendation_weight_variety", wv),
+                getWeight("recommendation_weight_location", wl)
         );
         double total = configured.total();
         if (total <= 0) {
-            return new RecommendationWeights(0.25, 0.20, 0.20, 0.15, 0.10, 0.05, 0.05);
+            return new RecommendationWeights(wp, wb, wpref, wn, wt, wv, wl);
         }
         return configured.normalize(total);
     }

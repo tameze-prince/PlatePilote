@@ -1,10 +1,14 @@
 package com.platepilote.platepilote.mealplanning.application.service;
 
 import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanEntry;
+import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanMode;
+import com.platepilote.platepilote.mealplanning.domain.entity.SwapTracking;
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanEntryRepository;
+import com.platepilote.platepilote.mealplanning.domain.repository.SwapTrackingRepository;
 import com.platepilote.platepilote.recipes.domain.entity.Recipe;
 import com.platepilote.platepilote.recipes.domain.repository.RecipeRepository;
 import com.platepilote.platepilote.recommendation.domain.service.RecommendationEngine;
+import com.platepilote.platepilote.subscription.application.service.EntitlementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,11 +25,29 @@ public class SmartSwapService {
     private final MealPlanEntryRepository mealPlanEntryRepository;
     private final RecipeRepository recipeRepository;
     private final RecommendationEngine recommendationEngine;
+    private final EntitlementService entitlementService;
+    private final SwapTrackingRepository swapTrackingRepository;
+
+    private static final int FREE_TIER_SWAP_LIMIT = 3;
 
     @Transactional(readOnly = true)
     public List<SwapOption> getSwapOptions(UUID userId, UUID entryId, int limit) {
+        return getSwapOptions(userId, entryId, limit, MealPlanMode.STANDARD);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SwapOption> getSwapOptions(UUID userId, UUID entryId, int limit, MealPlanMode mode) {
         MealPlanEntry entry = mealPlanEntryRepository.findById(entryId)
                 .orElseThrow(() -> new RuntimeException("Entry not found"));
+
+        boolean premium = entitlementService.hasActiveEntitlement(userId, "PREMIUM");
+        if (!premium) {
+            java.time.Instant weekAgo = java.time.Instant.now().minus(java.time.Duration.ofDays(7));
+            long swapCount = swapTrackingRepository.countByUserIdAndSwappedAtAfter(userId, weekAgo);
+            if (swapCount >= FREE_TIER_SWAP_LIMIT) {
+                return List.of();
+            }
+        }
 
         String mealType = entry.getMealType();
         int maxTime = entry.getNotes() != null && entry.getNotes().contains("quick")

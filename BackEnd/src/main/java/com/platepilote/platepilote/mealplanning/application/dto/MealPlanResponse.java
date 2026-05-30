@@ -22,7 +22,13 @@ public class MealPlanResponse {
     private LocalDate startDate;
     private LocalDate endDate;
     private String status;
+    private String mode;
     private List<MealPlanEntryResponse> entries;
+    private BigDecimal totalCost;
+    private Integer totalTime;
+    private Integer totalCalories;
+    private Integer mealCount;
+    private BigDecimal costPerMeal;
     private Instant createdAt;
     private Instant updatedAt;
 

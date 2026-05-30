@@ -9,6 +9,9 @@ import com.platepilote.platepilote.mealplanning.application.dto.MealPlanRequest;
 import com.platepilote.platepilote.mealplanning.application.dto.MealPlanResponse;
 import com.platepilote.platepilote.mealplanning.domain.entity.MealPlan;
 import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanEntry;
+import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanMode;
+import com.platepilote.platepilote.mealplanning.domain.entity.SwapTracking;
+import com.platepilote.platepilote.mealplanning.domain.repository.SwapTrackingRepository;
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanEntryRepository;
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanRepository;
 import com.platepilote.platepilote.recipes.domain.entity.Recipe;
@@ -39,6 +42,7 @@ public class MealPlanService {
     private final RecommendationEngine recommendationEngine;
     private final SecurityUtils securityUtils;
     private final SmartSwapService smartSwapService;
+    private final SwapTrackingRepository swapTrackingRepository;
 
     @Transactional(readOnly = true)
     public PagedResponse<MealPlanResponse> getUserMealPlans(UUID userId, Pageable pageable) {
@@ -129,7 +133,11 @@ public class MealPlanService {
     }
 
     public MealPlanResponse generateWeeklyPlan(UUID userId, LocalDate startDate) {
-        List<List<RecommendationResult>> weeklyPlan = recommendationEngine.generateWeeklyMealPlan(userId);
+        return generateWeeklyPlan(userId, startDate, MealPlanMode.STANDARD);
+    }
+
+    public MealPlanResponse generateWeeklyPlan(UUID userId, LocalDate startDate, MealPlanMode mode) {
+        List<List<RecommendationResult>> weeklyPlan = recommendationEngine.generateWeeklyMealPlan(userId, mode);
         LocalDate endDate = startDate.plusDays(6);
 
         MealPlan mealPlan = MealPlan.builder()
@@ -138,6 +146,7 @@ public class MealPlanService {
                 .startDate(startDate)
                 .endDate(endDate)
                 .status("ACTIVE")
+                .mode(mode.name())
                 .build();
         MealPlan saved = mealPlanRepository.save(mealPlan);
 
@@ -185,6 +194,20 @@ public class MealPlanService {
         entry.setRecipeId(newRecipeId);
         mealPlanEntryRepository.save(entry);
 
+        swapTrackingRepository.save(SwapTracking.builder()
+                .userId(userId)
+                .swappedAt(java.time.Instant.now())
+                .build());
+
+        return toFullResponse(mealPlan);
+    }
+
+    public MealPlanResponse setMode(UUID userId, UUID mealPlanId, MealPlanMode mode) {
+        MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
+                .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
+        securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", mealPlanId.toString());
+        mealPlan.setMode(mode.name());
+        mealPlanRepository.save(mealPlan);
         return toFullResponse(mealPlan);
     }
 
@@ -240,13 +263,33 @@ public class MealPlanService {
                 })
                 .collect(Collectors.toList());
 
+        BigDecimal totalCost = entryResponses.stream()
+                .map(e -> e.getEstimatedCost() != null ? e.getEstimatedCost() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        int totalTime = entryResponses.stream()
+                .mapToInt(e -> e.getTotalTimeMinutes() != null ? e.getTotalTimeMinutes() : 0)
+                .sum();
+        int totalCalories = entryResponses.stream()
+                .mapToInt(e -> e.getCaloriesPerServing() != null ? e.getCaloriesPerServing() : 0)
+                .sum();
+        int mealCount = entryResponses.size();
+        BigDecimal costPerMeal = mealCount > 0
+                ? totalCost.divide(BigDecimal.valueOf(mealCount), 2, java.math.RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
         return MealPlanResponse.builder()
                 .id(mealPlan.getId())
                 .name(mealPlan.getName())
                 .startDate(mealPlan.getStartDate())
                 .endDate(mealPlan.getEndDate())
                 .status(mealPlan.getStatus())
+                .mode(mealPlan.getMode())
                 .entries(entryResponses)
+                .totalCost(totalCost)
+                .totalTime(totalTime)
+                .totalCalories(totalCalories)
+                .mealCount(mealCount)
+                .costPerMeal(costPerMeal)
                 .createdAt(mealPlan.getCreatedAt())
                 .updatedAt(mealPlan.getUpdatedAt())
                 .build();

@@ -8,6 +8,7 @@ import com.platepilote.platepilote.mealplanning.application.dto.MealPlanRequest;
 import com.platepilote.platepilote.mealplanning.application.dto.MealPlanResponse;
 import com.platepilote.platepilote.mealplanning.application.service.MealPlanService;
 import com.platepilote.platepilote.mealplanning.application.service.SmartSwapService;
+import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanMode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -62,9 +64,11 @@ public class MealPlanController {
     @PostMapping("/generate")
     public ResponseEntity<ApiResponse<MealPlanResponse>> generateWeeklyPlan(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(defaultValue = "STANDARD") String mode) {
         UUID userId = securityUtils.getCurrentUserId(userDetails);
-        MealPlanResponse plan = mealPlanService.generateWeeklyPlan(userId, startDate);
+        MealPlanMode mealPlanMode = MealPlanMode.valueOf(mode.toUpperCase());
+        MealPlanResponse plan = mealPlanService.generateWeeklyPlan(userId, startDate, mealPlanMode);
         return ResponseEntity.ok(ApiResponse.success("Weekly plan generated", plan));
     }
 
@@ -124,6 +128,17 @@ public class MealPlanController {
         UUID userId = securityUtils.getCurrentUserId(userDetails);
         MealPlanResponse plan = mealPlanService.applySwap(userId, entryId, newRecipeId);
         return ResponseEntity.ok(ApiResponse.success("Entry swapped", plan));
+    }
+
+    @PutMapping("/{mealPlanId}/mode")
+    public ResponseEntity<ApiResponse<MealPlanResponse>> setMode(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable UUID mealPlanId,
+            @RequestParam String mode) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        MealPlanMode mealPlanMode = MealPlanMode.valueOf(mode.toUpperCase());
+        MealPlanResponse plan = mealPlanService.setMode(userId, mealPlanId, mealPlanMode);
+        return ResponseEntity.ok(ApiResponse.success("Mode updated", plan));
     }
 
     @DeleteMapping("/{mealPlanId}")

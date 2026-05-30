@@ -54,4 +54,8 @@ public class MealPlan extends BaseEntity {
 
     @Column(nullable = false)
     private String status = "DRAFT";  // "DRAFT", "ACTIVE", "COMPLETED", "CANCELLED"
+
+    @Column(nullable = false)
+    @Builder.Default
+    private String mode = "STANDARD";  // "STANDARD", "WASTELESS", "ENDOFMONTH", "BUSYWEEK", "FAMILY"
 }

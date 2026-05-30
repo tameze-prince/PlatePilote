@@ -1,0 +1,9 @@
+{
+  "name": "platepilote-landing",
+  "version": "1.0.0",
+  "description": "PlatePilote landing page + waitlist API",
+  "private": true,
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4"
+  }
+}
