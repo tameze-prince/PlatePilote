@@ -197,23 +197,12 @@ public class RecommendationEngine {
     private ScoringData loadScoringData(List<UUID> candidateIds, UserContext context, MealPlanMode mode) {
         AllergenContext allergenCtx = buildAllergenContext(candidateIds, context.allergies());
 
-        Map<UUID, BigDecimal> recipeCosts = budgetOptimizer.batchCostEstimate(candidateIds);
+        Map<UUID, BigDecimal> recipeCosts = budgetOptimizer.estimateMultipleRecipeCosts(candidateIds, context.countryCode());
 
-        Map<UUID, Double> pantryScores = pantryUtilizationScorer.batchScore(candidateIds, context.userId());
+        Map<UUID, Double> pantryScores = pantryUtilizationScorer.calculatePantryScoresForRecipes(context.userId(), candidateIds);
 
-        Set<UUID> expiringMatches = context.expiringIngredientIds();
-        Map<UUID, Boolean> expiringMap = new HashMap<>();
-        for (UUID recipeId : candidateIds) {
-            expiringMap.put(recipeId, false);
-        }
-        if (!expiringMatches.isEmpty()) {
-            List<RecipeIngredient> recipeIngredients = recipeIngredientRepository.findByRecipeIdIn(candidateIds);
-            for (RecipeIngredient ri : recipeIngredients) {
-                if (ri.getIngredientId() != null && expiringMatches.contains(ri.getIngredientId())) {
-                    expiringMap.put(ri.getRecipe().getId(), true);
-                }
-            }
-        }
+        Map<UUID, Boolean> expiringMap = pantryUtilizationScorer.findRecipesUsingExpiringPantry(
+                context.userId(), context.expiringIngredientIds(), candidateIds);
 
         RecommendationWeights weights = loadWeights(mode);
 
