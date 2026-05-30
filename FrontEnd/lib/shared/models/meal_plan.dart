@@ -15,7 +15,13 @@ class MealPlan {
   final String? startDate;
   final String? endDate;
   final String? status;
+  final String? mode;
   final List<MealPlanEntry> entries;
+  final double? totalCost;
+  final int? totalTime;
+  final int? totalCalories;
+  final int? mealCount;
+  final double? costPerMeal;
   final String? createdAt;
   final String? updatedAt;
 
@@ -26,11 +32,17 @@ class MealPlan {
       startDate: json['startDate'] as String?,
       endDate: json['endDate'] as String?,
       status: json['status'] as String?,
+      mode: json['mode'] as String?,
       entries: (json['entries'] as List<dynamic>?)
               ?.map(
                   (e) => MealPlanEntry.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+      totalCost: (json['totalCost'] as num?)?.toDouble(),
+      totalTime: (json['totalTime'] as num?)?.toInt(),
+      totalCalories: (json['totalCalories'] as num?)?.toInt(),
+      mealCount: (json['mealCount'] as num?)?.toInt(),
+      costPerMeal: (json['costPerMeal'] as num?)?.toDouble(),
       createdAt: json['createdAt'] as String?,
       updatedAt: json['updatedAt'] as String?,
     );
@@ -42,6 +54,7 @@ class MealPlan {
       'startDate': startDate,
       'endDate': endDate,
       'status': status,
+      'mode': mode,
       'entries': entries.map((e) => e.toJson()).toList(),
     };
   }

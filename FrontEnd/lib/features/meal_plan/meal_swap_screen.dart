@@ -7,10 +7,10 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_typography.dart';
 import '../../core/premium_components.dart';
-import '../../core/repositories/recipe_repository.dart';
 import '../../shared/models/demo_data.dart';
 import '../../shared/models/meal_plan.dart';
 import 'meal_plan_provider.dart';
+import 'meal_plan_repository.dart';
 
 class MealSwapScreen extends ConsumerStatefulWidget {
   final Meal currentMeal;
@@ -31,9 +31,9 @@ class MealSwapScreen extends ConsumerStatefulWidget {
 }
 
 class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
-  List<Meal> _alternatives = [];
+  List<_SwapOption> _alternatives = [];
   bool _isLoading = true;
-  Meal? _selectedMeal;
+  _SwapOption? _selectedMeal;
 
   @override
   void initState() {
@@ -44,59 +44,68 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
   Future<void> _loadAlternatives() async {
     setState(() => _isLoading = true);
     try {
-      final repo = ref.read(recipeRepositoryProvider);
-      final page = await repo.getByMealType(widget.mealType, size: 20);
-      setState(() {
-        _alternatives = page.content.map((detail) {
-          IconData icon = Icons.restaurant;
-          Color tint = Colors.green;
-          switch (widget.mealType.toLowerCase()) {
-            case 'breakfast':
-              icon = Icons.wb_sunny; tint = Colors.orange; break;
-            case 'lunch':
-              icon = Icons.lunch_dining; tint = Colors.amber; break;
-            case 'dinner':
-              icon = Icons.dinner_dining; tint = Colors.deepPurple; break;
-            case 'snack':
-              icon = Icons.cookie; tint = Colors.brown; break;
-          }
-          return Meal(
-            day: '',
-            type: widget.mealType,
-            title: detail.name ?? 'Unknown',
-            minutes: detail.totalTimeMinutes ??
-                ((detail.prepTimeMinutes ?? 0) + (detail.cookTimeMinutes ?? 0)),
-            kcal: detail.caloriesPerServing ?? 450,
-            icon: icon,
-            tint: tint,
-            imageUrl: detail.imageUrl,
-            recipeId: detail.id,
-          );
-        }).toList();
-        _isLoading = false;
-      });
-    } catch (_) {
-      setState(() {
-        _alternatives = demoMeals.where((m) => m.type == widget.mealType).toList();
-        if (_alternatives.isEmpty) _alternatives = demoMeals;
-        _isLoading = false;
-      });
-    }
+      final entryId = widget.currentEntry?.id;
+      if (entryId != null) {
+        final repo = ref.read(mealPlanRepositoryProvider);
+        final options = await repo.getSwapOptions(entryId, 10);
+        setState(() {
+          _alternatives = options.map((o) => _SwapOption.fromJson(o)).toList();
+          _isLoading = false;
+        });
+        return;
+      }
+    } catch (_) {}
+
+    setState(() {
+      _alternatives = demoMeals.where((m) => m.type == widget.mealType).toList()
+          .map((m) => _SwapOption(
+                recipeId: m.recipeId,
+                name: m.title,
+                minutes: m.minutes,
+                calories: m.kcal,
+                imageUrl: m.imageUrl,
+              ))
+          .toList();
+      if (_alternatives.isEmpty) {
+        _alternatives = demoMeals.map((m) => _SwapOption(
+              recipeId: m.recipeId,
+              name: m.title,
+              minutes: m.minutes,
+              calories: m.kcal,
+              imageUrl: m.imageUrl,
+            )).toList();
+      }
+      _isLoading = false;
+    });
   }
 
   Future<void> _swapMeal() async {
     if (_selectedMeal == null) return;
-    if (widget.currentEntry != null && _selectedMeal!.recipeId != null) {
-      final newEntry = MealPlanEntry(
-        recipeId: _selectedMeal!.recipeId,
-        recipeName: _selectedMeal!.title,
-        mealDate: widget.currentEntry!.mealDate,
-        mealType: widget.mealType,
-        servings: widget.currentEntry!.servings,
-      );
-      await ref
-          .read(mealPlanProvider.notifier)
-          .replaceEntry(widget.dayIndex, newEntry);
+    if (widget.currentEntry?.id != null && _selectedMeal!.recipeId != null) {
+      try {
+        final repo = ref.read(mealPlanRepositoryProvider);
+        await repo.applySwap(widget.currentEntry!.id!, _selectedMeal!.recipeId!);
+        await ref.read(mealPlanProvider.notifier).refresh();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Meal swapped successfully!'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (_) {
+        final newEntry = MealPlanEntry(
+          recipeId: _selectedMeal!.recipeId,
+          recipeName: _selectedMeal!.name,
+          mealDate: widget.currentEntry!.mealDate,
+          mealType: widget.mealType,
+          servings: widget.currentEntry!.servings,
+        );
+        await ref
+            .read(mealPlanProvider.notifier)
+            .replaceEntry(widget.dayIndex, newEntry);
+      }
     }
     if (context.mounted) context.pop();
   }
@@ -180,7 +189,7 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
                           ),
                         ),
                         Text(
-                          '${widget.currentMeal.minutes} min • ${widget.currentMeal.kcal} kcal',
+                          '${widget.currentMeal.minutes} min \u2022 ${widget.currentMeal.kcal} kcal',
                           style: AppTypography.bodySmall.copyWith(
                             color: PremiumTheme.textSecondary(context),
                           ),
@@ -219,6 +228,19 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
                         final meal = _alternatives[index];
                         final isSelected = _selectedMeal == meal;
 
+                        IconData icon = Icons.restaurant;
+                        Color tint = Colors.green;
+                        switch (widget.mealType.toLowerCase()) {
+                          case 'breakfast':
+                            icon = Icons.wb_sunny; tint = Colors.orange; break;
+                          case 'lunch':
+                            icon = Icons.lunch_dining; tint = Colors.amber; break;
+                          case 'dinner':
+                            icon = Icons.dinner_dining; tint = Colors.deepPurple; break;
+                          case 'snack':
+                            icon = Icons.cookie; tint = Colors.brown; break;
+                        }
+
                         return GestureDetector(
                           onTap: () {
                             setState(() => _selectedMeal = meal);
@@ -245,16 +267,12 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(AppSpacing.sm),
                                   decoration: BoxDecoration(
-                                    color: meal.tint.withOpacity(0.15),
+                                    color: tint.withOpacity(0.15),
                                     borderRadius: BorderRadius.circular(
                                       AppRadius.md,
                                     ),
                                   ),
-                                  child: Icon(
-                                    meal.icon,
-                                    color: meal.tint,
-                                    size: 22,
-                                  ),
+                                  child: Icon(icon, color: tint, size: 22),
                                 ),
                                 const SizedBox(width: AppSpacing.md),
                                 Expanded(
@@ -262,14 +280,14 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        meal.title,
+                                        meal.name,
                                         style: AppTypography.bodyMedium.copyWith(
                                           color: PremiumTheme.textPrimary(context),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                       Text(
-                                        '${meal.minutes} min • ${meal.kcal} kcal',
+                                        '${meal.minutes ?? "?"} min \u2022 ${meal.calories ?? "?"} kcal',
                                         style: AppTypography.bodySmall.copyWith(
                                           color: PremiumTheme.textSecondary(context),
                                         ),
@@ -315,6 +333,32 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SwapOption {
+  final String? recipeId;
+  final String name;
+  final int? minutes;
+  final int? calories;
+  final String? imageUrl;
+
+  _SwapOption({
+    this.recipeId,
+    required this.name,
+    this.minutes,
+    this.calories,
+    this.imageUrl,
+  });
+
+  factory _SwapOption.fromJson(Map<String, dynamic> json) {
+    return _SwapOption(
+      recipeId: json['recipeId']?.toString(),
+      name: json['name'] as String? ?? 'Unknown',
+      minutes: json['totalTimeMinutes'] as int?,
+      calories: json['caloriesPerServing'] as int?,
+      imageUrl: json['imageUrl'] as String?,
     );
   }
 }

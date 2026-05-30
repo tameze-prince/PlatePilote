@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/network/api_client.dart';
 import '../../core/repositories/recipe_repository.dart';
 import '../../shared/models/demo_data.dart';
 import '../../shared/models/meal_plan.dart';
@@ -183,11 +184,13 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     }
   }
 
-  Future<void> generateNewPlan() async {
+  Future<void> generateNewPlan({String? mode}) async {
     state = state.copyWith(isGenerating: true, clearError: true);
     try {
       final repo = ref.read(mealPlanRepositoryProvider);
-      final plan = await repo.generateWeeklyPlan(startDate: _nextMonday());
+      final plan = mode != null
+          ? await repo.generateWeeklyPlanWithMode(startDate: _nextMonday(), mode: mode)
+          : await repo.generateWeeklyPlan(startDate: _nextMonday());
       final meals = await _entriesToMeals(plan.entries);
       final updatedPlans = [plan, ...state.availablePlans];
       state = MealPlanState(
@@ -296,7 +299,10 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     }
   }
 
-  Future<void> refresh() => _loadCurrentPlan();
+  Future<List<Meal>> refresh() async {
+    await _loadCurrentPlan();
+    return state.meals;
+  }
 }
 
 final mealPlanProvider = NotifierProvider<MealPlanNotifier, MealPlanState>(

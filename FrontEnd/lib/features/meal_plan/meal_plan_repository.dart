@@ -78,7 +78,7 @@ class MealPlanRepository extends BaseRepository {
           'mealDate': mealDate,
           'mealType': mealType,
           'servings': servings,
-          'notes': ?notes,
+          'notes': notes,
         },
       );
       return handleResponse(response, MealPlan.fromJson);
@@ -106,6 +106,60 @@ class MealPlanRepository extends BaseRepository {
   Future<void> deleteMealPlan(String planId) async {
     try {
       await apiClient.delete('/meal-plans/$planId');
+    } on DioException catch (e) {
+      throw ApiException(extractMessage(e), e.response?.statusCode);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getSwapOptions(
+      String entryId, int limit) async {
+    try {
+      final response = await apiClient.get(
+        '/meal-plans/entries/$entryId/swap-options',
+        query: {'limit': limit},
+      );
+      final data = response.data;
+      if (data is Map && data['data'] is List) {
+        return (data['data'] as List).cast<Map<String, dynamic>>();
+      }
+      return [];
+    } on DioException catch (_) {
+      return [];
+    }
+  }
+
+  Future<MealPlan> applySwap(String entryId, String newRecipeId) async {
+    try {
+      final response = await apiClient.post(
+        '/meal-plans/entries/$entryId/swap',
+        query: {'newRecipeId': newRecipeId},
+      );
+      return handleResponse(response, MealPlan.fromJson);
+    } on DioException catch (e) {
+      throw ApiException(extractMessage(e), e.response?.statusCode);
+    }
+  }
+
+  Future<MealPlan> setMode(String planId, String mode) async {
+    try {
+      final response = await apiClient.put(
+        '/meal-plans/$planId/mode',
+        query: {'mode': mode},
+      );
+      return handleResponse(response, MealPlan.fromJson);
+    } on DioException catch (e) {
+      throw ApiException(extractMessage(e), e.response?.statusCode);
+    }
+  }
+
+  Future<MealPlan> generateWeeklyPlanWithMode(
+      {required String startDate, String mode = 'STANDARD'}) async {
+    try {
+      final response = await apiClient.post(
+        '/meal-plans/generate',
+        query: {'startDate': startDate, 'mode': mode},
+      );
+      return handleResponse(response, MealPlan.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }

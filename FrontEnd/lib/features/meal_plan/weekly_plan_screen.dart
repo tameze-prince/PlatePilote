@@ -12,6 +12,7 @@ import '../../shared/models/demo_data.dart';
 import '../../shared/widgets/shimmer_glass_skeleton.dart';
 import '../grocery/grocery_provider.dart';
 import 'meal_plan_provider.dart';
+import 'meal_plan_repository.dart';
 
 class WeeklyPlanScreen extends ConsumerStatefulWidget {
   const WeeklyPlanScreen({super.key});
@@ -83,6 +84,8 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
+              _buildModeSelector(context, ref, state),
+              const SizedBox(height: AppSpacing.md),
               _buildActionRow(context, ref, state, isTablet, screenWidth),
               const SizedBox(height: AppSpacing.md),
               if (state.error != null)
@@ -101,6 +104,71 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  static const List<Map<String, String>> _modes = [
+    {'key': 'STANDARD', 'label': 'Standard', 'icon': '⚖️'},
+    {'key': 'WASTELESS', 'label': 'Waste Less', 'icon': '♻️'},
+    {'key': 'ENDOFMONTH', 'label': 'End of Month', 'icon': '💰'},
+    {'key': 'BUSYWEEK', 'label': 'Busy Week', 'icon': '⚡'},
+    {'key': 'FAMILY', 'label': 'Family', 'icon': '👨‍👩‍👧‍👧'},
+  ];
+
+  Widget _buildModeSelector(BuildContext context, WidgetRef ref, MealPlanState state) {
+    final currentMode = state.currentPlan?.mode ?? 'STANDARD';
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: _modes.map((m) {
+          final isActive = currentMode == m['key'];
+          return Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            child:             GestureDetector(
+              onTap: () async {
+                if (isActive) return;
+                final planId = state.currentPlan?.id;
+                if (planId != null) {
+                  try {
+                    final repo = ref.read(mealPlanRepositoryProvider);
+                    await repo.setMode(planId, m['key']!);
+                    await ref.read(mealPlanProvider.notifier).refresh();
+                  } catch (_) {
+                    await ref.read(mealPlanProvider.notifier)
+                        .generateNewPlan(mode: m['key']!);
+                  }
+                } else {
+                  await ref.read(mealPlanProvider.notifier)
+                      .generateNewPlan(mode: m['key']!);
+                }
+              },
+              child: GlassContainer(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md, vertical: AppSpacing.sm,
+                ),
+                borderRadius: AppRadius.full,
+                elevated: isActive,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(m['icon']!, style: const TextStyle(fontSize: 14)),
+                    const SizedBox(width: 6),
+                    Text(
+                      m['label']!,
+                      style: AppTypography.labelSmall.copyWith(
+                        color: isActive
+                            ? AppColors.primaryAccentGreen
+                            : PremiumTheme.textSecondary(context),
+                        fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
