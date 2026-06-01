@@ -1,0 +1,12 @@
+node_modules/
+
+# Logs
+logs
+
+package-lock.json
+yarn.lock
+package.json
+post-social-media.js
+
+fb-auto-post.js
+generate-visuals.js

@@ -5,7 +5,13 @@ class MealPlan {
     this.startDate,
     this.endDate,
     this.status,
+    this.mode,
     this.entries = const [],
+    this.totalCost,
+    this.totalTime,
+    this.totalCalories,
+    this.mealCount,
+    this.costPerMeal,
     this.createdAt,
     this.updatedAt,
   });
