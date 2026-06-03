@@ -6,16 +6,17 @@ import 'app_typography.dart';
 import 'app_elevation.dart';
 import 'app_animations.dart';
 
+/// Construit le thème sombre de l'application.
 ThemeData buildDarkTheme() {
   final textTheme = AppTypography.createTextTheme(
     primary: AppColors.darkOnBackground,
     secondary: AppColors.darkOnSurfaceVariant,
   );
-  
+
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
-    
+
     // Color scheme
     colorScheme: ColorScheme(
       brightness: Brightness.dark,
@@ -48,7 +49,7 @@ ThemeData buildDarkTheme() {
       inversePrimary: AppColors.primaryAccentGreen,
       surfaceTint: AppColors.primaryAccentGreen,
     ),
-    
+
     // Text theme
     textTheme: textTheme,
     primaryTextTheme: textTheme.copyWith(
@@ -56,10 +57,10 @@ ThemeData buildDarkTheme() {
       bodyMedium: textTheme.bodyMedium?.copyWith(color: AppColors.darkBackground),
       bodySmall: textTheme.bodySmall?.copyWith(color: AppColors.darkOnInverseSurface.withOpacity(0.7)),
     ),
-    
+
     // Scaffold
     scaffoldBackgroundColor: AppColors.darkBackground,
-    
+
     // App bar
     appBarTheme: AppBarTheme(
       backgroundColor: AppColors.darkSurface.withOpacity(0.95),
@@ -80,7 +81,7 @@ ThemeData buildDarkTheme() {
         size: 24,
       ),
     ),
-    
+
     // Bottom navigation
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: AppColors.darkSurface,
@@ -94,7 +95,7 @@ ThemeData buildDarkTheme() {
       unselectedLabelStyle: textTheme.labelMedium,
       showUnselectedLabels: true,
     ),
-    
+
     // Navigation bar (Material 3)
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.darkSurface,
@@ -125,7 +126,7 @@ ThemeData buildDarkTheme() {
       elevation: AppElevation.navigationBar,
       height: 80,
     ),
-    
+
     // Cards
     cardTheme: CardThemeData(
       color: AppColors.darkSurface,
@@ -140,7 +141,7 @@ ThemeData buildDarkTheme() {
       ),
       clipBehavior: Clip.antiAlias,
     ),
-    
+
     // Chips
     chipTheme: ChipThemeData(
       backgroundColor: AppColors.darkSurfaceContainerLow,
@@ -158,7 +159,7 @@ ThemeData buildDarkTheme() {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       checkmarkColor: AppColors.primaryLight,
     ),
-    
+
     // Switches
     switchTheme: SwitchThemeData(
       trackColor: WidgetStateProperty.resolveWith((states) {
@@ -180,7 +181,7 @@ ThemeData buildDarkTheme() {
         return AppColors.darkOutline;
       }),
     ),
-    
+
     // Checkboxes
     checkboxTheme: CheckboxThemeData(
       fillColor: WidgetStateProperty.resolveWith((states) {
@@ -198,7 +199,7 @@ ThemeData buildDarkTheme() {
         borderRadius: BorderRadius.circular(AppRadius.xs),
       ),
     ),
-    
+
     // Radio buttons
     radioTheme: RadioThemeData(
       fillColor: WidgetStateProperty.resolveWith((states) {
@@ -208,14 +209,14 @@ ThemeData buildDarkTheme() {
         return AppColors.darkOnSurfaceVariant;
       }),
     ),
-    
+
     // Dividers
     dividerTheme: DividerThemeData(
       color: AppColors.darkOutline,
       thickness: 1,
       space: 1,
     ),
-    
+
     // Dialogs
     dialogTheme: DialogThemeData(
       backgroundColor: AppColors.darkSurface,
@@ -231,7 +232,7 @@ ThemeData buildDarkTheme() {
       ),
       elevation: AppElevation.dialog,
     ),
-    
+
     // Bottom sheets
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: AppColors.darkSurface,
@@ -244,7 +245,7 @@ ThemeData buildDarkTheme() {
       modalBackgroundColor: AppColors.darkSurface,
       modalElevation: AppElevation.bottomSheet,
     ),
-    
+
     // Snackbars
     snackBarTheme: SnackBarThemeData(
       backgroundColor: AppColors.darkInverseSurface,
@@ -258,7 +259,7 @@ ThemeData buildDarkTheme() {
       ),
       elevation: AppElevation.snackbar,
     ),
-    
+
     // Floating action buttons
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: AppColors.primaryLight,
@@ -272,7 +273,7 @@ ThemeData buildDarkTheme() {
         fontWeight: FontWeight.w600,
       ),
     ),
-    
+
     // Input decoration
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -333,7 +334,7 @@ ThemeData buildDarkTheme() {
         vertical: 16,
       ),
     ),
-    
+
     // Buttons
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -353,7 +354,7 @@ ThemeData buildDarkTheme() {
         minimumSize: const Size.fromHeight(54),
       ),
     ),
-    
+
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: AppColors.primaryLight,
@@ -371,7 +372,7 @@ ThemeData buildDarkTheme() {
         minimumSize: const Size.fromHeight(54),
       ),
     ),
-    
+
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.primaryLight,
@@ -392,7 +393,7 @@ ThemeData buildDarkTheme() {
         minimumSize: const Size.fromHeight(54),
       ),
     ),
-    
+
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: AppColors.primaryLight,
@@ -408,7 +409,7 @@ ThemeData buildDarkTheme() {
         ),
       ),
     ),
-    
+
     // Icon buttons
     iconButtonTheme: IconButtonThemeData(
       style: IconButton.styleFrom(
@@ -418,7 +419,7 @@ ThemeData buildDarkTheme() {
         ),
       ),
     ),
-    
+
     // Progress indicators
     progressIndicatorTheme: ProgressIndicatorThemeData(
       color: AppColors.primaryLight,
@@ -426,7 +427,7 @@ ThemeData buildDarkTheme() {
       circularTrackColor: AppColors.darkSurfaceContainerHigh,
       linearMinHeight: 8,
     ),
-    
+
     // List tiles
     listTileTheme: ListTileThemeData(
       contentPadding: const EdgeInsets.symmetric(
@@ -447,7 +448,7 @@ ThemeData buildDarkTheme() {
         color: AppColors.darkOnSurfaceVariant,
       ),
     ),
-    
+
     // Tooltip
     tooltipTheme: TooltipThemeData(
       decoration: BoxDecoration(
@@ -465,7 +466,7 @@ ThemeData buildDarkTheme() {
       waitDuration: AppAnimations.fast,
       showDuration: AppAnimations.normal,
     ),
-    
+
     // Badge
     badgeTheme: BadgeThemeData(
       backgroundColor: AppColors.error,
@@ -475,7 +476,7 @@ ThemeData buildDarkTheme() {
         fontWeight: FontWeight.w600,
       ),
     ),
-    
+
     // Segmented button
     segmentedButtonTheme: SegmentedButtonThemeData(
       style: SegmentedButton.styleFrom(
@@ -491,7 +492,7 @@ ThemeData buildDarkTheme() {
         ),
       ),
     ),
-    
+
     // Slider
     sliderTheme: SliderThemeData(
       activeTrackColor: AppColors.primaryLight,
@@ -510,7 +511,7 @@ ThemeData buildDarkTheme() {
         overlayRadius: 20,
       ),
     ),
-    
+
     // Dropdown
     dropdownMenuTheme: DropdownMenuThemeData(
       textStyle: textTheme.bodyMedium?.copyWith(
@@ -529,7 +530,7 @@ ThemeData buildDarkTheme() {
         ),
       ),
     ),
-    
+
     // Menu
     menuTheme: MenuThemeData(
       style: MenuStyle(
@@ -545,7 +546,7 @@ ThemeData buildDarkTheme() {
         ),
       ),
     ),
-    
+
     // Popup menu
     popupMenuTheme: PopupMenuThemeData(
       color: AppColors.darkSurface,
@@ -557,7 +558,7 @@ ThemeData buildDarkTheme() {
         color: AppColors.darkOnSurface,
       ),
     ),
-    
+
     // Tab bar
     tabBarTheme: TabBarThemeData(
       indicatorColor: AppColors.primaryLight,
@@ -577,7 +578,7 @@ ThemeData buildDarkTheme() {
       ),
       dividerColor: AppColors.darkOutline,
     ),
-    
+
     // Expansion tile
     expansionTileTheme: ExpansionTileThemeData(
       backgroundColor: AppColors.darkSurface,
@@ -593,7 +594,7 @@ ThemeData buildDarkTheme() {
       textColor: AppColors.darkOnSurface,
       collapsedTextColor: AppColors.darkOnSurface,
     ),
-    
+
     // Date picker
     datePickerTheme: DatePickerThemeData(
       backgroundColor: AppColors.darkSurface,
@@ -627,7 +628,7 @@ ThemeData buildDarkTheme() {
         color: AppColors.darkOnSurface,
       ),
     ),
-    
+
     // Time picker
     timePickerTheme: TimePickerThemeData(
       backgroundColor: AppColors.darkSurface,
@@ -654,7 +655,7 @@ ThemeData buildDarkTheme() {
       dialHandColor: AppColors.primaryLight,
       entryModeIconColor: AppColors.darkOnSurfaceVariant,
     ),
-    
+
     // Search bar
     searchBarTheme: SearchBarThemeData(
       backgroundColor: WidgetStateProperty.all(AppColors.darkSurfaceContainerLow),
@@ -678,7 +679,7 @@ ThemeData buildDarkTheme() {
         const EdgeInsets.symmetric(horizontal: 16),
       ),
     ),
-    
+
     // Search view
     searchViewTheme: SearchViewThemeData(
       backgroundColor: AppColors.darkSurface,

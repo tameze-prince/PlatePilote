@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_radius.dart';
 import '../../core/premium_components.dart';
 
+/// Squelette d'affichage avec effet shimmer et verre.
 class ShimmerGlassSkeleton extends StatefulWidget {
   const ShimmerGlassSkeleton({
     super.key,
@@ -11,8 +12,11 @@ class ShimmerGlassSkeleton extends StatefulWidget {
     this.borderRadius,
   });
 
+  /// Largeur du squelette.
   final double width;
+  /// Hauteur du squelette.
   final double height;
+  /// Rayon de bordure.
   final double? borderRadius;
 
   @override
@@ -21,7 +25,9 @@ class ShimmerGlassSkeleton extends StatefulWidget {
 
 class _ShimmerGlassSkeletonState extends State<ShimmerGlassSkeleton>
     with SingleTickerProviderStateMixin {
+  /// Contrôleur d'animation du shimmer.
   late final AnimationController _controller;
+  /// Animation du gradient.
   late final Animation<double> _animation;
 
   @override

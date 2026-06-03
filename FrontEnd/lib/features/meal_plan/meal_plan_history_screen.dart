@@ -12,6 +12,8 @@ import '../../shared/models/meal_plan.dart';
 import 'meal_plan_repository.dart';
 import 'meal_plan_provider.dart';
 
+/// Écran d'historique des plans de repas.
+/// Permet de consulter et recharger les plans de repas passés.
 class MealPlanHistoryScreen extends ConsumerStatefulWidget {
   const MealPlanHistoryScreen({super.key});
 
@@ -22,7 +24,10 @@ class MealPlanHistoryScreen extends ConsumerStatefulWidget {
 
 class _MealPlanHistoryScreenState
     extends ConsumerState<MealPlanHistoryScreen> {
+  /// Liste des plans de repas historiques.
   List<MealPlan> _history = [];
+
+  /// Indique si le chargement est en cours.
   bool _isLoading = true;
 
   @override
@@ -31,6 +36,7 @@ class _MealPlanHistoryScreenState
     _loadHistory();
   }
 
+  /// Charge l'historique des plans depuis l'API.
   Future<void> _loadHistory() async {
     setState(() => _isLoading = true);
     try {
@@ -45,6 +51,7 @@ class _MealPlanHistoryScreenState
     }
   }
 
+  /// Formate la plage de dates d'un plan pour l'affichage.
   String _formatDateRange(MealPlan plan) {
     final start = plan.startDate ?? '';
     final end = plan.endDate ?? '';
@@ -79,6 +86,7 @@ class _MealPlanHistoryScreenState
     );
   }
 
+  /// Construit une carte d'historique pour un plan de repas.
   Widget _buildHistoryCard(MealPlan plan, int index) {
     final mealCount = plan.entries.length;
     return Padding(

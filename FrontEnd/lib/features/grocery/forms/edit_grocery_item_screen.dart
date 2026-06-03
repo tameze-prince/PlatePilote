@@ -11,7 +11,10 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/secondary_button.dart';
 import '../../../shared/models/demo_data.dart';
 
+/// Écran d'édition d'un article de la liste de courses.
+/// Permet de modifier le nom, la quantité, le prix et la catégorie.
 class EditGroceryItemScreen extends ConsumerStatefulWidget {
+  /// Article à modifier (null pour un ajout).
   final GroceryItem? item;
 
   const EditGroceryItemScreen({super.key, this.item});
@@ -22,13 +25,25 @@ class EditGroceryItemScreen extends ConsumerStatefulWidget {
 }
 
 class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
+  /// Clé globale pour la validation du formulaire.
   final _formKey = GlobalKey<FormState>();
+
+  /// Contrôleur pour le nom de l'article.
   late TextEditingController _nameController;
+
+  /// Contrôleur pour la quantité.
   late TextEditingController _quantityController;
+
+  /// Contrôleur pour le prix.
   late TextEditingController _priceController;
+
+  /// Catégorie sélectionnée.
   late String _selectedCategory;
+
+  /// Indique si l'article est coché (acheté).
   late bool _isChecked;
 
+  /// Liste des catégories disponibles.
   final List<String> _categories = [
     'Produce',
     'Dairy & Eggs',
@@ -63,6 +78,7 @@ class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
     super.dispose();
   }
 
+  /// Sauvegarde les modifications et retourne à l'écran précédent.
   Future<void> _saveItem() async {
     if (!_formKey.currentState!.validate()) return;
     if (context.mounted) {
@@ -70,6 +86,7 @@ class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
     }
   }
 
+  /// Supprime l'article après confirmation et retourne à l'écran précédent.
   Future<void> _deleteItem() async {
     final confirmed = await showDialog<bool>(
       context: context,

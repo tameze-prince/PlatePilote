@@ -15,6 +15,8 @@ import '../../../shared/models/ingredient.dart';
 import '../ingredient_repository.dart';
 import '../pantry_provider.dart';
 
+/// Écran d'ajout d'article au garde-manger.
+/// Permet de rechercher un ingrédient, de le sélectionner et de saisir les détails.
 class AddPantryItemScreen extends ConsumerStatefulWidget {
   const AddPantryItemScreen({super.key});
 
@@ -24,22 +26,52 @@ class AddPantryItemScreen extends ConsumerStatefulWidget {
 }
 
 class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
+  /// Clé globale pour la validation du formulaire.
   final _formKey = GlobalKey<FormState>();
+
+  /// Contrôleur pour la recherche.
   final _searchController = TextEditingController();
+
+  /// Contrôleur pour le nom de l'ingrédient.
   final _nameController = TextEditingController();
+
+  /// Contrôleur pour la quantité.
   final _quantityController = TextEditingController();
+
+  /// Contrôleur pour l'unité.
   final _unitController = TextEditingController(text: 'unit');
+
+  /// Contrôleur pour la date d'expiration.
   final _expirationController = TextEditingController();
+
+  /// Catégorie sélectionnée.
   String _category = 'Vegetables';
+
+  /// Date d'expiration choisie.
   DateTime? _expirationDate;
+
+  /// Ingrédient sélectionné dans les résultats.
   Ingredient? _selectedIngredient;
+
+  /// Résultats de la recherche.
   List<Ingredient> _searchResults = [];
+
+  /// Indique si la recherche est en cours.
   bool _isSearching = false;
+
+  /// Timer pour le debounce de la recherche.
   Timer? _debounce;
+
+  /// Indique si les résultats doivent être affichés.
   bool _showResults = false;
+
+  /// Indique si la sauvegarde est en cours.
   bool _saving = false;
+
+  /// Recherches récentes.
   List<String> _recentSearches = [];
 
+  /// Liste des catégories disponibles.
   static const _categories = [
     'Vegetables',
     'Fruits',
@@ -69,6 +101,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     super.dispose();
   }
 
+  /// Déclenche la recherche après un délai (debounce).
   void _onSearchChanged() {
     _debounce?.cancel();
     final query = _searchController.text.trim();
@@ -82,6 +115,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     _debounce = Timer(const Duration(milliseconds: 400), () => _search(query));
   }
 
+  /// Effectue la recherche d'ingrédients via le dépôt.
   Future<void> _search(String query) async {
     setState(() => _isSearching = true);
     try {
@@ -106,6 +140,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     }
   }
 
+  /// Parcourt les ingrédients d'une catégorie donnée.
   Future<void> _browseCategory(String category) async {
     setState(() {
       _isSearching = true;
@@ -127,6 +162,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     }
   }
 
+  /// Sélectionne un ingrédient et pré-remplit le formulaire.
   void _selectIngredient(Ingredient ingredient) {
     setState(() {
       _selectedIngredient = ingredient;
@@ -146,6 +182,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     });
   }
 
+  /// Réinitialise la sélection d'ingrédient.
   void _clearSelection() {
     setState(() {
       _selectedIngredient = null;
@@ -155,6 +192,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     });
   }
 
+  /// Ouvre le sélecteur de date pour choisir la date d'expiration.
   Future<void> _pickDate() async {
     final date = await showDatePicker(
       context: context,
@@ -169,6 +207,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     }
   }
 
+  /// Soumet le formulaire et ajoute l'article au garde-manger.
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
@@ -288,6 +327,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     );
   }
 
+  /// Construit la section de recherche d'ingrédients.
   Widget _buildSearchSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -480,6 +520,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     );
   }
 
+  /// Construit la carte "aucun résultat".
   Widget _buildNoResultsCard() {
     final query = _searchController.text.trim();
     return GlassContainer(
@@ -522,6 +563,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     );
   }
 
+  /// Construit la carte d'information sur le scan de code-barres (à venir).
   Widget _buildBarcodeCard() {
     return GlassContainer(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -584,6 +626,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     );
   }
 
+  /// Construit la carte récapitulative de l'ingrédient sélectionné.
   Widget _buildSelectedIngredientCard() {
     final ing = _selectedIngredient!;
     return GlassContainer(
@@ -680,6 +723,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     );
   }
 
+  /// Construit un chip d'information nutritionnelle.
   Widget _nutrientChip(String label, double? value, String unit) {
     if (value == null) return const SizedBox.shrink();
     return Container(
@@ -699,6 +743,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     );
   }
 
+  /// Retourne les tags diététiques (végétalien, sans gluten, etc.).
   List<String> _dietaryTags(Ingredient ing) {
     final tags = <String>[];
     if (ing.vegan == true) tags.add('Vegan');
@@ -709,6 +754,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     return tags;
   }
 
+  /// Construit le formulaire de saisie des détails de l'article.
   Widget _buildFormSection() {
     return GlassContainer(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -794,6 +840,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     );
   }
 
+  /// Retourne l'icône correspondant à une catégorie.
   IconData _categoryIcon(String category) {
     return switch (category.toLowerCase()) {
       'vegetables' => Icons.eco,
@@ -807,6 +854,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
     };
   }
 
+  /// Retourne le libellé d'une catégorie avec le nombre de résultats.
   String _categoryCountLabel(String category) {
     final count = _searchResults
         .where(
@@ -818,6 +866,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
   }
 }
 
+/// Chip de navigation pour parcourir une catégorie d'ingrédients.
 class _BrowseCategoryChip extends StatelessWidget {
   const _BrowseCategoryChip({
     required this.label,
@@ -825,8 +874,13 @@ class _BrowseCategoryChip extends StatelessWidget {
     required this.onTap,
   });
 
+  /// Texte du chip.
   final String label;
+
+  /// Icône du chip.
   final IconData icon;
+
+  /// Callback au clic.
   final VoidCallback onTap;
 
   @override
@@ -862,6 +916,8 @@ class _BrowseCategoryChip extends StatelessWidget {
   }
 }
 
+/// Extension pour simplifier l'accès aux propriétés diététiques.
 extension on Ingredient {
+  /// Vrai si l'ingrédient est sans gluten.
   bool get glutenFree => containsGluten == false;
 }

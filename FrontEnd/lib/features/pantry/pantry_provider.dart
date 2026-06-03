@@ -5,6 +5,8 @@ import '../../shared/models/demo_data.dart' as demo;
 import '../../shared/models/pantry_item.dart';
 import 'pantry_repository.dart';
 
+/// État de la liste du garde-manger.
+/// Contient les articles, l'état de chargement et les erreurs.
 class PantryListState {
   const PantryListState({
     this.items = const [],
@@ -13,11 +15,19 @@ class PantryListState {
     this.useDemoFallback = false,
   });
 
+  /// Liste des articles du garde-manger.
   final List<PantryItem> items;
+
+  /// Indique si le chargement est en cours.
   final bool isLoading;
+
+  /// Message d'erreur éventuel.
   final String? error;
+
+  /// Utilise les données de démonstration en fallback.
   final bool useDemoFallback;
 
+  /// Crée une copie avec des champs mis à jour.
   PantryListState copyWith({
     List<PantryItem>? items,
     bool? isLoading,
@@ -34,6 +44,8 @@ class PantryListState {
   }
 }
 
+/// Notifier qui gère l'état du garde-manger.
+/// Charge, ajoute, modifie et supprime des articles.
 class PantryNotifier extends Notifier<PantryListState> {
   @override
   PantryListState build() {
@@ -45,6 +57,7 @@ class PantryNotifier extends Notifier<PantryListState> {
     );
   }
 
+  /// Articles de démonstration utilisés en fallback.
   static final List<PantryItem> _demoItems =
       demo.pantryItems.map((d) => PantryItem(
         id: d.name.hashCode.toString(),
@@ -56,6 +69,7 @@ class PantryNotifier extends Notifier<PantryListState> {
         isExpired: d.urgent,
       )).toList();
 
+  /// Charge les articles du garde-manger depuis l'API.
   Future<void> _loadItems() async {
     try {
       final repo = ref.read(pantryRepositoryProvider);
@@ -66,8 +80,10 @@ class PantryNotifier extends Notifier<PantryListState> {
     }
   }
 
+  /// Recharge les articles du garde-manger.
   Future<void> refresh() => _loadItems();
 
+  /// Ajoute un article au garde-manger.
   Future<void> addItem({
     required String name,
     String? category,
@@ -90,6 +106,7 @@ class PantryNotifier extends Notifier<PantryListState> {
     }
   }
 
+  /// Met à jour la quantité d'un article (consommation).
   Future<void> updateItemQuantity(int index, double quantity, String unit) async {
     if (index >= state.items.length) return;
     final item = state.items[index];
@@ -106,6 +123,7 @@ class PantryNotifier extends Notifier<PantryListState> {
     }
   }
 
+  /// Supprime un article du garde-manger.
   Future<void> deleteItem(int index) async {
     if (index >= state.items.length) return;
     final item = state.items[index];
@@ -120,6 +138,7 @@ class PantryNotifier extends Notifier<PantryListState> {
   }
 }
 
+/// Fournisseur de l'état du garde-manger.
 final pantryProvider = NotifierProvider<PantryNotifier, PantryListState>(
   PantryNotifier.new,
 );

@@ -394,6 +394,7 @@ class _GroceryCostBreakdownScreenState
     );
   }
 
+  /// Construit une astuce d'économie.
   Widget _buildTipItem(String tip, String savings) {
     return Row(
       children: [

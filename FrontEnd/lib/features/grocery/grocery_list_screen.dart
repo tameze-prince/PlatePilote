@@ -12,6 +12,8 @@ import '../../shared/widgets/shimmer_glass_skeleton.dart';
 import '../budget/budget_provider.dart';
 import 'grocery_provider.dart';
 
+/// Écran principal de la liste de courses.
+/// Affiche les articles groupés par catégorie avec progression et résumé budgétaire.
 class GroceryListScreen extends ConsumerStatefulWidget {
   const GroceryListScreen({super.key});
 
@@ -20,6 +22,7 @@ class GroceryListScreen extends ConsumerStatefulWidget {
 }
 
 class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
+  /// Évite une double initialisation.
   bool _didInit = false;
 
   @override
@@ -33,6 +36,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     }
   }
 
+  /// Ouvre le dialogue d'ajout rapide d'article.
   void _showAddItemDialog() {
     final nameCtrl = TextEditingController();
     final qtyCtrl = TextEditingController(text: '1');
@@ -170,6 +174,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     );
   }
 
+  /// Ouvre le dialogue d'édition de la quantité d'un article.
   void _editItem(int index, GroceryItem item) {
     final qtyController = TextEditingController(
       text: item.quantity?.toStringAsFixed(1) ?? '1',
@@ -246,6 +251,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     );
   }
 
+  /// Affiche une confirmation avant de supprimer un article.
   void _deleteItem(int index, GroceryItem item) {
     showDialog(
       context: context,
@@ -335,6 +341,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     );
   }
 
+  /// Construit la vue liste complète avec les sections.
   Widget _buildListView(
     BuildContext context,
     GroceryListState state,
@@ -456,6 +463,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     );
   }
 
+  /// Construit la carte de résumé (total, progression, budget).
   Widget _buildSummaryCard(
     BuildContext context,
     GroceryListState state,
@@ -597,6 +605,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     );
   }
 
+  /// Construit un chip coloré pour afficher un indicateur.
   Widget _buildChip(BuildContext context, String label, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -615,6 +624,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     );
   }
 
+  /// Construit l'en-tête d'une section de catégorie.
   Widget _buildSectionHeader(
     BuildContext context, {
     required IconData icon,
@@ -639,6 +649,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     );
   }
 
+  /// Construit l'indicateur de balayage pour les actions rapides.
   Widget _buildSwipeHint(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -673,6 +684,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     );
   }
 
+  /// Construit la vue lorsque la liste est vide.
   Widget _buildEmptyView(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -737,6 +749,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     );
   }
 
+  /// Construit la vue d'erreur avec bouton de réessai.
   Widget _buildErrorView(BuildContext context) {
     return Center(
       child: Padding(
@@ -765,6 +778,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     );
   }
 
+  /// Retourne l'icône correspondant à une catégorie.
   IconData _categoryIcon(String category) {
     return switch (category) {
       'Produce' => Icons.eco,
@@ -775,6 +789,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     };
   }
 
+  /// Vérifie si un article doit être épinglé en priorité.
   bool _isPinnedItem(GroceryItem item) {
     return item.isHighPriority || (item.notes?.trim().startsWith('!') ?? false);
   }

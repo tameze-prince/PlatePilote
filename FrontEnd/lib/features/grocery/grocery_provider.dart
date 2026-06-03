@@ -7,6 +7,8 @@ import '../../shared/models/purchase_record.dart';
 import '../pantry/pantry_provider.dart';
 import 'grocery_repository.dart';
 
+/// État de la liste de courses.
+/// Contient la liste courante, les articles, l'historique et l'état de chargement.
 class GroceryListState {
   const GroceryListState({
     this.currentList,
@@ -18,19 +20,35 @@ class GroceryListState {
     this.isSaving = false,
   });
 
+  /// Liste de courses courante.
   final GroceryList? currentList;
+
+  /// Articles de la liste.
   final List<GroceryItem> items;
+
+  /// Indique si le chargement est en cours.
   final bool isLoading;
+
+  /// Message d'erreur éventuel.
   final String? error;
+
+  /// Utilise les données de démonstration en fallback.
   final bool useDemoFallback;
+
+  /// Historique des achats.
   final List<PurchaseRecord> purchaseHistory;
+
+  /// Indique si la sauvegarde est en cours.
   final bool isSaving;
 
+  /// Prix total estimé de tous les articles.
   double get totalEstimatedPrice =>
       items.fold<double>(0, (sum, item) => sum + (item.estimatedPrice ?? 0));
 
+  /// Nombre d'articles cochés (achetés).
   int get checkedCount => items.where((i) => i.checked).length;
 
+  /// Crée une copie avec des champs mis à jour.
   GroceryListState copyWith({
     GroceryList? currentList,
     List<GroceryItem>? items,
@@ -53,6 +71,8 @@ class GroceryListState {
   }
 }
 
+/// Notifier qui gère l'état de la liste de courses.
+/// Charge, ajoute, modifie et supprime des articles, gère le checkout.
 class GroceryNotifier extends Notifier<GroceryListState> {
   @override
   GroceryListState build() {
@@ -62,6 +82,7 @@ class GroceryNotifier extends Notifier<GroceryListState> {
     );
   }
 
+  /// Articles de démonstration utilisés en fallback.
   static final List<GroceryItem> _demoItems =
       demo.groceryItems.map((d) => GroceryItem(
         name: d.name,
@@ -72,6 +93,7 @@ class GroceryNotifier extends Notifier<GroceryListState> {
         checked: d.checked,
       )).toList();
 
+  /// Charge la liste de courses courante depuis l'API.
   Future<void> _loadCurrentList() async {
     try {
       final repo = ref.read(groceryRepositoryProvider);
@@ -90,6 +112,7 @@ class GroceryNotifier extends Notifier<GroceryListState> {
     }
   }
 
+  /// Génère une liste de courses à partir d'un plan de repas.
   Future<void> generateFromMealPlan(String mealPlanId) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
@@ -101,6 +124,7 @@ class GroceryNotifier extends Notifier<GroceryListState> {
     }
   }
 
+  /// Bascule l'état coché/décoché d'un article.
   Future<void> toggleItem(int index) async {
     final items = [...state.items];
     if (index >= items.length) return;
@@ -116,6 +140,7 @@ class GroceryNotifier extends Notifier<GroceryListState> {
     }
   }
 
+  /// Met à jour la quantité et l'unité d'un article.
   Future<void> updateItemQuantity(int index, double quantity, String unit) async {
     if (index >= state.items.length) return;
     final item = state.items[index];
@@ -125,6 +150,7 @@ class GroceryNotifier extends Notifier<GroceryListState> {
     state = state.copyWith(items: items);
   }
 
+  /// Supprime un article de la liste (optimiste).
   Future<void> removeItem(int index) async {
     if (index >= state.items.length) return;
     final item = state.items[index];
@@ -139,6 +165,7 @@ class GroceryNotifier extends Notifier<GroceryListState> {
     }
   }
 
+  /// Ajoute un article à la liste de courses.
   Future<void> addItem({
     required String name,
     String? category,
@@ -178,6 +205,7 @@ class GroceryNotifier extends Notifier<GroceryListState> {
     state = state.copyWith(items: [...state.items, newItem]);
   }
 
+  /// Marque les articles cochés comme achetés et met à jour le garde-manger.
   Future<void> markItemsAsBought() async {
     final checkedItems = state.items.where((i) => i.checked).toList();
     if (checkedItems.isEmpty) return;
@@ -226,6 +254,7 @@ class GroceryNotifier extends Notifier<GroceryListState> {
     state = state.copyWith(items: remaining, isSaving: false);
   }
 
+  /// Sauvegarde la liste de courses (complète).
   Future<void> saveList() async {
     state = state.copyWith(isSaving: true);
     final listId = state.currentList?.id;
@@ -240,9 +269,11 @@ class GroceryNotifier extends Notifier<GroceryListState> {
     state = state.copyWith(isSaving: false);
   }
 
+  /// Recharge la liste de courses depuis l'API.
   Future<void> refresh() => _loadCurrentList();
 }
 
+/// Fournisseur de l'état de la liste de courses.
 final groceryProvider = NotifierProvider<GroceryNotifier, GroceryListState>(
   GroceryNotifier.new,
 );

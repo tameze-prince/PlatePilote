@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+/// Définition des styles typographiques de l'application.
 abstract final class AppTypography {
+  /// Police par défaut.
   static const fontFamily = 'Inter';
-  
+
   // Display styles (largest)
   static const displayLarge = TextStyle(
     fontFamily: fontFamily,
@@ -11,7 +13,7 @@ abstract final class AppTypography {
     letterSpacing: 0,
     height: 1.2,
   );
-  
+
   static const displayMedium = TextStyle(
     fontFamily: fontFamily,
     fontSize: 28,
@@ -127,8 +129,8 @@ abstract final class AppTypography {
     letterSpacing: 0.3,
     height: 1.4,
   );
-  
-  // Helper method to create text theme
+
+  /// Crée un [TextTheme] complet avec les couleurs spécifiées.
   static TextTheme createTextTheme({
     required Color primary,
     required Color secondary,

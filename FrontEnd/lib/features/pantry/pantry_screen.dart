@@ -12,6 +12,8 @@ import '../../shared/models/pantry_item.dart';
 import '../../shared/widgets/shimmer_glass_skeleton.dart';
 import 'pantry_provider.dart';
 
+/// Écran principal du garde-manger.
+/// Affiche l'inventaire avec recherche, filtres, et indicateurs d'expiration.
 class PantryScreen extends ConsumerStatefulWidget {
   const PantryScreen({super.key});
 
@@ -20,10 +22,16 @@ class PantryScreen extends ConsumerStatefulWidget {
 }
 
 class _PantryScreenState extends ConsumerState<PantryScreen> {
+  /// Contrôleur pour la recherche.
   final _searchController = TextEditingController();
+
+  /// Filtre de catégorie sélectionné.
   String _selectedFilter = 'All Items';
+
+  /// Évite une double initialisation.
   bool _didInit = false;
 
+  /// Liste des catégories disponibles pour le filtre.
   static const _categories = [
     'All Items',
     'Vegetables',
@@ -53,6 +61,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
     super.dispose();
   }
 
+  /// Filtre les articles par recherche textuelle et catégorie.
   List<PantryItem> _filteredItems(List<PantryItem> items) {
     final query = _searchController.text.toLowerCase();
     var result = items;
@@ -71,6 +80,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
     return result;
   }
 
+  /// Ouvre le dialogue d'édition de la quantité d'un article.
   void _editItem(int index, PantryItem item) {
     final qtyController = TextEditingController(
       text: item.quantity?.toStringAsFixed(1) ?? '1',
@@ -147,6 +157,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
     );
   }
 
+  /// Affiche une confirmation avant de supprimer un article.
   void _deleteItem(int index, PantryItem item) {
     showDialog(
       context: context,
@@ -342,6 +353,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
     );
   }
 
+  /// Modifie la quantité d'un article (incrémente ou décrémente).
   void _changeQuantity(int index, PantryItem item, double delta) {
     final current = item.quantity ?? 0;
     final next = (current + delta).clamp(0, double.infinity).toDouble();
@@ -350,6 +362,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
         .updateItemQuantity(index, next, item.unit ?? 'unit');
   }
 
+  /// Construit la barre de filtres par catégorie.
   Widget _buildFilterBar(BuildContext context) {
     return Container(
       color: PremiumTheme.background(context),
@@ -377,6 +390,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
     );
   }
 
+  /// Construit l'état vide pour un filtre sans résultat.
   Widget _buildFilteredEmptyState() {
     return PremiumCard(
       child: Column(
@@ -407,6 +421,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
     );
   }
 
+  /// Construit l'état vide lorsque le garde-manger est vide.
   Widget _buildEmptyState() {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xxl),
@@ -466,6 +481,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
     );
   }
 
+  /// Construit la carte d'erreur avec bouton de réessai.
   Widget _buildErrorCard(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -503,6 +519,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
   }
 }
 
+/// Carte d'action pour l'état vide du garde-manger.
 class _ActionCard extends StatelessWidget {
   const _ActionCard({
     required this.icon,
@@ -512,10 +529,19 @@ class _ActionCard extends StatelessWidget {
     this.badge,
   });
 
+  /// Icône de l'action.
   final IconData icon;
+
+  /// Titre de l'action.
   final String title;
+
+  /// Sous-titre descriptif.
   final String subtitle;
+
+  /// Callback au clic.
   final VoidCallback? onTap;
+
+  /// Badge optionnel (ex: "Soon").
   final String? badge;
 
   @override
@@ -579,6 +605,7 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
+/// Chip de filtre pour sélectionner une catégorie.
 class _FilterChip extends StatelessWidget {
   const _FilterChip({
     required this.label,
@@ -586,8 +613,13 @@ class _FilterChip extends StatelessWidget {
     required this.onTap,
   });
 
+  /// Texte du filtre.
   final String label;
+
+  /// Indique si le filtre est actif.
   final bool selected;
+
+  /// Callback au clic.
   final VoidCallback onTap;
 
   @override
@@ -623,10 +655,14 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
+/// Délégué d'en-tête persistent pour la barre de filtres.
 class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
   const _FilterHeaderDelegate({required this.child, required this.height});
 
+  /// Widget enfant (barre de filtres).
   final Widget child;
+
+  /// Hauteur de l'en-tête.
   final double height;
 
   @override
@@ -653,6 +689,7 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
+/// Carte d'article du garde-manger avec swipe pour actions.
 class _PantryItemCard extends StatefulWidget {
   const _PantryItemCard({
     required this.item,
@@ -662,10 +699,19 @@ class _PantryItemCard extends StatefulWidget {
     this.onDelete,
   });
 
+  /// Article à afficher.
   final PantryItem item;
+
+  /// Callback pour incrémenter la quantité.
   final VoidCallback? onIncrement;
+
+  /// Callback pour décrémenter la quantité.
   final VoidCallback? onDecrement;
+
+  /// Callback pour éditer la quantité.
   final VoidCallback? onEdit;
+
+  /// Callback pour supprimer l'article.
   final VoidCallback? onDelete;
 
   @override
@@ -674,14 +720,28 @@ class _PantryItemCard extends StatefulWidget {
 
 class _PantryItemCardState extends State<_PantryItemCard>
     with SingleTickerProviderStateMixin {
+  /// Contrôleur pour l'animation de glissement.
   late AnimationController _controller;
+
+  /// Animation de translation pour le swipe.
   late Animation<Offset> _slideAnimation;
+
+  /// Position X initiale du drag.
   double _dragStartX = 0;
+
+  /// Indique si les actions sont visibles.
   bool _isOpen = false;
 
+  /// Largeur d'un bouton d'action.
   static const double _actionWidth = 60;
+
+  /// Nombre d'actions disponibles.
   static const double _totalActions = 2;
+
+  /// Largeur totale de la zone révélée.
   static const double _revealWidth = _actionWidth * _totalActions;
+
+  /// Seuil de détection du glissement.
   static const double _dragThreshold = 30;
 
   @override
@@ -708,6 +768,7 @@ class _PantryItemCardState extends State<_PantryItemCard>
     super.dispose();
   }
 
+  /// Ouvre le panneau d'actions par glissement.
   void _open() {
     if (!_isOpen) {
       _isOpen = true;
@@ -715,6 +776,7 @@ class _PantryItemCardState extends State<_PantryItemCard>
     }
   }
 
+  /// Ferme le panneau d'actions.
   void _close() {
     if (_isOpen) {
       _isOpen = false;
@@ -722,16 +784,19 @@ class _PantryItemCardState extends State<_PantryItemCard>
     }
   }
 
+  /// Enregistre la position de départ du glissement horizontal.
   void _onHorizontalDragStart(DragStartDetails details) {
     _dragStartX = details.localPosition.dx;
   }
 
+  /// Détecte le glissement vers la gauche pour ouvrir les actions.
   void _onHorizontalDragUpdate(DragUpdateDetails details) {
     if (!_isOpen && details.localPosition.dx < _dragStartX - _dragThreshold) {
       _open();
     }
   }
 
+  /// Ferme les actions si ouvertes au clic.
   void _onTap() {
     if (_isOpen) _close();
   }
@@ -882,6 +947,7 @@ class _PantryItemCardState extends State<_PantryItemCard>
     );
   }
 
+  /// Construit un bouton d'action pour le swipe.
   Widget _actionButton({
     required IconData icon,
     required String label,
@@ -912,6 +978,7 @@ class _PantryItemCardState extends State<_PantryItemCard>
     );
   }
 
+  /// Retourne l'icône correspondant à une catégorie.
   IconData _itemIcon(String? category) {
     return switch (category?.toLowerCase()) {
       'vegetables' => Icons.eco,
@@ -926,10 +993,14 @@ class _PantryItemCardState extends State<_PantryItemCard>
   }
 }
 
+/// Bouton circulaire pour modifier la quantité (+/-).
 class _QtyButton extends StatelessWidget {
   const _QtyButton({required this.icon, this.onTap});
 
+  /// Icône du bouton.
   final IconData icon;
+
+  /// Callback au clic.
   final VoidCallback? onTap;
 
   @override
@@ -950,10 +1021,14 @@ class _QtyButton extends StatelessWidget {
   }
 }
 
+/// Petit badge coloré pour indiquer un statut (Low, etc.).
 class _SmallBadge extends StatelessWidget {
   const _SmallBadge({required this.label, required this.color});
 
+  /// Texte du badge.
   final String label;
+
+  /// Couleur du badge.
   final Color color;
 
   @override

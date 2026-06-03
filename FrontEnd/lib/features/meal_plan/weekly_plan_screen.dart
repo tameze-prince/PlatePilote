@@ -14,6 +14,8 @@ import '../grocery/grocery_provider.dart';
 import 'meal_plan_provider.dart';
 import 'meal_plan_repository.dart';
 
+/// Écran du plan hebdomadaire.
+/// Affiche les repas de la semaine, les statistiques et les actions associées.
 class WeeklyPlanScreen extends ConsumerStatefulWidget {
   const WeeklyPlanScreen({super.key});
 
@@ -22,6 +24,7 @@ class WeeklyPlanScreen extends ConsumerStatefulWidget {
 }
 
 class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
+  /// Évite une double initialisation.
   bool _didInit = false;
 
   @override
@@ -116,6 +119,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     {'key': 'FAMILY', 'label': 'Family', 'icon': '👨‍👩‍👧‍👧'},
   ];
 
+  /// Construit le sélecteur de mode de génération du plan.
   Widget _buildModeSelector(BuildContext context, WidgetRef ref, MealPlanState state) {
     final currentMode = state.currentPlan?.mode ?? 'STANDARD';
     return SingleChildScrollView(
@@ -173,6 +177,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     );
   }
 
+  /// Construit le résumé des valeurs (repas, temps, coût).
   Widget _buildValueSummary(BuildContext context, MealPlanState state) {
     final cost = state.estimatedCost;
     final minutes = state.totalMinutes;
@@ -208,6 +213,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     );
   }
 
+  /// Construit le squelette de chargement.
   Widget _buildGlassSkeleton() {
     return Column(
       children: List.generate(7, (i) => Padding(
@@ -220,6 +226,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     );
   }
 
+  /// Construit la rangée d'actions (planifier, sauvegarder, liste de courses).
   Widget _buildActionRow(
     BuildContext context,
     WidgetRef ref,
@@ -285,6 +292,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     );
   }
 
+  /// Construit la carte d'erreur avec bouton de réessai.
   Widget _buildErrorCard(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -324,6 +332,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     );
   }
 
+  /// Construit l'état vide lorsqu'aucun plan n'existe.
   Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
@@ -358,6 +367,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     );
   }
 
+  /// Construit la liste des repas groupés par jour.
   List<Widget> _buildGroupedMeals(
     BuildContext context,
     WidgetRef ref,
@@ -415,6 +425,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     ];
   }
 
+  /// Convertit un nom de jour abrégé en nom complet.
   String _fullDayName(String abbrev) {
     switch (abbrev) {
       case 'Mon': return 'Monday';
@@ -428,6 +439,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     }
   }
 
+  /// Construit la carte budget/transformation en courses.
   Widget _buildBudgetCard(
     BuildContext context,
     WidgetRef ref,
@@ -488,6 +500,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     );
   }
 
+  /// Navigue vers le détail d'une recette.
   void _onMealTap(
     BuildContext context,
     WidgetRef ref,
@@ -499,6 +512,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     }
   }
 
+  /// Navigue vers l'écran d'échange de repas.
   void _onMealSwap(
     BuildContext context,
     WidgetRef ref,
@@ -519,6 +533,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
   }
 }
 
+/// Métrique de valeur pour l'affichage d'une statistique.
 class _ValueMetric extends StatelessWidget {
   const _ValueMetric({
     required this.icon,
@@ -526,8 +541,13 @@ class _ValueMetric extends StatelessWidget {
     required this.value,
   });
 
+  /// Icône de la métrique.
   final IconData icon;
+
+  /// Texte du label.
   final String label;
+
+  /// Valeur affichée.
   final String value;
 
   @override
@@ -560,6 +580,7 @@ class _ValueMetric extends StatelessWidget {
   }
 }
 
+/// Flèche de navigation entre les semaines de plans.
 class _WeekArrow extends StatelessWidget {
   const _WeekArrow({
     required this.icon,
@@ -567,8 +588,13 @@ class _WeekArrow extends StatelessWidget {
     required this.onTap,
   });
 
+  /// Icône de la flèche.
   final IconData icon;
+
+  /// Indique si la navigation est possible.
   final bool enabled;
+
+  /// Callback au clic.
   final VoidCallback onTap;
 
   @override
@@ -587,6 +613,7 @@ class _WeekArrow extends StatelessWidget {
   }
 }
 
+/// Tuile d'action pour les actions rapides du plan hebdomadaire.
 class _ActionTile extends StatelessWidget {
   const _ActionTile({
     required this.icon,
@@ -595,9 +622,16 @@ class _ActionTile extends StatelessWidget {
     this.onTap,
   });
 
+  /// Icône de l'action.
   final IconData icon;
+
+  /// Texte du label.
   final String label;
+
+  /// Couleur de l'action.
   final Color color;
+
+  /// Callback au clic (null = désactivé).
   final VoidCallback? onTap;
 
   @override

@@ -6,6 +6,8 @@ import '../../app/theme/app_spacing.dart';
 import '../../core/widgets/app_card.dart';
 import 'grocery_provider.dart';
 
+/// Écran d'historique des achats.
+/// Affiche la liste des achats passés avec les dates et les montants.
 class PurchaseHistoryScreen extends ConsumerWidget {
   const PurchaseHistoryScreen({super.key});
 

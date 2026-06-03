@@ -15,6 +15,8 @@ import '../../../shared/models/ingredient.dart';
 import '../../pantry/ingredient_repository.dart';
 import '../grocery_provider.dart';
 
+/// Écran d'ajout d'articles à la liste de courses.
+/// Permet de rechercher des ingrédients, d'en sélectionner plusieurs et de les ajouter.
 class AddGroceryItemScreen extends ConsumerStatefulWidget {
   const AddGroceryItemScreen({super.key});
 
@@ -24,21 +26,49 @@ class AddGroceryItemScreen extends ConsumerStatefulWidget {
 }
 
 class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
+  /// Clé globale pour la validation du formulaire.
   final _formKey = GlobalKey<FormState>();
+
+  /// Contrôleur pour la recherche.
   final _searchController = TextEditingController();
+
+  /// Contrôleur pour la saisie manuelle du nom.
   final _manualNameController = TextEditingController();
+
+  /// Contrôleur pour la quantité.
   final _manualQuantityController = TextEditingController(text: '1');
+
+  /// Contrôleur pour l'unité.
   final _unitController = TextEditingController(text: 'unit');
+
+  /// Contrôleur pour les notes.
   final _notesController = TextEditingController();
+
+  /// Catégorie sélectionnée.
   String _category = 'Produce';
+
+  /// Indique si l'ajout est en cours.
   bool _adding = false;
+
+  /// Timer pour le debounce de la recherche.
   Timer? _debounce;
+
+  /// Indique si la recherche est en cours.
   bool _isSearching = false;
+
+  /// Indique si les résultats doivent être affichés.
   bool _showResults = false;
+
+  /// Résultats de la recherche.
   List<Ingredient> _searchResults = [];
+
+  /// Recherches récentes de l'utilisateur.
   List<String> _recentSearches = [];
+
+  /// Ingrédients sélectionnés pour l'ajout.
   final Set<Ingredient> _selectedIngredients = {};
 
+  /// Liste des catégories disponibles.
   static const _categories = [
     'Produce',
     'Dairy & Eggs',
@@ -68,6 +98,7 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
     super.dispose();
   }
 
+  /// Déclenche la recherche après un délai (debounce).
   void _onSearchChanged() {
     _debounce?.cancel();
     final query = _searchController.text.trim();
@@ -81,6 +112,7 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
     _debounce = Timer(const Duration(milliseconds: 400), () => _search(query));
   }
 
+  /// Effectue la recherche d'ingrédients via le dépôt.
   Future<void> _search(String query) async {
     setState(() => _isSearching = true);
     try {
@@ -105,6 +137,7 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
     }
   }
 
+  /// Parcourt les ingrédients d'une catégorie donnée.
   Future<void> _browseCategory(String category) async {
     setState(() {
       _isSearching = true;
@@ -126,6 +159,7 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
     }
   }
 
+  /// Ajoute ou retire un ingrédient de la sélection.
   void _toggleIngredient(Ingredient ing) {
     setState(() {
       if (_selectedIngredients.contains(ing)) {
@@ -136,10 +170,12 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
     });
   }
 
+  /// Sélectionne tous les résultats de la recherche.
   void _selectAllResults() {
     setState(() => _selectedIngredients.addAll(_searchResults));
   }
 
+  /// Soumet le formulaire et ajoute les articles à la liste de courses.
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -314,6 +350,7 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
     );
   }
 
+  /// Construit la section de recherche d'ingrédients.
   Widget _buildSearchSection() {
     return GlassContainer(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -473,6 +510,7 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
     );
   }
 
+  /// Construit l'état "aucun résultat" pour la recherche.
   Widget _buildNoResults() {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
@@ -512,6 +550,7 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
     );
   }
 
+  /// Construit la section des ingrédients sélectionnés.
   Widget _buildSelectedSection() {
     if (_selectedIngredients.isEmpty) return const SizedBox.shrink();
     return GlassContainer(
@@ -579,6 +618,7 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
     );
   }
 
+  /// Construit le formulaire de saisie manuelle.
   Widget _buildFormSection() {
     return GlassContainer(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -676,6 +716,7 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
     );
   }
 
+  /// Construit le bouton de soumission.
   Widget _buildSubmitButton() {
     return SizedBox(
       width: double.infinity,
@@ -712,6 +753,7 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
     );
   }
 
+  /// Retourne l'icône correspondant à une catégorie.
   IconData _categoryIcon(String category) {
     return switch (category.toLowerCase()) {
       'produce' => Icons.eco,
@@ -726,6 +768,7 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
     };
   }
 
+  /// Retourne le libellé d'une catégorie avec le nombre de résultats.
   String _categoryCountLabel(String category) {
     final count = _searchResults
         .where(
@@ -737,6 +780,7 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
   }
 }
 
+/// Chip de navigation pour parcourir une catégorie d'ingrédients.
 class _BrowseChip extends StatelessWidget {
   const _BrowseChip({
     required this.label,
@@ -744,8 +788,13 @@ class _BrowseChip extends StatelessWidget {
     required this.onTap,
   });
 
+  /// Texte du chip.
   final String label;
+
+  /// Icône du chip.
   final IconData icon;
+
+  /// Callback au clic.
   final VoidCallback onTap;
 
   @override

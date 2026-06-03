@@ -6,9 +6,12 @@ import '../../core/network/api_response.dart';
 import '../../core/repositories/base_repository.dart';
 import '../../shared/models/meal_plan.dart';
 
+/// Dépôt des plans de repas.
+/// Communique avec l'API pour gérer les plans, leurs entrées et les swaps.
 class MealPlanRepository extends BaseRepository {
   MealPlanRepository(super.apiClient);
 
+  /// Récupère la liste paginée des plans de repas.
   Future<PageResponse<MealPlan>> listMealPlans({
     int page = 0,
     int size = 20,
@@ -24,6 +27,7 @@ class MealPlanRepository extends BaseRepository {
     }
   }
 
+  /// Récupère un plan de repas par son identifiant.
   Future<MealPlan> getMealPlan(String id) async {
     try {
       final response = await apiClient.get('/meal-plans/$id');
@@ -33,6 +37,7 @@ class MealPlanRepository extends BaseRepository {
     }
   }
 
+  /// Crée un nouveau plan de repas.
   Future<MealPlan> createMealPlan({
     required String name,
     required String startDate,
@@ -50,6 +55,7 @@ class MealPlanRepository extends BaseRepository {
     }
   }
 
+  /// Génère un plan hebdomadaire à partir d'une date de début.
   Future<MealPlan> generateWeeklyPlan({required String startDate}) async {
     try {
       final response = await apiClient.post(
@@ -62,6 +68,7 @@ class MealPlanRepository extends BaseRepository {
     }
   }
 
+  /// Ajoute une entrée (repas) à un plan.
   Future<MealPlan> addEntry(
     String planId, {
     required String recipeId,
@@ -87,6 +94,7 @@ class MealPlanRepository extends BaseRepository {
     }
   }
 
+  /// Supprime une entrée d'un plan de repas.
   Future<void> deleteEntry(String entryId) async {
     try {
       await apiClient.delete('/meal-plans/entries/$entryId');
@@ -95,6 +103,7 @@ class MealPlanRepository extends BaseRepository {
     }
   }
 
+  /// Active un plan de repas.
   Future<void> activatePlan(String planId) async {
     try {
       await apiClient.post('/meal-plans/$planId/activate');
@@ -103,6 +112,7 @@ class MealPlanRepository extends BaseRepository {
     }
   }
 
+  /// Supprime un plan de repas.
   Future<void> deleteMealPlan(String planId) async {
     try {
       await apiClient.delete('/meal-plans/$planId');
@@ -111,6 +121,7 @@ class MealPlanRepository extends BaseRepository {
     }
   }
 
+  /// Récupère les options d'échange pour une entrée de plan.
   Future<List<Map<String, dynamic>>> getSwapOptions(
       String entryId, int limit) async {
     try {
@@ -128,6 +139,7 @@ class MealPlanRepository extends BaseRepository {
     }
   }
 
+  /// Applique un échange de recette sur une entrée.
   Future<MealPlan> applySwap(String entryId, String newRecipeId) async {
     try {
       final response = await apiClient.post(
@@ -140,6 +152,7 @@ class MealPlanRepository extends BaseRepository {
     }
   }
 
+  /// Définit le mode de génération d'un plan.
   Future<MealPlan> setMode(String planId, String mode) async {
     try {
       final response = await apiClient.put(
@@ -152,6 +165,7 @@ class MealPlanRepository extends BaseRepository {
     }
   }
 
+  /// Génère un plan hebdomadaire avec un mode spécifique.
   Future<MealPlan> generateWeeklyPlanWithMode(
       {required String startDate, String mode = 'STANDARD'}) async {
     try {
@@ -166,6 +180,7 @@ class MealPlanRepository extends BaseRepository {
   }
 }
 
+/// Fournisseur du dépôt de plans de repas.
 final mealPlanRepositoryProvider = Provider<MealPlanRepository>((ref) {
   return MealPlanRepository(ref.watch(apiClientProvider));
 });

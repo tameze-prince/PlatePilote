@@ -10,7 +10,10 @@ import '../../core/premium_components.dart';
 import '../../shared/models/meal_plan.dart';
 import 'meal_plan_provider.dart';
 
+/// Écran d'acceptation du plan de repas.
+/// Présente un résumé du plan généré et permet de l'accepter ou le régénérer.
 class PlanAcceptanceScreen extends ConsumerStatefulWidget {
+  /// Plan de repas à accepter.
   final MealPlan plan;
 
   const PlanAcceptanceScreen({super.key, required this.plan});
@@ -21,9 +24,13 @@ class PlanAcceptanceScreen extends ConsumerStatefulWidget {
 }
 
 class _PlanAcceptanceScreenState extends ConsumerState<PlanAcceptanceScreen> {
+  /// Indique si la régénération est en cours.
   bool _isGenerating = false;
+
+  /// Indique si le plan a été accepté.
   bool _isAccepted = false;
 
+  /// Accepte le plan et l'active.
   Future<void> _acceptPlan() async {
     setState(() => _isGenerating = true);
     await ref.read(mealPlanProvider.notifier).activatePlan();
@@ -33,6 +40,7 @@ class _PlanAcceptanceScreenState extends ConsumerState<PlanAcceptanceScreen> {
     });
   }
 
+  /// Régénère un nouveau plan de repas.
   Future<void> _regeneratePlan() async {
     setState(() => _isGenerating = true);
     await ref.read(mealPlanProvider.notifier).generateNewPlan();
@@ -260,6 +268,7 @@ class _PlanAcceptanceScreenState extends ConsumerState<PlanAcceptanceScreen> {
     );
   }
 
+  /// Construit un élément de statistique (temps, calories, coût).
   Widget _buildStatItem({
     required IconData icon,
     required String label,
@@ -289,6 +298,7 @@ class _PlanAcceptanceScreenState extends ConsumerState<PlanAcceptanceScreen> {
     );
   }
 
+  /// Construit un aperçu d'un repas du plan.
   Widget _buildMealPreview(MealPlanEntry entry) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -336,6 +346,7 @@ class _PlanAcceptanceScreenState extends ConsumerState<PlanAcceptanceScreen> {
     );
   }
 
+  /// Construit un élément listant un avantage du plan.
   Widget _buildBenefitItem({
     required IconData icon,
     required String title,

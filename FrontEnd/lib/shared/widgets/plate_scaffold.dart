@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/premium_components.dart';
 import '../../core/extensions/theme_extensions.dart';
 
+/// Scaffold réutilisable avec header, recherche et notifications.
 class PlateScaffold extends StatelessWidget {
   const PlateScaffold({
     required this.title,
@@ -13,9 +14,13 @@ class PlateScaffold extends StatelessWidget {
     super.key,
   });
 
+  /// Titre affiché dans l'en-tête.
   final String title;
+  /// Contenu principal de la page.
   final Widget child;
+  /// Widget optionnel à droite du titre.
   final Widget? trailing;
+  /// Affiche le bouton retour.
   final bool showBack;
 
   @override

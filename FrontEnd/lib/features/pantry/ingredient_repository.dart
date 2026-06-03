@@ -5,9 +5,12 @@ import '../../core/network/api_client.dart';
 import '../../core/repositories/base_repository.dart';
 import '../../shared/models/ingredient.dart';
 
+/// Dépôt des ingrédients.
+/// Permet de rechercher et récupérer des ingrédients depuis l'API.
 class IngredientRepository extends BaseRepository {
   IngredientRepository(super.apiClient);
 
+  /// Recherche des ingrédients par nom.
   Future<List<Ingredient>> search(String query) async {
     try {
       final response = await apiClient.get(
@@ -21,6 +24,7 @@ class IngredientRepository extends BaseRepository {
     }
   }
 
+  /// Récupère les ingrédients d'une catégorie donnée.
   Future<List<Ingredient>> getByCategory(String category) async {
     try {
       final response = await apiClient.get(
@@ -34,6 +38,7 @@ class IngredientRepository extends BaseRepository {
     }
   }
 
+  /// Récupère un ingrédient par son identifiant.
   Future<Ingredient> getById(String id) async {
     try {
       final response = await apiClient.get('/ingredients/$id');
@@ -44,6 +49,7 @@ class IngredientRepository extends BaseRepository {
   }
 }
 
+/// Fournisseur du dépôt d'ingrédients.
 final ingredientRepositoryProvider = Provider<IngredientRepository>((ref) {
   return IngredientRepository(ref.watch(apiClientProvider));
 });

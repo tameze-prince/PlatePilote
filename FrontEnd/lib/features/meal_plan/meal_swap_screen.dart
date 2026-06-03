@@ -12,10 +12,19 @@ import '../../shared/models/meal_plan.dart';
 import 'meal_plan_provider.dart';
 import 'meal_plan_repository.dart';
 
+/// Écran d'échange de repas.
+/// Permet de remplacer un repas par une alternative dans le plan hebdomadaire.
 class MealSwapScreen extends ConsumerStatefulWidget {
+  /// Repas actuel à remplacer.
   final Meal currentMeal;
+
+  /// Index du jour dans le plan.
   final int dayIndex;
+
+  /// Type de repas (petit-déjeuner, déjeuner, dîner, etc.).
   final String mealType;
+
+  /// Entrée de plan correspondante (optionnelle).
   final MealPlanEntry? currentEntry;
 
   const MealSwapScreen({
@@ -31,8 +40,13 @@ class MealSwapScreen extends ConsumerStatefulWidget {
 }
 
 class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
+  /// Liste des alternatives disponibles pour l'échange.
   List<_SwapOption> _alternatives = [];
+
+  /// Indique si le chargement est en cours.
   bool _isLoading = true;
+
+  /// Alternative sélectionnée par l'utilisateur.
   _SwapOption? _selectedMeal;
 
   @override
@@ -41,6 +55,7 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
     _loadAlternatives();
   }
 
+  /// Charge les alternatives depuis l'API ou les données de démonstration.
   Future<void> _loadAlternatives() async {
     setState(() => _isLoading = true);
     try {
@@ -79,6 +94,7 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
     });
   }
 
+  /// Applique l'échange du repas sélectionné.
   Future<void> _swapMeal() async {
     if (_selectedMeal == null) return;
     if (widget.currentEntry?.id != null && _selectedMeal!.recipeId != null) {
@@ -110,6 +126,7 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
     if (context.mounted) context.pop();
   }
 
+  /// Régénère l'intégralité du plan de repas.
   Future<void> _regenerateAll() async {
     await ref.read(mealPlanProvider.notifier).generateNewPlan();
     if (context.mounted) context.pop();
@@ -337,11 +354,21 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
   }
 }
 
+/// Option d'échange de repas.
 class _SwapOption {
+  /// Identifiant de la recette alternative.
   final String? recipeId;
+
+  /// Nom du repas.
   final String name;
+
+  /// Temps de préparation en minutes.
   final int? minutes;
+
+  /// Calories par portion.
   final int? calories;
+
+  /// URL de l'image du repas.
   final String? imageUrl;
 
   _SwapOption({
@@ -352,6 +379,7 @@ class _SwapOption {
     this.imageUrl,
   });
 
+  /// Crée une instance depuis une réponse JSON de l'API.
   factory _SwapOption.fromJson(Map<String, dynamic> json) {
     return _SwapOption(
       recipeId: json['recipeId']?.toString(),

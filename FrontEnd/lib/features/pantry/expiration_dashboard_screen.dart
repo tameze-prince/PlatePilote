@@ -9,6 +9,8 @@ import '../../core/widgets/app_card.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../shared/models/demo_data.dart';
 
+/// Écran du tableau de bord des expirations.
+/// Affiche les articles périmés et ceux qui expirent bientôt.
 class PantryExpirationScreen extends ConsumerStatefulWidget {
   const PantryExpirationScreen({super.key});
 
@@ -19,8 +21,13 @@ class PantryExpirationScreen extends ConsumerStatefulWidget {
 
 class _PantryExpirationScreenState
     extends ConsumerState<PantryExpirationScreen> {
+  /// Articles sur le point d'expirer.
   List<PantryItem> _expiringItems = [];
+
+  /// Articles déjà périmés.
   List<PantryItem> _expiredItems = [];
+
+  /// Indique si le chargement est en cours.
   bool _isLoading = true;
 
   @override
@@ -29,6 +36,7 @@ class _PantryExpirationScreenState
     _loadExpirationData();
   }
 
+  /// Charge les données d'expiration (simulées pour l'instant).
   Future<void> _loadExpirationData() async {
     setState(() => _isLoading = true);
     await Future.delayed(const Duration(seconds: 1));
@@ -73,6 +81,7 @@ class _PantryExpirationScreenState
     });
   }
 
+  /// Supprime un article de la liste d'expiration.
   Future<void> _removeItem(PantryItem item) async {
     setState(() {
       _expiringItems.remove(item);
@@ -206,6 +215,7 @@ class _PantryExpirationScreenState
     );
   }
 
+  /// Construit l'en-tête d'une section (expiré / expire bientôt).
   Widget _buildSectionHeader({
     required IconData icon,
     required String title,
@@ -245,6 +255,7 @@ class _PantryExpirationScreenState
     );
   }
 
+  /// Construit une carte d'article avec son état d'expiration.
   Widget _buildExpirationCard(PantryItem item, {required bool isExpired}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -323,6 +334,7 @@ class _PantryExpirationScreenState
     );
   }
 
+  /// Construit un élément de statistique.
   Widget _buildStatItem({
     required String label,
     required String value,

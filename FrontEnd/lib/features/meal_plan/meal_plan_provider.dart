@@ -7,6 +7,8 @@ import '../../shared/models/demo_data.dart';
 import '../../shared/models/meal_plan.dart';
 import 'meal_plan_repository.dart';
 
+/// État du plan de repas.
+/// Contient le plan courant, la liste des repas et les plans disponibles.
 class MealPlanState {
   const MealPlanState({
     this.currentPlan,
@@ -18,23 +20,44 @@ class MealPlanState {
     this.selectedPlanIndex = 0,
   });
 
+  /// Plan de repas courant.
   final MealPlan? currentPlan;
+
+  /// Repas du plan courant.
   final List<Meal> meals;
+
+  /// Indique si le chargement est en cours.
   final bool isLoading;
+
+  /// Indique si la génération d'un plan est en cours.
   final bool isGenerating;
+
+  /// Message d'erreur éventuel.
   final String? error;
+
+  /// Plans de repas disponibles (historique).
   final List<MealPlan> availablePlans;
+
+  /// Index du plan sélectionné dans la liste.
   final int selectedPlanIndex;
 
+  /// Vrai s'il existe un plan précédent dans l'historique.
   bool get hasPrevPlan => selectedPlanIndex < availablePlans.length - 1;
+
+  /// Vrai s'il existe un plan suivant dans l'historique.
   bool get hasNextPlan => selectedPlanIndex > 0;
+
+  /// Temps total de préparation cumulé en minutes.
   int get totalMinutes => currentPlan?.entries
       .map((entry) => entry.totalTimeMinutes ?? 0)
       .fold<int>(0, (sum, value) => sum + value) ?? 0;
+
+  /// Coût total estimé du plan.
   double get estimatedCost => currentPlan?.entries
       .map((entry) => entry.estimatedCost ?? 0)
       .fold<double>(0, (sum, value) => sum + value) ?? 0;
 
+  /// Crée une copie avec des champs mis à jour.
   MealPlanState copyWith({
     MealPlan? currentPlan,
     List<Meal>? meals,
@@ -57,6 +80,8 @@ class MealPlanState {
   }
 }
 
+/// Notifier qui gère l'état du plan de repas.
+/// Charge, génère, modifie et active les plans de repas.
 class MealPlanNotifier extends Notifier<MealPlanState> {
   @override
   MealPlanState build() {
@@ -64,6 +89,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     return const MealPlanState(isLoading: true);
   }
 
+  /// Retourne la date du prochain lundi au format ISO.
   String _nextMonday() {
     final now = DateTime.now();
     final daysUntilMonday = (DateTime.monday - now.weekday + 7) % 7;
@@ -71,6 +97,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     return '${monday.year}-${monday.month.toString().padLeft(2, '0')}-${monday.day.toString().padLeft(2, '0')}';
   }
 
+  /// Convertit les entrées d'un plan en objets [Meal] pour l'affichage.
   Future<List<Meal>> _entriesToMeals(List<MealPlanEntry> entries) async {
     const concurrency = 3;
     final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -134,6 +161,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     return meals;
   }
 
+  /// Charge le plan de repas courant depuis l'API.
   Future<void> _loadCurrentPlan() async {
     try {
       final repo = ref.read(mealPlanRepositoryProvider);
@@ -157,6 +185,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     }
   }
 
+  /// Sélectionne un plan de repas par son index dans l'historique.
   Future<void> selectPlan(int index) async {
     final plans = state.availablePlans;
     if (index < 0 || index >= plans.length) return;
@@ -170,6 +199,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     );
   }
 
+  /// Navigue vers le plan précédent dans l'historique.
   void navigatePrev() {
     final idx = state.selectedPlanIndex;
     if (idx < state.availablePlans.length - 1) {
@@ -177,6 +207,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     }
   }
 
+  /// Navigue vers le plan suivant dans l'historique.
   void navigateNext() {
     final idx = state.selectedPlanIndex;
     if (idx > 0) {
@@ -184,6 +215,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     }
   }
 
+  /// Génère un nouveau plan de repas (optionnellement avec un mode spécifique).
   Future<void> generateNewPlan({String? mode}) async {
     state = state.copyWith(isGenerating: true, clearError: true);
     try {
@@ -211,6 +243,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     }
   }
 
+  /// Remplace une entrée du plan par une nouvelle.
   Future<void> replaceEntry(int index, MealPlanEntry newEntry) async {
     final plan = state.currentPlan;
     if (plan == null) return;
@@ -235,6 +268,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     }
   }
 
+  /// Supprime une entrée du plan de repas.
   Future<void> removeEntry(int index) async {
     final plan = state.currentPlan;
     if (plan == null) return;
@@ -261,6 +295,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     }
   }
 
+  /// Active le plan de repas courant.
   Future<void> activatePlan() async {
     final plan = state.currentPlan;
     if (plan == null) return;
@@ -284,6 +319,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     }
   }
 
+  /// Supprime le plan de repas courant.
   Future<void> deletePlan() async {
     final plan = state.currentPlan;
     if (plan == null) return;
@@ -299,12 +335,14 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     }
   }
 
+  /// Recharge le plan de repas courant.
   Future<List<Meal>> refresh() async {
     await _loadCurrentPlan();
     return state.meals;
   }
 }
 
+/// Fournisseur de l'état du plan de repas.
 final mealPlanProvider = NotifierProvider<MealPlanNotifier, MealPlanState>(
   MealPlanNotifier.new,
 );

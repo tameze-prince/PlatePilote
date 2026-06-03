@@ -7,9 +7,12 @@ import '../../core/repositories/base_repository.dart';
 import '../../shared/models/grocery_list.dart';
 import '../../shared/models/purchase_record.dart';
 
+/// Dépôt des listes de courses.
+/// Communique avec l'API pour gérer les listes et leurs articles.
 class GroceryRepository extends BaseRepository {
   GroceryRepository(super.apiClient);
 
+  /// Récupère la liste paginée des listes de courses.
   Future<PageResponse<GroceryList>> listGroceryLists({
     int page = 0,
     int size = 20,
@@ -25,6 +28,7 @@ class GroceryRepository extends BaseRepository {
     }
   }
 
+  /// Récupère une liste de courses par son identifiant.
   Future<GroceryList> getGroceryList(String listId) async {
     try {
       final response = await apiClient.get('/grocery-lists/$listId');
@@ -34,6 +38,7 @@ class GroceryRepository extends BaseRepository {
     }
   }
 
+  /// Génère une liste de courses à partir d'un plan de repas.
   Future<GroceryList> generateFromMealPlan(String mealPlanId) async {
     try {
       final response = await apiClient.post(
@@ -46,6 +51,7 @@ class GroceryRepository extends BaseRepository {
     }
   }
 
+  /// Crée une nouvelle liste de courses.
   Future<GroceryList> createGroceryList(String name) async {
     try {
       final response = await apiClient.post(
@@ -58,6 +64,7 @@ class GroceryRepository extends BaseRepository {
     }
   }
 
+  /// Ajoute un article à une liste de courses.
   Future<GroceryList> addItem(
     String listId, {
     required String name,
@@ -87,6 +94,7 @@ class GroceryRepository extends BaseRepository {
     }
   }
 
+  /// Bascule l'état coché/décoché d'un article.
   Future<void> toggleItem(String itemId) async {
     try {
       await apiClient.patch('/grocery-lists/items/$itemId/toggle');
@@ -95,6 +103,7 @@ class GroceryRepository extends BaseRepository {
     }
   }
 
+  /// Supprime un article d'une liste de courses.
   Future<void> removeItem(String itemId) async {
     try {
       await apiClient.delete('/grocery-lists/items/$itemId');
@@ -103,6 +112,7 @@ class GroceryRepository extends BaseRepository {
     }
   }
 
+  /// Marque une liste de courses comme complétée.
   Future<void> completeList(String listId) async {
     try {
       await apiClient.patch('/grocery-lists/$listId/complete');
@@ -111,6 +121,7 @@ class GroceryRepository extends BaseRepository {
     }
   }
 
+  /// Supprime une liste de courses.
   Future<void> deleteGroceryList(String listId) async {
     try {
       await apiClient.delete('/grocery-lists/$listId');
@@ -119,6 +130,7 @@ class GroceryRepository extends BaseRepository {
     }
   }
 
+  /// Valide le checkout d'une liste : enregistre les articles achetés.
   Future<void> checkoutList(
     String listId, {
     required List<String> checkedItemIds,
@@ -138,6 +150,7 @@ class GroceryRepository extends BaseRepository {
     }
   }
 
+  /// Récupère l'historique des achats de façon paginée.
   Future<PageResponse<PurchaseRecord>> getPurchaseHistory({
     int page = 0,
     int size = 20,
@@ -154,6 +167,7 @@ class GroceryRepository extends BaseRepository {
   }
 }
 
+/// Fournisseur du dépôt de listes de courses.
 final groceryRepositoryProvider = Provider<GroceryRepository>((ref) {
   return GroceryRepository(ref.watch(apiClientProvider));
 });

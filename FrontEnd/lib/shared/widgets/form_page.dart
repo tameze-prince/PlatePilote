@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/widgets/primary_button.dart';
 
+/// Page de formulaire avec validation et bouton de soumission.
 class FormPage extends StatelessWidget {
   const FormPage({
     required this.formKey,
@@ -12,9 +13,13 @@ class FormPage extends StatelessWidget {
     super.key,
   });
 
+  /// Clé globale pour la validation du formulaire.
   final GlobalKey<FormState> formKey;
+  /// Enfants (champs de formulaire).
   final List<Widget> children;
+  /// Texte du bouton de soumission.
   final String submitLabel;
+  /// Fonction appelée lors de la soumission.
   final Future<void> Function() onSubmit;
 
   @override

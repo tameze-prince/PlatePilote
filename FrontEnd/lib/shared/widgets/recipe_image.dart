@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_radius.dart';
 
+/// Image de recette avec fallback par type de cuisine.
 class RecipeImage extends StatelessWidget {
   const RecipeImage({
     this.imageUrl,
@@ -13,10 +14,15 @@ class RecipeImage extends StatelessWidget {
     super.key,
   });
 
+  /// URL de l'image.
   final String? imageUrl;
+  /// Largeur du conteneur.
   final double width;
+  /// Hauteur du conteneur.
   final double height;
+  /// Rayon de bordure.
   final double? borderRadius;
+  /// Type de cuisine pour le fallback.
   final String? cuisine;
 
   @override
@@ -39,6 +45,7 @@ class RecipeImage extends StatelessWidget {
     );
   }
 
+  /// Affichage de secours quand l'image n'est pas disponible.
   Widget _fallback() {
     final icon = switch (cuisine?.toLowerCase()) {
       'italian' => Icons.local_pizza,
@@ -59,6 +66,7 @@ class RecipeImage extends StatelessWidget {
   }
 }
 
+/// Image hero d'une recette avec superposition.
 class RecipeHeroImage extends StatelessWidget {
   const RecipeHeroImage({
     this.imageUrl,
@@ -67,8 +75,11 @@ class RecipeHeroImage extends StatelessWidget {
     super.key,
   });
 
+  /// URL de l'image.
   final String? imageUrl;
+  /// Hauteur du conteneur.
   final double height;
+  /// Type de cuisine pour le fallback.
   final String? cuisine;
 
   @override
@@ -110,6 +121,7 @@ class RecipeHeroImage extends StatelessWidget {
     );
   }
 
+  /// Affichage de secours pour l'image hero.
   Widget _heroFallback() {
     final icon = switch (cuisine?.toLowerCase()) {
       'italian' => Icons.local_pizza,

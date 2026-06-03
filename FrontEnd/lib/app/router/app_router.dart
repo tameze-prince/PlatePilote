@@ -46,6 +46,7 @@ import '../../features/splash/splash_screen.dart';
 import '../../features/support/offline_screen.dart';
 import '../../shared/models/demo_data.dart';
 
+/// Provider du routeur GoRouter avec redirect pour l'authentification.
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/splash',
@@ -349,6 +350,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
+/// Énumération des routes de l'application.
 enum AppRoute {
   splash,
   onboarding,
@@ -392,9 +394,11 @@ enum AppRoute {
   planHistory,
 }
 
+/// Shell avec barre de navigation pour les routes principales.
 class PlatePilotShell extends StatelessWidget {
   const PlatePilotShell({required this.navigationShell, super.key});
 
+  /// Shell de navigation stateful.
   final StatefulNavigationShell navigationShell;
 
   @override
