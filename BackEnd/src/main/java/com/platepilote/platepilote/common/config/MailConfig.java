@@ -9,10 +9,20 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Properties;
 
+/**
+ * Configuration de l'envoi d'emails via JavaMailSender.
+ * Utilise les propriétés de l'application pour configurer le serveur SMTP.
+ */
 @Configuration
 @EnableConfigurationProperties(MailProperties.class)
 public class MailConfig {
 
+    /**
+     * Crée et configure un JavaMailSender à partir des propriétés de messagerie.
+     *
+     * @param mailProperties propriétés de messagerie de l'application
+     * @return instance configurée de JavaMailSender
+     */
     @Bean
     public JavaMailSender javaMailSender(MailProperties mailProperties) {
         JavaMailSenderImpl sender = new JavaMailSenderImpl();

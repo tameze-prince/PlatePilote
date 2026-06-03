@@ -1,32 +1,17 @@
 package com.platepilote.platepilote.recipes.domain.entity;
 
 /**
- * RECIPE ENTITY - DATABASE TABLE: recipes
- * ==========================================
- * 
- * WHAT IT IS:
- * Represents a cooking recipe with its basic information.
- * 
- * RELATIONSHIPS:
- * - One Recipe has MANY RecipeIngredients (one-to-many)
- * - One Recipe has MANY RecipeSteps (one-to-many)
- * - One Recipe can have MANY RecipeRatings (one-to-many)
- * - One Recipe can be in MANY MealPlanEntries (one-to-many)
- * 
- * FIELDS:
- * - name: Recipe title (e.g., "Chicken Stir Fry")
- * - description: Brief description of the recipe
- * - prepTimeMinutes: Time to prepare ingredients
- * - cookTimeMinutes: Time to cook
- * - totalTimeMinutes: prep + cook time
- * - servings: How many people this recipe serves
- * - difficulty: "Easy", "Medium", "Hard"
- * - cuisineType: "Italian", "Mexican", "Japanese", etc.
- * - mealType: "Breakfast", "Lunch", "Dinner", "Snack"
- * - imageUrl: URL to recipe photo (stored in Cloudinary/R2)
- * - source: Where the recipe came from (e.g., "Grandma", "AllRecipes")
- * - isPublic: Whether other users can see this recipe
- * - userId: Who created this recipe (null for system recipes)
+ * Entité représentant une recette de cuisine.
+ * <p>
+ * Une recette contient des informations de base (nom, description, temps,
+ * portions), des métadonnées nutritionnelles et diététiques, des indicateurs
+ * d'allergènes, et des informations de vérification.
+ * <p>
+ * Relations :
+ * <ul>
+ *   <li>Une recette a plusieurs {@link RecipeIngredient}</li>
+ *   <li>Une recette a plusieurs {@link RecipeStep}</li>
+ * </ul>
  */
 
 import com.platepilote.platepilote.common.kernel.BaseEntity;

@@ -24,21 +24,47 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Importateur de recettes via l'API RecipeAPI.
+ * <p>
+ * Récupère des recettes avec leurs ingrédients, instructions et informations
+ * nutritionnelles depuis RecipeAPI.io et les importe dans le catalogue
+ * de recettes PlatePilote.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class RecipeAPIImporter {
 
+    /** Repository des recettes. */
     private final RecipeRepository recipeRepository;
+
+    /** Repository des ingrédients de recettes. */
     private final RecipeIngredientRepository recipeIngredientRepository;
+
+    /** Repository des étapes de recettes. */
     private final RecipeStepRepository recipeStepRepository;
+
+    /** Repository des ingrédients. */
     private final IngredientRepository ingredientRepository;
+
+    /** Normaliseur d'ingrédients. */
     private final IngredientNormalizer normalizer;
+
+    /** Client HTTP RestTemplate. */
     private final RestTemplate restTemplate;
 
+    /** Clé API RecipeAPI. */
     @Value("${app.api.recipeapi-key:}")
     private String apiKey;
 
+    /**
+     * Lance l'import des recettes depuis RecipeAPI.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @param job        job d'importation en cours
+     */
     @SuppressWarnings("unchecked")
     public void importData(String query, int maxResults, ImportJob job) {
         log.info("RecipeAPI import started: query='{}', maxResults={}", query, maxResults);

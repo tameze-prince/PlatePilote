@@ -15,14 +15,33 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Scoreur d'utilisation du placard pour les recommandations de recettes.
+ * <p>
+ * Évalue dans quelle mesure les ingrédients d'une recette sont déjà présents
+ * dans le placard de l'utilisateur. Un score élevé indique que l'utilisateur
+ * peut préparer la recette sans achats supplémentaires.
+ */
 @Service
 @RequiredArgsConstructor
 public class PantryUtilizationScorer {
 
+    /** Repository des articles du placard. */
     private final PantryItemRepository pantryItemRepository;
+
+    /** Repository des ingrédients de recettes. */
     private final RecipeIngredientRepository recipeIngredientRepository;
+
+    /** Service de résolution d'ingrédients par nom. */
     private final IngredientResolutionService ingredientResolutionService;
 
+    /**
+     * Calcule le score d'utilisation du placard pour une recette unique.
+     *
+     * @param userId   identifiant de l'utilisateur
+     * @param recipeId identifiant de la recette
+     * @return proportion des ingrédients de la recette présents dans le placard (0.0 - 1.0)
+     */
     public double calculatePantryScore(UUID userId, UUID recipeId) {
         List<PantryItem> pantryItems = pantryItemRepository
                 .findByUserIdAndDeletedAtIsNull(userId,
@@ -42,6 +61,13 @@ public class PantryUtilizationScorer {
         return (double) matchedIngredients / recipeIngredients.size();
     }
 
+    /**
+     * Calcule les scores d'utilisation du placard pour plusieurs recettes en une passe.
+     *
+     * @param userId    identifiant de l'utilisateur
+     * @param recipeIds liste des identifiants de recettes
+     * @return map associant chaque identifiant de recette à son score (0.0 - 1.0)
+     */
     public Map<UUID, Double> calculatePantryScoresForRecipes(UUID userId, List<UUID> recipeIds) {
         if (recipeIds.isEmpty()) {
             return Map.of();
@@ -72,6 +98,14 @@ public class PantryUtilizationScorer {
         return scores;
     }
 
+    /**
+     * Identifie les recettes qui utilisent des ingrédients du placard proches de l'expiration.
+     *
+     * @param userId               identifiant de l'utilisateur
+     * @param expiringIngredientIds ensemble des identifiants d'ingrédients expirant bientôt
+     * @param recipeIds            liste des identifiants de recettes candidates
+     * @return map associant chaque recette à un booléen indiquant si elle utilise un ingrédient expirant
+     */
     public Map<UUID, Boolean> findRecipesUsingExpiringPantry(UUID userId, Set<UUID> expiringIngredientIds, List<UUID> recipeIds) {
         if (expiringIngredientIds.isEmpty() || recipeIds.isEmpty()) {
             return recipeIds.stream().collect(Collectors.toMap(id -> id, id -> false));

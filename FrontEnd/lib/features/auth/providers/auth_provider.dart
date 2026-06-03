@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/app_session_provider.dart';
 import '../../../core/repositories/auth_repository.dart';
+import '../../../core/repositories/oauth2_repository.dart';
 import '../../../core/repositories/preference_repository.dart';
 import '../../../core/repositories/profile_repository.dart';
 import '../../../core/services/secure_storage_service.dart';
@@ -159,6 +160,62 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<bool> resendVerification({required String email}) async {
     final repo = ref.read(authRepositoryProvider);
     return repo.resendVerification(email);
+  }
+
+  Future<bool> signInWithGoogle() async {
+    state = const AuthState(isLoading: true);
+    try {
+      final repo = ref.read(oAuth2RepositoryProvider);
+      final result = await repo.signInWithGoogle();
+      if (result == null) {
+        state = const AuthState(); // User cancelled
+        return false;
+      }
+      if (!result.success) {
+        state = AuthState(errorMessage: result.errorMessage);
+        return false;
+      }
+      final secureStorage = ref.read(secureStorageProvider);
+      await secureStorage.saveTokens(
+        accessToken: result.accessToken!,
+        refreshToken: result.refreshToken!,
+      );
+      final email = AuthRepository.extractEmailFromToken(result.accessToken!);
+      state = AuthState(isAuthenticated: true, email: email);
+      await ref.read(appSessionProvider.notifier).signIn();
+      return true;
+    } catch (e) {
+      state = AuthState(errorMessage: 'Google sign-in failed');
+      return false;
+    }
+  }
+
+  Future<bool> signInWithApple() async {
+    state = const AuthState(isLoading: true);
+    try {
+      final repo = ref.read(oAuth2RepositoryProvider);
+      final result = await repo.signInWithApple();
+      if (result == null) {
+        state = const AuthState(); // User cancelled
+        return false;
+      }
+      if (!result.success) {
+        state = AuthState(errorMessage: result.errorMessage);
+        return false;
+      }
+      final secureStorage = ref.read(secureStorageProvider);
+      await secureStorage.saveTokens(
+        accessToken: result.accessToken!,
+        refreshToken: result.refreshToken!,
+      );
+      final email = AuthRepository.extractEmailFromToken(result.accessToken!);
+      state = AuthState(isAuthenticated: true, email: email);
+      await ref.read(appSessionProvider.notifier).signIn();
+      return true;
+    } catch (e) {
+      state = AuthState(errorMessage: 'Apple sign-in failed');
+      return false;
+    }
   }
 
   Future<void> logout() async {

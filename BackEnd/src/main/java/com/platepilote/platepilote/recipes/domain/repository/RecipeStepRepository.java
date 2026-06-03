@@ -1,17 +1,10 @@
 package com.platepilote.platepilote.recipes.domain.repository;
 
 /**
- * RECIPE STEP REPOSITORY - DATABASE ACCESS FOR RECIPE STEPS
- * ===========================================================
- * 
- * METHODS:
- * 
- * 1. findByRecipeIdOrderByStepNumberAsc(recipeId)
- *    -> Get all steps for a recipe, ordered by step number
- *    SQL: SELECT * FROM recipe_steps WHERE recipe_id = ? ORDER BY step_number ASC
- * 
- * 2. deleteByRecipeId(recipeId)
- *    -> Delete all steps for a recipe (used when deleting a recipe)
+ * Repository JPA pour l'entité {@link RecipeStep}.
+ * <p>
+ * Fournit l'accès aux étapes d'une recette avec tri par numéro d'étape,
+ * ainsi que la suppression en masse pour nettoyage lors des mises à jour.
  */
 
 import com.platepilote.platepilote.recipes.domain.entity.RecipeStep;
@@ -25,13 +18,18 @@ import java.util.UUID;
 public interface RecipeStepRepository extends JpaRepository<RecipeStep, UUID> {
 
     /**
-     * Get all steps for a recipe, sorted by step number (1, 2, 3, ...).
+     * Récupère toutes les étapes d'une recette, triées par numéro d'étape.
+     *
+     * @param recipeId l'identifiant de la recette
+     * @return la liste des étapes triées par {@code stepNumber} croissant
      */
     List<RecipeStep> findByRecipeIdOrderByStepNumberAsc(UUID recipeId);
 
     /**
-     * Delete all steps for a recipe.
-     * Called when a recipe is deleted to clean up orphaned steps.
+     * Supprime toutes les étapes d'une recette.
+     * Utilisé lors de la mise à jour ou de la suppression d'une recette.
+     *
+     * @param recipeId l'identifiant de la recette
      */
     void deleteByRecipeId(UUID recipeId);
 }

@@ -31,8 +31,8 @@ import com.platepilote.platepilote.subscription.application.service.EntitlementS
 import com.platepilote.platepilote.userprofile.domain.entity.UserProfile;
 import com.platepilote.platepilote.userprofile.domain.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,14 +50,34 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Moteur de recommandation de recettes.
+ * <p>
+ * Composant central qui orchestre le scoring des recettes candidates en combinant
+ * plusieurs facteurs : budget, placard, préférences alimentaires, nutrition,
+ * temps de préparation, variété, pertinence géographique et feedback utilisateur.
+ * <p>
+ * Les phases de traitement sont :
+ * <ol>
+ *   <li>Chargement du contexte utilisateur (profil, préférences, allergies, budget)</li>
+ *   <li>Vérification du quota hebdomadaire pour les utilisateurs gratuits</li>
+ *   <li>Récupération des recettes candidates depuis le catalogue</li>
+ *   <li>Chargement groupé des données de scoring (coûts, placard, allergènes)</li>
+ *   <li>Scoring en mémoire pure — zéro appel base de données</li>
+ *   <li>Application de la diversité (éviter les doublons cuisine + type de repas)</li>
+ * </ol>
+ */
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("unchecked")
 public class RecommendationEngine {
 
+    /** Limite hebdomadaire par défaut pour les utilisateurs gratuits (20 recommandations). */
     private static final int DEFAULT_FREE_WEEKLY_LIMIT = 20;
+
+    /** Association code pays → cuisines régionales pertinentes pour le scoring géographique. */
     private static final Map<String, List<String>> REGIONAL_CUISINES = Map.of(
             "CM", List.of("cameroonian", "west african", "african"),
             "FR", List.of("french", "mediterranean"),
@@ -69,6 +89,7 @@ public class RecommendationEngine {
             "JP", List.of("japanese", "asian")
     );
 
+    /** Repository des recettes. */
     private final RecipeRepository recipeRepository;
     private final RecipeIngredientRepository recipeIngredientRepository;
     private final DietaryPreferenceRepository dietaryPreferenceRepository;
@@ -84,23 +105,52 @@ public class RecommendationEngine {
     private final EntitlementService entitlementService;
     private final UserInteractionRepository userInteractionRepository;
     private final IngredientAllergenRepository ingredientAllergenRepository;
+    /** Repository des items du placard. */
     private final PantryItemRepository pantryItemRepository;
 
+    /**
+     * Récupère une liste de recommandations de recettes standard pour un utilisateur.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @param limit  nombre maximum de résultats
+     * @return liste des recommandations triées par score décroissant
+     */
     @Transactional
     public List<RecommendationResult> getRecommendations(UUID userId, int limit) {
         return recommend(userId, "STANDARD", null, limit);
     }
 
+    /**
+     * Récupère des recommandations de repas rapides (temps de préparation limité).
+     *
+     * @param userId  identifiant de l'utilisateur
+     * @param maxTime temps maximum en minutes
+     * @param limit   nombre maximum de résultats
+     * @return liste des recommandations de repas rapides
+     */
     @Transactional
     public List<RecommendationResult> getQuickMeals(UUID userId, int maxTime, int limit) {
         return recommend(userId, "QUICK_MEAL", maxTime, limit);
     }
 
+    /**
+     * Génère un plan de repas hebdomadaire complet (mode STANDARD par défaut).
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return liste de 7 jours, chacun contenant jusqu'à 3 recommandations
+     */
     @Transactional
     public List<List<RecommendationResult>> generateWeeklyMealPlan(UUID userId) {
         return generateWeeklyMealPlan(userId, MealPlanMode.STANDARD);
     }
 
+    /**
+     * Génère un plan de repas hebdomadaire avec un mode spécifique.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @param mode   mode du plan de repas (STANDARD, WASTELESS, ENDOFMONTH, BUSYWEEK, FAMILY)
+     * @return liste de 7 jours, chacun contenant jusqu'à 3 recommandations
+     */
     @Transactional
     public List<List<RecommendationResult>> generateWeeklyMealPlan(UUID userId, MealPlanMode mode) {
         List<RecommendationResult> allRecommendations = recommend(userId, mode != null ? mode.name() : "WEEKLY_PLAN", null, 50, mode);
@@ -394,7 +444,7 @@ public class RecommendationEngine {
                 .orElse(BigDecimal.valueOf(200));
     }
 
-    private boolean isPremium(UUID userId) {
+    private boolean isPremium(@NonNull UUID userId) {
         if (entitlementService.hasActiveEntitlement(userId, EntitlementService.PREMIUM_ENTITLEMENT)) {
             return true;
         }
@@ -725,6 +775,24 @@ public class RecommendationEngine {
             RecommendationWeights weights
     ) {}
 
+    /**
+     * Résultat d'une recommandation contenant la recette et tous les scores détaillés.
+     *
+     * @param recipe          recette recommandée
+     * @param finalScore      score global final
+     * @param budgetScore     score budgétaire (0-1)
+     * @param pantryScore     score d'utilisation du placard (0-1)
+     * @param timeScore       score de temps de préparation (0-1)
+     * @param preferenceScore score de correspondance aux préférences (0-1)
+     * @param nutritionScore  score nutritionnel (0-1)
+     * @param varietyScore    score de variété (0-1)
+     * @param locationScore   score de pertinence géographique (0-1)
+     * @param estimatedCost   coût estimé de la recette
+     * @param currencyCode    code devise ISO 4217
+     * @param countryCode     code pays ISO 3166-1 alpha-2
+     * @param reasons         raisons de la recommandation
+     * @param warnings        avertissements (allergènes, etc.)
+     */
     public record RecommendationResult(
             Recipe recipe,
             double finalScore,

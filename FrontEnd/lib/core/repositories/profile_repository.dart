@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../network/api_client.dart';
 import 'base_repository.dart';
 
+/// Repository du profil utilisateur (lecture et mise à jour).
 class ProfileRepository extends BaseRepository {
   ProfileRepository(super.apiClient);
 
+  /// Récupère le profil complet de l'utilisateur connecté.
   Future<Map<String, dynamic>> getProfile() async {
     try {
       final response = await apiClient.get('/profile');
@@ -16,6 +18,8 @@ class ProfileRepository extends BaseRepository {
     }
   }
 
+  /// Met à jour les champs du profil utilisateur.
+  /// Seuls les champs non nuls sont envoyés au serveur.
   Future<void> updateProfile({
     String? cookingSkill,
     int? householdSize,
@@ -49,6 +53,7 @@ class ProfileRepository extends BaseRepository {
   }
 }
 
+/// Provider Riverpod pour [ProfileRepository].
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
   return ProfileRepository(ref.watch(apiClientProvider));
 });

@@ -3,13 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/secure_storage_service.dart';
 
+/// Fournit une instance [Dio] configurée avec l'URL de base, les timeouts,
+/// les en-têtes par défaut et les intercepteurs d'authentification et d'erreur.
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
       baseUrl: const String.fromEnvironment(
-        'PLATEPILOT_API_BASE_URL',
-        defaultValue: 'http://localhost:8081/api/v1',
-      ),
+              'PLATEPILOT_API_BASE_URL',
+              defaultValue: 'http://localhost:8080/api/v1',
+            ),
       connectTimeout: const Duration(seconds: 60),
       receiveTimeout: const Duration(seconds: 60),
       headers: const {'Accept': 'application/json'},
@@ -33,6 +35,7 @@ final dioProvider = Provider<Dio>((ref) {
   return dio;
 });
 
+/// Fournit une instance [ApiClient] pour effectuer les appels HTTP vers l'API.
 final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(ref.watch(dioProvider));
 });
@@ -53,9 +56,9 @@ class _AuthTokenInterceptor extends Interceptor {
   final Dio _refreshDio = Dio(
     BaseOptions(
       baseUrl: const String.fromEnvironment(
-        'PLATEPILOT_API_BASE_URL',
-        defaultValue: 'http://localhost:8081/api/v1',
-      ),
+              'PLATEPILOT_API_BASE_URL',
+              defaultValue: 'http://localhost:8080/api/v1',
+            ),
       connectTimeout: const Duration(seconds: 60),
       receiveTimeout: const Duration(seconds: 60),
       headers: const {'Accept': 'application/json'},
@@ -127,27 +130,35 @@ class _ErrorLogInterceptor extends Interceptor {
   }
 }
 
+/// Client HTTP encapsulant [Dio] pour interagir avec l'API REST.
+///
+/// Fournit des méthodes génériques GET, POST, PUT, PATCH et DELETE.
 class ApiClient {
   const ApiClient(this._dio);
 
   final Dio _dio;
 
+  /// Effectue une requête GET vers [path] avec des paramètres [query] optionnels.
   Future<Response<dynamic>> get(String path, {Map<String, dynamic>? query}) {
     return _dio.get(path, queryParameters: query);
   }
 
+  /// Effectue une requête POST vers [path] avec un corps [data] et des paramètres [query] optionnels.
   Future<Response<dynamic>> post(String path, {Object? data, Map<String, dynamic>? query}) {
     return _dio.post(path, data: data, queryParameters: query);
   }
 
+  /// Effectue une requête PUT vers [path] avec un corps [data] et des paramètres [query] optionnels.
   Future<Response<dynamic>> put(String path, {Object? data, Map<String, dynamic>? query}) {
     return _dio.put(path, data: data, queryParameters: query);
   }
 
+  /// Effectue une requête PATCH vers [path] avec un corps [data] et des paramètres [query] optionnels.
   Future<Response<dynamic>> patch(String path, {Object? data, Map<String, dynamic>? query}) {
     return _dio.patch(path, data: data, queryParameters: query);
   }
 
+  /// Effectue une requête DELETE vers [path].
   Future<Response<dynamic>> delete(String path) {
     return _dio.delete(path);
   }

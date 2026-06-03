@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/theme/color_tokens.dart';
 import '../../app/theme/app_spacing.dart';
-import '../../core/extensions/theme_extensions.dart';
 import '../../core/repositories/recommendation_repository.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../shared/widgets/plate_scaffold.dart';

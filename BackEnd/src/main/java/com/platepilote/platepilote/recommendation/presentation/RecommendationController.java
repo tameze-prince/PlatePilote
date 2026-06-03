@@ -22,15 +22,33 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Contrôleur REST exposant les endpoints de recommandation de recettes.
+ * <p>
+ * Permet d'obtenir des recommandations personnalisées, des repas rapides,
+ * des plans de repas hebdomadaires et de soumettre du feedback utilisateur.
+ */
 @RestController
 @RequestMapping("/api/v1/recommendations")
 @RequiredArgsConstructor
 public class RecommendationController {
 
+    /** Moteur de recommandation injecté. */
     private final RecommendationEngine recommendationEngine;
+
+    /** Repository des interactions utilisateur. */
     private final UserInteractionRepository userInteractionRepository;
+
+    /** Utilitaires de sécurité pour extraire l'utilisateur courant. */
     private final SecurityUtils securityUtils;
 
+    /**
+     * Récupère une liste de recommandations de recettes personnalisées.
+     *
+     * @param userDetails détails de l'utilisateur authentifié
+     * @param limit       nombre maximum de résultats (défaut: 10)
+     * @return liste des recommandations avec scores détaillés
+     */
     @GetMapping
     public ResponseEntity<ApiResponse<List<RecipeRecommendation>>> getRecommendations(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -40,6 +58,14 @@ public class RecommendationController {
         return ResponseEntity.ok(ApiResponse.success(toDto(results)));
     }
 
+    /**
+     * Récupère des recommandations de repas rapides (temps de préparation limité).
+     *
+     * @param userDetails détails de l'utilisateur authentifié
+     * @param maxTime     temps maximum de préparation en minutes (défaut: 30)
+     * @param limit       nombre maximum de résultats (défaut: 3)
+     * @return liste des recommandations de repas rapides
+     */
     @PostMapping("/quick-meal")
     public ResponseEntity<ApiResponse<List<RecipeRecommendation>>> getQuickMeal(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -50,6 +76,12 @@ public class RecommendationController {
         return ResponseEntity.ok(ApiResponse.success(toDto(results)));
     }
 
+    /**
+     * Génère un plan de repas hebdomadaire complet (7 jours, 3 repas par jour).
+     *
+     * @param userDetails détails de l'utilisateur authentifié
+     * @return plan hebdomadaire structuré par jour et par repas
+     */
     @PostMapping("/weekly-plan")
     public ResponseEntity<ApiResponse<List<List<RecipeRecommendation>>>> generateWeeklyPlan(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -61,6 +93,15 @@ public class RecommendationController {
         return ResponseEntity.ok(ApiResponse.success(dtoPlan));
     }
 
+    /**
+     * Soumet un feedback utilisateur sur une recette recommandée.
+     * <p>
+     * Les types d'interaction possibles : saved, cooked, rated, viewed, skipped, disliked.
+     *
+     * @param userDetails détails de l'utilisateur authentifié
+     * @param request     corps de la requête contenant recipeId, interactionType et weight
+     * @return confirmation de l'enregistrement du feedback
+     */
     @PostMapping("/feedback")
     public ResponseEntity<ApiResponse<Void>> submitFeedback(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -78,12 +119,25 @@ public class RecommendationController {
         return ResponseEntity.ok(ApiResponse.success("Feedback recorded", null));
     }
 
+    /**
+     * Requête de feedback utilisateur.
+     *
+     * @param recipeId        identifiant de la recette concernée
+     * @param interactionType type d'interaction (saved, cooked, rated, viewed, skipped, disliked)
+     * @param weight          poids optionnel de l'interaction
+     */
     public record FeedbackRequest(
             UUID recipeId,
             String interactionType,
             BigDecimal weight
     ) {}
 
+    /**
+     * Convertit une liste de résultats du moteur en DTO de réponse.
+     *
+     * @param results résultats du moteur de recommandation
+     * @return liste de DTO RecipeRecommendation
+     */
     private List<RecipeRecommendation> toDto(List<RecommendationResult> results) {
         return results.stream()
                 .map(r -> new RecipeRecommendation(
@@ -113,6 +167,32 @@ public class RecommendationController {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * DTO représentant une recommandation de recette exposée via l'API REST.
+     *
+     * @param id               identifiant de la recette
+     * @param name             nom de la recette
+     * @param description      description textuelle
+     * @param cuisineType      type de cuisine (ex: italienne, asiatique)
+     * @param mealType         type de repas (ex: dîner, déjeuner)
+     * @param difficulty       niveau de difficulté
+     * @param totalTimeMinutes temps total de préparation en minutes
+     * @param servings         nombre de portions
+     * @param imageUrl         URL de l'image de la recette
+     * @param score            score global de la recommandation
+     * @param budgetScore      score budgétaire
+     * @param pantryScore      score d'utilisation du placard
+     * @param timeScore        score de temps de préparation
+     * @param preferenceScore  score de correspondance aux préférences
+     * @param nutritionScore   score nutritionnel
+     * @param varietyScore     score de variété
+     * @param locationScore    score de pertinence géographique
+     * @param estimatedCost    coût estimé de la recette
+     * @param currencyCode     code de la devise
+     * @param countryCode      code du pays
+     * @param reasons          raisons justifiant la recommandation
+     * @param warnings         avertissements (allergènes, etc.)
+     */
     public record RecipeRecommendation(
             UUID id,
             String name,

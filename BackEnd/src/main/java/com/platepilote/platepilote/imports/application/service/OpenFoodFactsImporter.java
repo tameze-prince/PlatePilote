@@ -14,16 +14,37 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Importateur de produits via l'API Open Food Facts.
+ * <p>
+ * Récupère des produits alimentaires avec leurs informations nutritionnelles
+ * et codes-barres depuis la base Open Food Facts. Les données sont importées
+ * dans les entités Ingredient et BarcodeProduct.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class OpenFoodFactsImporter {
 
+    /** Repository des ingrédients. */
     private final IngredientRepository ingredientRepository;
+
+    /** Repository des produits par code-barres. */
     private final BarcodeProductRepository barcodeProductRepository;
+
+    /** Normaliseur d'ingrédients. */
     private final IngredientNormalizer normalizer;
+
+    /** Client HTTP RestTemplate. */
     private final RestTemplate restTemplate;
 
+    /**
+     * Lance l'import des produits depuis Open Food Facts.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @param job        job d'importation en cours
+     */
     @SuppressWarnings("unchecked")
     public void importData(String query, int maxResults, ImportJob job) {
         log.info("OpenFoodFacts import started: query='{}', maxResults={}", query, maxResults);

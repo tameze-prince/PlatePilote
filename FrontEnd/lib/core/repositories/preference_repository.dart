@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../network/api_client.dart';
 import 'base_repository.dart';
 
+/// Repository des préférences utilisateur (régimes, cuisines, allergies).
 class PreferenceRepository extends BaseRepository {
   PreferenceRepository(super.apiClient);
 
+  /// Récupère la liste des préférences alimentaires (régimes).
   Future<List<String>> getDietaryPreferences() async {
     try {
       final response = await apiClient.get('/preferences/diets');
@@ -21,6 +23,7 @@ class PreferenceRepository extends BaseRepository {
     }
   }
 
+  /// Ajoute une préférence alimentaire.
   Future<void> addDietaryPreference(String dietType) async {
     try {
       await apiClient.post('/preferences/diets', data: {'dietType': dietType});
@@ -29,6 +32,7 @@ class PreferenceRepository extends BaseRepository {
     }
   }
 
+  /// Supprime une préférence alimentaire.
   Future<void> removeDietaryPreference(String dietType) async {
     try {
       await apiClient.delete('/preferences/diets/$dietType');
@@ -37,6 +41,7 @@ class PreferenceRepository extends BaseRepository {
     }
   }
 
+  /// Récupère la liste des préférences de cuisine.
   Future<List<String>> getCuisinePreferences() async {
     try {
       final response = await apiClient.get('/preferences/cuisines');
@@ -51,6 +56,7 @@ class PreferenceRepository extends BaseRepository {
     }
   }
 
+  /// Ajoute une préférence de cuisine.
   Future<void> addCuisinePreference(String cuisineType) async {
     try {
       await apiClient.post('/preferences/cuisines', data: {'cuisineType': cuisineType});
@@ -59,6 +65,7 @@ class PreferenceRepository extends BaseRepository {
     }
   }
 
+  /// Supprime une préférence de cuisine.
   Future<void> removeCuisinePreference(String cuisineType) async {
     try {
       await apiClient.delete('/preferences/cuisines/$cuisineType');
@@ -67,6 +74,7 @@ class PreferenceRepository extends BaseRepository {
     }
   }
 
+  /// Récupère la liste des allergies déclarées.
   Future<List<dynamic>> getAllergies() async {
     try {
       final response = await apiClient.get('/preferences/allergies');
@@ -81,6 +89,7 @@ class PreferenceRepository extends BaseRepository {
     }
   }
 
+  /// Ajoute une allergie avec une sévérité optionnelle.
   Future<void> addAllergy(String allergen, {String? severity}) async {
     try {
       await apiClient.post('/preferences/allergies', data: {
@@ -92,6 +101,7 @@ class PreferenceRepository extends BaseRepository {
     }
   }
 
+  /// Supprime une allergie.
   Future<void> removeAllergy(String allergen) async {
     try {
       await apiClient.delete('/preferences/allergies/$allergen');
@@ -100,6 +110,7 @@ class PreferenceRepository extends BaseRepository {
     }
   }
 
+  /// Récupère toutes les préférences de l'utilisateur connecté.
   Future<Map<String, dynamic>> getMyPreferences() async {
     try {
       final response = await apiClient.get('/preferences/me');
@@ -114,6 +125,7 @@ class PreferenceRepository extends BaseRepository {
     }
   }
 
+  /// Met à jour les préférences de l'utilisateur connecté (régimes, allergies, cuisines).
   Future<void> updateMyPreferences({
     List<String>? dietaryPreferences,
     List<Map<String, String?>>? allergies,
@@ -139,6 +151,7 @@ class PreferenceRepository extends BaseRepository {
   }
 }
 
+/// Provider Riverpod pour [PreferenceRepository].
 final preferenceRepositoryProvider = Provider<PreferenceRepository>((ref) {
   return PreferenceRepository(ref.watch(apiClientProvider));
 });

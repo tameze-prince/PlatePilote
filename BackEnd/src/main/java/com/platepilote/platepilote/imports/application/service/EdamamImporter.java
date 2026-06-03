@@ -18,22 +18,45 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Importateur de recettes via l'API Edamam.
+ * <p>
+ * Récupère des recettes, ingrédients, valeurs nutritionnelles et instructions
+ * depuis l'API Recipe d'Edamam. Les données sont importées dans le catalogue
+ * de recettes PlatePilote.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EdamamImporter {
 
+    /** Repository des recettes. */
     private final RecipeRepository recipeRepository;
+
+    /** Repository des ingrédients de recettes. */
     private final RecipeIngredientRepository recipeIngredientRepository;
+
+    /** Repository des étapes de recettes. */
     private final RecipeStepRepository recipeStepRepository;
+
+    /** Client HTTP RestTemplate. */
     private final RestTemplate restTemplate;
 
+    /** Identifiant d'application Edamam. */
     @Value("${app.api.edamam-app-id}")
     private String appId;
 
+    /** Clé d'application Edamam. */
     @Value("${app.api.edamam-app-key}")
     private String appKey;
 
+    /**
+     * Lance l'import des recettes depuis Edamam.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @param job        job d'importation en cours
+     */
     @SuppressWarnings("unchecked")
     public void importData(String query, int maxResults, ImportJob job) {
         log.info("Edamam import started: query='{}', maxResults={}", query, maxResults);

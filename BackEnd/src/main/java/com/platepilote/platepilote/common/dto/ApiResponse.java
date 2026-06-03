@@ -1,32 +1,29 @@
 package com.platepilote.platepilote.common.dto;
 
 /**
- * API RESPONSE - STANDARD WRAPPER FOR ALL API RESPONSES
- * ======================================================
- * 
- * WHAT IT IS:
- * A standard wrapper that all API endpoints use to return data.
- * 
- * WHY IT EXISTS:
- * Ensures all API responses have the same format, making it easier for the
- * Flutter app to parse and handle responses consistently.
- * 
- * SUCCESS RESPONSE FORMAT:
+ * Réponse API standardisée pour tous les endpoints REST.
+ * <p>
+ * Format succès :
+ * <pre>{@code
  * {
  *   "success": true,
- *   "message": "Recipe created successfully",
- *   "data": { ... recipe object ... },
+ *   "message": "Opération réussie",
+ *   "data": { ... },
  *   "timestamp": "2024-01-15T10:30:00Z"
  * }
- * 
- * ERROR RESPONSE FORMAT:
+ * }</pre>
+ * Format erreur :
+ * <pre>{@code
  * {
  *   "success": false,
- *   "message": "Recipe not found",
+ *   "message": "Ressource introuvable",
  *   "timestamp": "2024-01-15T10:30:00Z"
  * }
+ * }</pre>
+ * </p>
+ *
+ * @param <T> type des données de la réponse
  */
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,17 +36,24 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)  // Don't include null fields in JSON
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
-    private boolean success;    // true = operation succeeded, false = failed
-    private String message;     // Human-readable message for the user
-    private T data;             // The actual response data (generic type)
-    private Instant timestamp;  // When the response was generated
+    /** Indique si l'opération a réussi. */
+    private boolean success;
+    /** Message lisible pour l'utilisateur. */
+    private String message;
+    /** Données de la réponse (type générique). */
+    private T data;
+    /** Horodatage de génération de la réponse. */
+    private Instant timestamp;
 
     /**
-     * Create a success response with data.
-     * Example: return ApiResponse.success(recipe);
+     * Crée une réponse de succès avec des données.
+     *
+     * @param data données à retourner
+     * @param <T>  type des données
+     * @return réponse de succès
      */
     public static <T> ApiResponse<T> success(T data) {
         return ApiResponse.<T>builder()
@@ -60,8 +64,12 @@ public class ApiResponse<T> {
     }
 
     /**
-     * Create a success response with a custom message and data.
-     * Example: return ApiResponse.success("Recipe created", recipe);
+     * Crée une réponse de succès avec un message personnalisé et des données.
+     *
+     * @param message message de succès
+     * @param data    données à retourner
+     * @param <T>     type des données
+     * @return réponse de succès
      */
     public static <T> ApiResponse<T> success(String message, T data) {
         return ApiResponse.<T>builder()
@@ -73,8 +81,11 @@ public class ApiResponse<T> {
     }
 
     /**
-     * Create an error response.
-     * Example: return ApiResponse.error("Recipe not found");
+     * Crée une réponse d'erreur avec un message.
+     *
+     * @param message description de l'erreur
+     * @param <T>     type des données (généralement vide)
+     * @return réponse d'erreur
      */
     public static <T> ApiResponse<T> error(String message) {
         return ApiResponse.<T>builder()

@@ -26,12 +26,22 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Service de construction du tableau de bord d'accueil.
+ * <p>
+ * Agrège les données des différents domaines (profil, abonnement, plans de repas,
+ * listes de courses, placard, budget, notifications, recettes) pour fournir
+ * une vue synthétique et actionnable à l'utilisateur dès sa connexion.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class DashboardService {
 
+    /** Repository des utilisateurs. */
     private final UserRepository userRepository;
+
+    /** Repository des profils utilisateur. */
     private final UserProfileRepository userProfileRepository;
     private final MealPlanRepository mealPlanRepository;
     private final MealPlanEntryRepository mealPlanEntryRepository;
@@ -43,6 +53,16 @@ public class DashboardService {
     private final SubscriptionRepository subscriptionRepository;
     private final RecipeRepository recipeRepository;
 
+    /**
+     * Construit le tableau de bord d'accueil pour un utilisateur.
+     * <p>
+     * Agrège les informations suivantes : prénom, type d'abonnement, plan de repas actif,
+     * liste de courses active, résumé du placard (ruptures, expirations), budget,
+     * nombre de notifications non lues, recettes recommandées et prochaine action suggérée.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return tableau de bord complet
+     */
     public DashboardResponse getHomeDashboard(UUID userId) {
         // Greeting - firstName is on OurUser entity, not UserProfile
         String firstName = userRepository.findById(userId)
@@ -188,7 +208,19 @@ public class DashboardService {
         return new PantrySummary(total, expiringSoon, expired, lowStock);
     }
 
-    // DTO records
+    /**
+     * DTO représentant le tableau de bord d'accueil complet.
+     *
+     * @param firstName          prénom de l'utilisateur
+     * @param planType           type d'abonnement (FREE, PREMIUM, etc.)
+     * @param activePlan         plan de repas actif (ou null)
+     * @param groceryList        liste de courses active (ou null)
+     * @param pantry             résumé du placard
+     * @param budget             résumé du budget (ou null)
+     * @param unreadNotifications nombre de notifications non lues
+     * @param recommendations    liste des recettes recommandées
+     * @param nextAction         prochaine action suggérée
+     */
     public record DashboardResponse(
             String firstName,
             String planType,
@@ -201,6 +233,16 @@ public class DashboardService {
             String nextAction
     ) {}
 
+    /**
+     * Résumé d'un plan de repas.
+     *
+     * @param id         identifiant du plan
+     * @param name       nom du plan
+     * @param status     statut (ACTIVE, etc.)
+     * @param startDate  date de début
+     * @param endDate    date de fin
+     * @param entryCount nombre d'entrées du plan
+     */
     public record MealPlanSummary(
             UUID id,
             String name,
@@ -210,6 +252,16 @@ public class DashboardService {
             int entryCount
     ) {}
 
+    /**
+     * Résumé d'une liste de courses.
+     *
+     * @param id              identifiant de la liste
+     * @param name            nom de la liste
+     * @param totalItems      nombre total d'articles
+     * @param checkedItems    nombre d'articles cochés
+     * @param totalEstimate   estimation du coût total
+     * @param checkedEstimate estimation du coût des articles cochés
+     */
     public record GrocerySummary(
             UUID id,
             String name,
@@ -219,6 +271,14 @@ public class DashboardService {
             BigDecimal checkedEstimate
     ) {}
 
+    /**
+     * Résumé de l'état du placard.
+     *
+     * @param totalItems   nombre total d'articles
+     * @param expiringSoon articles proches de l'expiration (≤ 3 jours)
+     * @param expired      articles expirés
+     * @param lowStock     articles en stock faible
+     */
     public record PantrySummary(
             int totalItems,
             int expiringSoon,
@@ -226,12 +286,33 @@ public class DashboardService {
             int lowStock
     ) {}
 
+    /**
+     * Résumé du budget hebdomadaire.
+     *
+     * @param amount   montant du budget
+     * @param spent    montant déjà dépensé
+     * @param currency devise
+     */
     public record BudgetSummary(
             BigDecimal amount,
             BigDecimal spent,
             String currency
     ) {}
 
+    /**
+     * DTO d'une recette recommandée affichée dans le tableau de bord.
+     *
+     * @param id               identifiant de la recette
+     * @param name             nom
+     * @param description      description
+     * @param imageUrl         URL de l'image
+     * @param totalTimeMinutes temps de préparation total
+     * @param servings         nombre de portions
+     * @param cuisineType      type de cuisine
+     * @param mealType         type de repas
+     * @param estimatedCost    coût estimé
+     * @param score            score de recommandation
+     */
     public record RecommendationDTO(
             UUID id,
             String name,

@@ -1,25 +1,11 @@
 package com.platepilote.platepilote.grocery.domain.entity;
 
 /**
- * GROCERY ITEM ENTITY - DATABASE TABLE: grocery_items
- * ======================================================
- * 
- * WHAT IT IS:
- * Represents one item on a shopping list (e.g., "Milk - 2 liters").
- * 
- * EXAMPLE DATA:
- * - groceryListId: "list-123", name: "Milk", category: "dairy", quantity: 2, unit: "liter", estimatedPrice: 3.50, checked: false
- * 
- * FIELDS:
- * - groceryListId: Which shopping list this item belongs to
- * - name: Item name
- * - category: Store section (e.g., "dairy", "produce", "meat") for organizing the list
- * - quantity: How much to buy
- * - unit: Unit of measurement
- * - estimatedPrice: Expected cost (for budget tracking)
- * - checked: Whether the item has been purchased (ticked off in the app)
- * - notes: Optional note (e.g., "Get the organic brand")
- * - sortOrder: Display order in the list (grouped by category)
+ * Entité représentant un article dans une liste de courses.
+ * <p>
+ * Chaque article appartient à une liste (via {@code groceryListId}) et contient
+ * les informations nécessaires à l'achat : nom, quantité, prix estimé, etc.
+ * L'attribut {@code checked} indique si l'article a été acheté.
  */
 
 import jakarta.persistence.Column;

@@ -6,6 +6,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../premium_components.dart';
 
+/// Carte réutilisable avec padding, tap et couleur personnalisable.
 class AppCard extends StatelessWidget {
   const AppCard({
     required this.child,
@@ -15,9 +16,16 @@ class AppCard extends StatelessWidget {
     super.key,
   });
 
+  /// Contenu de la carte.
   final Widget child;
+
+  /// Padding interne.
   final EdgeInsetsGeometry padding;
+
+  /// Callback de tap optionnel.
   final VoidCallback? onTap;
+
+  /// Couleur de fond optionnelle.
   final Color? color;
 
   @override

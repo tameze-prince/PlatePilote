@@ -5,17 +5,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/preferences_provider.dart';
 
+/// Interface abstraite pour le stockage sécurisé des tokens JWT.
 abstract class TokenStorage {
+  /// Sauvegarde les tokens d'accès et de rafraîchissement.
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
   });
+
+  /// Récupère le token d'accès.
   Future<String?> getAccessToken();
+
+  /// Récupère le token de rafraîchissement.
   Future<String?> getRefreshToken();
+
+  /// Efface tous les tokens stockés.
   Future<void> clearTokens();
+
+  /// Vérifie si des tokens sont présents.
   Future<bool> hasTokens();
 }
 
+/// Implémentation native de [TokenStorage] utilisant [FlutterSecureStorage]
+/// pour les appareils mobiles (Android, iOS).
 class NativeTokenStorage implements TokenStorage {
   NativeTokenStorage(this._storage);
 
@@ -56,6 +68,8 @@ class NativeTokenStorage implements TokenStorage {
   }
 }
 
+/// Implémentation web de [TokenStorage] utilisant [SharedPreferences]
+/// (car FlutterSecureStorage n'est pas disponible sur le web).
 class WebTokenStorage implements TokenStorage {
   WebTokenStorage(this._prefs);
 
@@ -95,6 +109,8 @@ class WebTokenStorage implements TokenStorage {
   }
 }
 
+/// Provider Riverpod pour [TokenStorage].
+/// Utilise [NativeTokenStorage] sur mobile et [WebTokenStorage] sur le web.
 final secureStorageProvider = Provider<TokenStorage>((ref) {
   if (kIsWeb) {
     final prefs = ref.watch(sharedPreferencesProvider);

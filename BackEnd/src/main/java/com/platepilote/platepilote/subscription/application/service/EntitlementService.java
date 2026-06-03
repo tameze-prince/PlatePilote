@@ -15,17 +15,29 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Service métier pour la gestion des droits (entitlements) des utilisateurs.
+ * Gère l'octroi et la révocation du statut premium.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class EntitlementService {
 
+    /** Clé d'entitlement pour le statut premium. */
     public static final String PREMIUM_ENTITLEMENT = "premium";
 
     private final UserEntitlementRepository userEntitlementRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
+    /**
+     * Vérifie si un utilisateur possède un entitlement actif et non expiré.
+     *
+     * @param userId         identifiant de l'utilisateur
+     * @param entitlementKey clé de l'entitlement
+     * @return true si l'entitlement est actif et valide
+     */
     @Transactional(readOnly = true)
     public boolean hasActiveEntitlement(UUID userId, String entitlementKey) {
         return userEntitlementRepository.findByUserIdAndEntitlementKey(userId, entitlementKey)
@@ -35,6 +47,14 @@ public class EntitlementService {
                 .isPresent();
     }
 
+    /**
+     * Accorde le statut premium à un utilisateur.
+     *
+     * @param userId    identifiant de l'utilisateur
+     * @param source    source de l'octroi (STRIPE, INTERNAL, etc.)
+     * @param expiresAt date d'expiration du premium
+     * @return l'entitlement créé ou mis à jour
+     */
     public UserEntitlement grantPremium(UUID userId, String source, Instant expiresAt) {
         UserEntitlement entitlement = userEntitlementRepository
                 .findByUserIdAndEntitlementKey(userId, PREMIUM_ENTITLEMENT)
@@ -53,6 +73,11 @@ public class EntitlementService {
         return saved;
     }
 
+    /**
+     * Révoque le statut premium d'un utilisateur.
+     *
+     * @param userId identifiant de l'utilisateur
+     */
     public void revokePremium(UUID userId) {
         userEntitlementRepository.findByUserIdAndEntitlementKey(userId, PREMIUM_ENTITLEMENT)
                 .ifPresent(entitlement -> {
@@ -63,6 +88,12 @@ public class EntitlementService {
         syncPremiumRole(userId);
     }
 
+    /**
+     * Synchronise le rôle ROLE_PREMIUM_USER sur l'utilisateur
+     * en fonction de son entitlement premium actif.
+     *
+     * @param userId identifiant de l'utilisateur
+     */
     public void syncPremiumRole(UUID userId) {
         OurUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString()));

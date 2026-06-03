@@ -30,6 +30,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Contrôleur REST exposant les endpoints de gestion du garde-manger.
+ */
 @RestController
 @RequestMapping("/api/v1/pantry")
 @RequiredArgsConstructor
@@ -39,6 +42,14 @@ public class PantryController {
 
     private final SecurityUtils securityUtils;
 
+    /**
+     * Récupère tous les articles du garde-manger de l'utilisateur connecté (paginné).
+     *
+     * @param userDetails utilisateur authentifié
+     * @param page        numéro de page (défaut 0)
+     * @param size        taille de page (défaut 20)
+     * @return liste paginée des articles
+     */
     @GetMapping
     public ResponseEntity<ApiResponse<PagedResponse<PantryItemResponse>>> getAllItems(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -50,6 +61,13 @@ public class PantryController {
         return ResponseEntity.ok(ApiResponse.success(items));
     }
 
+    /**
+     * Récupère les articles filtrés par catégorie.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param category    catégorie souhaitée
+     * @return liste des articles de la catégorie
+     */
     @GetMapping("/category/{category}")
     public ResponseEntity<ApiResponse<List<PantryItemResponse>>> getItemsByCategory(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -59,6 +77,13 @@ public class PantryController {
         return ResponseEntity.ok(ApiResponse.success(items));
     }
 
+    /**
+     * Récupère les articles qui expirent dans un nombre de jours donné.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param days        nombre de jours (défaut 7)
+     * @return liste des articles proches de la péremption
+     */
     @GetMapping("/expiring")
     public ResponseEntity<ApiResponse<List<PantryItemResponse>>> getExpiringItems(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -68,6 +93,13 @@ public class PantryController {
         return ResponseEntity.ok(ApiResponse.success(items));
     }
 
+    /**
+     * Recherche des articles par nom.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param q           terme de recherche
+     * @return liste des articles correspondants
+     */
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<PantryItemResponse>>> searchItems(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -77,6 +109,13 @@ public class PantryController {
         return ResponseEntity.ok(ApiResponse.success(items));
     }
 
+    /**
+     * Ajoute un nouvel article dans le garde-manger.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param request     données de l'article
+     * @return l'article créé (status 201)
+     */
     @PostMapping
     public ResponseEntity<ApiResponse<PantryItemResponse>> addItem(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -87,6 +126,14 @@ public class PantryController {
                 .body(ApiResponse.success("Item added", item));
     }
 
+    /**
+     * Met à jour un article existant.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param itemId      identifiant de l'article
+     * @param request     nouvelles données
+     * @return l'article mis à jour
+     */
     @PutMapping("/{itemId}")
     public ResponseEntity<ApiResponse<PantryItemResponse>> updateItem(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -97,6 +144,12 @@ public class PantryController {
         return ResponseEntity.ok(ApiResponse.success("Item updated", item));
     }
 
+    /**
+     * Supprime (soft-delete) un article du garde-manger.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param itemId      identifiant de l'article
+     */
     @DeleteMapping("/{itemId}")
     public ResponseEntity<ApiResponse<Void>> removeItem(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -106,6 +159,13 @@ public class PantryController {
         return ResponseEntity.ok(ApiResponse.success("Item removed", null));
     }
 
+    /**
+     * Consomme une partie d'un article. Si la quantité atteint zéro, l'article est supprimé.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param itemId      identifiant de l'article
+     * @param amount      quantité consommée
+     */
     @PatchMapping("/{itemId}/consume")
     public ResponseEntity<ApiResponse<Void>> consumeItem(
             @AuthenticationPrincipal UserDetails userDetails,

@@ -1,8 +1,12 @@
 import '../../shared/models/ingredient.dart';
 
+/// Utilitaires de recherche et de tri pour les ingrédients.
 class SearchUtils {
   const SearchUtils._();
 
+  /// Trie les [ingredients] selon leur pertinence par rapport à [query].
+  /// Le score tient compte du nom, du début du nom, de la catégorie,
+  /// puis du score de popularité et enfin de l'ordre alphabétique.
   static List<Ingredient> sortIngredients(
     Iterable<Ingredient> ingredients,
     String query,
@@ -25,6 +29,8 @@ class SearchUtils {
     return sorted;
   }
 
+  /// Génère jusqu'à 3 suggestions d'ingrédients à partir de [query].
+  /// Retourne une liste vide si la requête fait moins de 2 caractères.
   static List<String> suggestionsFor(
     String query,
     Iterable<Ingredient> ingredients,
@@ -44,6 +50,8 @@ class SearchUtils {
         .toList();
   }
 
+  /// Calcule un score de pertinence pour un [ingredient] par rapport à [query].
+  /// Priorité : égalité parfaite > commence par > contient > catégorie correspond.
   static int _score(Ingredient ingredient, String query) {
     if (query.isEmpty) return 0;
     final name = ingredient.canonicalName.toLowerCase();

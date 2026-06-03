@@ -14,14 +14,29 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+/**
+ * Contrôleur REST pour le tableau de bord.
+ * <p>
+ * Expose l'endpoint principal de la page d'accueil qui agrège
+ * les données clés de l'utilisateur.
+ */
 @RestController
 @RequestMapping("/api/v1/dashboard")
 @RequiredArgsConstructor
 public class DashboardController {
 
+    /** Service de construction du tableau de bord. */
     private final DashboardService dashboardService;
+
+    /** Utilitaires de sécurité. */
     private final SecurityUtils securityUtils;
 
+    /**
+     * Récupère le tableau de bord d'accueil de l'utilisateur connecté.
+     *
+     * @param userDetails détails de l'utilisateur authentifié
+     * @return tableau de bord complet
+     */
     @GetMapping("/home")
     public ResponseEntity<ApiResponse<DashboardResponse>> getHomeDashboard(
             @AuthenticationPrincipal UserDetails userDetails) {

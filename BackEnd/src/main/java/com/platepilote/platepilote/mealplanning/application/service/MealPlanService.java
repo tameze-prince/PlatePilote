@@ -33,6 +33,14 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Service métier pour la gestion des plans de repas.
+ * <p>
+ * Fournit les opérations CRUD sur les plans de repas et leurs entrées,
+ * la génération automatique de plans hebdomadaires, et la gestion des
+ * échanges (swap) de recettes.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -46,6 +54,13 @@ public class MealPlanService {
     private final SmartSwapService smartSwapService;
     private final SwapTrackingRepository swapTrackingRepository;
 
+    /**
+     * Récupère la liste paginée des plans de repas d'un utilisateur.
+     *
+     * @param userId   identifiant de l'utilisateur
+     * @param pageable paramètres de pagination et de tri
+     * @return réponse paginée contenant les résumés des plans
+     */
     @Transactional(readOnly = true)
     public PagedResponse<MealPlanResponse> getUserMealPlans(UUID userId, Pageable pageable) {
         Page<MealPlan> page = mealPlanRepository.findByUserIdAndDeletedAtIsNull(userId, pageable);
@@ -57,6 +72,17 @@ public class MealPlanService {
         return PagedResponse.of(content, page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
+    /**
+     * Récupère un plan de repas complet par son identifiant.
+     * <p>
+     * Vérifie que l'utilisateur est bien le propriétaire du plan.
+     * </p>
+     *
+     * @param userId     identifiant de l'utilisateur connecté
+     * @param mealPlanId identifiant du plan de repas
+     * @return réponse complète du plan avec ses entrées
+     * @throws ResourceNotFoundException si le plan n'existe pas
+     */
     @Transactional(readOnly = true)
     public MealPlanResponse getMealPlanById(UUID userId, UUID mealPlanId) {
         MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
@@ -67,6 +93,14 @@ public class MealPlanService {
         return toFullResponse(mealPlan);
     }
 
+    /**
+     * Crée un nouveau plan de repas pour l'utilisateur.
+     *
+     * @param userId  identifiant de l'utilisateur
+     * @param request données du plan à créer
+     * @return résumé du plan créé
+     * @throws BusinessRuleViolationException si la date de fin est antérieure à la date de début
+     */
     public MealPlanResponse createMealPlan(UUID userId, MealPlanRequest request) {
         if (request.getEndDate().isBefore(request.getStartDate())) {
             throw new BusinessRuleViolationException("End date must be after start date");
@@ -84,6 +118,18 @@ public class MealPlanService {
         return toSummaryResponse(saved);
     }
 
+    /**
+     * Ajoute une entrée (repas) à un plan de repas existant.
+     * <p>
+     * Vérifie que la date du repas est bien comprise dans l'intervalle du plan
+     * et que la recette référencée existe.
+     * </p>
+     *
+     * @param userId     identifiant de l'utilisateur connecté
+     * @param mealPlanId identifiant du plan de repas
+     * @param request    données de l'entrée à ajouter
+     * @return réponse complète du plan mis à jour
+     */
     public MealPlanResponse addEntry(UUID userId, UUID mealPlanId, MealPlanEntryRequest request) {
         MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
@@ -112,6 +158,12 @@ public class MealPlanService {
         return toFullResponse(mealPlan);
     }
 
+    /**
+     * Supprime une entrée (repas) d'un plan de repas.
+     *
+     * @param userId  identifiant de l'utilisateur connecté
+     * @param entryId identifiant de l'entrée à supprimer
+     */
     public void removeEntry(UUID userId, UUID entryId) {
         MealPlanEntry entry = mealPlanEntryRepository.findById(entryId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlanEntry", "id", entryId.toString()));
@@ -124,6 +176,12 @@ public class MealPlanService {
         mealPlanEntryRepository.delete(entry);
     }
 
+    /**
+     * Active un plan de repas en lui attribuant le statut ACTIVE.
+     *
+     * @param userId     identifiant de l'utilisateur connecté
+     * @param mealPlanId identifiant du plan à activer
+     */
     public void activateMealPlan(UUID userId, UUID mealPlanId) {
         MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
@@ -134,10 +192,29 @@ public class MealPlanService {
         mealPlanRepository.save(mealPlan);
     }
 
+    /**
+     * Génère un plan de repas hebdomadaire automatique en mode STANDARD.
+     *
+     * @param userId    identifiant de l'utilisateur
+     * @param startDate date de début de la semaine
+     * @return réponse complète du plan généré
+     */
     public MealPlanResponse generateWeeklyPlan(UUID userId, LocalDate startDate) {
         return generateWeeklyPlan(userId, startDate, MealPlanMode.STANDARD);
     }
 
+    /**
+     * Génère un plan de repas hebdomadaire automatique selon un mode donné.
+     * <p>
+     * Utilise le moteur de recommandation pour proposer des recettes adaptées
+     * au mode (STANDARD, WASTELESS, ENDOFMONTH, BUSYWEEK, FAMILY).
+     * </p>
+     *
+     * @param userId    identifiant de l'utilisateur
+     * @param startDate date de début de la semaine
+     * @param mode      mode de génération du plan
+     * @return réponse complète du plan généré
+     */
     public MealPlanResponse generateWeeklyPlan(UUID userId, LocalDate startDate, MealPlanMode mode) {
         List<List<RecommendationResult>> weeklyPlan = recommendationEngine.generateWeeklyMealPlan(userId, mode);
         LocalDate endDate = startDate.plusDays(6);
@@ -172,6 +249,14 @@ public class MealPlanService {
         return toFullResponse(saved);
     }
 
+    /**
+     * Récupère les options d'échange (swap) disponibles pour une entrée donnée.
+     *
+     * @param userId  identifiant de l'utilisateur connecté
+     * @param entryId identifiant de l'entrée à échanger
+     * @param limit   nombre maximum d'options à retourner
+     * @return liste des options d'échange disponibles
+     */
     public List<SmartSwapService.SwapOption> getSwapOptions(UUID userId, UUID entryId, int limit) {
         MealPlanEntry entry = mealPlanEntryRepository.findById(entryId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlanEntry", "id", entryId.toString()));
@@ -181,6 +266,17 @@ public class MealPlanService {
         return smartSwapService.getSwapOptions(userId, entryId, limit);
     }
 
+    /**
+     * Applique un échange (swap) : remplace la recette d'une entrée par une nouvelle recette.
+     * <p>
+     * Enregistre également l'échange dans l'historique de suivi.
+     * </p>
+     *
+     * @param userId      identifiant de l'utilisateur connecté
+     * @param entryId     identifiant de l'entrée à modifier
+     * @param newRecipeId identifiant de la nouvelle recette
+     * @return réponse complète du plan mis à jour
+     */
     public MealPlanResponse applySwap(UUID userId, UUID entryId, UUID newRecipeId) {
         MealPlanEntry entry = mealPlanEntryRepository.findById(entryId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlanEntry", "id", entryId.toString()));
@@ -204,6 +300,14 @@ public class MealPlanService {
         return toFullResponse(mealPlan);
     }
 
+    /**
+     * Définit le mode d'un plan de repas.
+     *
+     * @param userId     identifiant de l'utilisateur connecté
+     * @param mealPlanId identifiant du plan
+     * @param mode       nouveau mode à appliquer
+     * @return réponse complète du plan mis à jour
+     */
     public MealPlanResponse setMode(UUID userId, UUID mealPlanId, MealPlanMode mode) {
         MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
@@ -213,6 +317,12 @@ public class MealPlanService {
         return toFullResponse(mealPlan);
     }
 
+    /**
+     * Supprime (soft-delete) un plan de repas.
+     *
+     * @param userId     identifiant de l'utilisateur connecté
+     * @param mealPlanId identifiant du plan à supprimer
+     */
     public void deleteMealPlan(UUID userId, UUID mealPlanId) {
         MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
@@ -223,6 +333,12 @@ public class MealPlanService {
         mealPlanRepository.save(mealPlan);
     }
 
+    /**
+     * Construit une réponse résumée à partir d'une entité MealPlan.
+     *
+     * @param mealPlan entité source
+     * @return réponse résumée sans les entrées ni les agrégats
+     */
     private MealPlanResponse toSummaryResponse(MealPlan mealPlan) {
         return MealPlanResponse.builder()
                 .id(mealPlan.getId())
@@ -235,6 +351,16 @@ public class MealPlanService {
                 .build();
     }
 
+    /**
+     * Construit une réponse complète à partir d'une entité MealPlan.
+     * <p>
+     * Inclut les entrées du plan, les informations des recettes associées,
+     * ainsi que les agrégats calculés (coût total, temps total, calories, etc.).
+     * </p>
+     *
+     * @param mealPlan entité source
+     * @return réponse complète avec entrées et agrégats
+     */
     private MealPlanResponse toFullResponse(MealPlan mealPlan) {
         List<MealPlanEntry> entries = mealPlanEntryRepository.findByMealPlanId(mealPlan.getId());
 

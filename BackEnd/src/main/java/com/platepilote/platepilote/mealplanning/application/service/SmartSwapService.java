@@ -18,6 +18,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Service de suggestions d'échanges intelligents de recettes.
+ * <p>
+ * Propose des alternatives aux recettes d'un plan de repas en fonction
+ * du type de repas, du temps de préparation, du coût et d'autres critères.
+ * Les utilisateurs gratuits sont limités à 3 échanges par semaine.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class SmartSwapService {
@@ -28,13 +36,36 @@ public class SmartSwapService {
     private final EntitlementService entitlementService;
     private final SwapTrackingRepository swapTrackingRepository;
 
+    /** Limite d'échanges hebdomadaires pour les utilisateurs du palier gratuit. */
     private static final int FREE_TIER_SWAP_LIMIT = 3;
 
+    /**
+     * Récupère les options d'échange pour une entrée donnée en mode STANDARD.
+     *
+     * @param userId  identifiant de l'utilisateur
+     * @param entryId identifiant de l'entrée à échanger
+     * @param limit   nombre maximum d'options
+     * @return liste des options d'échange triées par compatibilité
+     */
     @Transactional(readOnly = true)
     public List<SwapOption> getSwapOptions(UUID userId, UUID entryId, int limit) {
         return getSwapOptions(userId, entryId, limit, MealPlanMode.STANDARD);
     }
 
+    /**
+     * Récupère les options d'échange pour une entrée donnée selon un mode spécifique.
+     * <p>
+     * Vérifie d'abord les droits de l'utilisateur : les utilisateurs non premium
+     * sont limités à 3 échanges par semaine. Ensuite, recherche des recettes candidates
+     * compatibles avec le type de repas et les contraintes de temps.
+     * </p>
+     *
+     * @param userId  identifiant de l'utilisateur
+     * @param entryId identifiant de l'entrée à échanger
+     * @param limit   nombre maximum d'options
+     * @param mode    mode de planification
+     * @return liste des options d'échange triées par compatibilité décroissante
+     */
     @Transactional(readOnly = true)
     public List<SwapOption> getSwapOptions(UUID userId, UUID entryId, int limit, MealPlanMode mode) {
         MealPlanEntry entry = mealPlanEntryRepository.findById(entryId)
@@ -77,6 +108,18 @@ public class SmartSwapService {
                 .toList();
     }
 
+    /**
+     * Calcule un score de compatibilité entre une recette candidate et l'entrée d'origine.
+     * <p>
+     * Le score prend en compte le type de repas, le temps de préparation, le coût,
+     * la présence d'une image et le score de confiance de la recette.
+     * Le score maximal est de 2.0.
+     * </p>
+     *
+     * @param recipe recette candidate
+     * @param entry  entrée d'origine
+     * @return score de compatibilité entre 0.0 et 2.0
+     */
     private double computeCompatibility(Recipe recipe, MealPlanEntry entry) {
         double score = 1.0;
         if (entry.getMealType() != null && recipe.getMealType() != null
@@ -99,6 +142,21 @@ public class SmartSwapService {
         return Math.min(score, 2.0);
     }
 
+    /**
+     * Enregistrement représentant une option d'échange de recette.
+     *
+     * @param recipeId          identifiant de la recette candidate
+     * @param name              nom de la recette
+     * @param description       description de la recette
+     * @param imageUrl          URL de l'image
+     * @param totalTimeMinutes  temps total de préparation
+     * @param estimatedCost     coût estimé
+     * @param caloriesPerServing calories par portion
+     * @param difficulty        niveau de difficulté
+     * @param cuisineType       type de cuisine
+     * @param compatibility     score de compatibilité avec l'entrée d'origine
+     * @param confidenceScore   score de confiance de la recette
+     */
     public record SwapOption(
             UUID recipeId, String name, String description,
             String imageUrl, Integer totalTimeMinutes,

@@ -17,19 +17,41 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Importateur de recettes via l'API TheMealDB.
+ * <p>
+ * Récupère des recettes complètes (nom, catégorie, région, ingrédients,
+ * mesures, instructions) depuis TheMealDB et les importe dans le catalogue
+ * de recettes PlatePilote.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class MealDbImporter {
 
+    /** Repository des recettes. */
     private final RecipeRepository recipeRepository;
+
+    /** Repository des ingrédients de recettes. */
     private final RecipeIngredientRepository recipeIngredientRepository;
+
+    /** Repository des étapes de recettes. */
     private final RecipeStepRepository recipeStepRepository;
+
+    /** Client HTTP RestTemplate. */
     private final RestTemplate restTemplate;
 
+    /** Clé API TheMealDB. */
     @Value("${app.api.themealdb-key}")
     private String apiKey;
 
+    /**
+     * Lance l'import des recettes depuis TheMealDB.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @param job        job d'importation en cours
+     */
     @SuppressWarnings("unchecked")
     public void importData(String query, int maxResults, ImportJob job) {
         log.info("TheMealDB import started: query='{}', maxResults={}", query, maxResults);

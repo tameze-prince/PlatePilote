@@ -1,37 +1,5 @@
 package com.platepilote.platepilote.authentication.application.service;
 
-/**
- * AUTH SERVICE - BUSINESS LOGIC FOR AUTHENTICATION
- * ==================================================
- * 
- * WHAT IT IS:
- * The service class that handles all authentication business logic.
- * 
- * WHAT IT DOES:
- * 1. register() - Creates a new user account and returns JWT tokens
- * 2. login() - Validates credentials and returns JWT tokens
- * 3. refreshToken() - Generates new access token from refresh token
- * 
- * REGISTER FLOW:
- * 1. Check if email already exists -> throw error if yes
- * 2. Hash the password with BCrypt (one-way encryption)
- * 3. Create User entity and save to database
- * 4. Generate access token and refresh token
- * 5. Return tokens to the client
- * 
- * LOGIN FLOW:
- * 1. Call Spring Security's AuthenticationManager to validate email/password
- * 2. If valid, load user details from database
- * 3. Generate access token and refresh token
- * 4. Return tokens to the client
- * 
- * REFRESH TOKEN FLOW:
- * 1. Extract email from the refresh token
- * 2. Verify the refresh token is valid and not expired
- * 3. Generate a new access token
- * 4. Return new access token (keep the same refresh token)
- */
-
 import com.platepilote.platepilote.authentication.application.dto.AuthenticationResponse;
 import com.platepilote.platepilote.authentication.application.dto.LoginRequest;
 import com.platepilote.platepilote.authentication.application.dto.OAuth2LoginRequest;
@@ -63,6 +31,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Service métier pour l'authentification.
+ * <p>
+ * Gère l'inscription, la connexion, la connexion OAuth2, le rafraîchissement
+ * des tokens, la déconnexion et la réinitialisation du mot de passe.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -70,22 +45,25 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;  // BCrypt password hasher
-    private final AuthenticationManager authenticationManager;  // Spring Security auth manager
-    private final JwtService jwtService;  // JWT token generator/validator
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
     private final OAuth2IdentityVerifier oAuth2IdentityVerifier;
     private final EmailVerificationService emailVerificationService;
 
     /**
-     * Register a new user account.
-     * 
-     * @param request Registration data (firstName, lastName, email, password)
-     * @return AuthenticationResponse with access and refresh tokens
-     * @throws BusinessRuleViolationException if email already exists
+     * Inscrit un nouvel utilisateur.
+     * <p>
+     * Vérifie que l'email n'est pas déjà utilisé, hache le mot de passe avec BCrypt,
+     * crée l'utilisateur en base, envoie un email de vérification et retourne les tokens JWT.
+     * </p>
+     *
+     * @param request les données d'inscription (prénom, nom, email, mot de passe)
+     * @return les tokens JWT d'accès et de rafraîchissement
+     * @throws BusinessRuleViolationException si l'email est déjà enregistré
      */
     @Transactional
     public AuthenticationResponse register(RegisterRequest request) {
-        // Check if email is already registered
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BusinessRuleViolationException("Email already registered");
         }
@@ -97,21 +75,18 @@ public class AuthService {
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
-                .passwordHash(passwordEncoder.encode(request.getPassword()))  // Hash password before saving
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .provider("local")
                 .emailVerified(false)
                 .enabled(true)
                 .roles(new HashSet<>(List.of(userRole)))
                 .build();
 
-        // Save user to database
         OurUser savedUser = userRepository.save(user);
         emailVerificationService.sendVerificationEmail(savedUser);
 
-        // Create UserDetails for JWT generation
         UserDetails userDetails = userDetails(savedUser);
 
-        // Generate JWT tokens
         String accessToken = jwtService.generateToken(roleClaims(savedUser), userDetails);
         String refreshToken = issueRefreshToken(savedUser, userDetails);
 
@@ -122,14 +97,16 @@ public class AuthService {
     }
 
     /**
-     * Authenticate an existing user.
-     * 
-     * @param request Login data (email, password)
-     * @return AuthenticationResponse with access and refresh tokens
-     * @throws BadCredentialsException if email or password is wrong
+     * Authentifie un utilisateur existant.
+     * <p>
+     * Délégue la validation du mot de passe à Spring Security via {@link AuthenticationManager},
+     * puis génère et retourne les tokens JWT.
+     * </p>
+     *
+     * @param request les données de connexion (email, mot de passe)
+     * @return les tokens JWT d'accès et de rafraîchissement
      */
     public AuthenticationResponse login(LoginRequest request) {
-        // Spring Security validates the password against the stored hash
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
@@ -139,7 +116,6 @@ public class AuthService {
 
         UserDetails userDetails = userDetails(user);
 
-        // Generate JWT tokens
         String accessToken = jwtService.generateToken(roleClaims(user), userDetails);
         String refreshToken = issueRefreshToken(user, userDetails);
 
@@ -150,11 +126,15 @@ public class AuthService {
     }
 
     /**
-     * Generate a new access token using a valid refresh token.
-     * 
-     * @param refreshToken The refresh token sent by the client
-     * @return AuthenticationResponse with new access token
-     * @throws BusinessRuleViolationException if refresh token is invalid
+     * Connecte un utilisateur via OAuth2.
+     * <p>
+     * Vérifie le token auprès du fournisseur, crée un nouveau compte ou lie
+     * l'identité OAuth2 à un compte existant, puis retourne les tokens JWT.
+     * </p>
+     *
+     * @param request les données de connexion OAuth2
+     * @return les tokens JWT d'accès et de rafraîchissement
+     * @throws BusinessRuleViolationException si le token est invalide ou l'email manquant
      */
     @Transactional
     public AuthenticationResponse oauth2Login(OAuth2LoginRequest request) {
@@ -190,16 +170,25 @@ public class AuthService {
                 .build();
     }
 
+    /**
+     * Rafraîchit le token d'accès à partir d'un token de rafraîchissement valide.
+     * <p>
+     * Vérifie que le token de rafraîchissement est valide, non révoqué, non expiré
+     * et appartient bien à l'utilisateur, puis révoque l'ancien token et en émet un nouveau.
+     * </p>
+     *
+     * @param refreshToken le token de rafraîchissement
+     * @return les nouveaux tokens JWT
+     * @throws BusinessRuleViolationException si le token est invalide
+     */
     @Transactional
     public AuthenticationResponse refreshToken(String refreshToken) {
-        // Extract email from the refresh token
         final String email = jwtService.extractUsername(refreshToken);
 
         if (email == null) {
             throw new BusinessRuleViolationException("Invalid refresh token");
         }
 
-        // Load user from database
         OurUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessRuleViolationException("User not found"));
 
@@ -207,7 +196,6 @@ public class AuthService {
             throw new BusinessRuleViolationException("User account is disabled");
         }
 
-        // Create UserDetails for validation
         UserDetails userDetails = userDetails(user);
 
         String tokenHash = hashToken(refreshToken);
@@ -234,6 +222,11 @@ public class AuthService {
                 .build();
     }
 
+    /**
+     * Déconnecte l'utilisateur en révoquant un token de rafraîchissement spécifique.
+     *
+     * @param refreshToken le token de rafraîchissement à révoquer
+     */
     @Transactional
     public void logout(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
@@ -246,22 +239,44 @@ public class AuthService {
         });
     }
 
+    /**
+     * Déconnecte l'utilisateur de toutes ses sessions en révoquant tous ses tokens actifs.
+     *
+     * @param userId l'identifiant de l'utilisateur
+     */
     @Transactional
     public void logoutAll(UUID userId) {
         refreshTokenRepository.revokeAllActiveForUser(userId);
     }
 
+    /**
+     * Initie le processus de réinitialisation du mot de passe.
+     * <p>
+     * Envoie toujours une réponse de succès pour éviter l'énumération d'emails.
+     * Si l'utilisateur existe, un email de réinitialisation est envoyé.
+     * </p>
+     *
+     * @param email l'email du compte
+     */
     @Transactional
     public void forgotPassword(String email) {
-        // Always return success to prevent email enumeration
         userRepository.findByEmail(email).ifPresent(user -> {
             String resetToken = jwtService.generateResetToken(user.getEmail());
-            // In production, send email with reset link
-            // For now, just log it
-            System.out.println("Password reset token for " + email + ": " + resetToken);
+            emailVerificationService.sendPasswordResetEmail(user, resetToken);
         });
     }
 
+    /**
+     * Réinitialise le mot de passe à l'aide d'un token de réinitialisation valide.
+     * <p>
+     * Vérifie le token, hache le nouveau mot de passe et révoque tous les tokens
+     * de rafraîchissement existants pour des raisons de sécurité.
+     * </p>
+     *
+     * @param token       le token de réinitialisation
+     * @param newPassword le nouveau mot de passe
+     * @throws BusinessRuleViolationException si le token est invalide ou expiré
+     */
     @Transactional
     public void resetPassword(String token, String newPassword) {
         String email = jwtService.extractUsername(token);
@@ -279,10 +294,16 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        // Revoke all existing refresh tokens for security
         refreshTokenRepository.revokeAllActiveForUser(user.getId());
     }
 
+    /**
+     * Émet et persiste un nouveau token de rafraîchissement.
+     *
+     * @param user        l'utilisateur
+     * @param userDetails les détails de l'utilisateur pour Spring Security
+     * @return le token de rafraîchissement brut
+     */
     private String issueRefreshToken(OurUser user, UserDetails userDetails) {
         String refreshToken = jwtService.generateRefreshToken(userDetails);
         refreshTokenRepository.save(RefreshToken.builder()
@@ -294,6 +315,14 @@ public class AuthService {
         return refreshToken;
     }
 
+    /**
+     * Crée un nouvel utilisateur à partir d'une identité OAuth2.
+     *
+     * @param identity l'identité OAuth2 vérifiée
+     * @param request  la requête OAuth2
+     * @param role     le rôle à attribuer
+     * @return le nouvel utilisateur
+     */
     private OurUser createOAuth2User(OAuth2IdentityVerifier.OAuth2Identity identity,
                                      OAuth2LoginRequest request,
                                      Role userRole) {
@@ -311,6 +340,15 @@ public class AuthService {
                 .build();
     }
 
+    /**
+     * Lie une identité OAuth2 à un compte utilisateur existant.
+     *
+     * @param user     l'utilisateur existant
+     * @param identity l'identité OAuth2 vérifiée
+     * @param request  la requête OAuth2
+     * @return l'utilisateur mis à jour
+     * @throws BusinessRuleViolationException si le compte est déjà lié à une autre identité
+     */
     private OurUser linkOAuth2Identity(OurUser user,
                                        OAuth2IdentityVerifier.OAuth2Identity identity,
                                        OAuth2LoginRequest request) {
@@ -339,6 +377,14 @@ public class AuthService {
         return user;
     }
 
+    /**
+     * Retourne une valeur selon la priorité : requête → identité → valeur par défaut.
+     *
+     * @param requestValue   la valeur de la requête
+     * @param identityValue la valeur de l'identité
+     * @param fallback       la valeur par défaut
+     * @return la meilleure valeur disponible
+     */
     private String nameOrFallback(String requestValue, String identityValue, String fallback) {
         if (requestValue != null && !requestValue.isBlank()) {
             return requestValue.trim();
@@ -349,6 +395,12 @@ public class AuthService {
         return fallback;
     }
 
+    /**
+     * Construit un {@link UserDetails} à partir de l'entité utilisateur.
+     *
+     * @param user l'utilisateur
+     * @return les détails utilisateur pour Spring Security
+     */
     private UserDetails userDetails(OurUser user) {
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
@@ -364,6 +416,12 @@ public class AuthService {
         );
     }
 
+    /**
+     * Hache un token avec SHA-256.
+     *
+     * @param token le token en clair
+     * @return l'empreinte hexadécimale
+     */
     private String hashToken(String token) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -374,6 +432,12 @@ public class AuthService {
         }
     }
 
+    /**
+     * Construit les revendications de rôles pour le token JWT.
+     *
+     * @param user l'utilisateur
+     * @return une map contenant la liste des rôles
+     */
     private Map<String, Object> roleClaims(OurUser user) {
         List<String> roles = user.getRoles().stream()
                 .map(Role::getName)

@@ -1,33 +1,13 @@
 package com.platepilote.platepilote.common.security;
 
 /**
- * JWT SERVICE - JSON WEB TOKEN CREATION AND VALIDATION
- * ======================================================
- * 
- * WHAT IT IS:
- * This class handles all JWT (JSON Web Token) operations.
- * 
- * WHAT IS A JWT?
- * A JWT is a compact, URL-safe token that contains user information.
- * Format: "header.payload.signature" (e.g., "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2huIn0.abc123")
- * 
- * HOW JWT WORKS IN THIS APP:
- * 1. User logs in with email/password
- * 2. Server validates credentials and generates a JWT
- * 3. Server sends JWT back to the client (Flutter app)
- * 4. Client includes JWT in every subsequent request (Authorization: Bearer <token>)
- * 5. Server validates the JWT on each request to identify the user
- * 
- * TWO TYPES OF TOKENS:
- * - Access Token: Short-lived (1 hour), used for API requests
- * - Refresh Token: Long-lived (7 days), used to get new access tokens
- * 
- * WHY TWO TOKENS?
- * - If access token is stolen, it expires quickly (1 hour)
- * - Refresh token is stored securely and only used to get new access tokens
- * - If refresh token is compromised, it can be revoked
+ * Service de gestion des jetons JWT ({@code JSON Web Token}).
+ * <p>
+ * Crée et valide les jetons d'accès (accès API, courte durée) et de rafraîchissement
+ * (longue durée, permet d'obtenir un nouveau jeton d'accès).
+ * Utilise une clé secrète configurée dans les propriétés de l'application.
+ * </p>
  */
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -43,40 +23,38 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-@Service  // Tells Spring: "This is a service bean"
+@Service
 public class JwtService {
 
-    /**
-     * Secret key used to sign and verify JWT tokens.
-     * Must be kept secret - if someone gets this key, they can forge tokens.
-     * In production, this should be a long random string stored in environment variables.
-     */
+    /** Clé secrète pour signer et vérifier les jetons JWT. */
     @Value("${app.jwt.secret}")
     private String secretKey;
 
-    /**
-     * Access token expiration time in milliseconds (default: 1 hour = 3,600,000 ms)
-     */
+    /** Durée de validité du jeton d'accès en millisecondes (défaut : 1 heure). */
     @Value("${app.jwt.expiration}")
     private long jwtExpiration;
 
-    /**
-     * Refresh token expiration time in milliseconds (default: 7 days = 604,800,000 ms)
-     */
+    /** Durée de validité du jeton de rafraîchissement en millisecondes (défaut : 7 jours). */
     @Value("${app.jwt.refresh-expiration}")
     private long refreshExpiration;
 
     /**
-     * Extract the username (email) from a JWT token.
-     * Used to identify which user the token belongs to.
+     * Extrait le nom d'utilisateur (email) du jeton JWT.
+     *
+     * @param token jeton JWT
+     * @return nom d'utilisateur contenu dans le jeton
      */
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
     /**
-     * Extract any claim from the JWT token using a resolver function.
-     * Claims are the data stored inside the token (username, expiration, etc.)
+     * Extrait une information (claim) du jeton JWT via une fonction de résolution.
+     *
+     * @param token          jeton JWT
+     * @param claimsResolver fonction de résolution du claim
+     * @param <T>            type du claim
+     * @return valeur du claim
      */
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
@@ -84,31 +62,43 @@ public class JwtService {
     }
 
     /**
-     * Generate a new access token for a user.
-     * Called after successful login or registration.
+     * Génère un nouveau jeton d'accès pour un utilisateur.
+     *
+     * @param userDetails informations de l'utilisateur
+     * @return jeton JWT d'accès
      */
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
 
     /**
-     * Generate a new access token with additional claims.
-     * Claims are extra data you want to store in the token (e.g., user role).
+     * Génère un jeton d'accès avec des claims supplémentaires.
+     *
+     * @param extraClaims données supplémentaires à inclure
+     * @param userDetails informations de l'utilisateur
+     * @return jeton JWT d'accès
      */
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
     /**
-     * Generate a refresh token (longer-lived than access token).
+     * Génère un jeton de rafraîchissement (durée de validité plus longue).
+     *
+     * @param userDetails informations de l'utilisateur
+     * @return jeton JWT de rafraîchissement
      */
     public String generateRefreshToken(UserDetails userDetails) {
         return buildToken(new HashMap<>(), userDetails, refreshExpiration);
     }
 
     /**
-     * Internal method that actually builds the JWT token.
-     * Sets the subject (username), issued date, expiration date, and signs it with the secret key.
+     * Construit le jeton JWT avec les claims, la date d'émission, l'expiration et la signature.
+     *
+     * @param extraClaims claims supplémentaires
+     * @param userDetails informations de l'utilisateur
+     * @param expiration  durée de validité en ms
+     * @return jeton JWT signé
      */
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
         return Jwts.builder()
@@ -121,10 +111,11 @@ public class JwtService {
     }
 
     /**
-     * Validate a JWT token.
-     * Checks that:
-     * 1. The username in the token matches the provided user
-     * 2. The token hasn't expired
+     * Valide un jeton JWT en vérifiant le nom d'utilisateur et l'expiration.
+     *
+     * @param token       jeton JWT
+     * @param userDetails informations de l'utilisateur attendu
+     * @return {@code true} si le jeton est valide
      */
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
@@ -132,25 +123,40 @@ public class JwtService {
     }
 
     /**
-     * Check if a token has expired.
+     * Vérifie si le jeton a expiré.
+     *
+     * @param token jeton JWT
+     * @return {@code true} si le jeton a expiré
      */
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
     /**
-     * Extract the expiration date from a token.
+     * Extrait la date d'expiration du jeton.
+     *
+     * @param token jeton JWT
+     * @return date d'expiration
      */
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    /**
+     * Extrait l'Instant d'expiration du jeton.
+     *
+     * @param token jeton JWT
+     * @return instant d'expiration
+     */
     public Instant extractExpirationInstant(String token) {
-        return extractExpiration(token).toInstant();
+    	return extractExpiration(token).toInstant();
     }
 
     /**
-     * Extract all claims from a token by parsing and verifying it.
+     * Extrait tous les claims du jeton après vérification de la signature.
+     *
+     * @param token jeton JWT
+     * @return tous les claims du jeton
      */
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
@@ -160,15 +166,28 @@ public class JwtService {
                 .getPayload();
     }
 
+    /**
+     * Génère un jeton de réinitialisation de mot de passe (valable 30 minutes).
+     *
+     * @param email email de l'utilisateur
+     * @return jeton JWT de réinitialisation
+     */
     public String generateResetToken(String email) {
         return Jwts.builder()
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30)) // 30 minutes
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
                 .signWith(getSignInKey())
                 .compact();
     }
 
+    /**
+     * Vérifie si un jeton de réinitialisation est valide pour un email donné.
+     *
+     * @param token jeton JWT de réinitialisation
+     * @param email email attendu
+     * @return {@code true} si le jeton est valide
+     */
     public boolean isResetTokenValid(String token, String email) {
         try {
             return extractUsername(token).equals(email) && !isTokenExpired(token);
@@ -178,7 +197,9 @@ public class JwtService {
     }
 
     /**
-     * Convert the base64-encoded secret key string into a cryptographic key.
+     * Convertit la clé secrète base64 en clé cryptographique HMAC-SHA.
+     *
+     * @return clé secrète HMAC
      */
     private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);

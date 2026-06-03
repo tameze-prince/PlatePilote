@@ -1,4 +1,6 @@
+/// Réponse générique de l'API encapsulant le succès, le message, les données et l'horodatage.
 class ApiResponse<T> {
+  /// Crée une [ApiResponse] avec les champs requis.
   const ApiResponse({
     required this.success,
     this.message,
@@ -6,11 +8,19 @@ class ApiResponse<T> {
     this.timestamp,
   });
 
+  /// Indique si la requête a réussi.
   final bool success;
+
+  /// Message optionnel de l'API (ex: message d'erreur).
   final String? message;
+
+  /// Données typées renvoyées par l'API.
   final T? data;
+
+  /// Horodatage de la réponse.
   final String? timestamp;
 
+  /// Construit une [ApiResponse] à partir d'un JSON avec un mapping objet unique.
   factory ApiResponse.fromJson(
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>)? fromData,
@@ -25,6 +35,7 @@ class ApiResponse<T> {
     );
   }
 
+  /// Construit une [ApiResponse] à partir d'un JSON avec un mapping de liste.
   factory ApiResponse.fromJsonList(
     Map<String, dynamic> json,
     T Function(List<dynamic>) fromDataList,
@@ -40,7 +51,9 @@ class ApiResponse<T> {
   }
 }
 
+/// Réponse paginée générique de l'API contenant la liste des éléments et les métadonnées de pagination.
 class PageResponse<T> {
+  /// Crée une [PageResponse] avec les champs de pagination requis.
   const PageResponse({
     required this.content,
     required this.page,
@@ -50,13 +63,25 @@ class PageResponse<T> {
     required this.last,
   });
 
+  /// Liste des éléments de la page courante.
   final List<T> content;
+
+  /// Numéro de la page courante (indexé à 0).
   final int page;
+
+  /// Nombre d'éléments par page.
   final int size;
+
+  /// Nombre total d'éléments sur toutes les pages.
   final int totalElements;
+
+  /// Nombre total de pages.
   final int totalPages;
+
+  /// Indique s'il s'agit de la dernière page.
   final bool last;
 
+  /// Construit une [PageResponse] à partir d'un JSON de réponse paginée.
   factory PageResponse.fromJson(
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromItem,

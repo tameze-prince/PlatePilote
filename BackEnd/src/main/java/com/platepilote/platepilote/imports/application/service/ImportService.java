@@ -10,12 +10,20 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Service central d'importation de données depuis des sources externes.
+ * <p>
+ * Orchestre l'ensemble des importateurs (USDA, OpenFoodFacts, TheMealDB, Edamam,
+ * Spoonacular, Nutritionix, Tasty, BarcodeLookup, Chomp, RecipeAPI) et gère
+ * le cycle de vie des jobs d'importation (création, complétion, échec).
+ * Un job d'import programmé est exécuté quotidiennement à 2h00 du matin.
+ */
 @Slf4j
-
 @Service
 @RequiredArgsConstructor
 public class ImportService {
 
+    /** Repository des jobs d'importation. */
     private final ImportJobRepository importJobRepository;
     private final UsdaImporter usdaImporter;
     private final OpenFoodFactsImporter openFoodFactsImporter;
@@ -28,6 +36,13 @@ public class ImportService {
     private final ChompImporter chompImporter;
     private final RecipeAPIImporter recipeAPIImporter;
 
+    /**
+     * Importe des données depuis USDA FoodData Central de manière asynchrone.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @return future contenant le job d'importation complété
+     */
     @Async
     public CompletableFuture<ImportJob> importFromUsda(String query, int maxResults) {
         ImportJob job = createJob("USDA_FOOD_DATA_CENTRAL");
@@ -40,6 +55,13 @@ public class ImportService {
         return CompletableFuture.completedFuture(job);
     }
 
+    /**
+     * Importe des données depuis Open Food Facts de manière asynchrone.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @return future contenant le job d'importation complété
+     */
     @Async
     public CompletableFuture<ImportJob> importFromOpenFoodFacts(String query, int maxResults) {
         ImportJob job = createJob("OPEN_FOOD_FACTS");
@@ -52,6 +74,13 @@ public class ImportService {
         return CompletableFuture.completedFuture(job);
     }
 
+    /**
+     * Importe des recettes depuis TheMealDB de manière asynchrone.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @return future contenant le job d'importation complété
+     */
     @Async
     public CompletableFuture<ImportJob> importFromMealDb(String query, int maxResults) {
         ImportJob job = createJob("THE_MEAL_DB");
@@ -64,6 +93,13 @@ public class ImportService {
         return CompletableFuture.completedFuture(job);
     }
 
+    /**
+     * Importe des recettes depuis Edamam de manière asynchrone.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @return future contenant le job d'importation complété
+     */
     @Async
     public CompletableFuture<ImportJob> importFromEdamam(String query, int maxResults) {
         ImportJob job = createJob("EDAMAM");
@@ -72,6 +108,13 @@ public class ImportService {
         return CompletableFuture.completedFuture(job);
     }
 
+    /**
+     * Importe des recettes depuis Spoonacular de manière asynchrone.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @return future contenant le job d'importation complété
+     */
     @Async
     public CompletableFuture<ImportJob> importFromSpoonacular(String query, int maxResults) {
         ImportJob job = createJob("SPOONACULAR");
@@ -80,6 +123,13 @@ public class ImportService {
         return CompletableFuture.completedFuture(job);
     }
 
+    /**
+     * Importe des ingrédients depuis Nutritionix de manière asynchrone.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @return future contenant le job d'importation complété
+     */
     @Async
     public CompletableFuture<ImportJob> importFromNutritionix(String query, int maxResults) {
         ImportJob job = createJob("NUTRITIONIX");
@@ -88,6 +138,13 @@ public class ImportService {
         return CompletableFuture.completedFuture(job);
     }
 
+    /**
+     * Importe des recettes depuis Tasty de manière asynchrone.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @return future contenant le job d'importation complété
+     */
     @Async
     public CompletableFuture<ImportJob> importFromTasty(String query, int maxResults) {
         ImportJob job = createJob("TASTY");
@@ -96,6 +153,13 @@ public class ImportService {
         return CompletableFuture.completedFuture(job);
     }
 
+    /**
+     * Importe des produits depuis BarcodeLookup de manière asynchrone.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @return future contenant le job d'importation complété
+     */
     @Async
     public CompletableFuture<ImportJob> importFromBarcodeLookup(String query, int maxResults) {
         ImportJob job = createJob("BARCODE_LOOKUP");
@@ -104,6 +168,13 @@ public class ImportService {
         return CompletableFuture.completedFuture(job);
     }
 
+    /**
+     * Importe des produits depuis Chomp de manière asynchrone.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @return future contenant le job d'importation complété
+     */
     @Async
     public CompletableFuture<ImportJob> importFromChomp(String query, int maxResults) {
         ImportJob job = createJob("CHOMP");
@@ -112,6 +183,13 @@ public class ImportService {
         return CompletableFuture.completedFuture(job);
     }
 
+    /**
+     * Importe des recettes depuis RecipeAPI de manière asynchrone.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @return future contenant le job d'importation complété
+     */
     @Async
     public CompletableFuture<ImportJob> importFromRecipeAPI(String query, int maxResults) {
         ImportJob job = createJob("RECIPE_API");
@@ -120,7 +198,13 @@ public class ImportService {
         return CompletableFuture.completedFuture(job);
     }
 
-    @Scheduled(cron = "0 0 2 * * ?") // Run at 2:00 AM daily
+    /**
+     * Importation programmée quotidienne à 2h00 du matin.
+     * <p>
+     * Lance l'import depuis toutes les sources disponibles avec des requêtes
+     * et limites prédéfinies pour maintenir le catalogue à jour.
+     */
+    @Scheduled(cron = "0 0 2 * * ?")
     public void scheduledNightlyImport() {
         log.info("Starting scheduled nightly import");
         importFromUsda("chicken,rice,beans,tomato,onion", 20);

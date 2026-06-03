@@ -27,6 +27,10 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Service métier pour la gestion de la facturation et des paiements Stripe.
+ * Gère la création de sessions de paiement, le portail client et les webhooks.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -45,6 +49,13 @@ public class BillingService {
     private final SystemSettingRepository systemSettingRepository;
     private final AuditLogService auditLogService;
 
+    /**
+     * Crée une session de paiement Stripe pour un utilisateur.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @param plan   plan souhaité (MONTHLY / YEARLY)
+     * @return URL et identifiant de la session de paiement
+     */
     public CheckoutSessionResponse createCheckoutSession(UUID userId, String plan) {
         OurUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString()));
@@ -68,6 +79,12 @@ public class BillingService {
         return new CheckoutSessionResponse(session.url(), session.id());
     }
 
+    /**
+     * Crée un lien vers le portail client Stripe pour gérer l'abonnement.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return URL du portail client
+     */
     public CustomerPortalResponse createCustomerPortal(UUID userId) {
         OurUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString()));
@@ -78,6 +95,13 @@ public class BillingService {
         return new CustomerPortalResponse(session.url());
     }
 
+    /**
+     * Traite un webhook Stripe : vérifie la signature, persiste l'événement
+     * et applique les changements d'abonnement.
+     *
+     * @param rawPayload      corps brut de la requête
+     * @param signatureHeader en-tête Stripe-Signature
+     */
     public void processStripeWebhook(String rawPayload, String signatureHeader) {
         ProviderEvent event = billingProvider.verifyWebhook(rawPayload, signatureHeader);
         if (billingEventRepository.findByProviderAndEventId(STRIPE, event.id()).isPresent()) {

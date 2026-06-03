@@ -1,19 +1,15 @@
 package com.platepilote.platepilote.grocery.domain.entity;
 
 /**
- * GROCERY LIST ENTITY - DATABASE TABLE: grocery_lists
- * ======================================================
- * 
- * WHAT IT IS:
- * Represents a shopping list (e.g., "Weekly Shopping", "BBQ Party List").
- * 
- * EXAMPLE DATA:
- * - userId: "user-123", name: "Weekly Shopping", status: "ACTIVE"
- * 
- * STATUS VALUES:
- * - "ACTIVE": Currently being used for shopping
- * - "COMPLETED": Shopping trip is done
- * - "ARCHIVED": Old list kept for reference
+ * Entité représentant une liste de courses.
+ * <p>
+ * Une liste appartient à un utilisateur et peut avoir plusieurs statuts :
+ * <ul>
+ *   <li>{@code ACTIVE} — en cours d'utilisation</li>
+ *   <li>{@code COMPLETED} — achat terminé</li>
+ *   <li>{@code ARCHIVED} — conservée pour référence</li>
+ * </ul>
+ * Elle peut être liée à un plan de repas pour génération automatique.
  */
 
 import com.platepilote.platepilote.common.kernel.BaseEntity;

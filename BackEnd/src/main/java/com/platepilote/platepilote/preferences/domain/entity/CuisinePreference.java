@@ -12,6 +12,10 @@ import lombok.Setter;
 
 import java.util.UUID;
 
+/**
+ * Entité représentant une préférence culinaire d'un utilisateur.
+ * Table en base : {@code cuisine_preferences}.
+ */
 @Entity
 @Table(name = "cuisine_preferences")
 @Getter
@@ -21,12 +25,15 @@ import java.util.UUID;
 @Builder
 public class CuisinePreference extends BaseEntity {
 
+    /** Identifiant de l'utilisateur. */
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
+    /** Type de cuisine (ex. italienne, japonaise, mexicaine). */
     @Column(name = "cuisine_type", nullable = false)
     private String cuisineType;
 
+    /** Niveau de préférence (LIKE, DISLIKE). */
     @Column(name = "preference_level")
     private String preferenceLevel;
 }

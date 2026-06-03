@@ -1,26 +1,12 @@
 package com.platepilote.platepilote.recipes.domain.entity;
 
 /**
- * RECIPE INGREDIENT ENTITY - DATABASE TABLE: recipe_ingredients
- * ===============================================================
- * 
- * WHAT IT IS:
- * Represents one ingredient in a recipe.
- * 
- * RELATIONSHIP:
- * Many-to-one with Recipe (each ingredient belongs to one recipe).
- * 
- * EXAMPLE DATA:
- * - recipeId: "recipe-123", name: "Chicken Breast", quantity: 500, unit: "g", sortOrder: 1
- * - recipeId: "recipe-123", name: "Soy Sauce", quantity: 2, unit: "tbsp", sortOrder: 2
- * 
- * FIELDS:
- * - recipe: The recipe this ingredient belongs to (foreign key)
- * - name: Ingredient name
- * - quantity: Amount needed (e.g., 500, 2, 1.5)
- * - unit: Unit of measurement (g, kg, ml, tbsp, cup, piece, etc.)
- * - notes: Optional note (e.g., "diced", "room temperature")
- * - sortOrder: Display order in the ingredient list
+ * Entité représentant un ingrédient d'une recette.
+ * <p>
+ * Chaque ingrédient appartient à une recette (relation many-to-one) et contient
+ * le nom, la quantité, l'unité de mesure et un ordre d'affichage.
+ * L'identifiant {@code ingredientId} permet de lier l'ingrédient à un ingrédient
+ * canonique pour la résolution des prix et des substitutions.
  */
 
 import jakarta.persistence.Column;

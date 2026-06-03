@@ -1,27 +1,5 @@
 package com.platepilote.platepilote.authentication.application.service;
 
-/**
- * USER DETAILS SERVICE IMPL - SPRING SECURITY USER LOADER
- * ========================================================
- * 
- * WHAT IT IS:
- * Implementation of Spring Security's UserDetailsService interface.
- * 
- * WHAT IT DOES:
- * When a user tries to log in, Spring Security calls this service to:
- * 1. Load the user from the database by email
- * 2. Return a UserDetails object that Spring Security can use to verify the password
- * 
- * HOW IT FITS INTO LOGIN FLOW:
- * 1. User sends POST /api/v1/auth/login with email + password
- * 2. AuthController calls AuthService.login()
- * 3. AuthService calls AuthenticationManager.authenticate()
- * 4. AuthenticationManager calls this loadUserByUsername() to get user from DB
- * 5. Spring Security compares the provided password with the stored passwordHash
- * 6. If match -> login successful, JWT generated
- * 7. If no match -> login failed, 401 error returned
- */
-
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import com.platepilote.platepilote.authentication.domain.entity.Role;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
@@ -36,6 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Implémentation de {@link UserDetailsService} pour Spring Security.
+ * <p>
+ * Lors de la connexion, Spring Security appelle {@link #loadUserByUsername(String)}
+ * pour charger l'utilisateur depuis la base de données et vérifier le mot de passe.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -43,15 +28,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
     /**
-     * Load user by email (username = email in our system).
-     * Called by Spring Security during authentication.
-     * 
-     * @param email The email address to look up
-     * @return UserDetails object with user's credentials and authorities
-     * @throws UsernameNotFoundException if no user exists with this email
+     * Charge un utilisateur par son email (le {@code username} dans notre système).
+     * <p>
+     * Appelé par Spring Security lors de l'authentification. Convertit l'entité
+     * {@link OurUser} en {@link UserDetails} avec les rôles appropriés.
+     * </p>
+     *
+     * @param email l'email de l'utilisateur
+     * @return les détails utilisateur avec identifiants et autorités
+     * @throws UsernameNotFoundException si aucun utilisateur ne correspond à cet email
      */
     @Override
-    @Transactional(readOnly = true)  // Read-only transaction for performance
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         OurUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
@@ -68,7 +56,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 user.getEmail(),
                 user.getPasswordHash() == null ? "{noop}oauth2" : user.getPasswordHash(),
                 user.getEnabled(),
-                true, true, true,  // accountNonExpired, credentialsNonExpired, accountNonLocked
+                true, true, true,
                 authorities
         );
     }

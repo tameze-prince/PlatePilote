@@ -14,18 +14,38 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Importateur d'ingrédients via l'API USDA FoodData Central.
+ * <p>
+ * Récupère des aliments avec leurs valeurs nutritionnelles détaillées
+ * (calories, protéines, glucides, lipides, fibres, etc.) depuis
+ * la base de données USDA FoodData Central.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class UsdaImporter {
 
+    /** Repository des ingrédients. */
     private final IngredientRepository ingredientRepository;
+
+    /** Normaliseur d'ingrédients. */
     private final IngredientNormalizer normalizer;
+
+    /** Client HTTP RestTemplate. */
     private final RestTemplate restTemplate;
 
+    /** Clé API USDA. */
     @Value("${app.api.usda-key}")
     private String apiKey;
 
+    /**
+     * Lance l'import des ingrédients depuis USDA FoodData Central.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @param job        job d'importation en cours
+     */
     @SuppressWarnings("unchecked")
     public void importData(String query, int maxResults, ImportJob job) {
         log.info("USDA import started: query='{}', maxResults={}", query, maxResults);

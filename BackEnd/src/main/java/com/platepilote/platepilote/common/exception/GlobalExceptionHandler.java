@@ -1,34 +1,23 @@
 package com.platepilote.platepilote.common.exception;
 
 /**
- * GLOBAL EXCEPTION HANDLER - CATCHES ALL ERRORS AND CONVERTS TO HTTP RESPONSES
- * =============================================================================
- * 
- * WHAT IT IS:
- * A centralized error handler that catches all exceptions thrown by controllers
- * and converts them into proper HTTP responses with JSON error messages.
- * 
- * WHY IT EXISTS:
- * Without this, exceptions would return generic HTML error pages.
- * This ensures all errors return consistent JSON format that the Flutter app can parse.
- * 
- * EXCEPTION MAPPING:
- * - ResourceNotFoundException -> HTTP 404 Not Found
- * - BusinessRuleViolationException -> HTTP 422 Unprocessable Entity
- * - DomainException -> HTTP 400 Bad Request
- * - Validation errors -> HTTP 400 with field-specific error messages
- * - BadCredentialsException -> HTTP 401 Unauthorized
- * - AccessDeniedException -> HTTP 403 Forbidden
- * - Any other exception -> HTTP 500 Internal Server Error
- * 
- * EXAMPLE RESPONSE:
- * {
- *   "status": 404,
- *   "message": "Recipe not found with id: '123'",
- *   "timestamp": "2024-01-15T10:30:00Z"
- * }
+ * Gestionnaire global des exceptions pour tous les contrôleurs REST.
+ * <p>
+ * Intercepte les exceptions levées par les contrôleurs et les convertit
+ * en réponses HTTP JSON standardisées.
+ * </p>
+ *
+ * <p><b>Correspondance des exceptions :</b></p>
+ * <ul>
+ *   <li>{@code ResourceNotFoundException} → HTTP 404</li>
+ *   <li>{@code BusinessRuleViolationException} → HTTP 422</li>
+ *   <li>{@code DomainException} → HTTP 400</li>
+ *   <li>{@code MethodArgumentNotValidException} → HTTP 400 (erreurs par champ)</li>
+ *   <li>{@code BadCredentialsException} → HTTP 401</li>
+ *   <li>{@code AccessDeniedException} → HTTP 403</li>
+ *   <li>{@code Exception} (autres) → HTTP 500</li>
+ * </ul>
  */
-
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.common.kernel.DomainException;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
@@ -50,15 +39,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestControllerAdvice  // Tells Spring: "This class handles exceptions for all controllers"
+@RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
     private final Environment environment;
 
     /**
-     * Handle "resource not found" errors -> HTTP 404
-     * Example: User requests a recipe that doesn't exist
+     * Gère les exceptions {@link ResourceNotFoundException} → HTTP 404.
+     *
+     * @param ex exception de ressource introuvable
+     * @return réponse HTTP 404 avec les détails de l'erreur
      */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex) {
@@ -71,8 +62,10 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle business rule violations -> HTTP 422
-     * Example: Trying to register with an email that already exists
+     * Gère les violations de règles métier {@link BusinessRuleViolationException} → HTTP 422.
+     *
+     * @param ex exception de violation de règle métier
+     * @return réponse HTTP 422 avec les détails de l'erreur
      */
     @ExceptionHandler(BusinessRuleViolationException.class)
     public ResponseEntity<ErrorResponse> handleBusinessRuleViolation(BusinessRuleViolationException ex) {
@@ -85,8 +78,10 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle general domain exceptions -> HTTP 400
-     * Example: Invalid input data, validation failures at domain level
+     * Gère les exceptions du domaine {@link DomainException} → HTTP 400.
+     *
+     * @param ex exception du domaine
+     * @return réponse HTTP 400 avec les détails de l'erreur
      */
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ErrorResponse> handleDomainException(DomainException ex) {
@@ -99,18 +94,13 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle validation errors (e.g., @NotBlank, @Email) -> HTTP 400
-     * Returns field-specific error messages so the app can show them to the user.
-     * 
-     * EXAMPLE RESPONSE:
-     * {
-     *   "status": 400,
-     *   "message": "Validation failed",
-     *   "errors": {
-     *     "email": "Email must be valid",
-     *     "password": "Password must be at least 8 characters"
-     *   }
-     * }
+     * Gère les erreurs de validation des paramètres ({@link MethodArgumentNotValidException}) → HTTP 400.
+     * <p>
+     * Retourne les erreurs spécifiques à chaque champ pour affichage côté client.
+     * </p>
+     *
+     * @param ex exception de validation des arguments
+     * @return réponse HTTP 400 avec les erreurs par champ
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -130,8 +120,10 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle login failures -> HTTP 401
-     * Example: Wrong email or password
+     * Gère les échecs d'authentification {@link BadCredentialsException} → HTTP 401.
+     *
+     * @param ex exception de mauvaises identifiants
+     * @return réponse HTTP 401
      */
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
@@ -144,8 +136,10 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle access denied errors -> HTTP 403
-     * Example: Regular user trying to access admin endpoint
+     * Gère les refus d'accès {@link AccessDeniedException} → HTTP 403.
+     *
+     * @param ex exception d'accès refusé
+     * @return réponse HTTP 403
      */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
@@ -158,8 +152,13 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle any unexpected errors -> HTTP 500
-     * This is a catch-all for errors we didn't specifically handle.
+     * Gère toutes les exceptions non anticipées → HTTP 500.
+     * <p>
+     * En production, le message d'erreur est générique pour ne pas exposer de détails internes.
+     * </p>
+     *
+     * @param ex exception générique
+     * @return réponse HTTP 500
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
@@ -176,22 +175,26 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Standard error response format returned for all errors.
+     * Format standard de réponse d'erreur retourné pour toutes les exceptions.
      */
     @Getter
     @AllArgsConstructor
     public static class ErrorResponse {
-        private final int status;       // HTTP status code (404, 500, etc.)
-        private final String message;   // Human-readable error message
-        private final Instant timestamp; // When the error occurred
+        /** Code HTTP d'erreur (404, 500, etc.). */
+        private final int status;
+        /** Message d'erreur lisible. */
+        private final String message;
+        /** Horodatage de l'erreur. */
+        private final Instant timestamp;
     }
 
     /**
-     * Extended error response for validation errors with field-specific messages.
+     * Réponse d'erreur étendue pour les erreurs de validation avec messages par champ.
      */
     @Getter
     public static class ValidationErrorResponse extends ErrorResponse {
-        private final Map<String, String> errors;  // Field name -> error message
+        /** Carte des erreurs : nom du champ → message d'erreur. */
+        private final Map<String, String> errors;
 
         public ValidationErrorResponse(int status, String message, Instant timestamp, Map<String, String> errors) {
             super(status, message, timestamp);

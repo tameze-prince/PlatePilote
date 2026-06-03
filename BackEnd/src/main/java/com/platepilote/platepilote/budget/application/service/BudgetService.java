@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Service métier pour la gestion des budgets.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -27,6 +30,13 @@ public class BudgetService {
     private final BudgetRepository budgetRepository;
     private final SecurityUtils securityUtils;
 
+    /**
+     * Récupère tous les budgets actifs d'un utilisateur avec pagination.
+     *
+     * @param userId   identifiant de l'utilisateur
+     * @param pageable paramètres de pagination
+     * @return réponse paginée des budgets
+     */
     @Transactional(readOnly = true)
     public PagedResponse<BudgetResponse> getUserBudgets(UUID userId, Pageable pageable) {
         Page<Budget> page = budgetRepository.findByUserIdAndDeletedAtIsNull(userId, pageable);
@@ -38,6 +48,13 @@ public class BudgetService {
         return PagedResponse.of(content, page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
+    /**
+     * Crée un nouveau budget.
+     *
+     * @param userId  identifiant de l'utilisateur
+     * @param request données du budget
+     * @return le budget créé
+     */
     public BudgetResponse createBudget(UUID userId, BudgetRequest request) {
         Budget budget = Budget.builder()
                 .userId(userId)
@@ -52,6 +69,12 @@ public class BudgetService {
         return toResponse(saved);
     }
 
+    /**
+     * Supprime (soft-delete) un budget.
+     *
+     * @param userId   identifiant de l'utilisateur propriétaire
+     * @param budgetId identifiant du budget
+     */
     public void deleteBudget(UUID userId, UUID budgetId) {
         Budget budget = budgetRepository.findById(budgetId)
                 .orElseThrow(() -> new ResourceNotFoundException("Budget", "id", budgetId.toString()));
@@ -75,6 +98,12 @@ public class BudgetService {
         );
     }
 
+    /**
+     * Récupère les analytics budgétaires (total, dépensé, restant, catégories).
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return analytics du budget
+     */
     @Transactional(readOnly = true)
     public BudgetAnalyticsResponse getBudgetAnalytics(UUID userId) {
         List<Budget> budgets = budgetRepository.findByUserIdAndDeletedAtIsNull(userId);
@@ -107,6 +136,12 @@ public class BudgetService {
                 weeklyHistory, weekLabels, categories);
     }
 
+    /**
+     * Récupère les économies estimées pour un utilisateur.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return données d'économies
+     */
     @Transactional(readOnly = true)
     public SavingsResponse getSavings(UUID userId) {
         return new SavingsResponse(
@@ -122,41 +157,79 @@ public class BudgetService {
         );
     }
 
+    /**
+     * Analytics budgétaires (total, dépensé, restant, ventilation par catégorie).
+     */
     public record BudgetAnalyticsResponse(
+            /** Montant total du budget. */
             BigDecimal totalBudget,
+            /** Montant total dépensé. */
             BigDecimal totalSpent,
+            /** Montant restant. */
             BigDecimal remaining,
+            /** Pourcentage utilisé. */
             BigDecimal percentUsed,
+            /** Historique hebdomadaire des dépenses. */
             List<BigDecimal> weeklyHistory,
+            /** Libellés des semaines. */
             List<String> weekLabels,
+            /** Dépenses par catégorie. */
             List<CategorySpend> categoryBreakdown
     ) {}
 
+    /**
+     * Dépense par catégorie.
+     */
     public record CategorySpend(
+            /** Nom de la catégorie. */
             String name,
+            /** Montant dépensé. */
             BigDecimal amount
     ) {}
 
+    /**
+     * Économies réalisées.
+     */
     public record SavingsResponse(
+            /** Total économisé. */
             BigDecimal totalSaved,
+            /** Objectif mensuel. */
             BigDecimal monthlyGoal,
+            /** Moyenne mensuelle. */
             BigDecimal averageMonthly,
+            /** Sources des économies. */
             List<SavingsSource> sources
     ) {}
 
+    /**
+     * Source d'économie.
+     */
     public record SavingsSource(
+            /** Description de la source. */
             String source,
+            /** Montant économisé. */
             BigDecimal amount
     ) {}
 
+    /**
+     * Réponse contenant les détails d'un budget.
+     */
     public record BudgetResponse(
+            /** Identifiant du budget. */
             UUID id,
+            /** Montant alloué. */
             java.math.BigDecimal amount,
+            /** Devise. */
             String currency,
+            /** Période. */
             String period,
+            /** Date de début. */
             java.time.LocalDate startDate,
+            /** Date de fin. */
             java.time.LocalDate endDate,
+            /** Date de création. */
             java.time.Instant createdAt,
+            /** Date de modification. */
             java.time.Instant updatedAt
     ) {}
 }

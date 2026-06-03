@@ -1,27 +1,7 @@
 package com.platepilote.platepilote.pantry.domain.repository;
 
 /**
- * PANTRY ITEM REPOSITORY - DATABASE ACCESS FOR PANTRY ITEMS
- * ===========================================================
- * 
- * METHODS:
- * 
- * 1. findByUserIdAndDeletedAtIsNull(userId, pageable)
- *    -> Get all active pantry items for a user (paginated)
- *    SQL: SELECT * FROM pantry_items WHERE ouruser_id = ? AND deleted_at IS NULL LIMIT ? OFFSET ?
- * 
- * 2. findByUserIdAndCategoryAndDeletedAtIsNull(userId, category)
- *    -> Get pantry items filtered by category
- *    SQL: SELECT * FROM pantry_items WHERE ouruser_id = ? AND category = ? AND deleted_at IS NULL
- * 
- * 3. findExpiringItems(userId, date)
- *    -> Get items expiring on or before a specific date
- *    SQL: SELECT * FROM pantry_items WHERE ouruser_id = ? AND deleted_at IS NULL AND expiration_date <= ?
- *    Used to send "item expiring soon" notifications
- * 
- * 4. searchByUserIdAndQuery(userId, query)
- *    -> Search pantry items by name (case-insensitive partial match)
- *    SQL: SELECT * FROM pantry_items WHERE ouruser_id = ? AND deleted_at IS NULL AND LOWER(name) LIKE '%query%'
+ * Repository pour l'accès aux données des articles du garde-manger.
  */
 
 import com.platepilote.platepilote.pantry.domain.entity.PantryItem;
@@ -38,32 +18,57 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Repository pour l'accès aux données des articles du garde-manger.
+ */
 @Repository
 public interface PantryItemRepository extends JpaRepository<PantryItem, UUID> {
 
     /**
-     * Get all active (non-deleted) pantry items for a user with pagination.
+     * Récupère tous les articles actifs d'un utilisateur avec pagination.
+     *
+     * @param userId   identifiant de l'utilisateur
+     * @param pageable paramètres de pagination
+     * @return page des articles actifs
      */
     Page<PantryItem> findByUserIdAndDeletedAtIsNull(UUID userId, Pageable pageable);
 
     /**
-     * Get pantry items filtered by category (e.g., all dairy items).
+     * Récupère les articles d'un utilisateur filtrés par catégorie.
+     *
+     * @param userId   identifiant de l'utilisateur
+     * @param category catégorie souhaitée
+     * @return liste des articles de la catégorie
      */
     List<PantryItem> findByUserIdAndCategoryAndDeletedAtIsNull(UUID userId, String category);
 
     /**
-     * Find items that are expiring soon (on or before the given date).
-     * Used to trigger expiration notifications.
+     * Recherche les articles dont la date de péremption est antérieure ou égale à une date donnée.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @param date   date seuil
+     * @return liste des articles proches de la péremption
      */
     @Query("SELECT p FROM PantryItem p WHERE p.userId = :userId AND p.deletedAt IS NULL AND p.expirationDate <= :date")
     List<PantryItem> findExpiringItems(@Param("userId") UUID userId, @Param("date") LocalDate date);
 
     /**
-     * Search pantry items by name (partial, case-insensitive match).
+     * Recherche des articles par nom (correspondance partielle, insensible à la casse).
+     *
+     * @param userId identifiant de l'utilisateur
+     * @param query  terme de recherche
+     * @return liste des articles correspondants
      */
     @Query("SELECT p FROM PantryItem p WHERE p.userId = :userId AND p.deletedAt IS NULL AND LOWER(p.name) LIKE LOWER(CONCAT('%', :query, '%'))")
     List<PantryItem> searchByUserIdAndQuery(@Param("userId") UUID userId, @Param("query") String query);
 
+    /**
+     * Recherche les articles dont l'identifiant d'ingrédient est dans une liste donnée.
+     *
+     * @param userId        identifiant de l'utilisateur
+     * @param ingredientIds collection d'identifiants d'ingrédients
+     * @return liste des articles correspondants
+     */
     @Query("SELECT p FROM PantryItem p WHERE p.userId = :userId AND p.deletedAt IS NULL AND p.ingredientId IN :ingredientIds")
     List<PantryItem> findByUserIdAndIngredientIdIn(@Param("userId") UUID userId, @Param("ingredientIds") Collection<UUID> ingredientIds);
 }

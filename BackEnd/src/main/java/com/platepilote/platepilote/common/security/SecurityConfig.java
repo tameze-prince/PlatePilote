@@ -1,28 +1,20 @@
 package com.platepilote.platepilote.common.security;
 
 /**
- * SECURITY CONFIGURATION - SPRING SECURITY SETUP
- * =================================================
- * 
- * WHAT IT IS:
- * This class configures how Spring Security protects the application.
- * 
- * WHAT IT DOES:
- * 1. Disables CSRF (not needed for stateless JWT APIs)
- * 2. Defines which endpoints are public (no login required)
- * 3. Defines which endpoints require authentication
- * 4. Sets up stateless sessions (no server-side session storage)
- * 5. Registers the JWT filter to validate tokens on every request
- * 
- * PUBLIC ENDPOINTS (no login needed):
- * - /api/v1/auth/** -> Login, register, refresh token
- * - /api/v1/recipes/public/** -> Browse public recipes
- * - /swagger-ui/** -> API documentation
- * - /actuator/health -> Health check for Docker/load balancers
- * 
- * ALL OTHER ENDPOINTS require a valid JWT token in the Authorization header.
+ * Configuration de la sécurité HTTP de l'application.
+ * <p>
+ * Définit les endpoints publics, les règles d'autorisation par rôle,
+ * la gestion de session sans état (stateless), et le filtre JWT.
+ * </p>
+ *
+ * <p>Endpoints publics (sans authentification) :</p>
+ * <ul>
+ *   <li>{@code /api/v1/auth/**} — connexion, inscription, rafraîchissement</li>
+ *   <li>{@code /api/v1/recipes/public/**} — recettes publiques</li>
+ *   <li>{@code /swagger-ui/**}, {@code /v3/api-docs/**} — documentation</li>
+ *   <li>{@code /actuator/**} — health check</li>
+ * </ul>
  */
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,43 +37,47 @@ import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-@Configuration  // Tells Spring: "This class contains bean definitions"
-@EnableWebSecurity  // Enables Spring Security's web security support
-@EnableMethodSecurity  // Enables @PreAuthorize and @PostAuthorize annotations
-@RequiredArgsConstructor  // Lombok: Generates constructor for final fields
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
 
-    /**
-     * These endpoints can be accessed WITHOUT logging in.
-     * Everything else requires authentication.
-     */
+    /** Endpoints publics accessibles sans authentification. */
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/v1/auth/register",     // Create account
-            "/api/v1/auth/login",        // Login
-            "/api/v1/auth/oauth2",       // Google/Apple OAuth2 ID token login
-            "/api/v1/auth/refresh",      // Refresh access token
-            "/api/v1/auth/verify-email", // Verify local-account email
-            "/api/v1/auth/resend-verification", // Resend local-account verification email
-            "/api/v1/auth/logout",       // Revoke a provided refresh token
-            "/api/v1/billing/stripe/webhook", // Stripe signed billing webhook
-            "/api/v1/recipes/public/**", // Browse public recipes
-            "/api/v1/ingredients/**",    // Food intelligence database
-            "/api/v1/pricing/**",        // Price and barcode lookup
-            "/v3/api-docs/**",           // OpenAPI documentation
-            "/swagger-ui/**",            // Swagger UI
+            "/api/v1/auth/register",
+            "/api/v1/auth/login",
+            "/api/v1/auth/oauth2",
+            "/api/v1/auth/refresh",
+            "/api/v1/auth/verify-email",
+            "/api/v1/auth/resend-verification",
+            "/api/v1/auth/logout",
+            "/api/v1/billing/stripe/webhook",
+            "/api/v1/recipes/public/**",
+            "/api/v1/ingredients/**",
+            "/api/v1/pricing/**",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
             "/swagger-ui.html",
             "/api/v1/auth/forgot-password",
             "/api/v1/auth/reset-password",
-            "/actuator/health",          // Health check
+            "/actuator/health",
             "/actuator/info"
     };
 
     /**
-     * Main security configuration method.
-     * This is where we define the security rules for the application.
+     * Configure la chaîne de filtres de sécurité.
+     * <p>
+     * Désactive CSRF, définit les règles d'autorisation, configure les sessions
+     * sans état et enregistre le filtre JWT.
+     * </p>
+     *
+     * @param http configuration HTTP de sécurité
+     * @return chaîne de filtres de sécurité
+     * @throws Exception en cas d'erreur de configuration
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -90,39 +86,36 @@ public class SecurityConfig {
                 // (CSRF is for browser sessions with cookies, not token-based auth)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                
-                // Define which URLs need authentication and which are public
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()  // Public endpoints
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers("/api/v1/admin/users/*/roles", "/api/v1/admin/feature-flags/**")
                             .hasRole("SUPER_ADMIN")
                         .requestMatchers("/api/v1/admin/**")
                             .hasAnyRole("ADMIN", "SUPER_ADMIN", "SUPPORT_AGENT", "ANALYST", "CONTENT_MANAGER")
                         .requestMatchers("/api/v1/imports/**")
                             .hasAnyRole("ADMIN", "SUPER_ADMIN", "CONTENT_MANAGER", "SYSTEM")
-                        .anyRequest().authenticated()                    // Everything else needs login
+                        .anyRequest().authenticated()
                 )
-                
-                // Stateless session management - no server-side session storage
-                // Every request must include a valid JWT token
+
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                
-                // Register our authentication provider (username/password validation)
+
                 .authenticationProvider(authenticationProvider())
-                
-                // Add our JWT filter BEFORE the standard username/password filter
-                // This intercepts every request to validate the JWT token
+
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     /**
-     * Authentication provider - validates username and password.
-     * Uses our UserDetailsService to load user data and BCrypt to verify passwords.
+     * Fournisseur d'authentification qui valide les identifiants utilisateur.
+     * Utilise {@link UserDetailsService} pour charger les données utilisateur
+     * et {@link BCryptPasswordEncoder} pour vérifier les mots de passe.
+     *
+     * @return fournisseur d'authentification
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -133,8 +126,11 @@ public class SecurityConfig {
     }
 
     /**
-     * Authentication manager - orchestrates the authentication process.
-     * Used by the login endpoint to validate credentials.
+     * Gestionnaire d'authentification utilisé par l'endpoint de connexion.
+     *
+     * @param config configuration d'authentification Spring
+     * @return gestionnaire d'authentification
+     * @throws Exception en cas d'erreur
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -142,15 +138,21 @@ public class SecurityConfig {
     }
 
     /**
-     * Password encoder - hashes passwords using BCrypt.
-     * BCrypt is a one-way hashing algorithm designed for passwords.
-     * Even if the database is stolen, passwords cannot be recovered.
+     * Encodeur de mots de passe utilisant BCrypt.
+     * BCrypt est un algorithme de hachage unidirectionnel conçu pour les mots de passe.
+     *
+     * @return encodeur BCrypt
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Source de configuration CORS pour autoriser les requêtes cross-origin.
+     *
+     * @return source de configuration CORS
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

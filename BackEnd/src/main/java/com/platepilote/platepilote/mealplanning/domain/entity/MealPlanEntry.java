@@ -1,27 +1,5 @@
 package com.platepilote.platepilote.mealplanning.domain.entity;
 
-/**
- * MEAL PLAN ENTRY ENTITY - DATABASE TABLE: meal_plan_entries
- * =============================================================
- * 
- * WHAT IT IS:
- * Represents one meal in a meal plan (e.g., "Monday Dinner: Chicken Stir Fry").
- * 
- * RELATIONSHIP:
- * Many-to-one with MealPlan (each entry belongs to one meal plan).
- * 
- * EXAMPLE DATA:
- * - mealPlanId: "plan-123", recipeId: "recipe-456", mealDate: "2024-01-15", mealType: "Dinner", servings: 2
- * 
- * FIELDS:
- * - mealPlanId: Which meal plan this entry belongs to
- * - recipeId: Which recipe is being served
- * - mealDate: What day this meal is planned for
- * - mealType: "Breakfast", "Lunch", "Dinner", "Snack"
- * - servings: How many servings to prepare
- * - notes: Optional notes (e.g., "Double the recipe for leftovers")
- */
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -37,6 +15,14 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * Entité représentant un repas individuel dans un plan de repas.
+ * <p>
+ * Chaque entrée correspond à un repas planifié à une date donnée
+ * (ex : "Lundi Dîner : Poulet stir-fry"). Elle référence une recette
+ * et précise le type de repas, le nombre de portions et des notes optionnelles.
+ * </p>
+ */
 @Entity
 @Table(name = "meal_plan_entries")
 @Getter
@@ -46,25 +32,32 @@ import java.util.UUID;
 @Builder
 public class MealPlanEntry {
 
+    /** Identifiant unique de l'entrée. */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /** Identifiant du plan de repas auquel cette entrée appartient. */
     @Column(name = "meal_plan_id", nullable = false)
     private UUID mealPlanId;
 
+    /** Identifiant de la recette utilisée pour ce repas. */
     @Column(name = "recipe_id", nullable = false)
     private UUID recipeId;
 
+    /** Date à laquelle ce repas est planifié. */
     @Column(name = "meal_date", nullable = false)
-    private LocalDate mealDate;  // Which day this meal is planned for
+    private LocalDate mealDate;
 
+    /** Type de repas : Breakfast, Lunch, Dinner, Snack. */
     @Column(name = "meal_type", nullable = false)
-    private String mealType;  // "Breakfast", "Lunch", "Dinner", "Snack"
+    private String mealType;
 
+    /** Nombre de portions à préparer (défaut : 1). */
     @Column(nullable = false)
-    private Integer servings = 1;  // How many servings to prepare
+    private Integer servings = 1;
 
+    /** Notes optionnelles (ex : "Doubler la recette pour les restes"). */
     @Column(columnDefinition = "TEXT")
-    private String notes;  // Optional notes
+    private String notes;
 }

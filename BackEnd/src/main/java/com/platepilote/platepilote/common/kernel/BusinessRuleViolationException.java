@@ -1,21 +1,19 @@
 package com.platepilote.platepilote.common.kernel;
 
 /**
- * BUSINESS RULE VIOLATION EXCEPTION - HTTP 422 ERROR
- * ====================================================
- * 
- * WHAT IT IS:
- * Thrown when a business rule is violated (not a technical error, but a logic violation).
- * 
- * EXAMPLES:
- * - Trying to register with an email that already exists
- * - Trying to subtract more pantry items than available
- * - Trying to create a meal plan in the past
- * 
- * This gets caught by GlobalExceptionHandler and converted to HTTP 422 response.
+ * Exception levée lorsqu'une règle métier est violée.
+ * <p>
+ * Exemples : email déjà utilisé, stock insuffisant, planification dans le passé.
+ * Convertie en réponse HTTP 422 par {@link com.platepilote.platepilote.common.exception.GlobalExceptionHandler}.
+ * </p>
  */
-
 public class BusinessRuleViolationException extends DomainException {
+
+    /**
+     * Crée une exception de violation de règle métier.
+     *
+     * @param message description de la violation
+     */
     public BusinessRuleViolationException(String message) {
         super(message);
     }

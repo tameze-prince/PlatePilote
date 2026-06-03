@@ -16,14 +16,34 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Contrôleur REST pour l'enregistrement des appareils mobiles.
+ * <p>
+ * Permet aux utilisateurs d'enregistrer leurs appareils pour recevoir
+ * des notifications push. Les anciens tokens sont désactivés lors
+ * d'une réinscription.
+ */
 @RestController
 @RequestMapping("/api/v1/devices")
 @RequiredArgsConstructor
 public class DeviceController {
 
+    /** Repository des enregistrements d'appareils. */
     private final DeviceRegistrationRepository deviceRepository;
+
+    /** Utilitaires de sécurité. */
     private final SecurityUtils securityUtils;
 
+    /**
+     * Enregistre un nouvel appareil pour les notifications push.
+     * <p>
+     * Si le token existe déjà, l'ancien enregistrement est désactivé
+     * avant la création du nouveau.
+     *
+     * @param userDetails détails de l'utilisateur authentifié
+     * @param request     corps de la requête (deviceToken, platform)
+     * @return confirmation de l'enregistrement
+     */
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> registerDevice(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -50,6 +70,12 @@ public class DeviceController {
         return ResponseEntity.ok(ApiResponse.success("Device registered", null));
     }
 
+    /**
+     * Requête d'enregistrement d'appareil.
+     *
+     * @param deviceToken token FCM/APNS de l'appareil
+     * @param platform    plateforme (android, ios, web)
+     */
     public record RegisterDeviceRequest(
             String deviceToken,
             String platform

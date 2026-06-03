@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+/**
+ * Contrôleur REST exposant les endpoints de facturation Stripe.
+ */
 @RestController
 @RequestMapping("/api/v1/billing/stripe")
 @RequiredArgsConstructor
@@ -26,6 +29,13 @@ public class BillingController {
     private final BillingService billingService;
     private final SecurityUtils securityUtils;
 
+    /**
+     * Crée une session de paiement Stripe pour un utilisateur authentifié.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param request     plan souhaité (MONTHLY / YEARLY)
+     * @return URL de la session de paiement
+     */
     @PostMapping("/checkout-session")
     public ResponseEntity<ApiResponse<CheckoutSessionResponse>> checkoutSession(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -35,6 +45,12 @@ public class BillingController {
                 billingService.createCheckoutSession(userId, request.plan())));
     }
 
+    /**
+     * Crée un lien vers le portail client Stripe pour gérer l'abonnement.
+     *
+     * @param userDetails utilisateur authentifié
+     * @return URL du portail client
+     */
     @PostMapping("/customer-portal")
     public ResponseEntity<ApiResponse<CustomerPortalResponse>> customerPortal(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -43,6 +59,14 @@ public class BillingController {
                 billingService.createCustomerPortal(userId)));
     }
 
+    /**
+     * Reçoit et traite un webhook Stripe (checkout, abonnement, etc.).
+     * Endpoint public (sans authentification) car Stripe signe ses requêtes.
+     *
+     * @param rawPayload      corps brut de la requête
+     * @param signatureHeader en-tête Stripe-Signature
+     * @return confirmation du traitement
+     */
     @PostMapping("/webhook")
     public ResponseEntity<ApiResponse<Void>> webhook(
             @RequestBody String rawPayload,

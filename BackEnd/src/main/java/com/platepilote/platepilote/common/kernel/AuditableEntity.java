@@ -1,20 +1,18 @@
 package com.platepilote.platepilote.common.kernel;
 
 /**
- * AUDITABLE ENTITY - EXTENDS BASE ENTITY WITH USER TRACKING
- * ==========================================================
- * 
- * WHAT IT IS:
- * Extends BaseEntity by adding createdBy and updatedBy fields.
- * These track WHICH USER created or last modified a record.
- * 
- * EXAMPLE USE CASE:
- * - User "john@email.com" creates a recipe -> createdBy = "john@email.com"
- * - User "admin@email.com" updates that recipe -> updatedBy = "admin@email.com"
- * 
- * This is useful for audit trails and debugging ("who changed this?")
+ * Entité auditable qui étend {@link BaseEntity} avec le suivi des utilisateurs.
+ * <p>
+ * Ajoute les champs {@code createdBy} et {@code updatedBy} pour tracer
+ * quel utilisateur a créé ou modifié un enregistrement.
+ * </p>
+ *
+ * <p>Exemple :</p>
+ * <ul>
+ *   <li>L'utilisateur "john@email.com" crée une recette → {@code createdBy = "john@email.com"}</li>
+ *   <li>L'utilisateur "admin@email.com" modifie la recette → {@code updatedBy = "admin@email.com"}</li>
+ * </ul>
  */
-
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
@@ -31,18 +29,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @jakarta.persistence.EntityListeners(AuditingEntityListener.class)
 public abstract class AuditableEntity extends BaseEntity {
 
-    /**
-     * Email/ID of the user who created this record
-     * Automatically filled by Spring Security when the record is first saved
-     */
+    /** Email ou identifiant de l'utilisateur ayant créé l'enregistrement. Rempli automatiquement par Spring Security. */
     @CreatedBy
     @Column(name = "created_by", updatable = false)
     private String createdBy;
 
-    /**
-     * Email/ID of the user who last modified this record
-     * Automatically updated by Spring Security on every save
-     */
+    /** Email ou identifiant du dernier utilisateur ayant modifié l'enregistrement. Mis à jour automatiquement. */
     @LastModifiedBy
     @Column(name = "updated_by")
     private String updatedBy;

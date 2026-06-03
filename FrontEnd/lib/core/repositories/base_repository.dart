@@ -3,11 +3,17 @@ import 'package:dio/dio.dart';
 import '../network/api_client.dart';
 import '../network/api_response.dart';
 
+/// Repository de base fournissant des méthodes génériques pour traiter
+/// les réponses HTTP (objet unique, liste et paginée) ainsi que l'extraction
+/// de messages d'erreur à partir des exceptions [DioException].
 class BaseRepository {
   const BaseRepository(this.apiClient);
 
+  /// Instance du client API pour effectuer les requêtes.
   final ApiClient apiClient;
 
+  /// Traite une réponse HTTP et convertit l'objet `data` via [fromJson].
+  /// Lance [ApiException] en cas d'échec.
   T handleResponse<T>(
     Response<dynamic> response,
     T Function(Map<String, dynamic>) fromJson,
@@ -28,6 +34,8 @@ class BaseRepository {
     );
   }
 
+  /// Traite une réponse HTTP et convertit la liste `data` via [fromJson].
+  /// Lance [ApiException] en cas d'échec.
   List<T> handleListResponse<T>(
     Response<dynamic> response,
     T Function(Map<String, dynamic>) fromJson,
@@ -50,6 +58,8 @@ class BaseRepository {
     );
   }
 
+  /// Traite une réponse HTTP paginée et retourne une [PageResponse].
+  /// Lance [ApiException] en cas d'échec.
   PageResponse<T> handlePageResponse<T>(
     Response<dynamic> response,
     T Function(Map<String, dynamic>) fromJson,
@@ -70,6 +80,9 @@ class BaseRepository {
     );
   }
 
+  /// Extrait un message d'erreur lisible depuis une [DioException].
+  /// Vérifie d'abord le champ `message` de la réponse, puis utilise
+  /// un message par défaut selon le type d'exception.
   String extractMessage(DioException e) {
     final response = e.response;
     if (response?.data is Map) {
@@ -93,10 +106,14 @@ class BaseRepository {
   }
 }
 
+/// Exception levée par les repositories lors d'une erreur API.
 class ApiException implements Exception {
   const ApiException(this.message, [this.statusCode]);
 
+  /// Message décrivant l'erreur.
   final String message;
+
+  /// Code HTTP de la réponse, ou null si indisponible.
   final int? statusCode;
 
   @override

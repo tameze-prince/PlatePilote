@@ -28,6 +28,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+/**
+ * Contrôleur REST exposant les endpoints de gestion des budgets.
+ */
 @RestController
 @RequestMapping("/api/v1/budgets")
 @RequiredArgsConstructor
@@ -36,6 +39,14 @@ public class BudgetController {
     private final BudgetService budgetService;
     private final SecurityUtils securityUtils;
 
+    /**
+     * Récupère les budgets de l'utilisateur connecté (paginné).
+     *
+     * @param userDetails utilisateur authentifié
+     * @param page        numéro de page (défaut 0)
+     * @param size        taille de page (défaut 20)
+     * @return liste paginée des budgets
+     */
     @GetMapping
     public ResponseEntity<ApiResponse<PagedResponse<BudgetResponse>>> getMyBudgets(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -47,6 +58,13 @@ public class BudgetController {
         return ResponseEntity.ok(ApiResponse.success(budgets));
     }
 
+    /**
+     * Crée un nouveau budget.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param request     données du budget
+     * @return le budget créé (status 201)
+     */
     @PostMapping
     public ResponseEntity<ApiResponse<BudgetResponse>> createBudget(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -57,6 +75,12 @@ public class BudgetController {
                 .body(ApiResponse.success("Budget created", budget));
     }
 
+    /**
+     * Supprime (soft-delete) un budget.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param budgetId    identifiant du budget
+     */
     @DeleteMapping("/{budgetId}")
     public ResponseEntity<ApiResponse<Void>> deleteBudget(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -66,6 +90,12 @@ public class BudgetController {
         return ResponseEntity.ok(ApiResponse.success("Budget deleted", null));
     }
 
+    /**
+     * Récupère les analytics budgétaires.
+     *
+     * @param userDetails utilisateur authentifié
+     * @return analytics du budget
+     */
     @GetMapping("/analytics")
     public ResponseEntity<ApiResponse<BudgetAnalyticsResponse>> getBudgetAnalytics(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -74,6 +104,12 @@ public class BudgetController {
         return ResponseEntity.ok(ApiResponse.success(analytics));
     }
 
+    /**
+     * Récupère les économies estimées.
+     *
+     * @param userDetails utilisateur authentifié
+     * @return données d'économies
+     */
     @GetMapping("/savings")
     public ResponseEntity<ApiResponse<SavingsResponse>> getSavings(
             @AuthenticationPrincipal UserDetails userDetails) {

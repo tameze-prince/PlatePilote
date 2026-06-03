@@ -15,21 +15,42 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Importateur d'ingrédients via l'API Nutritionix.
+ * <p>
+ * Récupère des informations nutritionnelles détaillées (calories, protéines,
+ * glucides, lipides, fibres, sodium, etc.) depuis l'API instant de Nutritionix
+ * et les importe dans la base d'ingrédients.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class NutritionixImporter {
 
+    /** Repository des ingrédients. */
     private final IngredientRepository ingredientRepository;
+
+    /** Normaliseur d'ingrédients. */
     private final IngredientNormalizer normalizer;
+
+    /** Client HTTP RestTemplate. */
     private final RestTemplate restTemplate;
 
+    /** Identifiant d'application Nutritionix. */
     @Value("${app.api.nutritionix-app-id}")
     private String appId;
 
+    /** Clé d'application Nutritionix. */
     @Value("${app.api.nutritionix-app-key}")
     private String appKey;
 
+    /**
+     * Lance l'import des ingrédients depuis Nutritionix.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @param job        job d'importation en cours
+     */
     @SuppressWarnings("unchecked")
     public void importData(String query, int maxResults, ImportJob job) {
         log.info("Nutritionix import started: query='{}', maxResults={}", query, maxResults);

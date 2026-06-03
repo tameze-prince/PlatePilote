@@ -7,10 +7,28 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Repository d'accès aux données des alias d'ingrédients.
+ * <p>
+ * Table associée : {@code ingredient_aliases}.
+ * </p>
+ */
 @Repository
 public interface IngredientAliasRepository extends JpaRepository<IngredientAlias, UUID> {
 
+    /**
+     * Récupère tous les alias associés à un ingrédient donné.
+     *
+     * @param ingredientId identifiant de l'ingrédient
+     * @return liste des alias de l'ingrédient
+     */
     List<IngredientAlias> findByIngredientId(UUID ingredientId);
 
+    /**
+     * Récupère les alias correspondant à un nom normalisé donné.
+     *
+     * @param normalizedAlias alias normalisé recherché
+     * @return liste des alias correspondant
+     */
     List<IngredientAlias> findByNormalizedAlias(String normalizedAlias);
 }

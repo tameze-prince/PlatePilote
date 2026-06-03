@@ -1,23 +1,5 @@
 package com.platepilote.platepilote.mealplanning.domain.entity;
 
-/**
- * MEAL PLAN ENTITY - DATABASE TABLE: meal_plans
- * ================================================
- * 
- * WHAT IT IS:
- * Represents a meal plan (e.g., "Week of Jan 15-21").
- * A meal plan contains multiple MealPlanEntries (one meal per day).
- * 
- * EXAMPLE DATA:
- * - userId: "user-123", name: "Week 3 January", startDate: "2024-01-15", endDate: "2024-01-21", status: "ACTIVE"
- * 
- * STATUS VALUES:
- * - "DRAFT": Plan is being created, not yet finalized
- * - "ACTIVE": Plan is currently in use
- * - "COMPLETED": Plan period has passed
- * - "CANCELLED": Plan was abandoned
- */
-
 import com.platepilote.platepilote.common.kernel.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,6 +13,13 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * Entité représentant un plan de repas (ex : "Semaine du 15 au 21 janvier").
+ * <p>
+ * Un plan contient plusieurs {@link MealPlanEntry} et peut avoir différents
+ * statuts (DRAFT, ACTIVE, COMPLETED, CANCELLED) et modes de fonctionnement.
+ * </p>
+ */
 @Entity
 @Table(name = "meal_plans")
 @Getter
@@ -40,22 +29,28 @@ import java.util.UUID;
 @Builder
 public class MealPlan extends BaseEntity {
 
+    /** Identifiant de l'utilisateur propriétaire du plan. */
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
+    /** Nom du plan (ex : "Semaine 3 Janvier", "Low Carb Week"). */
     @Column(nullable = false)
-    private String name;  // e.g., "Week 3 January", "Low Carb Week"
+    private String name;
 
+    /** Date de début du plan de repas. */
     @Column(name = "start_date", nullable = false)
-    private LocalDate startDate;  // First day of the meal plan
+    private LocalDate startDate;
 
+    /** Date de fin du plan de repas. */
     @Column(name = "end_date", nullable = false)
-    private LocalDate endDate;  // Last day of the meal plan
+    private LocalDate endDate;
 
+    /** Statut du plan : DRAFT, ACTIVE, COMPLETED, CANCELLED. */
     @Column(nullable = false)
-    private String status = "DRAFT";  // "DRAFT", "ACTIVE", "COMPLETED", "CANCELLED"
+    private String status = "DRAFT";
 
+    /** Mode de fonctionnement : STANDARD, WASTELESS, ENDOFMONTH, BUSYWEEK, FAMILY. */
     @Column(nullable = false)
     @Builder.Default
-    private String mode = "STANDARD";  // "STANDARD", "WASTELESS", "ENDOFMONTH", "BUSYWEEK", "FAMILY"
+    private String mode = "STANDARD";
 }

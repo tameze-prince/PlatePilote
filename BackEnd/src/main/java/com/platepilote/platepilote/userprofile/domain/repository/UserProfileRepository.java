@@ -1,15 +1,9 @@
 package com.platepilote.platepilote.userprofile.domain.repository;
 
 /**
- * USER PROFILE REPOSITORY - DATABASE ACCESS FOR USER PROFILES
- * =============================================================
- * 
- * WHAT IT DOES:
- * Provides methods to query the "user_profiles" table.
- * 
- * METHOD:
- * - findByUserId(uuid) -> Find the profile for a specific user
- *   SQL: SELECT * FROM user_profiles WHERE user_id = ?
+ * Repository pour l'accès aux données des profils utilisateur.
+ * <p>
+ * Fournit une méthode de recherche du profil par identifiant utilisateur.
  */
 
 import com.platepilote.platepilote.userprofile.domain.entity.UserProfile;
@@ -23,8 +17,10 @@ import java.util.UUID;
 public interface UserProfileRepository extends JpaRepository<UserProfile, UUID> {
 
     /**
-     * Find a user's profile by their user ID.
-     * Returns Optional<UserProfile> - empty if the user hasn't set up their profile yet.
+     * Recherche le profil d'un utilisateur par son identifiant.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return profil trouvé ou Optional vide si aucun profil n'existe
      */
     Optional<UserProfile> findByUserId(UUID userId);
 }

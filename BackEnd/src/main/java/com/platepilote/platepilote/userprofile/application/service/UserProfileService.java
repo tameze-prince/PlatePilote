@@ -11,13 +11,29 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Service de gestion des profils utilisateur.
+ * <p>
+ * Permet de consulter, créer, mettre à jour et supprimer le profil d'un utilisateur.
+ * Les profils contiennent des informations physiques et des préférences utilisées
+ * par les autres modules (recommandations, nutrition, etc.).
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class UserProfileService {
 
+    /** Repository des profils utilisateur. */
     private final UserProfileRepository userProfileRepository;
 
+    /**
+     * Récupère le profil d'un utilisateur par son identifiant.
+     * <p>
+     * Si aucun profil n'existe, un profil par défaut est retourné sans être persisté.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return profil utilisateur (existant ou par défaut)
+     */
     @Transactional(readOnly = true)
     public UserProfileResponse getProfileByUserId(UUID userId) {
         UserProfile profile = userProfileRepository.findByUserId(userId).orElseGet(() -> {
@@ -34,6 +50,16 @@ public class UserProfileService {
         return toResponse(profile);
     }
 
+    /**
+     * Crée ou met à jour le profil d'un utilisateur.
+     * <p>
+     * Si un profil existe déjà, il est mis à jour. Sinon, un nouveau profil est créé.
+     * Les valeurs par défaut sont appliquées pour les champs null ou invalides.
+     *
+     * @param userId  identifiant de l'utilisateur
+     * @param request données du profil à enregistrer
+     * @return profil créé ou mis à jour
+     */
     public UserProfileResponse createOrUpdateProfile(UUID userId, UserProfileRequest request) {
         UserProfile profile = userProfileRepository.findByUserId(userId)
                 .orElseGet(() -> {
@@ -60,6 +86,12 @@ public class UserProfileService {
         return toResponse(saved);
     }
 
+    /**
+     * Supprime (soft-delete) le profil d'un utilisateur.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @throws com.platepilote.platepilote.common.kernel.ResourceNotFoundException si le profil n'existe pas
+     */
     public void deleteProfile(UUID userId) {
         UserProfile profile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("UserProfile", "userId", userId.toString()));

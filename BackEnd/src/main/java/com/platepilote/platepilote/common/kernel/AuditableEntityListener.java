@@ -1,21 +1,14 @@
 package com.platepilote.platepilote.common.kernel;
 
 /**
- * AUDITABLE ENTITY LISTENER - AUTO TIMESTAMP UPDATER
- * ====================================================
- * 
- * WHAT IT IS:
- * A JPA listener that automatically sets createdAt and updatedAt timestamps.
- * 
- * HOW IT WORKS:
- * - Before INSERT (PrePersist): Sets both createdAt and updatedAt to now
- * - Before UPDATE (PreUpdate): Sets updatedAt to now
- * 
- * WHY IT EXISTS:
- * So developers don't have to manually set timestamps every time they save an entity.
- * Spring handles this automatically.
+ * Auditeur JPA qui met automatiquement à jour les horodatages {@code createdAt} et {@code updatedAt}.
+ * <p>
+ * <ul>
+ *   <li>Avant INSERT ({@code PrePersist}) : initialise {@code createdAt} et {@code updatedAt} à maintenant</li>
+ *   <li>Avant UPDATE ({@code PreUpdate}) : met à jour {@code updatedAt} à maintenant</li>
+ * </ul>
+ * </p>
  */
-
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 
@@ -23,6 +16,11 @@ import java.time.Instant;
 
 public class AuditableEntityListener {
 
+    /**
+     * Initialise les horodatages {@code createdAt} et {@code updatedAt} avant la persistance.
+     *
+     * @param entity entité à auditer
+     */
     @PrePersist
     public void prePersist(BaseEntity entity) {
         Instant now = Instant.now();
@@ -34,6 +32,11 @@ public class AuditableEntityListener {
         }
     }
 
+    /**
+     * Met à jour l'horodatage {@code updatedAt} avant la mise à jour.
+     *
+     * @param entity entité à auditer
+     */
     @PreUpdate
     public void preUpdate(BaseEntity entity) {
         entity.setUpdatedAt(Instant.now());

@@ -5,11 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../network/api_client.dart';
 
+/// Repository d'authentification gérant la connexion, l'inscription,
+/// le rafraîchissement de token, la vérification email et les mots de passe oubliés.
 class AuthRepository {
   AuthRepository(this._apiClient);
 
   final ApiClient _apiClient;
 
+  /// Connecte l'utilisateur avec [email] et [password].
   Future<AuthResult> login({
     required String email,
     required String password,
@@ -28,6 +31,7 @@ class AuthRepository {
     }
   }
 
+  /// Inscrit un nouvel utilisateur avec les informations personnelles.
   Future<AuthResult> register({
     required String firstName,
     required String lastName,
@@ -53,6 +57,7 @@ class AuthRepository {
     }
   }
 
+  /// Rafraîchit le token d'accès à l'aide du [refreshToken].
   Future<AuthResult> refreshToken(String refreshToken) async {
     try {
       final response = await _apiClient.post(
@@ -68,6 +73,7 @@ class AuthRepository {
     }
   }
 
+  /// Vérifie l'adresse email avec le [token] de vérification.
   Future<bool> verifyEmail(String token) async {
     try {
       await _apiClient.post('/auth/verify-email', query: {'token': token});
@@ -77,6 +83,7 @@ class AuthRepository {
     }
   }
 
+  /// Renvoie l'email de vérification à l'adresse donnée.
   Future<bool> resendVerification(String email) async {
     try {
       await _apiClient.post('/auth/resend-verification', data: {'email': email});
@@ -86,6 +93,7 @@ class AuthRepository {
     }
   }
 
+  /// Déconnecte l'utilisateur en invalidant le [refreshToken] côté serveur.
   Future<bool> logout({required String refreshToken}) async {
     try {
       await _apiClient.post('/auth/logout', data: {'refreshToken': refreshToken});
@@ -95,8 +103,8 @@ class AuthRepository {
     }
   }
 
-  /// Validates the current session by calling a protected endpoint.
-  /// Returns the email extracted from the JWT if successful.
+  /// Valide la session actuelle en appelant un endpoint protégé.
+  /// Retourne l'email extrait du JWT en cas de succès.
   Future<AuthResult> validateSession() async {
     try {
       await _apiClient.get('/profile');
@@ -109,8 +117,8 @@ class AuthRepository {
     }
   }
 
-  /// Decodes the JWT payload to extract the email (subject claim).
-  /// This is a client-side only operation — no network call.
+  /// Décode le payload du JWT pour extraire l'email (claim subject).
+  /// Opération côté client uniquement — sans appel réseau.
   static String? extractEmailFromToken(String token) {
     try {
       final parts = token.split('.');
@@ -123,6 +131,7 @@ class AuthRepository {
     }
   }
 
+  /// Envoie une demande de réinitialisation de mot de passe pour [email].
   Future<bool> forgotPassword(String email) async {
     try {
       await _apiClient.post('/auth/forgot-password', data: {'email': email});
@@ -132,6 +141,7 @@ class AuthRepository {
     }
   }
 
+  /// Réinitialise le mot de passe avec [token] et [newPassword].
   Future<bool> resetPassword(String token, String newPassword) async {
     try {
       await _apiClient.post(
@@ -165,6 +175,8 @@ class AuthRepository {
   }
 }
 
+/// Résultat d'une opération d'authentification contenant le statut,
+/// les tokens JWT et un éventuel message d'erreur.
 class AuthResult {
   const AuthResult({
     required this.success,
@@ -174,13 +186,23 @@ class AuthResult {
     this.message,
   });
 
+  /// Indique si l'opération a réussi.
   final bool success;
+
+  /// Token d'accès JWT.
   final String? accessToken;
+
+  /// Token de rafraîchissement JWT.
   final String? refreshToken;
+
+  /// Données utilisateur optionnelles.
   final AuthUserData? data;
+
+  /// Message d'erreur ou d'information.
   final String? message;
 }
 
+/// Données utilisateur extraites après une authentification réussie.
 class AuthUserData {
   const AuthUserData({
     required this.id,
@@ -189,12 +211,20 @@ class AuthUserData {
     this.lastName,
   });
 
+  /// Identifiant unique de l'utilisateur.
   final int id;
+
+  /// Adresse email de l'utilisateur.
   final String email;
+
+  /// Prénom de l'utilisateur.
   final String? firstName;
+
+  /// Nom de famille de l'utilisateur.
   final String? lastName;
 }
 
+/// Provider Riverpod pour [AuthRepository].
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(
     ref.watch(apiClientProvider),

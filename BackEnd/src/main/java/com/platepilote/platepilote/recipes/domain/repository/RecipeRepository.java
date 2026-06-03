@@ -1,32 +1,11 @@
 package com.platepilote.platepilote.recipes.domain.repository;
 
 /**
- * RECIPE REPOSITORY - DATABASE ACCESS FOR RECIPES
- * ==================================================
- * 
- * METHODS:
- * 
- * 1. findByIsPublicTrueAndDeletedAtIsNull(pageable)
- *    -> Get all public recipes (for browsing)
- *    SQL: SELECT * FROM recipes WHERE is_public = true AND deleted_at IS NULL
- * 
- * 2. findByUserIdAndDeletedAtIsNull(userId, pageable)
- *    -> Get a user's personal recipes
- *    SQL: SELECT * FROM recipes WHERE user_id = ? AND deleted_at IS NULL
- * 
- * 3. findByCuisineTypeAndIsPublicTrueAndDeletedAtIsNull(cuisineType, pageable)
- *    -> Filter public recipes by cuisine type (e.g., "Italian")
- * 
- * 4. findByMealTypeAndIsPublicTrueAndDeletedAtIsNull(mealType, pageable)
- *    -> Filter public recipes by meal type (e.g., "Breakfast")
- * 
- * 5. searchPublicRecipes(query, pageable)
- *    -> Search recipes by name or description (case-insensitive)
- *    SQL: SELECT * FROM recipes WHERE is_public = true AND deleted_at IS NULL 
- *         AND (LOWER(name) LIKE '%query%' OR LOWER(description) LIKE '%query%')
- * 
- * 6. findByIds(ids)
- *    -> Get recipes by a list of IDs (used by recommendation engine)
+ * Repository JPA pour l'entité {@link Recipe}.
+ * <p>
+ * Fournit l'accès aux recettes publiques et personnelles avec des méthodes
+ * de recherche, de filtrage par type de cuisine / repas, et de requêtes
+ * spécialisées (tableau de bord, repas rapides, recommandations).
  */
 
 import com.platepilote.platepilote.recipes.domain.entity.Recipe;
@@ -44,10 +23,19 @@ import java.util.UUID;
 public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
 
     /**
-     * Get all public recipes (visible to everyone) with pagination.
+     * Récupère toutes les recettes publiques (visibles par tout le monde), de manière paginée.
+     *
+     * @param pageable les paramètres de pagination
+     * @return une page de recettes publiques
      */
     Page<Recipe> findByIsPublicTrueAndDeletedAtIsNull(Pageable pageable);
 
+    /**
+     * Récupère les recettes pour le tableau de bord (filtrées et triées par pertinence).
+     *
+     * @param pageable les paramètres de pagination
+     * @return une page de recettes pour le tableau de bord
+     */
     @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.deletedAt IS NULL " +
            "AND r.enabled = true AND r.imageUrl IS NOT NULL " +
            "AND (r.caloriesPerServing IS NULL OR r.caloriesPerServing > 0) " +
@@ -55,23 +43,38 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
     Page<Recipe> findDashboardRecipes(Pageable pageable);
 
     /**
-     * Get a specific user's personal recipes.
+     * Récupère les recettes personnelles d'un utilisateur.
+     *
+     * @param userId   l'identifiant de l'utilisateur
+     * @param pageable les paramètres de pagination
+     * @return une page de recettes de l'utilisateur
      */
     Page<Recipe> findByUserIdAndDeletedAtIsNull(UUID userId, Pageable pageable);
 
     /**
-     * Filter public recipes by cuisine type (e.g., "Italian", "Mexican").
+     * Filtre les recettes publiques par type de cuisine (ex: "Italienne", "Mexicaine").
+     *
+     * @param cuisineType le type de cuisine
+     * @param pageable    les paramètres de pagination
+     * @return une page de recettes correspondant au type de cuisine
      */
     Page<Recipe> findByCuisineTypeAndIsPublicTrueAndDeletedAtIsNull(String cuisineType, Pageable pageable);
 
     /**
-     * Filter public recipes by meal type (e.g., "Breakfast", "Dinner").
+     * Filtre les recettes publiques par type de repas (ex: "Petit-déjeuner", "Dîner").
+     *
+     * @param mealType le type de repas
+     * @param pageable les paramètres de pagination
+     * @return une page de recettes correspondant au type de repas
      */
     Page<Recipe> findByMealTypeAndIsPublicTrueAndDeletedAtIsNull(String mealType, Pageable pageable);
 
     /**
-     * Search public recipes by name or description.
-     * Uses LIKE for partial matching (e.g., "chicken" matches "Chicken Stir Fry").
+     * Recherche les recettes publiques par nom ou description (insensible à la casse).
+     *
+     * @param query    le terme de recherche
+     * @param pageable les paramètres de pagination
+     * @return une page de recettes correspondant à la recherche
      */
     @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.deletedAt IS NULL AND " +
            "LOWER(r.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
@@ -79,15 +82,33 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
     Page<Recipe> searchPublicRecipes(@Param("query") String query, Pageable pageable);
 
     /**
-     * Get recipes by a list of IDs.
-     * Used by the recommendation engine to fetch recommended recipes.
+     * Récupère les recettes par une liste d'identifiants.
+     * Utilisé par le moteur de recommandation.
+     *
+     * @param ids la liste des identifiants de recettes
+     * @return la liste des recettes correspondantes
      */
     @Query("SELECT r FROM Recipe r WHERE r.id IN :ids AND r.deletedAt IS NULL")
     List<Recipe> findByIds(@Param("ids") List<UUID> ids);
 
+    /**
+     * Récupère les recettes publiques dont le temps total est inférieur ou égal à une limite.
+     *
+     * @param maxTime  le temps maximum en minutes
+     * @param pageable les paramètres de pagination
+     * @return une page de recettes rapides
+     */
     @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.deletedAt IS NULL AND r.totalTimeMinutes <= :maxTime")
     Page<Recipe> findQuickMeals(@Param("maxTime") Integer maxTime, Pageable pageable);
 
+    /**
+     * Récupère les recettes publiques filtrées par cuisine et coût maximum estimé.
+     *
+     * @param cuisine le type de cuisine (peut être null)
+     * @param maxCost le coût maximum estimé
+     * @param pageable les paramètres de pagination
+     * @return une liste de recettes correspondant aux filtres
+     */
     @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.deletedAt IS NULL AND " +
            "(:cuisine IS NULL OR r.cuisineType = :cuisine) AND " +
            "(r.estimatedCost IS NULL OR r.estimatedCost <= :maxCost)")

@@ -9,10 +9,26 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Repository pour l'accès aux données des budgets.
+ */
 @Repository
 public interface BudgetRepository extends JpaRepository<Budget, UUID> {
 
+    /**
+     * Récupère les budgets actifs d'un utilisateur avec pagination.
+     *
+     * @param userId   identifiant de l'utilisateur
+     * @param pageable paramètres de pagination
+     * @return page des budgets
+     */
     Page<Budget> findByUserIdAndDeletedAtIsNull(UUID userId, Pageable pageable);
 
+    /**
+     * Récupère tous les budgets actifs d'un utilisateur.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return liste des budgets
+     */
     List<Budget> findByUserIdAndDeletedAtIsNull(UUID userId);
 }

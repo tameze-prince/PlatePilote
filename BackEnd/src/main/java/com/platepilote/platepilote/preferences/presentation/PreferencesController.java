@@ -27,6 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Contrôleur REST exposant les endpoints de gestion des préférences utilisateur.
+ */
 @RestController
 @RequestMapping("/api/v1/preferences")
 @RequiredArgsConstructor
@@ -36,8 +39,14 @@ public class PreferencesController {
 
     private final SecurityUtils securityUtils;
 
-    // ==================== DIETARY PREFERENCES ====================
+    // ==================== RÉGIMES ALIMENTAIRES ====================
 
+    /**
+     * Récupère la liste des régimes alimentaires de l'utilisateur connecté.
+     *
+     * @param userDetails utilisateur authentifié
+     * @return liste des types de régime
+     */
     @GetMapping("/diets")
     public ResponseEntity<ApiResponse<List<String>>> getDietaryPreferences(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -46,6 +55,13 @@ public class PreferencesController {
         return ResponseEntity.ok(ApiResponse.success(diets));
     }
 
+    /**
+     * Ajoute un régime alimentaire pour l'utilisateur connecté.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param request     données du régime
+     * @return confirmation (status 201)
+     */
     @PostMapping("/diets")
     public ResponseEntity<ApiResponse<Void>> addDietaryPreference(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -56,6 +72,13 @@ public class PreferencesController {
                 .body(ApiResponse.success("Dietary preference added", null));
     }
 
+    /**
+     * Supprime un régime alimentaire.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param dietType    type de régime à supprimer
+     * @return confirmation
+     */
     @DeleteMapping("/diets/{dietType}")
     public ResponseEntity<ApiResponse<Void>> removeDietaryPreference(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -67,6 +90,12 @@ public class PreferencesController {
 
     // ==================== ALLERGIES ====================
 
+    /**
+     * Récupère la liste des allergies de l'utilisateur connecté.
+     *
+     * @param userDetails utilisateur authentifié
+     * @return liste des allergies
+     */
     @GetMapping("/allergies")
     public ResponseEntity<ApiResponse<List<Allergy>>> getAllergies(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -75,6 +104,13 @@ public class PreferencesController {
         return ResponseEntity.ok(ApiResponse.success(allergies));
     }
 
+    /**
+     * Ajoute une allergie pour l'utilisateur connecté.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param request     données de l'allergie
+     * @return confirmation (status 201)
+     */
     @PostMapping("/allergies")
     public ResponseEntity<ApiResponse<Void>> addAllergy(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -85,6 +121,13 @@ public class PreferencesController {
                 .body(ApiResponse.success("Allergy added", null));
     }
 
+    /**
+     * Supprime une allergie.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param allergen    nom de l'allergène à supprimer
+     * @return confirmation
+     */
     @DeleteMapping("/allergies/{allergen}")
     public ResponseEntity<ApiResponse<Void>> removeAllergy(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -94,8 +137,14 @@ public class PreferencesController {
         return ResponseEntity.ok(ApiResponse.success("Allergy removed", null));
     }
 
-    // ==================== CUISINE PREFERENCES ====================
+    // ==================== PRÉFÉRENCES CULINAIRES ====================
 
+    /**
+     * Récupère la liste des cuisines préférées de l'utilisateur connecté.
+     *
+     * @param userDetails utilisateur authentifié
+     * @return liste des types de cuisine
+     */
     @GetMapping("/cuisines")
     public ResponseEntity<ApiResponse<List<String>>> getCuisinePreferences(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -104,6 +153,13 @@ public class PreferencesController {
         return ResponseEntity.ok(ApiResponse.success(cuisines));
     }
 
+    /**
+     * Ajoute une préférence culinaire pour l'utilisateur connecté.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param request     données de la cuisine
+     * @return confirmation (status 201)
+     */
     @PostMapping("/cuisines")
     public ResponseEntity<ApiResponse<Void>> addCuisinePreference(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -114,6 +170,13 @@ public class PreferencesController {
                 .body(ApiResponse.success("Cuisine preference added", null));
     }
 
+    /**
+     * Supprime une préférence culinaire.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param cuisineType type de cuisine à supprimer
+     * @return confirmation
+     */
     @DeleteMapping("/cuisines/{cuisineType}")
     public ResponseEntity<ApiResponse<Void>> removeCuisinePreference(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -123,8 +186,14 @@ public class PreferencesController {
         return ResponseEntity.ok(ApiResponse.success("Cuisine preference removed", null));
     }
 
-    // ==================== AGGREGATED PREFERENCES ====================
+    // ==================== PRÉFÉRENCES GROUPÉES ====================
 
+    /**
+     * Récupère toutes les préférences de l'utilisateur connecté.
+     *
+     * @param userDetails utilisateur authentifié
+     * @return toutes les préférences groupées
+     */
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserPreferencesResponse>> getMyPreferences(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -133,6 +202,13 @@ public class PreferencesController {
         return ResponseEntity.ok(ApiResponse.success(preferences));
     }
 
+    /**
+     * Remplace toutes les préférences de l'utilisateur connecté.
+     *
+     * @param userDetails utilisateur authentifié
+     * @param request     nouvelles préférences
+     * @return préférences mises à jour
+     */
     @PutMapping("/me")
     public ResponseEntity<ApiResponse<UserPreferencesResponse>> updateMyPreferences(
             @AuthenticationPrincipal UserDetails userDetails,

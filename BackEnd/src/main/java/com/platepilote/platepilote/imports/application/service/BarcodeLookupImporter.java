@@ -15,22 +15,48 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Importateur de produits via l'API BarcodeLookup / UPCItemDB.
+ * <p>
+ * Permet de rechercher des produits par code-barres, d'importer les données
+ * dans la base d'ingrédients et d'enregistrer les correspondances code-barres.
+ * Utilise UPCItemDB comme source principale avec fallback sur des données démo.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class BarcodeLookupImporter {
 
+    /** Repository des ingrédients. */
     private final IngredientRepository ingredientRepository;
+
+    /** Repository des produits par code-barres. */
     private final BarcodeProductRepository barcodeProductRepository;
+
+    /** Normaliseur d'ingrédients pour les slugs et la déduplication. */
     private final IngredientNormalizer normalizer;
+
+    /** Client HTTP RestTemplate. */
     private final RestTemplate restTemplate;
 
+    /** Clé API UPCItemDB (optionnelle). */
     @Value("${app.api.upcitemdb-key:}")
     private String upcItemDbKey;
 
+    /** Clé API Barcode Lookup (optionnelle). */
     @Value("${app.api.barcode-lookup-key:}")
     private String barcodeLookupKey;
 
+    /**
+     * Lance l'import des données depuis BarcodeLookup.
+     * <p>
+     * Chaque produit trouvé est transformé en entité Ingredient + BarcodeProduct.
+     * En cas d'échec de l'API, un fallback génère des données démo.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @param job        job d'importation en cours
+     */
     @SuppressWarnings("unchecked")
     public void importData(String query, int maxResults, ImportJob job) {
         log.info("BarcodeLookup import started: query='{}', maxResults={}", query, maxResults);

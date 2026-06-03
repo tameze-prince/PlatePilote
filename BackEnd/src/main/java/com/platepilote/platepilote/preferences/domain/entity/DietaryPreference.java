@@ -1,18 +1,11 @@
 package com.platepilote.platepilote.preferences.domain.entity;
 
 /**
- * DIETARY PREFERENCE ENTITY - DATABASE TABLE: dietary_preferences
- * =================================================================
- * 
- * WHAT IT IS:
- * Stores a user's dietary preferences (e.g., vegetarian, vegan, keto).
- * 
- * EXAMPLE DATA:
- * - userId: "user-123", dietType: "vegetarian"
- * - userId: "user-123", dietType: "gluten-free"
- * 
- * A user can have MULTIPLE dietary preferences (one-to-many relationship).
- * These are used by the RecommendationEngine to filter recipes.
+ * Entité représentant une préférence alimentaire (régime) d'un utilisateur.
+ * Table en base : {@code dietary_preferences}.
+ * <p>
+ * Un utilisateur peut avoir plusieurs régimes (ex. végétarien ET sans gluten).
+ * Utilisé par le moteur de recommandation pour filtrer les recettes.
  */
 
 import com.platepilote.platepilote.common.kernel.BaseEntity;
@@ -27,6 +20,10 @@ import lombok.Setter;
 
 import java.util.UUID;
 
+/**
+ * Entité représentant une préférence alimentaire (régime) d'un utilisateur.
+ * Table en base : {@code dietary_preferences}.
+ */
 @Entity
 @Table(name = "dietary_preferences")
 @Getter
@@ -36,9 +33,11 @@ import java.util.UUID;
 @Builder
 public class DietaryPreference extends BaseEntity {
 
+    /** Identifiant de l'utilisateur. */
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
+    /** Type de régime (végétarien, végan, keto, paléo, etc.). */
     @Column(name = "diet_type", nullable = false)
-    private String dietType;  // e.g., "vegetarian", "vegan", "keto", "paleo"
+    private String dietType;
 }

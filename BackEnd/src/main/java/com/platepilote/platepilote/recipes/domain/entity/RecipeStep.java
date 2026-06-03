@@ -1,24 +1,10 @@
 package com.platepilote.platepilote.recipes.domain.entity;
 
 /**
- * RECIPE STEP ENTITY - DATABASE TABLE: recipe_steps
- * ====================================================
- * 
- * WHAT IT IS:
- * Represents one step/instruction in a recipe.
- * 
- * RELATIONSHIP:
- * Many-to-one with Recipe (each step belongs to one recipe).
- * 
- * EXAMPLE DATA:
- * - recipeId: "recipe-123", stepNumber: 1, instruction: "Heat oil in a large pan", durationMinutes: 2
- * - recipeId: "recipe-123", stepNumber: 2, instruction: "Add chicken and cook until golden", durationMinutes: 10
- * 
- * FIELDS:
- * - recipe: The recipe this step belongs to (foreign key)
- * - stepNumber: Order of the step (1, 2, 3, ...)
- * - instruction: The actual cooking instruction
- * - durationMinutes: How long this step takes (optional)
+ * Entité représentant une étape d'une recette.
+ * <p>
+ * Chaque étape appartient à une recette (relation many-to-one) et contient
+ * un numéro d'ordre, une instruction de cuisson et une durée optionnelle.
  */
 
 import jakarta.persistence.Column;

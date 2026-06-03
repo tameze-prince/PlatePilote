@@ -36,6 +36,14 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Contrôleur REST pour la gestion des recettes.
+ * <p>
+ * Expose les endpoints pour la consultation des recettes publiques, la gestion
+ * des recettes personnelles (CRUD), et la gestion des favoris.
+ * <p>
+ * Base URL : {@code /api/v1/recipes}
+ */
 @RestController
 @RequestMapping("/api/v1/recipes")
 @RequiredArgsConstructor
@@ -46,6 +54,13 @@ public class RecipeController {
     private final RecipeFavoriteRepository recipeFavoriteRepository;
     private final RecipeRepository recipeRepository;
 
+    /**
+     * Récupère toutes les recettes publiques, de manière paginée.
+     *
+     * @param page le numéro de page (défaut : 0)
+     * @param size la taille de page (défaut : 20)
+     * @return une page de recettes publiques
+     */
     @GetMapping("/public")
     public ResponseEntity<ApiResponse<PagedResponse<RecipeResponse>>> getPublicRecipes(
             @RequestParam(defaultValue = "0") int page,
@@ -55,6 +70,14 @@ public class RecipeController {
         return ResponseEntity.ok(ApiResponse.success(recipes));
     }
 
+    /**
+     * Recherche les recettes publiques par nom ou description.
+     *
+     * @param q    le terme de recherche
+     * @param page le numéro de page (défaut : 0)
+     * @param size la taille de page (défaut : 20)
+     * @return une page de recettes correspondant à la recherche
+     */
     @GetMapping("/public/search")
     public ResponseEntity<ApiResponse<PagedResponse<RecipeResponse>>> searchRecipes(
             @RequestParam String q,
@@ -65,6 +88,14 @@ public class RecipeController {
         return ResponseEntity.ok(ApiResponse.success(recipes));
     }
 
+    /**
+     * Filtre les recettes publiques par type de cuisine.
+     *
+     * @param cuisineType le type de cuisine (ex: "Italienne", "Mexicaine")
+     * @param page        le numéro de page (défaut : 0)
+     * @param size        la taille de page (défaut : 20)
+     * @return une page de recettes du type de cuisine demandé
+     */
     @GetMapping("/public/cuisine/{cuisineType}")
     public ResponseEntity<ApiResponse<PagedResponse<RecipeResponse>>> getByCuisine(
             @PathVariable String cuisineType,
@@ -75,6 +106,14 @@ public class RecipeController {
         return ResponseEntity.ok(ApiResponse.success(recipes));
     }
 
+    /**
+     * Filtre les recettes publiques par type de repas.
+     *
+     * @param mealType le type de repas (ex: "Petit-déjeuner", "Dîner")
+     * @param page     le numéro de page (défaut : 0)
+     * @param size     la taille de page (défaut : 20)
+     * @return une page de recettes du type de repas demandé
+     */
     @GetMapping("/public/meal/{mealType}")
     public ResponseEntity<ApiResponse<PagedResponse<RecipeResponse>>> getByMealType(
             @PathVariable String mealType,
@@ -85,12 +124,26 @@ public class RecipeController {
         return ResponseEntity.ok(ApiResponse.success(recipes));
     }
 
+    /**
+     * Récupère une recette publique par son identifiant.
+     *
+     * @param recipeId l'identifiant de la recette
+     * @return la recette complète
+     */
     @GetMapping("/public/{recipeId}")
     public ResponseEntity<ApiResponse<RecipeResponse>> getPublicRecipe(@PathVariable UUID recipeId) {
         RecipeResponse recipe = recipeService.getRecipeById(recipeId);
         return ResponseEntity.ok(ApiResponse.success(recipe));
     }
 
+    /**
+     * Récupère les recettes personnelles de l'utilisateur connecté.
+     *
+     * @param userDetails les informations de l'utilisateur authentifié
+     * @param page        le numéro de page (défaut : 0)
+     * @param size        la taille de page (défaut : 20)
+     * @return une page de recettes de l'utilisateur
+     */
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<PagedResponse<RecipeResponse>>> getMyRecipes(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -102,6 +155,13 @@ public class RecipeController {
         return ResponseEntity.ok(ApiResponse.success(recipes));
     }
 
+    /**
+     * Récupère une de ses recettes par identifiant.
+     *
+     * @param userDetails les informations de l'utilisateur authentifié
+     * @param recipeId    l'identifiant de la recette
+     * @return la recette complète
+     */
     @GetMapping("/my/{recipeId}")
     public ResponseEntity<ApiResponse<RecipeResponse>> getMyRecipe(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -110,6 +170,13 @@ public class RecipeController {
         return ResponseEntity.ok(ApiResponse.success(recipe));
     }
 
+    /**
+     * Crée une nouvelle recette pour l'utilisateur connecté.
+     *
+     * @param userDetails les informations de l'utilisateur authentifié
+     * @param request     les données complètes de la recette
+     * @return la recette créée (statut 201)
+     */
     @PostMapping
     public ResponseEntity<ApiResponse<RecipeResponse>> createRecipe(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -120,6 +187,14 @@ public class RecipeController {
                 .body(ApiResponse.success("Recipe created", recipe));
     }
 
+    /**
+     * Met à jour une recette existante.
+     *
+     * @param userDetails les informations de l'utilisateur authentifié
+     * @param recipeId    l'identifiant de la recette à modifier
+     * @param request     les nouvelles données de la recette
+     * @return la recette mise à jour
+     */
     @PutMapping("/{recipeId}")
     public ResponseEntity<ApiResponse<RecipeResponse>> updateRecipe(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -130,6 +205,13 @@ public class RecipeController {
         return ResponseEntity.ok(ApiResponse.success("Recipe updated", recipe));
     }
 
+    /**
+     * Supprime logiquement une recette (soft-delete).
+     *
+     * @param userDetails les informations de l'utilisateur authentifié
+     * @param recipeId    l'identifiant de la recette à supprimer
+     * @return réponse vide confirmant la suppression
+     */
     @DeleteMapping("/{recipeId}")
     public ResponseEntity<ApiResponse<Void>> deleteRecipe(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -139,6 +221,13 @@ public class RecipeController {
         return ResponseEntity.ok(ApiResponse.success("Recipe deleted", null));
     }
 
+    /**
+     * Ajoute une recette aux favoris de l'utilisateur connecté.
+     *
+     * @param userDetails les informations de l'utilisateur authentifié
+     * @param recipeId    l'identifiant de la recette à favoriser
+     * @return réponse vide confirmant l'ajout
+     */
     @PostMapping("/{recipeId}/favorite")
     public ResponseEntity<ApiResponse<Void>> favoriteRecipe(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -154,6 +243,13 @@ public class RecipeController {
         return ResponseEntity.ok(ApiResponse.success("Recipe favorited", null));
     }
 
+    /**
+     * Supprime une recette des favoris de l'utilisateur connecté.
+     *
+     * @param userDetails les informations de l'utilisateur authentifié
+     * @param recipeId    l'identifiant de la recette à retirer des favoris
+     * @return réponse vide confirmant la suppression
+     */
     @DeleteMapping("/{recipeId}/favorite")
     public ResponseEntity<ApiResponse<Void>> unfavoriteRecipe(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -163,6 +259,14 @@ public class RecipeController {
         return ResponseEntity.ok(ApiResponse.success("Recipe unfavorited", null));
     }
 
+    /**
+     * Récupère les recettes favorites de l'utilisateur connecté, de manière paginée.
+     *
+     * @param userDetails les informations de l'utilisateur authentifié
+     * @param page        le numéro de page (défaut : 0)
+     * @param size        la taille de page (défaut : 20)
+     * @return une page de recettes favorites
+     */
     @GetMapping("/favorites")
     public ResponseEntity<ApiResponse<PagedResponse<RecipeResponse>>> getFavoriteRecipes(
             @AuthenticationPrincipal UserDetails userDetails,

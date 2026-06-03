@@ -7,9 +7,11 @@ import 'base_repository.dart';
 
 export 'base_repository.dart' show ApiException;
 
+/// Repository des recettes (recherche, détail, favoris).
 class RecipeRepository extends BaseRepository {
   RecipeRepository(super.apiClient);
 
+  /// Recherche des recettes publiques par mot-clé.
   Future<PageResponse<RecipeDetail>> searchRecipes({
     required String query,
     int page = 0,
@@ -26,6 +28,7 @@ class RecipeRepository extends BaseRepository {
     }
   }
 
+  /// Récupère le détail d'une recette publique par son identifiant.
   Future<RecipeDetail> getRecipeDetail(String recipeId) async {
     try {
       final response = await apiClient.get('/recipes/public/$recipeId');
@@ -35,6 +38,7 @@ class RecipeRepository extends BaseRepository {
     }
   }
 
+  /// Récupère les recettes publiques avec pagination.
   Future<PageResponse<RecipeDetail>> getPublicRecipes({
     int page = 0,
     int size = 20,
@@ -50,6 +54,7 @@ class RecipeRepository extends BaseRepository {
     }
   }
 
+  /// Récupère les recettes par type de cuisine.
   Future<PageResponse<RecipeDetail>> getByCuisine(
     String cuisine, {
     int page = 0,
@@ -66,6 +71,7 @@ class RecipeRepository extends BaseRepository {
     }
   }
 
+  /// Récupère les recettes par type de repas.
   Future<PageResponse<RecipeDetail>> getByMealType(
     String mealType, {
     int page = 0,
@@ -82,6 +88,7 @@ class RecipeRepository extends BaseRepository {
     }
   }
 
+  /// Ajoute une recette aux favoris.
   Future<bool> favoriteRecipe(String recipeId) async {
     try {
       await apiClient.post('/recipes/$recipeId/favorite');
@@ -91,6 +98,7 @@ class RecipeRepository extends BaseRepository {
     }
   }
 
+  /// Retire une recette des favoris.
   Future<bool> unfavoriteRecipe(String recipeId) async {
     try {
       await apiClient.delete('/recipes/$recipeId/favorite');
@@ -100,6 +108,7 @@ class RecipeRepository extends BaseRepository {
     }
   }
 
+  /// Récupère la liste des recettes favorites de l'utilisateur.
   Future<PageResponse<RecipeDetail>> getFavoriteRecipes({
     int page = 0,
     int size = 20,
@@ -116,6 +125,7 @@ class RecipeRepository extends BaseRepository {
   }
 }
 
+/// Détail complet d'une recette (informations, ingrédients, étapes).
 class RecipeDetail {
   const RecipeDetail({
     this.id,
@@ -139,24 +149,61 @@ class RecipeDetail {
     this.updatedAt,
   });
 
+  /// Identifiant de la recette.
   final String? id;
+
+  /// Nom de la recette.
   final String? name;
+
+  /// Description textuelle.
   final String? description;
+
+  /// Temps de préparation en minutes.
   final int? prepTimeMinutes;
+
+  /// Temps de cuisson en minutes.
   final int? cookTimeMinutes;
+
+  /// Temps total en minutes.
   final int? totalTimeMinutes;
+
+  /// Nombre de portions.
   final int? servings;
+
+  /// Niveau de difficulté.
   final String? difficulty;
+
+  /// Type de cuisine.
   final String? cuisineType;
+
+  /// Type de repas (petit-déjeuner, déjeuner, dîner, etc.).
   final String? mealType;
+
+  /// URL de l'image.
   final String? imageUrl;
+
+  /// Source de la recette.
   final String? source;
+
+  /// Indique si la recette est publique.
   final bool? isPublic;
+
+  /// Identifiant du créateur.
   final String? userId;
+
+  /// Calories par portion.
   final int? caloriesPerServing;
+
+  /// Liste des ingrédients.
   final List<RecipeIngredient> ingredients;
+
+  /// Liste des étapes de préparation.
   final List<RecipeStep> steps;
+
+  /// Date de création.
   final String? createdAt;
+
+  /// Date de dernière modification.
   final String? updatedAt;
 
   factory RecipeDetail.fromJson(Map<String, dynamic> json) {
@@ -190,6 +237,7 @@ class RecipeDetail {
   }
 }
 
+/// Ingrédient d'une recette avec quantité, unité et ordre.
 class RecipeIngredient {
   const RecipeIngredient({
     this.id,
@@ -201,12 +249,25 @@ class RecipeIngredient {
     this.ingredientId,
   });
 
+  /// Identifiant de l'ingrédient dans la recette.
   final String? id;
+
+  /// Nom de l'ingrédient.
   final String? name;
+
+  /// Quantité nécessaire.
   final double? quantity;
+
+  /// Unité de mesure.
   final String? unit;
+
+  /// Notes optionnelles sur l'ingrédient.
   final String? notes;
+
+  /// Ordre d'affichage dans la liste.
   final int? sortOrder;
+
+  /// Identifiant de l'ingrédient de référence.
   final String? ingredientId;
 
   factory RecipeIngredient.fromJson(Map<String, dynamic> json) {
@@ -222,6 +283,7 @@ class RecipeIngredient {
   }
 }
 
+/// Étape de préparation d'une recette.
 class RecipeStep {
   const RecipeStep({
     this.id,
@@ -230,9 +292,16 @@ class RecipeStep {
     this.durationMinutes,
   });
 
+  /// Identifiant de l'étape.
   final String? id;
+
+  /// Numéro d'ordre de l'étape.
   final int? stepNumber;
+
+  /// Instruction textuelle.
   final String? instruction;
+
+  /// Durée optionnelle en minutes.
   final int? durationMinutes;
 
   factory RecipeStep.fromJson(Map<String, dynamic> json) {
@@ -245,6 +314,7 @@ class RecipeStep {
   }
 }
 
+/// Provider Riverpod pour [RecipeRepository].
 final recipeRepositoryProvider = Provider<RecipeRepository>((ref) {
   return RecipeRepository(ref.watch(apiClientProvider));
 });

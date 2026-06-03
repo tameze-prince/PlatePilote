@@ -1,12 +1,7 @@
 package com.platepilote.platepilote.preferences.domain.repository;
 
 /**
- * DIETARY PREFERENCE REPOSITORY - DATABASE ACCESS FOR DIETARY PREFERENCES
- * =========================================================================
- * 
- * METHOD:
- * - findByUserId(uuid) -> Get all dietary preferences for a user
- *   SQL: SELECT * FROM dietary_preferences WHERE user_id = ?
+ * Repository pour l'accès aux données des préférences alimentaires (régimes).
  */
 
 import com.platepilote.platepilote.preferences.domain.entity.DietaryPreference;
@@ -16,12 +11,17 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Repository pour l'accès aux données des préférences alimentaires (régimes).
+ */
 @Repository
 public interface DietaryPreferenceRepository extends JpaRepository<DietaryPreference, UUID> {
 
     /**
-     * Get all dietary preferences for a specific user.
-     * Returns a list because a user can have multiple preferences.
+     * Récupère toutes les préférences alimentaires d'un utilisateur.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return liste des préférences
      */
     List<DietaryPreference> findByUserId(UUID userId);
 }

@@ -13,6 +13,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Vérificateur OAuth2 pour les fournisseurs OIDC (Google, Apple).
+ * <p>
+ * Valide les tokens JWT en utilisant JWKS (JSON Web Key Set) récupéré
+ * via l'URI fournie dans {@link OAuth2LoginProperties.Provider#jwkSetUri}.
+ * Vérifie l'émetteur (issuer) et le public (audience) du token.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class OidcIdentityVerifier implements OAuth2IdentityVerifier {
@@ -20,6 +28,14 @@ public class OidcIdentityVerifier implements OAuth2IdentityVerifier {
     private final OAuth2LoginProperties properties;
     private final Map<String, NimbusJwtDecoder> decoders = new ConcurrentHashMap<>();
 
+    /**
+     * Vérifie un token ID OIDC (Google ou Apple) et retourne l'identité.
+     *
+     * @param provider le fournisseur (google, apple)
+     * @param idToken  le token JWT ID
+     * @return l'identité vérifiée
+     * @throws BusinessRuleViolationException si la validation échoue
+     */
     @Override
     public OAuth2Identity verify(String provider, String idToken) {
         String normalizedProvider = normalizeProvider(provider);
@@ -65,11 +81,25 @@ public class OidcIdentityVerifier implements OAuth2IdentityVerifier {
         );
     }
 
+    /**
+     * Retourne (ou crée) un {@link NimbusJwtDecoder} pour le fournisseur donné.
+     *
+     * @param provider           le nom du fournisseur
+     * @param providerProperties les propriétés du fournisseur
+     * @return le décodeur JWT
+     */
     private NimbusJwtDecoder decoder(String provider, OAuth2LoginProperties.Provider providerProperties) {
         return decoders.computeIfAbsent(provider,
                 ignored -> NimbusJwtDecoder.withJwkSetUri(providerProperties.getJwkSetUri()).build());
     }
 
+    /**
+     * Retourne les propriétés du fournisseur en fonction de son nom.
+     *
+     * @param provider le nom normalisé du fournisseur
+     * @return les propriétés associées
+     * @throws BusinessRuleViolationException si le fournisseur n'est pas supporté
+     */
     private OAuth2LoginProperties.Provider providerProperties(String provider) {
         return switch (provider) {
             case "google" -> properties.getGoogle();
@@ -78,6 +108,12 @@ public class OidcIdentityVerifier implements OAuth2IdentityVerifier {
         };
     }
 
+    /**
+     * Filtre et retourne la liste des IDs client configurés (non nuls, non vides).
+     *
+     * @param providerProperties les propriétés du fournisseur
+     * @return la liste des IDs client valides
+     */
     private List<String> configuredClientIds(OAuth2LoginProperties.Provider providerProperties) {
         if (providerProperties.getClientIds() == null) {
             return List.of();
@@ -88,6 +124,13 @@ public class OidcIdentityVerifier implements OAuth2IdentityVerifier {
                 .toList();
     }
 
+    /**
+     * Normalise le nom du fournisseur.
+     *
+     * @param provider le nom du fournisseur
+     * @return le nom normalisé en minuscules
+     * @throws BusinessRuleViolationException si le fournisseur est {@code null} ou vide
+     */
     private String normalizeProvider(String provider) {
         if (provider == null || provider.isBlank()) {
             throw new BusinessRuleViolationException("OAuth2 provider is required");
@@ -95,6 +138,12 @@ public class OidcIdentityVerifier implements OAuth2IdentityVerifier {
         return provider.trim().toLowerCase(Locale.ROOT);
     }
 
+    /**
+     * Vérifie si la revendication {@code email_verified} du JWT est vraie.
+     *
+     * @param jwt le token JWT
+     * @return {@code true} si l'email est vérifié
+     */
     private boolean emailVerified(Jwt jwt) {
         Object value = jwt.getClaims().get("email_verified");
         if (value instanceof Boolean bool) {
@@ -103,6 +152,13 @@ public class OidcIdentityVerifier implements OAuth2IdentityVerifier {
         return value != null && Boolean.parseBoolean(value.toString());
     }
 
+    /**
+     * Extrait le prénom ou le nom depuis le champ {@code name}.
+     *
+     * @param name  le nom complet
+     * @param first {@code true} pour le prénom, {@code false} pour le nom
+     * @return la partie extraite, ou {@code null} si indisponible
+     */
     private String splitName(String name, boolean first) {
         if (name == null || name.isBlank()) {
             return null;
@@ -114,6 +170,13 @@ public class OidcIdentityVerifier implements OAuth2IdentityVerifier {
         return parts.size() > 1 ? parts.get(1) : null;
     }
 
+    /**
+     * Retourne {@code value} si non vide, sinon {@code fallback}.
+     *
+     * @param value    la valeur principale
+     * @param fallback la valeur de repli
+     * @return {@code value} ou {@code fallback}
+     */
     private String valueOrDefault(String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value;
     }

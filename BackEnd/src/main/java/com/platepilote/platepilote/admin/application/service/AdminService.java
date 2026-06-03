@@ -28,6 +28,7 @@ import com.platepilote.platepilote.subscription.domain.repository.SubscriptionRe
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,14 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Service d'administration centralisant les opérations de gestion du système.
+ * <p>
+ * Fournit les fonctionnalités de tableau de bord, gestion des utilisateurs,
+ * recettes, ingrédients, imports, abonnements, logs d'audit,
+ * feature flags, paramètres système et événements de facturation.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -58,6 +67,11 @@ public class AdminService {
     private final BillingEventRepository billingEventRepository;
     private final AuditLogService auditLogService;
 
+    /**
+     * Retourne un résumé des métriques du système (utilisateurs, recettes, imports, etc.).
+     *
+     * @return résumé des métriques d'administration
+     */
     @Transactional(readOnly = true)
     public OverviewResponse overview() {
         Instant monthStart = Instant.now().minus(30, ChronoUnit.DAYS);
@@ -75,13 +89,26 @@ public class AdminService {
                 imports, recommendationRequests, aiRequests, auditLogRepository.countByCreatedAtAfter(monthStart));
     }
 
+    /**
+     * Retourne la liste paginée des utilisateurs.
+     *
+     * @param pageable paramètres de pagination
+     * @return page d'utilisateurs
+     */
     @Transactional(readOnly = true)
-    public PagedResponse<UserAdminResponse> users(Pageable pageable) {
+    public PagedResponse<UserAdminResponse> users(@NonNull Pageable pageable) {
         return users(pageable, null);
     }
 
+    /**
+     * Retourne la liste paginée des utilisateurs, filtrée par une requête de recherche.
+     *
+     * @param pageable paramètres de pagination
+     * @param query    terme de recherche (email, nom, etc.), peut être null
+     * @return page d'utilisateurs filtrée
+     */
     @Transactional(readOnly = true)
-    public PagedResponse<UserAdminResponse> users(Pageable pageable, String query) {
+    public PagedResponse<UserAdminResponse> users(@NonNull Pageable pageable, String query) {
         Page<OurUser> page = query == null || query.isBlank()
                 ? userRepository.findAll(pageable)
                 : userRepository.search(query, pageable);
@@ -91,14 +118,30 @@ public class AdminService {
         return PagedResponse.of(content, page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
+    /**
+     * Retourne les détails d'un utilisateur par son identifiant.
+     *
+     * @param id identifiant de l'utilisateur
+     * @return détails de l'utilisateur
+     * @throws ResourceNotFoundException si l'utilisateur n'existe pas
+     */
     @Transactional(readOnly = true)
-    public UserAdminResponse user(UUID id) {
+    public UserAdminResponse user(@NonNull UUID id) {
         return userRepository.findById(id)
                 .map(this::toUserResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id.toString()));
     }
 
-    public UserAdminResponse suspendUser(UUID actorId, String actorEmail, UUID userId, boolean suspended) {
+    /**
+     * Suspend ou réactive un utilisateur.
+     *
+     * @param actorId   identifiant de l'administrateur réalisant l'action
+     * @param actorEmail email de l'administrateur
+     * @param userId    identifiant de l'utilisateur cible
+     * @param suspended {@code true} pour suspendre, {@code false} pour réactiver
+     * @return détails de l'utilisateur mis à jour
+     */
+    public UserAdminResponse suspendUser(@NonNull UUID actorId, @NonNull String actorEmail, @NonNull UUID userId, boolean suspended) {
         OurUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString()));
         user.setEnabled(!suspended);
@@ -108,7 +151,16 @@ public class AdminService {
         return toUserResponse(saved);
     }
 
-    public UserAdminResponse updateRoles(UUID actorId, String actorEmail, UUID userId, Set<String> roleNames) {
+    /**
+     * Met à jour les rôles d'un utilisateur.
+     *
+     * @param actorId    identifiant de l'administrateur
+     * @param actorEmail email de l'administrateur
+     * @param userId     identifiant de l'utilisateur cible
+     * @param roleNames  ensemble des noms de rôles à attribuer
+     * @return détails de l'utilisateur mis à jour
+     */
+    public UserAdminResponse updateRoles(@NonNull UUID actorId, @NonNull String actorEmail, @NonNull UUID userId, @NonNull Set<String> roleNames) {
         OurUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString()));
         Set<Role> roles = roleNames.stream()
@@ -124,21 +176,41 @@ public class AdminService {
         return toUserResponse(saved);
     }
 
+    /**
+     * Retourne la liste paginée des travaux d'importation.
+     *
+     * @param pageable paramètres de pagination
+     * @return page des travaux d'importation
+     */
     @Transactional(readOnly = true)
-    public PagedResponse<ImportJobResponse> imports(Pageable pageable) {
+    public PagedResponse<ImportJobResponse> imports(@NonNull Pageable pageable) {
         Page<ImportJob> page = importJobRepository.findByDeletedAtIsNullOrderByCreatedAtDesc(pageable);
         return PagedResponse.of(page.getContent().stream().map(this::toImportResponse).toList(),
                 page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
+    /**
+     * Retourne les détails d'un travail d'importation par son identifiant.
+     *
+     * @param id identifiant du travail d'importation
+     * @return détails de l'importation
+     */
     @Transactional(readOnly = true)
-    public ImportJobResponse importJob(UUID id) {
+    public ImportJobResponse importJob(@NonNull UUID id) {
         return importJobRepository.findById(id)
                 .map(this::toImportResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("ImportJob", "id", id.toString()));
     }
 
-    public ImportJob retryImport(UUID actorId, String actorEmail, UUID id) {
+    /**
+     * Demande une nouvelle tentative d'importation pour un travail donné.
+     *
+     * @param actorId    identifiant de l'administrateur
+     * @param actorEmail email de l'administrateur
+     * @param id         identifiant du travail d'importation
+     * @return travail d'importation mis à jour (statut RETRY_REQUESTED)
+     */
+    public ImportJob retryImport(@NonNull UUID actorId, @NonNull String actorEmail, @NonNull UUID id) {
         ImportJob job = importJobRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ImportJob", "id", id.toString()));
         job.setStatus("RETRY_REQUESTED");
@@ -147,8 +219,15 @@ public class AdminService {
         return saved;
     }
 
+    /**
+     * Retourne la liste paginée des recettes, éventuellement filtrée par une requête.
+     *
+     * @param pageable paramètres de pagination
+     * @param query    terme de recherche, peut être null
+     * @return page de recettes
+     */
     @Transactional(readOnly = true)
-    public PagedResponse<RecipeAdminResponse> recipes(Pageable pageable, String query) {
+    public PagedResponse<RecipeAdminResponse> recipes(@NonNull Pageable pageable, String query) {
         Page<Recipe> page = query == null || query.isBlank()
                 ? recipeRepository.findAll(pageable)
                 : recipeRepository.searchPublicRecipes(query, pageable);
@@ -156,8 +235,15 @@ public class AdminService {
                 page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
+    /**
+     * Retourne la liste paginée des ingrédients, éventuellement filtrée par une requête.
+     *
+     * @param pageable paramètres de pagination
+     * @param query    terme de recherche, peut être null
+     * @return page d'ingrédients
+     */
     @Transactional(readOnly = true)
-    public PagedResponse<IngredientAdminResponse> ingredients(Pageable pageable, String query) {
+    public PagedResponse<IngredientAdminResponse> ingredients(@NonNull Pageable pageable, String query) {
         Page<Ingredient> page = query == null || query.isBlank()
                 ? ingredientRepository.findAll(pageable)
                 : ingredientRepository.search(query, pageable);
@@ -165,29 +251,60 @@ public class AdminService {
                 page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
+    /**
+     * Retourne la liste paginée des abonnements.
+     *
+     * @param pageable paramètres de pagination
+     * @return page d'abonnements
+     */
     @Transactional(readOnly = true)
-    public PagedResponse<SubscriptionAdminResponse> subscriptions(Pageable pageable) {
+    public PagedResponse<SubscriptionAdminResponse> subscriptions(@NonNull Pageable pageable) {
         Page<Subscription> page = subscriptionRepository.findAll(pageable);
         return PagedResponse.of(page.getContent().stream().map(this::toSubscriptionResponse).toList(),
                 page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
+    /**
+     * Retourne la liste paginée des logs d'audit.
+     *
+     * @param pageable paramètres de pagination
+     * @return page des logs d'audit
+     */
     @Transactional(readOnly = true)
-    public PagedResponse<AuditLog> auditLogs(Pageable pageable) {
+    public PagedResponse<AuditLog> auditLogs(@NonNull Pageable pageable) {
         Page<AuditLog> page = auditLogRepository.findAllByOrderByCreatedAtDesc(pageable);
         return PagedResponse.of(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
+    /**
+     * Retourne la liste de tous les feature flags.
+     *
+     * @return liste des feature flags
+     */
     @Transactional(readOnly = true)
     public List<FeatureFlag> featureFlags() {
         return featureFlagRepository.findAll();
     }
 
+    /**
+     * Retourne la liste de tous les paramètres système.
+     *
+     * @return liste des paramètres système
+     */
     @Transactional(readOnly = true)
     public List<SystemSetting> systemSettings() {
         return systemSettingRepository.findAll();
     }
 
+    /**
+     * Met à jour ou crée un paramètre système.
+     *
+     * @param actorId    identifiant de l'administrateur
+     * @param actorEmail email de l'administrateur
+     * @param key        clé du paramètre
+     * @param value      valeur du paramètre
+     * @return paramètre système mis à jour
+     */
     public SystemSetting updateSystemSetting(UUID actorId, String actorEmail, String key, String value) {
         SystemSetting setting = systemSettingRepository.findBySettingKey(key)
                 .orElseGet(() -> SystemSetting.builder().settingKey(key).description("Admin configured setting").build());
@@ -197,6 +314,11 @@ public class AdminService {
         return saved;
     }
 
+    /**
+     * Retourne les analytics des recommandations sur les 30 derniers jours.
+     *
+     * @return analytics des recommandations
+     */
     @Transactional(readOnly = true)
     public RecommendationAnalyticsResponse recommendationAnalytics() {
         Instant monthStart = Instant.now().minus(30, ChronoUnit.DAYS);
@@ -206,6 +328,12 @@ public class AdminService {
         return new RecommendationAnalyticsResponse(requests, quotaBlocks, emptyResults);
     }
 
+    /**
+     * Retourne la liste paginée des événements de facturation.
+     *
+     * @param pageable paramètres de pagination
+     * @return page des événements de facturation
+     */
     @Transactional(readOnly = true)
     public PagedResponse<BillingEventResponse> billingEvents(Pageable pageable) {
         Page<BillingEvent> page = billingEventRepository.findAllByOrderByCreatedAtDesc(pageable);
@@ -213,6 +341,14 @@ public class AdminService {
                 page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
+    /**
+     * Active ou désactive un feature flag (inverse son état actuel).
+     *
+     * @param actorId    identifiant de l'administrateur
+     * @param actorEmail email de l'administrateur
+     * @param key        clé du feature flag
+     * @return feature flag mis à jour
+     */
     public FeatureFlag toggleFeatureFlag(UUID actorId, String actorEmail, String key) {
         FeatureFlag flag = featureFlagRepository.findByFlagKey(key)
                 .orElseThrow(() -> new ResourceNotFoundException("FeatureFlag", "key", key));
@@ -275,6 +411,19 @@ public class AdminService {
                 event.getProcessed(), event.getErrorMessage(), event.getCreatedAt(), event.getProcessedAt());
     }
 
+    /**
+     * Résumé des métriques du système pour le tableau de bord.
+     *
+     * @param totalUsers                 nombre total d'utilisateurs
+     * @param premiumSubscribers          nombre d'abonnés premium
+     * @param premiumConversionRate       taux de conversion premium (%)
+     * @param totalRecipes               nombre total de recettes
+     * @param totalIngredients           nombre total d'ingrédients
+     * @param totalImports               nombre total d'importations
+     * @param recommendationRequestsLast30Days requêtes de recommandation (30j)
+     * @param aiRequestsLast30Days       requêtes IA (30j)
+     * @param auditEventsLast30Days      événements d'audit (30j)
+     */
     public record OverviewResponse(
             long totalUsers,
             long premiumSubscribers,
@@ -287,6 +436,21 @@ public class AdminService {
             long auditEventsLast30Days
     ) {}
 
+    /**
+     * Réponse administrateur pour un utilisateur.
+     *
+     * @param id                 identifiant de l'utilisateur
+     * @param email              email de l'utilisateur
+     * @param firstName          prénom
+     * @param lastName           nom
+     * @param enabled            compte activé
+     * @param emailVerified      email vérifié
+     * @param roles              rôles attribués
+     * @param planType           type d'abonnement (NONE, PREMIUM_MONTHLY, etc.)
+     * @param subscriptionStatus statut de l'abonnement
+     * @param createdAt          date de création
+     * @param updatedAt          date de dernière modification
+     */
     public record UserAdminResponse(
             UUID id,
             String email,
@@ -301,26 +465,100 @@ public class AdminService {
             Instant updatedAt
     ) {}
 
+    /**
+     * Réponse administrateur pour une recette.
+     *
+     * @param id                 identifiant de la recette
+     * @param name               nom de la recette
+     * @param cuisineType        type de cuisine
+     * @param mealType           type de repas
+     * @param isPublic           recette publique
+     * @param enabled            recette activée
+     * @param verified           recette vérifiée
+     * @param verificationStatus statut de vérification
+     * @param confidenceScore    score de confiance
+     * @param createdAt          date de création
+     * @param updatedAt          date de dernière modification
+     */
     public record RecipeAdminResponse(UUID id, String name, String cuisineType, String mealType,
                                       Boolean isPublic, Boolean enabled, Boolean verified,
                                       String verificationStatus, Double confidenceScore,
                                       Instant createdAt, Instant updatedAt) {}
 
+    /**
+     * Réponse administrateur pour un ingrédient.
+     *
+     * @param id           identifiant de l'ingrédient
+     * @param canonicalName nom canonique
+     * @param slug         slug unique
+     * @param category     catégorie
+     * @param defaultUnit  unité par défaut
+     * @param createdAt    date de création
+     * @param updatedAt    date de dernière modification
+     */
     public record IngredientAdminResponse(UUID id, String canonicalName, String slug, String category,
                                           String defaultUnit, Instant createdAt, Instant updatedAt) {}
 
+    /**
+     * Réponse administrateur pour un abonnement.
+     *
+     * @param id                      identifiant de l'abonnement
+     * @param userId                  identifiant de l'utilisateur
+     * @param planType                type de plan
+     * @param status                  statut de l'abonnement
+     * @param provider                fournisseur de paiement
+     * @param providerSubscriptionId  identifiant chez le fournisseur
+     * @param expiresAt               date d'expiration
+     * @param lastVerifiedAt          date de dernière vérification
+     * @param cancelAtPeriodEnd       annulation en fin de période
+     * @param createdAt               date de création
+     * @param updatedAt               date de dernière modification
+     */
     public record SubscriptionAdminResponse(UUID id, UUID userId, String planType, String status,
                                             String provider, String providerSubscriptionId,
                                             Instant expiresAt, Instant lastVerifiedAt,
                                             Boolean cancelAtPeriodEnd, Instant createdAt, Instant updatedAt) {}
 
+    /**
+     * Réponse administrateur pour un travail d'importation.
+     *
+     * @param id               identifiant du travail
+     * @param source           source d'importation
+     * @param status           statut actuel
+     * @param totalRecords     nombre total d'enregistrements
+     * @param successfulRecords enregistrements réussis
+     * @param failedRecords    enregistrements échoués
+     * @param errorMessage     message d'erreur éventuel
+     * @param startedAt        date de début
+     * @param completedAt      date de fin
+     * @param createdAt        date de création
+     */
     public record ImportJobResponse(UUID id, String source, String status, Integer totalRecords,
                                     Integer successfulRecords, Integer failedRecords, String errorMessage,
                                     Instant startedAt, Instant completedAt, Instant createdAt) {}
 
+    /**
+     * Analytics des recommandations sur les 30 derniers jours.
+     *
+     * @param requestsLast30Days      nombre total de requêtes
+     * @param quotaBlocksLast30Days   requêtes bloquées par quota
+     * @param emptyResultRequestsLast30Days requêtes sans résultat
+     */
     public record RecommendationAnalyticsResponse(long requestsLast30Days, long quotaBlocksLast30Days,
                                                   long emptyResultRequestsLast30Days) {}
 
+    /**
+     * Réponse administrateur pour un événement de facturation.
+     *
+     * @param id           identifiant de l'événement
+     * @param provider     fournisseur de paiement
+     * @param eventId      identifiant chez le fournisseur
+     * @param eventType    type d'événement
+     * @param processed    événement traité
+     * @param errorMessage message d'erreur éventuel
+     * @param createdAt    date de création
+     * @param processedAt  date de traitement
+     */
     public record BillingEventResponse(UUID id, String provider, String eventId, String eventType,
                                        Boolean processed, String errorMessage,
                                        Instant createdAt, Instant processedAt) {}

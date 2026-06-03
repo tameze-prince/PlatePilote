@@ -1,25 +1,12 @@
 package com.platepilote.platepilote.userprofile.domain.entity;
 
 /**
- * USER PROFILE ENTITY - DATABASE TABLE: user_profiles
- * =====================================================
- * 
- * WHAT IT IS:
- * Stores additional user information beyond basic authentication.
- * Contains physical attributes and health goals used for personalized recommendations.
- * 
- * RELATIONSHIP TO USER:
- * Each User has exactly one UserProfile (one-to-one relationship).
- * The userId field links this profile to the User entity.
- * 
- * FIELDS:
- * - userId: Links to the User entity (foreign key)
- * - dateOfBirth: Used to calculate age-based nutritional needs
- * - gender: Affects calorie and nutrient calculations
- * - heightCm: Height in centimeters (e.g., 175.5)
- * - weightKg: Weight in kilograms (e.g., 70.2)
- * - activityLevel: Sedentary, Light, Moderate, Active, Very Active
- * - healthGoals: Free text (e.g., "Lose weight", "Build muscle", "Maintain")
+ * Entité représentant le profil utilisateur étendu.
+ * <p>
+ * Stocke les informations supplémentaires au-delà de l'authentification de base :
+ * attributs physiques, objectifs de santé, préférences de localisation
+ * et compétences culinaires. Chaque utilisateur possède exactement un profil
+ * (relation one-to-one avec l'entité User).
  */
 
 import com.platepilote.platepilote.common.kernel.AuditableEntity;
@@ -45,39 +32,51 @@ import java.util.UUID;
 @Builder
 public class UserProfile extends AuditableEntity {
 
+    /** Identifiant de l'utilisateur (foreign key vers User, unique). */
     @Column(name = "user_id", nullable = false, unique = true)
     private UUID userId;
 
+    /** Date de naissance utilisée pour les calculs nutritionnels. */
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
+    /** Genre (affecte les calculs de calories et nutriments). */
     @Column(name = "gender")
     private String gender;
 
+    /** Taille en centimètres. */
     @Column(name = "height_cm")
     private BigDecimal heightCm;
 
+    /** Poids en kilogrammes. */
     @Column(name = "weight_kg")
     private BigDecimal weightKg;
 
+    /** Niveau d'activité physique : Sédentaire, Léger, Modéré, Actif, Très actif. */
     @Column(name = "activity_level")
     private String activityLevel;
 
+    /** Objectifs de santé (texte libre). */
     @Column(name = "health_goals", columnDefinition = "TEXT")
     private String healthGoals;
 
+    /** Code pays ISO 3166-1 alpha-2 (défaut: US). */
     @Column(name = "country_code", length = 2)
-    private String countryCode = "US";
+    private String countryCode;
 
+    /** Code devise ISO 4217 (défaut: USD). */
     @Column(name = "currency_code", length = 4)
-    private String currencyCode = "USD";
+    private String currencyCode;
 
+    /** Locale (défaut: en-US). */
     @Column(name = "locale", length = 20)
-    private String locale = "en-US";
+    private String locale;
 
+    /** Niveau de compétence culinaire (défaut: BEGINNER). */
     @Column(name = "cooking_skill", length = 20)
-    private String cookingSkill = "BEGINNER";
+    private String cookingSkill;
 
+    /** Taille du foyer (défaut: 1). */
     @Column(name = "household_size")
-    private Integer householdSize = 1;
+    private Integer householdSize;
 }

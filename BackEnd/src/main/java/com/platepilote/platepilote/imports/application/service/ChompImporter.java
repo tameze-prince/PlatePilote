@@ -15,19 +15,40 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Importateur de produits via l'API Chomp (nutrition et codes-barres).
+ * <p>
+ * Récupère des informations nutritionnelles et des codes-barres depuis
+ * l'API ChompThis, et les importe dans la base d'ingrédients.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ChompImporter {
 
+    /** Repository des ingrédients. */
     private final IngredientRepository ingredientRepository;
+
+    /** Repository des produits par code-barres. */
     private final BarcodeProductRepository barcodeProductRepository;
+
+    /** Normaliseur d'ingrédients. */
     private final IngredientNormalizer normalizer;
+
+    /** Client HTTP RestTemplate. */
     private final RestTemplate restTemplate;
 
+    /** Clé API Chomp. */
     @Value("${app.api.chomp-key:}")
     private String apiKey;
 
+    /**
+     * Lance l'import des données depuis Chomp.
+     *
+     * @param query      terme de recherche
+     * @param maxResults nombre maximum de résultats
+     * @param job        job d'importation en cours
+     */
     @SuppressWarnings("unchecked")
     public void importData(String query, int maxResults, ImportJob job) {
         log.info("Chomp import started: query='{}', maxResults={}", query, maxResults);

@@ -23,11 +23,20 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Implémentation Stripe de {@link BillingProvider}.
+ * Gère la création de clients, sessions de paiement, portail client et webhooks.
+ */
 @Service
 public class StripeBillingProvider implements BillingProvider {
 
     private final BillingProperties properties;
 
+    /**
+     * Constructeur injectant les propriétés de configuration Stripe.
+     *
+     * @param properties propriétés de facturation
+     */
     public StripeBillingProvider(BillingProperties properties) {
         this.properties = properties;
     }
@@ -37,6 +46,13 @@ public class StripeBillingProvider implements BillingProvider {
         return "STRIPE";
     }
 
+    /**
+     * Crée un client Stripe avec l'email et le nom donnés.
+     *
+     * @param email email du client
+     * @param name  nom du client
+     * @return identifiant du client Stripe
+     */
     @Override
     public String createCustomer(String email, String name) {
         requireConfigured(properties.getStripe().getSecretKey(), "STRIPE_SECRET_KEY");
@@ -52,6 +68,17 @@ public class StripeBillingProvider implements BillingProvider {
         }
     }
 
+    /**
+     * Crée une session de checkout Stripe pour un abonnement.
+     *
+     * @param customerId        identifiant du client Stripe
+     * @param priceId           identifiant du prix Stripe
+     * @param trialDays         nombre de jours d'essai
+     * @param successUrl        URL de succès
+     * @param cancelUrl         URL d'annulation
+     * @param clientReferenceId référence client
+     * @return session de checkout
+     */
     @Override
     public BillingCheckoutSession createCheckoutSession(String customerId, String priceId, int trialDays,
                                                         String successUrl, String cancelUrl, String clientReferenceId) {
@@ -82,6 +109,13 @@ public class StripeBillingProvider implements BillingProvider {
         }
     }
 
+    /**
+     * Crée une session portail client Stripe.
+     *
+     * @param customerId identifiant du client Stripe
+     * @param returnUrl  URL de retour
+     * @return session portail
+     */
     @Override
     public BillingPortalSession createPortalSession(String customerId, String returnUrl) {
         requireConfigured(properties.getStripe().getSecretKey(), "STRIPE_SECRET_KEY");
@@ -98,6 +132,13 @@ public class StripeBillingProvider implements BillingProvider {
         }
     }
 
+    /**
+     * Vérifie et désérialise un webhook Stripe.
+     *
+     * @param rawPayload      corps brut de la requête
+     * @param signatureHeader en-tête Stripe-Signature
+     * @return événement désérialisé
+     */
     @Override
     public ProviderEvent verifyWebhook(String rawPayload, String signatureHeader) {
         requireConfigured(properties.getStripe().getWebhookSecret(), "STRIPE_WEBHOOK_SECRET");

@@ -1,28 +1,5 @@
 package com.platepilote.platepilote.authentication.domain.repository;
 
-/**
- * USER REPOSITORY - DATABASE ACCESS FOR USERS
- * =============================================
- * 
- * WHAT IT IS:
- * A Spring Data JPA repository interface for the User entity.
- * 
- * WHAT IT DOES:
- * Provides methods to query the "users" table in the database.
- * Spring Data JPA automatically implements these methods based on the method names.
- * 
- * METHOD EXPLANATION:
- * - findByEmail("john@email.com") -> SELECT * FROM users WHERE email = 'john@email.com'
- * - existsByEmail("john@email.com") -> SELECT COUNT(*) FROM users WHERE email = 'john@email.com' > 0
- * - findById(uuid) -> Inherited from JpaRepository, finds user by ID
- * - save(user) -> Inherited from JpaRepository, inserts or updates a user
- * - delete(user) -> Inherited from JpaRepository, deletes a user
- * 
- * NO NEED TO WRITE SQL:
- * Spring Data JPA generates the SQL automatically based on method names.
- * For complex queries, you can use @Query annotation.
- */
-
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -32,24 +9,49 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository  // Tells Spring: "This is a data access bean"
+/**
+ * Repository JPA pour l'entité {@link OurUser}.
+ * <p>
+ * Fournit les opérations d'accès aux données pour les utilisateurs.
+ * Spring Data JPA génère automatiquement les implémentations des méthodes.
+ * </p>
+ */
+@Repository
 public interface UserRepository extends JpaRepository<OurUser, UUID> {
 
     /**
-     * Find a user by their email address.
-     * Returns Optional<OurUser> - empty if no user found.
-     * Used during login to load user details.
+     * Recherche un utilisateur par son email.
+     *
+     * @param email l'email de l'utilisateur
+     * @return l'utilisateur trouvé, ou vide si inexistant
      */
     Optional<OurUser> findByEmail(String email);
 
+    /**
+     * Recherche un utilisateur par son fournisseur OAuth et son identifiant chez le fournisseur
+     * (insensible à la casse pour le fournisseur).
+     *
+     * @param provider   le fournisseur OAuth
+     * @param providerId l'identifiant chez le fournisseur
+     * @return l'utilisateur trouvé, ou vide si inexistant
+     */
     Optional<OurUser> findByProviderIgnoreCaseAndProviderId(String provider, String providerId);
 
     /**
-     * Check if a user with this email already exists.
-     * Used during registration to prevent duplicate accounts.
+     * Vérifie si un email est déjà utilisé.
+     *
+     * @param email l'email à vérifier
+     * @return {@code true} si un utilisateur avec cet email existe
      */
     boolean existsByEmail(String email);
 
+    /**
+     * Recherche des utilisateurs par email, prénom ou nom (insensible à la casse).
+     *
+     * @param query    le terme de recherche
+     * @param pageable les paramètres de pagination
+     * @return une page de résultats
+     */
     @Query("SELECT u FROM OurUser u WHERE LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')) " +
             "OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')) " +
             "OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))")

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme/color_tokens.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../core/premium_components.dart';
-import '../../core/providers/app_session_provider.dart';
+import '../../features/auth/providers/auth_provider.dart';
 
 class SocialSignInButtons extends ConsumerWidget {
   const SocialSignInButtons({super.key});
@@ -29,28 +30,42 @@ class SocialSignInButtons extends ConsumerWidget {
         _SocialButton(
           icon: Icons.g_mobiledata,
           label: 'Sign in with Google',
-          onTap: () => _signInWithProvider(ref, context, 'Google'),
+          onTap: () => _signInWithGoogle(ref, context),
         ),
         const SizedBox(height: AppSpacing.sm),
         _SocialButton(
           icon: Icons.apple,
           label: 'Sign in with Apple',
-          onTap: () => _signInWithProvider(ref, context, 'Apple'),
+          onTap: () => _signInWithApple(ref, context),
         ),
       ],
     );
   }
 
-  Future<void> _signInWithProvider(
-    WidgetRef ref,
-    BuildContext context,
-    String provider,
-  ) async {
-    await ref.read(appSessionProvider.notifier).signIn();
-    if (context.mounted) {
+  Future<void> _signInWithGoogle(WidgetRef ref, BuildContext context) async {
+    final success = await ref.read(authProvider.notifier).signInWithGoogle();
+    if (success && context.mounted) {
+      context.go('/home');
+    } else if (context.mounted) {
+      final error = ref.read(authProvider).errorMessage;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Signed in with $provider'),
+          content: Text(error ?? 'Google sign-in failed'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _signInWithApple(WidgetRef ref, BuildContext context) async {
+    final success = await ref.read(authProvider.notifier).signInWithApple();
+    if (success && context.mounted) {
+      context.go('/home');
+    } else if (context.mounted) {
+      final error = ref.read(authProvider).errorMessage;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error ?? 'Apple sign-in failed'),
           behavior: SnackBarBehavior.floating,
         ),
       );

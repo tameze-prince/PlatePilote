@@ -1,31 +1,20 @@
 package com.platepilote.platepilote.common.config;
 
 /**
- * OPENAPI CONFIGURATION - SWAGGER API DOCUMENTATION
- * ===================================================
- * 
- * WHAT IT IS:
- * Configures Swagger/OpenAPI documentation for the API.
- * 
- * WHAT IS SWAGGER?
- * Swagger is an interactive API documentation tool.
- * It shows all available endpoints, request/response formats, and lets you test them.
- * 
- * HOW TO ACCESS:
- * - Swagger UI: http://localhost:8080/swagger-ui.html
- * - Raw OpenAPI spec: http://localhost:8080/v3/api-docs
- * 
- * WHAT IT SHOWS:
- * - All REST endpoints (URLs, HTTP methods)
- * - Request parameters and body formats
- * - Response formats and status codes
- * - Authentication requirements (JWT Bearer token)
- * 
- * SECURITY NOTE:
- * In production, Swagger should be disabled or protected.
- * It exposes all API endpoints which could be a security risk.
+ * Configuration OpenAPI / Swagger pour la documentation de l'API.
+ * <p>
+ * Définit les métadonnées de l'API (titre, version, contact, licence)
+ * ainsi que le schéma d'authentification JWT Bearer.
+ * </p>
+ *
+ * <p><b>Accès :</b></p>
+ * <ul>
+ *   <li>Swagger UI : {@code http://localhost:8080/swagger-ui.html}</li>
+ *   <li>Spec OpenAPI : {@code http://localhost:8080/v3/api-docs}</li>
+ * </ul>
+ *
+ * <p><b>Note de sécurité :</b> En production, désactiver Swagger ou le protéger par authentification.</p>
  */
-
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
@@ -38,6 +27,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
+    /**
+     * Crée et configure l'instance OpenAPI personnalisée avec les métadonnées
+     * de l'API et le schéma de sécurité JWT Bearer.
+     *
+     * @return instance OpenAPI configurée
+     */
     @Bean
     public OpenAPI customOpenAPI() {
         final String securitySchemeName = "bearerAuth";

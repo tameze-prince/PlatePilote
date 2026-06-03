@@ -26,6 +26,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * Service métier pour la gestion des recettes.
+ * <p>
+ * Gère le cycle de vie complet des recettes : création, consultation, mise à jour,
+ * suppression logique, recherche et filtrage par type de cuisine ou de repas.
+ * Les ingrédients sont automatiquement résolus via {@link IngredientResolutionService}.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -37,18 +44,38 @@ public class RecipeService {
     private final IngredientResolutionService ingredientResolutionService;
     private final SecurityUtils securityUtils;
 
+    /**
+     * Récupère toutes les recettes publiques, de manière paginée.
+     *
+     * @param pageable les paramètres de pagination et de tri
+     * @return une page de résumés de recettes publiques
+     */
     @Transactional(readOnly = true)
     public PagedResponse<RecipeResponse> getPublicRecipes(Pageable pageable) {
         Page<Recipe> page = recipeRepository.findByIsPublicTrueAndDeletedAtIsNull(pageable);
         return toPagedResponse(page, false);
     }
 
+    /**
+     * Récupère les recettes personnelles d'un utilisateur, de manière paginée.
+     *
+     * @param userId   l'identifiant de l'utilisateur
+     * @param pageable les paramètres de pagination
+     * @return une page de recettes de l'utilisateur
+     */
     @Transactional(readOnly = true)
     public PagedResponse<RecipeResponse> getUserRecipes(UUID userId, Pageable pageable) {
         Page<Recipe> page = recipeRepository.findByUserIdAndDeletedAtIsNull(userId, pageable);
         return toPagedResponse(page, true);
     }
 
+    /**
+     * Récupère une recette par son identifiant avec le détail complet (ingrédients et étapes).
+     *
+     * @param recipeId l'identifiant de la recette
+     * @return la recette complète
+     * @throws ResourceNotFoundException si la recette est introuvable ou non publique
+     */
     @Transactional(readOnly = true)
     public RecipeResponse getRecipeById(UUID recipeId) {
         Recipe recipe = recipeRepository.findById(recipeId)
@@ -61,24 +88,55 @@ public class RecipeService {
         return toFullResponse(recipe);
     }
 
+    /**
+     * Recherche les recettes publiques par nom ou description.
+     *
+     * @param query    le terme de recherche (insensible à la casse)
+     * @param pageable les paramètres de pagination
+     * @return une page de recettes correspondant à la recherche
+     */
     @Transactional(readOnly = true)
     public PagedResponse<RecipeResponse> searchRecipes(String query, Pageable pageable) {
         Page<Recipe> page = recipeRepository.searchPublicRecipes(query, pageable);
         return toPagedResponse(page, false);
     }
 
+    /**
+     * Filtre les recettes publiques par type de cuisine.
+     *
+     * @param cuisineType le type de cuisine (ex: "Italienne", "Japonaise")
+     * @param pageable    les paramètres de pagination
+     * @return une page de recettes du type de cuisine demandé
+     */
     @Transactional(readOnly = true)
     public PagedResponse<RecipeResponse> getByCuisineType(String cuisineType, Pageable pageable) {
         Page<Recipe> page = recipeRepository.findByCuisineTypeAndIsPublicTrueAndDeletedAtIsNull(cuisineType, pageable);
         return toPagedResponse(page, false);
     }
 
+    /**
+     * Filtre les recettes publiques par type de repas.
+     *
+     * @param mealType le type de repas (ex: "Petit-déjeuner", "Dîner")
+     * @param pageable les paramètres de pagination
+     * @return une page de recettes du type de repas demandé
+     */
     @Transactional(readOnly = true)
     public PagedResponse<RecipeResponse> getByMealType(String mealType, Pageable pageable) {
         Page<Recipe> page = recipeRepository.findByMealTypeAndIsPublicTrueAndDeletedAtIsNull(mealType, pageable);
         return toPagedResponse(page, false);
     }
 
+    /**
+     * Crée une nouvelle recette avec ses ingrédients et ses étapes.
+     * <p>
+     * Les ingrédients sont automatiquement liés à un ingrédient canonique via
+     * {@link IngredientResolutionService} lorsque possible.
+     *
+     * @param userId  l'identifiant du créateur
+     * @param request les données complètes de la recette
+     * @return la recette créée avec le détail complet
+     */
     public RecipeResponse createRecipe(UUID userId, RecipeRequest request) {
         Recipe recipe = Recipe.builder()
                 .name(request.getName())
@@ -135,6 +193,16 @@ public class RecipeService {
         return toFullResponse(saved);
     }
 
+    /**
+     * Met à jour une recette existante.
+     * <p>
+     * Les ingrédients et étapes existants sont remplacés par les nouvelles données.
+     *
+     * @param userId   l'identifiant de l'utilisateur (vérification de propriété)
+     * @param recipeId l'identifiant de la recette à modifier
+     * @param request  les nouvelles données de la recette
+     * @return la recette mise à jour avec le détail complet
+     */
     public RecipeResponse updateRecipe(UUID userId, UUID recipeId, RecipeRequest request) {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", recipeId.toString()));
@@ -191,6 +259,12 @@ public class RecipeService {
         return toFullResponse(saved);
     }
 
+    /**
+     * Supprime logiquement (soft-delete) une recette.
+     *
+     * @param userId   l'identifiant de l'utilisateur (vérification de propriété)
+     * @param recipeId l'identifiant de la recette à supprimer
+     */
     public void deleteRecipe(UUID userId, UUID recipeId) {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", recipeId.toString()));

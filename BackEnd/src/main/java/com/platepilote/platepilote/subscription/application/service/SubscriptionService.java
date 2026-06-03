@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Service métier pour la gestion des abonnements utilisateur.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -19,6 +22,13 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final EntitlementService entitlementService;
 
+    /**
+     * Récupère l'abonnement d'un utilisateur.
+     * Crée un abonnement FREE par défaut s'il n'en existe pas.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return l'abonnement (existant ou FREE par défaut)
+     */
     public SubscriptionResponse getSubscription(UUID userId) {
         return subscriptionRepository.findByUserId(userId)
                 .map(this::toResponse)
@@ -36,6 +46,13 @@ public class SubscriptionService {
         return toResponse(saved);
     }
 
+    /**
+     * Crée un abonnement FREE pour un utilisateur.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return l'abonnement FREE créé
+     * @throws BusinessRuleViolationException si l'utilisateur a déjà un abonnement
+     */
     public SubscriptionResponse createFreeSubscription(UUID userId) {
         if (subscriptionRepository.existsByUserId(userId)) {
             throw new BusinessRuleViolationException("User already has a subscription");
@@ -52,6 +69,12 @@ public class SubscriptionService {
         return toResponse(saved);
     }
 
+    /**
+     * Passe un abonnement au statut Premium (interne, 30 jours).
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return l'abonnement Premium créé
+     */
     public SubscriptionResponse upgradeToPremium(UUID userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Subscription", "userId", userId.toString()));
@@ -70,6 +93,11 @@ public class SubscriptionService {
         return toResponse(saved);
     }
 
+    /**
+     * Annule l'abonnement d'un utilisateur (fin de période).
+     *
+     * @param userId identifiant de l'utilisateur
+     */
     public void cancelSubscription(UUID userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Subscription", "userId", userId.toString()));
@@ -95,17 +123,31 @@ public class SubscriptionService {
         );
     }
 
+    /**
+     * Réponse contenant les détails d'un abonnement.
+     */
     public record SubscriptionResponse(
+            /** Identifiant de l'abonnement. */
             UUID id,
+            /** Type de plan (FREE, PREMIUM_MONTHLY, PREMIUM_YEARLY). */
             String planType,
+            /** Statut (ACTIVE, CANCELLED, PAST_DUE, etc.). */
             String status,
+            /** Date de début. */
             Instant startDate,
+            /** Date de fin. */
             Instant endDate,
+            /** Date de fin d'essai. */
             Instant trialEndDate,
+            /** Annulation en fin de période. */
             Boolean cancelAtPeriodEnd,
+            /** Fournisseur de paiement. */
             String provider,
+            /** Date d'expiration. */
             Instant expiresAt,
+            /** Dernière vérification. */
             Instant lastVerifiedAt,
+            /** Date de création. */
             Instant createdAt
     ) {}
 }

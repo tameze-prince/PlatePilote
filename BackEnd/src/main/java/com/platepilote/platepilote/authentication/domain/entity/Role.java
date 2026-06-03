@@ -1,23 +1,5 @@
 package com.platepilote.platepilote.authentication.domain.entity;
 
-/**
- * ROLE ENTITY - DATABASE TABLE: roles
- * =====================================
- * 
- * WHAT IT IS:
- * Represents a user role/permission level.
- * 
- * ROLES IN THIS APP:
- * - ROLE_USER: Standard user (can manage pantry, recipes, meal plans)
- * - ROLE_ADMIN: Administrator (can manage all users, view analytics)
- * - ROLE_PREMIUM_USER: Premium subscriber (access to advanced features)
- * 
- * HOW ROLES WORK:
- * A user can have multiple roles through the user_roles join table.
- * Spring Security uses roles to control access to endpoints.
- * Example: @PreAuthorize("hasRole('ADMIN')") restricts endpoint to admins only.
- */
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,6 +13,21 @@ import lombok.Setter;
 
 import java.util.UUID;
 
+/**
+ * Entité représentant un rôle utilisateur.
+ * <p>
+ * Stockée dans la table {@code roles}.
+ * Les rôles sont attribués aux utilisateurs via la table de jointure {@code user_roles}.
+ * Spring Security utilise les rôles pour contrôler l'accès aux endpoints.
+ * </p>
+ *
+ * <p>Rôles disponibles :</p>
+ * <ul>
+ *   <li>{@code ROLE_USER} — Utilisateur standard (garde-manger, recettes, plans repas)</li>
+ *   <li>{@code ROLE_ADMIN} — Administrateur (gestion des utilisateurs, analytics)</li>
+ *   <li>{@code ROLE_PREMIUM_USER} — Abonné premium (fonctionnalités avancées)</li>
+ * </ul>
+ */
 @Entity
 @Table(name = "roles")
 @Getter
@@ -39,12 +36,15 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Role {
 
+    /** Identifiant unique du rôle. */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /** Nom du rôle (ex: {@code ROLE_USER}, {@code ROLE_ADMIN}). */
     @Column(nullable = false, unique = true)
-    private String name;  // e.g., "ROLE_USER", "ROLE_ADMIN"
+    private String name;
 
-    private String description;  // Human-readable description of the role
+    /** Description lisible du rôle. */
+    private String description;
 }

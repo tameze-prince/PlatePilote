@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'preferences_provider.dart';
 
+/// Notifier Riverpod qui gère le mode de thème (clair, sombre, système)
+/// et le persiste dans SharedPreferences.
 class ThemeModeNotifier extends Notifier<ThemeMode> {
   static const _themeModeKey = 'themeMode';
 
@@ -16,6 +18,7 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
     };
   }
 
+  /// Définit le mode de thème et le persiste.
   Future<void> set(ThemeMode mode) async {
     state = mode;
     await ref
@@ -24,6 +27,7 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
   }
 }
 
+/// Provider Riverpod exposant [ThemeMode] et [ThemeModeNotifier].
 final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
   ThemeModeNotifier.new,
 );

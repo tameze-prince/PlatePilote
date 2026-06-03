@@ -1,32 +1,20 @@
 package com.platepilote.platepilote.common.kernel;
 
 /**
- * BASE ENTITY - PARENT CLASS FOR ALL DATABASE ENTITIES
- * =====================================================
- * 
- * WHAT IT IS:
- * This is the parent class that ALL database entities extend from.
- * It provides common fields that every table needs:
- *   - id: Unique identifier (UUID)
- *   - createdAt: When the record was created
- *   - updatedAt: When the record was last modified
- *   - deletedAt: For soft deletion (hiding records without actually deleting them)
- * 
- * WHY IT EXISTS:
- * Instead of repeating these 4 fields in every entity (User, Recipe, PantryItem, etc.),
- * we define them once here and all entities inherit them.
- * 
- * SOFT DELETE EXPLANATION:
- * Instead of permanently deleting records, we set deletedAt to the current timestamp.
- * This allows us to:
- *   - Recover accidentally deleted data
- *   - Keep audit trails
- *   - Filter out "deleted" records in queries by checking WHERE deletedAt IS NULL
- * 
- * HOW TO USE:
- * Every entity class extends this: public class User extends BaseEntity { ... }
+ * Classe parente de toutes les entités de la base de données.
+ * <p>
+ * Fournit les champs communs à toutes les tables :
+ * <ul>
+ *   <li>{@code id} — identifiant unique (UUID)</li>
+ *   <li>{@code createdAt} — date de création</li>
+ *   <li>{@code updatedAt} — date de dernière modification</li>
+ *   <li>{@code deletedAt} — date de suppression logique (soft delete)</li>
+ * </ul>
+ *
+ * La suppression logique consiste à marquer un enregistrement comme supprimé
+ * sans l'effacer de la base, permettant la récupération et la traçabilité.
+ * </p>
  */
-
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -43,65 +31,51 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.util.UUID;
 
-@MappedSuperclass  // Tells JPA: "This class provides fields for child entities, but has no table itself"
-@Getter            // Lombok: Auto-generates getter methods for all fields
-@Setter            // Lombok: Auto-generates setter methods for all fields
-@NoArgsConstructor // Lombok: Auto-generates no-argument constructor
-@AllArgsConstructor// Lombok: Auto-generates constructor with all fields
-@EntityListeners(AuditableEntityListener.class) // Auto-updates createdAt/updatedAt timestamps
+@MappedSuperclass
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EntityListeners(AuditableEntityListener.class)
 public abstract class BaseEntity {
 
-    /**
-     * Primary key - Unique identifier for every record
-     * Uses UUID (e.g., "550e8400-e29b-41d4-a716-446655440000") instead of auto-increment numbers
-     * UUID is better for distributed systems and security (can't guess IDs)
-     */
+    /** Identifiant unique (UUID) de l'enregistrement. */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    /**
-     * Timestamp when this record was first created
-     * Automatically set by JPA, cannot be changed later (updatable = false)
-     */
+    /** Date de création de l'enregistrement. Rempli automatiquement, non modifiable. */
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    /**
-     * Timestamp when this record was last updated
-     * Automatically updated every time the record is modified
-     */
+    /** Date de dernière modification de l'enregistrement. Mis à jour automatiquement. */
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    /**
-     * Timestamp when this record was soft-deleted
-     * NULL = record is active, NOT NULL = record is deleted
-     */
+    /** Date de suppression logique. {@code null} = actif, non {@code null} = supprimé. */
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
     /**
-     * Check if this record has been soft-deleted
-     * @return true if deletedAt is set, false otherwise
+     * Vérifie si l'enregistrement est supprimé logiquement.
+     *
+     * @return {@code true} si {@code deletedAt} est renseigné
      */
     public boolean isDeleted() {
         return deletedAt != null;
     }
 
     /**
-     * Soft-delete this record (hide it without permanently removing from database)
-     * Sets deletedAt to current timestamp
+     * Supprime logiquement l'enregistrement en renseignant {@code deletedAt}.
      */
     public void softDelete() {
         this.deletedAt = Instant.now();
     }
 
     /**
-     * Restore a soft-deleted record
-     * Sets deletedAt back to null, making the record visible again
+     * Restaure un enregistrement supprimé logiquement en passant {@code deletedAt} à {@code null}.
      */
     public void restore() {
         this.deletedAt = null;

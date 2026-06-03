@@ -8,9 +8,12 @@ import '../../shared/models/mvp_entities.dart';
 @pragma('vm:entry-point')
 void notificationTapBackground(NotificationResponse response) {}
 
+/// Service de notifications locales pour les rappels de repas,
+/// alertes de garde-manger et avertissements de budget.
 class NotificationService {
   NotificationService._();
 
+  /// Instance singleton du service de notifications.
   static final NotificationService instance = NotificationService._();
 
   final FlutterLocalNotificationsPlugin _plugin =
@@ -32,6 +35,7 @@ class NotificationService {
 
   bool _initialized = false;
 
+  /// Initialise le plugin de notifications et crée les canaux Android.
   Future<void> initialize() async {
     if (kIsWeb || _initialized) {
       return;
@@ -71,6 +75,8 @@ class NotificationService {
     _initialized = true;
   }
 
+  /// Demande les permissions de notification sur Android, iOS et macOS.
+  /// Retourne `false` sur le web.
   Future<bool> requestPermissions() async {
     if (kIsWeb) {
       return false;
@@ -99,6 +105,7 @@ class NotificationService {
     return androidGranted ?? iosGranted ?? macGranted ?? false;
   }
 
+  /// Affiche une notification de rappel (repas, courses).
   Future<void> showReminder({
     required String title,
     required String body,
@@ -113,6 +120,7 @@ class NotificationService {
     );
   }
 
+  /// Affiche une notification d'avertissement (garde-manger, budget).
   Future<void> showWarning({
     required String title,
     required String body,
@@ -127,6 +135,8 @@ class NotificationService {
     );
   }
 
+  /// Planifie un rappel après un délai [delay].
+  /// Ignoré sur le web.
   Future<void> scheduleReminder({
     required String title,
     required String body,
@@ -149,6 +159,7 @@ class NotificationService {
     );
   }
 
+  /// Annule toutes les notifications planifiées et affichées.
   Future<void> cancelAll() async {
     if (kIsWeb) {
       return;

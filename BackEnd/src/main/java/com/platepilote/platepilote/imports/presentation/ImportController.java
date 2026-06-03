@@ -12,13 +12,27 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Contrôleur REST exposant les endpoints d'importation de données.
+ * <p>
+ * Permet de lancer manuellement des imports depuis chaque source externe.
+ * Tous les endpoints sont restreints aux rôles ADMIN, SUPER_ADMIN, CONTENT_MANAGER et SYSTEM.
+ */
 @RestController
 @RequestMapping("/api/v1/imports")
 @RequiredArgsConstructor
 public class ImportController {
 
+    /** Service d'importation central. */
     private final ImportService importService;
 
+    /**
+     * Lance un import depuis USDA FoodData Central.
+     *
+     * @param query      terme de recherche (défaut: chicken)
+     * @param maxResults nombre maximum de résultats (défaut: 10)
+     * @return job d'importation créé
+     */
     @PostMapping("/usda")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER','SYSTEM')")
     public ResponseEntity<ApiResponse<ImportJob>> importFromUsda(
@@ -29,6 +43,13 @@ public class ImportController {
         return ResponseEntity.ok(ApiResponse.success("USDA import started", job));
     }
 
+    /**
+     * Lance un import depuis Open Food Facts.
+     *
+     * @param query      terme de recherche (défaut: rice)
+     * @param maxResults nombre maximum de résultats (défaut: 10)
+     * @return job d'importation créé
+     */
     @PostMapping("/open-food-facts")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER','SYSTEM')")
     public ResponseEntity<ApiResponse<ImportJob>> importFromOpenFoodFacts(
@@ -39,6 +60,13 @@ public class ImportController {
         return ResponseEntity.ok(ApiResponse.success("Open Food Facts import started", job));
     }
 
+    /**
+     * Lance un import depuis TheMealDB.
+     *
+     * @param query      terme de recherche (défaut: chicken)
+     * @param maxResults nombre maximum de résultats (défaut: 10)
+     * @return job d'importation créé
+     */
     @PostMapping("/themealdb")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER','SYSTEM')")
     public ResponseEntity<ApiResponse<ImportJob>> importFromMealDb(
@@ -49,6 +77,13 @@ public class ImportController {
         return ResponseEntity.ok(ApiResponse.success("TheMealDB import started", job));
     }
 
+    /**
+     * Lance un import depuis Edamam.
+     *
+     * @param query      terme de recherche (défaut: pasta)
+     * @param maxResults nombre maximum de résultats (défaut: 10)
+     * @return job d'importation créé
+     */
     @PostMapping("/edamam")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER','SYSTEM')")
     public ResponseEntity<ApiResponse<ImportJob>> importFromEdamam(
@@ -59,6 +94,13 @@ public class ImportController {
         return ResponseEntity.ok(ApiResponse.success("Edamam import started", job));
     }
 
+    /**
+     * Lance un import depuis Spoonacular.
+     *
+     * @param query      terme de recherche (défaut: pasta)
+     * @param maxResults nombre maximum de résultats (défaut: 10)
+     * @return job d'importation créé
+     */
     @PostMapping("/spoonacular")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER','SYSTEM')")
     public ResponseEntity<ApiResponse<ImportJob>> importFromSpoonacular(
@@ -69,6 +111,13 @@ public class ImportController {
         return ResponseEntity.ok(ApiResponse.success("Spoonacular import started", job));
     }
 
+    /**
+     * Lance un import depuis Nutritionix.
+     *
+     * @param query      terme de recherche (défaut: chicken)
+     * @param maxResults nombre maximum de résultats (défaut: 10)
+     * @return job d'importation créé
+     */
     @PostMapping("/nutritionix")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER','SYSTEM')")
     public ResponseEntity<ApiResponse<ImportJob>> importFromNutritionix(
@@ -79,6 +128,13 @@ public class ImportController {
         return ResponseEntity.ok(ApiResponse.success("Nutritionix import started", job));
     }
 
+    /**
+     * Lance un import depuis Tasty.
+     *
+     * @param query      terme de recherche (défaut: pasta)
+     * @param maxResults nombre maximum de résultats (défaut: 10)
+     * @return job d'importation créé
+     */
     @PostMapping("/tasty")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER','SYSTEM')")
     public ResponseEntity<ApiResponse<ImportJob>> importFromTasty(
@@ -89,6 +145,13 @@ public class ImportController {
         return ResponseEntity.ok(ApiResponse.success("Tasty import started", job));
     }
 
+    /**
+     * Lance un import depuis BarcodeLookup.
+     *
+     * @param query      terme de recherche (défaut: rice)
+     * @param maxResults nombre maximum de résultats (défaut: 10)
+     * @return job d'importation créé
+     */
     @PostMapping("/barcode-lookup")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER','SYSTEM')")
     public ResponseEntity<ApiResponse<ImportJob>> importFromBarcodeLookup(
@@ -99,6 +162,13 @@ public class ImportController {
         return ResponseEntity.ok(ApiResponse.success("Barcode Lookup import started", job));
     }
 
+    /**
+     * Lance un import depuis Chomp.
+     *
+     * @param query      terme de recherche (défaut: rice)
+     * @param maxResults nombre maximum de résultats (défaut: 10)
+     * @return job d'importation créé
+     */
     @PostMapping("/chomp")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER','SYSTEM')")
     public ResponseEntity<ApiResponse<ImportJob>> importFromChomp(
@@ -109,6 +179,13 @@ public class ImportController {
         return ResponseEntity.ok(ApiResponse.success("Chomp import started", job));
     }
 
+    /**
+     * Lance un import depuis RecipeAPI.
+     *
+     * @param query      terme de recherche (défaut: pasta)
+     * @param maxResults nombre maximum de résultats (défaut: 10)
+     * @return job d'importation créé
+     */
     @PostMapping("/recipe-api")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','CONTENT_MANAGER','SYSTEM')")
     public ResponseEntity<ApiResponse<ImportJob>> importFromRecipeAPI(

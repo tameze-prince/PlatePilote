@@ -38,27 +38,27 @@ spring:
   # JPA / HIBERNATE CONFIGURATION
   # ==========================================
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      # update = Hibernate auto-adds missing columns/tables (Flyway manages initial schema)
-      # validate = strict check (fails if schema doesn't match entities)
-      ddl-auto: update
-    show-sql: false
-    properties:
+      database-platform: ${HIBERNATE_DIALECT:}
       hibernate:
-        format_sql: true
-        use_sql_comments: true
-        default_schema: public
-        cache:
-          use_second_level_cache: true
-          use_query_cache: true
-          region:
-            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
-        jakarta:
+        # update = Hibernate auto-adds missing columns/tables (Flyway manages initial schema)
+        ddl-auto: update
+      show-sql: false
+      open-in-view: false
+      properties:
+        hibernate:
+          format_sql: true
+          use_sql_comments: true
+          default_schema: public
           cache:
-            missing_cache_strategy: create
-            provider: org.ehcache.jsr107.EhcacheCachingProvider
-            uri: classpath:ehcache.xml
+            use_second_level_cache: true
+            use_query_cache: true
+            region:
+              factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+          javax:
+            cache:
+              missing_cache_strategy: create
+              provider: org.ehcache.jsr107.EhcacheCachingProvider
+              uri: classpath:ehcache.xml
 
   # ==========================================
   # FLYWAY - DATABASE MIGRATIONS
@@ -86,6 +86,7 @@ spring:
       time-to-live: 600000  # Cache expires after 10 minutes
 
   # ==========================================
+  # ==========================================
   # EMAIL CONFIGURATION (Optional)
   # ==========================================
   mail:
@@ -101,30 +102,26 @@ spring:
           timeout: 5000
           writetimeout: 5000
           starttls:
-            enable: ${MAIL_SMTP_STARTTLS:true}
-
-  # ==========================================
-  # JSON SERIALIZATION
-  # ==========================================
+            enabled: ${MAIL_SMTP_STARTTLS:true}
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    cache: true
   jackson:
     serialization:
-      write-dates-as-timestamps: false  # Use ISO-8601 format for dates
-    default-property-inclusion: non_null # Don't include null fields in JSON
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+  server:
+    port: 8081
+    compression:
+      enabled: true
+      mime-types: application/json,application/xml,text/html,text/plain
+      min-response-size: 1024
+    error:
+      include-message: always
+      include-binding-errors: always
 
-# ==========================================
-# SERVER CONFIGURATION
-# ==========================================
-server:
-  port: 8081
-  compression:
-    enabled: true
-    mime-types: application/json,application/xml,text/html,text/plain
-    min-response-size: 1024
-  error:
-    include-message: always
-    include-binding-errors: always
-
-# ==========================================
 # APPLICATION-SPECIFIC SETTINGS
 # ==========================================
 app:
@@ -150,17 +147,18 @@ app:
     expiration: ${JWT_EXPIRATION:3600000}       # Access token: 1 hour
     refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # Refresh token: 7 days
   oauth2:
-    google:
-      client-ids: ${GOOGLE_OAUTH_CLIENT_IDS:}
-      jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
-      issuers:
-        - https://accounts.google.com
-        - accounts.google.com
-    apple:
-      client-ids: ${APPLE_OAUTH_CLIENT_IDS:}
-      jwk-set-uri: https://appleid.apple.com/auth/keys
-      issuers:
-        - https://appleid.apple.com
+      google:
+        client-id: ${GOOGLE_OAUTH_CLIENT_IDS:}                          # comma-separated
+        jwk-set-uri: ${GOOGLE_OAUTH_JWK_SET_URI:https://www.googleapis.com/oauth2/v3/certs}
+        issuers: ${GOOGLE_OAUTH_ISSUERS:https://accounts.google.com,accounts.google.com}
+      apple:
+        client-id: ${APPLE_OAUTH_CLIENT_IDS:}                            # comma-separated (Service ID)
+        jwk-set-uri: ${APPLE_OAUTH_JWK_SET_URI:https://appleid.apple.com/auth/keys}
+        issuers: ${APPLE_OAUTH_ISSUERS:https://appleid.apple.com}
+      facebook:
+        client-ids: ${FACEBOOK_OAUTH_CLIENT_ID:}
+        graph-uri: ${FACEBOOK_OAUTH_GRAPH_URI:https://graph.facebook.com/v19.0}
+        app-secret: ${FACEBOOK_OAUTH_CLIENT_SECRET:}
   email:
     verification:
       from: ${EMAIL_VERIFICATION_FROM:PlatePilote <no-reply@platepilote.com>}

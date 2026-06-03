@@ -1,32 +1,26 @@
 package com.platepilote.platepilote.common.dto;
 
 /**
- * PAGED RESPONSE - WRAPPER FOR PAGINATED LIST RESPONSES
- * ======================================================
- * 
- * WHAT IT IS:
- * A wrapper for API responses that return lists of items (e.g., list of recipes).
- * 
- * WHY IT EXISTS:
- * When returning lists, we don't want to send ALL items at once (could be thousands).
- * Instead, we send pages of items (e.g., 20 per page) with pagination metadata.
- * 
- * EXAMPLE RESPONSE:
+ * Réponse paginée pour les listes d'éléments.
+ * <p>
+ * Permet de retourner des résultats par page avec les métadonnées de pagination
+ * (page courante, taille, nombre total d'éléments, nombre total de pages).
+ * </p>
+ *
+ * <p>Exemple de réponse :</p>
+ * <pre>{@code
  * {
- *   "content": [recipe1, recipe2, recipe3],
+ *   "content": [...],
  *   "page": 0,
  *   "size": 20,
  *   "totalElements": 150,
  *   "totalPages": 8,
  *   "last": false
  * }
- * 
- * HOW FLUTTER APP USES THIS:
- * - Shows items from "content" array
- * - Shows "Page 1 of 8" using page and totalPages
- * - Loads next page when user scrolls down
+ * }</pre>
+ *
+ * @param <T> type des éléments de la page
  */
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,13 +37,29 @@ public class PagedResponse<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private List<T> content;     // The actual items on this page
-    private int page;            // Current page number (0-indexed)
-    private int size;            // Number of items per page
-    private long totalElements;  // Total number of items across all pages
-    private int totalPages;      // Total number of pages
-    private boolean last;        // True if this is the last page
+    /** Éléments de la page courante. */
+    private List<T> content;
+    /** Numéro de la page courante (commence à 0). */
+    private int page;
+    /** Nombre d'éléments par page. */
+    private int size;
+    /** Nombre total d'éléments toutes pages confondues. */
+    private long totalElements;
+    /** Nombre total de pages. */
+    private int totalPages;
+    /** {@code true} si c'est la dernière page. */
+    private boolean last;
 
+    /**
+     * Crée une réponse paginée à partir des résultats.
+     *
+     * @param content       éléments de la page
+     * @param page          numéro de page
+     * @param size          taille de la page
+     * @param totalElements nombre total d'éléments
+     * @param <T>           type des éléments
+     * @return réponse paginée
+     */
     public static <T> PagedResponse<T> of(List<T> content, int page, int size, long totalElements) {
         int totalPages = (int) Math.ceil((double) totalElements / size);
         return PagedResponse.<T>builder()

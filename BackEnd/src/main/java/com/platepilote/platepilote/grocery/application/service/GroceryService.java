@@ -41,6 +41,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Service métier pour la gestion des listes de courses.
+ * <p>
+ * Gère le cycle de vie complet : création de listes, ajout/suppression d'articles,
+ * génération automatique depuis un plan de repas, passage en caisse avec
+ * mise à jour du budget et du garde-manger, et historique des achats.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -58,6 +65,13 @@ public class GroceryService {
     private final SecurityUtils securityUtils;
     private final PurchaseRecordRepository purchaseRecordRepository;
 
+    /**
+     * Récupère toutes les listes de courses d'un utilisateur, de manière paginée.
+     *
+     * @param userId   l'identifiant de l'utilisateur
+     * @param pageable les paramètres de pagination et de tri
+     * @return une page de résumés de listes de courses
+     */
     @Transactional(readOnly = true)
     public PagedResponse<GroceryListResponse> getUserLists(UUID userId, Pageable pageable) {
         Page<GroceryList> page = groceryListRepository.findByUserIdAndDeletedAtIsNull(userId, pageable);
@@ -69,6 +83,14 @@ public class GroceryService {
         return PagedResponse.of(content, page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
+    /**
+     * Récupère une liste de courses par son identifiant, avec le détail de ses articles.
+     *
+     * @param userId l'identifiant de l'utilisateur (vérification de propriété)
+     * @param listId l'identifiant de la liste
+     * @return la liste de courses avec ses articles
+     * @throws ResourceNotFoundException si la liste n'existe pas ou n'appartient pas à l'utilisateur
+     */
     @Transactional(readOnly = true)
     public GroceryListResponse getListById(UUID userId, UUID listId) {
         GroceryList list = groceryListRepository.findById(listId)
@@ -81,6 +103,13 @@ public class GroceryService {
         return toFullListResponse(list);
     }
 
+    /**
+     * Crée une nouvelle liste de courses pour un utilisateur.
+     *
+     * @param userId  l'identifiant de l'utilisateur propriétaire
+     * @param request les données de la liste (nom)
+     * @return le résumé de la liste créée
+     */
     public GroceryListResponse createList(UUID userId, GroceryListRequest request) {
         GroceryList list = GroceryList.builder()
                 .userId(userId)
@@ -92,6 +121,14 @@ public class GroceryService {
         return toListResponse(saved);
     }
 
+    /**
+     * Ajoute un article à une liste de courses existante.
+     *
+     * @param userId  l'identifiant de l'utilisateur (vérification de propriété)
+     * @param listId  l'identifiant de la liste destinataire
+     * @param request les données du nouvel article
+     * @return la liste mise à jour avec ses articles
+     */
     public GroceryListResponse addItem(UUID userId, UUID listId, GroceryItemRequest request) {
         GroceryList list = groceryListRepository.findById(listId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", listId.toString()));
@@ -114,6 +151,12 @@ public class GroceryService {
         return toFullListResponse(list);
     }
 
+    /**
+     * Bascule l'état coché/décoché d'un article.
+     *
+     * @param userId l'identifiant de l'utilisateur (vérification de propriété)
+     * @param itemId l'identifiant de l'article
+     */
     public void toggleItemChecked(UUID userId, UUID itemId) {
         GroceryItem item = groceryItemRepository.findById(itemId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryItem", "id", itemId.toString()));
@@ -127,6 +170,12 @@ public class GroceryService {
         groceryItemRepository.save(item);
     }
 
+    /**
+     * Supprime un article d'une liste de courses.
+     *
+     * @param userId l'identifiant de l'utilisateur (vérification de propriété)
+     * @param itemId l'identifiant de l'article à supprimer
+     */
     public void removeItem(UUID userId, UUID itemId) {
         GroceryItem item = groceryItemRepository.findById(itemId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryItem", "id", itemId.toString()));
@@ -139,6 +188,12 @@ public class GroceryService {
         groceryItemRepository.delete(item);
     }
 
+    /**
+     * Marque une liste de courses comme terminée.
+     *
+     * @param userId l'identifiant de l'utilisateur (vérification de propriété)
+     * @param listId l'identifiant de la liste à compléter
+     */
     public void completeList(UUID userId, UUID listId) {
         GroceryList list = groceryListRepository.findById(listId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", listId.toString()));
@@ -149,6 +204,17 @@ public class GroceryService {
         groceryListRepository.save(list);
     }
 
+    /**
+     * Génère une liste de courses à partir d'un plan de repas.
+     * <p>
+     * Agrège les ingrédients de toutes les recettes du plan, soustrait les quantités
+     * déjà présentes dans le garde-manger, estime les prix, et crée ou met à jour
+     * une liste de courses active associée à ce plan de repas.
+     *
+     * @param userId     l'identifiant de l'utilisateur
+     * @param mealPlanId l'identifiant du plan de repas
+     * @return la liste de courses générée avec ses articles
+     */
     public GroceryListResponse generateFromMealPlan(UUID userId, UUID mealPlanId) {
         MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
@@ -228,6 +294,19 @@ public class GroceryService {
         return toFullListResponse(saved);
     }
 
+    /**
+     * Effectue le passage en caisse d'une liste de courses.
+     * <p>
+     * Pour chaque article coché : enregistre l'achat dans l'historique, ajoute l'article
+     * au garde-manger, met à jour le budget dépensé, et supprime l'article de la liste.
+     * Si tous les articles sont cochés, la liste est marquée comme terminée.
+     *
+     * @param userId          l'identifiant de l'utilisateur
+     * @param listId          l'identifiant de la liste
+     * @param checkedItemIds  la liste des identifiants des articles achetés
+     * @param actualPrices    les prix réels constatés (optionnel)
+     * @return le résultat du passage en caisse (liste mise à jour, ajouts au garde-manger, historique)
+     */
     @Transactional
     public CheckoutResponse checkoutList(UUID userId, UUID listId, List<UUID> checkedItemIds, Map<UUID, BigDecimal> actualPrices) {
         GroceryList list = groceryListRepository.findById(listId)
@@ -321,6 +400,15 @@ public class GroceryService {
         );
     }
 
+    /**
+     * Récupère l'historique des achats d'un utilisateur, de manière paginée.
+     * <p>
+     * Les achats sont regroupés par liste de courses et triés du plus récent au plus ancien.
+     *
+     * @param userId   l'identifiant de l'utilisateur
+     * @param pageable les paramètres de pagination
+     * @return une page d'enregistrements d'achats groupés
+     */
     @Transactional(readOnly = true)
     public PagedResponse<PurchaseRecordResponse> getPurchaseHistory(UUID userId, Pageable pageable) {
         Page<PurchaseRecord> records = purchaseRecordRepository
@@ -348,6 +436,12 @@ public class GroceryService {
         return PagedResponse.of(dtos, records.getNumber(), records.getSize(), records.getTotalElements());
     }
 
+    /**
+     * Supprime logiquement (soft-delete) une liste de courses et tous ses articles.
+     *
+     * @param userId l'identifiant de l'utilisateur (vérification de propriété)
+     * @param listId l'identifiant de la liste à supprimer
+     */
     public void deleteList(UUID userId, UUID listId) {
         GroceryList list = groceryListRepository.findById(listId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", listId.toString()));

@@ -1,17 +1,10 @@
 package com.platepilote.platepilote.grocery.domain.repository;
 
 /**
- * GROCERY ITEM REPOSITORY - DATABASE ACCESS FOR GROCERY ITEMS
- * =============================================================
- * 
- * METHODS:
- * 
- * 1. findByGroceryListIdOrderBySortOrderAsc(groceryListId)
- *    -> Get all items in a grocery list, ordered by display order
- *    SQL: SELECT * FROM grocery_items WHERE grocery_list_id = ? ORDER BY sort_order ASC
- * 
- * 2. deleteByGroceryListId(groceryListId)
- *    -> Delete all items in a grocery list (used when deleting a list)
+ * Repository JPA pour l'entité {@link GroceryItem}.
+ * <p>
+ * Fournit l'accès aux articles d'une liste de courses avec tri par ordre d'affichage,
+ * ainsi que la suppression en masse des articles d'une liste.
  */
 
 import com.platepilote.platepilote.grocery.domain.entity.GroceryItem;
@@ -25,14 +18,18 @@ import java.util.UUID;
 public interface GroceryItemRepository extends JpaRepository<GroceryItem, UUID> {
 
     /**
-     * Get all items in a grocery list, sorted by display order.
-     * Items are grouped by category (produce, dairy, meat, etc.) for easier shopping.
+     * Récupère tous les articles d'une liste de courses, triés par ordre d'affichage.
+     *
+     * @param groceryListId l'identifiant de la liste de courses
+     * @return la liste des articles triés par {@code sortOrder} croissant
      */
     List<GroceryItem> findByGroceryListIdOrderBySortOrderAsc(UUID groceryListId);
 
     /**
-     * Delete all items in a grocery list.
-     * Called when a grocery list is deleted to clean up orphaned items.
+     * Supprime tous les articles d'une liste de courses.
+     * Utilisé lors de la suppression d'une liste pour nettoyer les articles orphelins.
+     *
+     * @param groceryListId l'identifiant de la liste de courses
      */
     void deleteByGroceryListId(UUID groceryListId);
 }
