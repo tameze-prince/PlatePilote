@@ -8,6 +8,7 @@ import '../../core/extensions/theme_extensions.dart';
 import '../../core/widgets/app_card.dart';
 import 'budget_repository.dart';
 
+/// Écran d'analyse et de suivi du budget.
 class BudgetAnalyticsScreen extends ConsumerStatefulWidget {
   const BudgetAnalyticsScreen({super.key});
 
@@ -17,14 +18,22 @@ class BudgetAnalyticsScreen extends ConsumerStatefulWidget {
 }
 
 class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
+  /// Budget hebdomadaire.
   double _weeklyBudget = 0;
+  /// Montant dépensé.
   double _spentAmount = 0;
+  /// Historique hebdomadaire des dépenses.
   List<double> _weeklyHistory = [];
+  /// Étiquettes des semaines.
   List<String> _weekLabels = [];
+  /// Vrai si le chargement est en cours.
   bool _isLoading = true;
 
+  /// Montant restant du budget.
   double get _remaining => _weeklyBudget - _spentAmount;
+  /// Pourcentage utilisé.
   double get _percentUsed => _spentAmount > 0 && _weeklyBudget > 0 ? _spentAmount / _weeklyBudget : 0;
+  /// Moyenne des dépenses hebdomadaires.
   double get _avgWeeklySpend =>
       _weeklyHistory.isEmpty ? 0 : _weeklyHistory.reduce((a, b) => a + b) / _weeklyHistory.length;
 
@@ -34,6 +43,7 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadAnalytics());
   }
 
+  /// Charge les données d'analyse depuis l'API.
   Future<void> _loadAnalytics() async {
     try {
       final repo = ref.read(budgetRepositoryProvider);
@@ -256,6 +266,7 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
     );
   }
 
+  /// Construit une carte de statistique.
   Widget _buildStatCard({
     required IconData icon,
     required String label,
@@ -285,6 +296,7 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
     );
   }
 
+  /// Construit la répartition des dépenses par catégorie.
   Widget _buildCategoryBreakdown() {
     final categories = [
       {'name': 'Produce', 'amount': 85.50, 'color': ColorTokens.primaryGreen},
@@ -349,11 +361,17 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
   }
 }
 
+/// Peintre personnalisé pour le graphique à barres.
 class _BarChartPainter extends CustomPainter {
+  /// Valeurs des barres.
   final List<double> values;
+  /// Étiquettes des barres.
   final List<String> labels;
+  /// Valeur maximale.
   final double maxValue;
+  /// Couleur des barres.
   final Color barColor;
+  /// Ligne du budget.
   final double budgetLine;
 
   _BarChartPainter({

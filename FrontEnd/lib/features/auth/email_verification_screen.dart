@@ -9,9 +9,13 @@ import '../../app/theme/app_typography.dart';
 import '../../core/premium_components.dart';
 import 'providers/auth_provider.dart';
 
+/// Écran de vérification d'email.
+/// Permet à l'utilisateur de saisir un token de vérification ou d'utiliser
+/// celui passé en paramètre pour valider son adresse email.
 class EmailVerificationScreen extends ConsumerStatefulWidget {
   const EmailVerificationScreen({super.key, this.token});
 
+  /// Token de vérification optionnel fourni via un lien.
   final String? token;
 
   @override
@@ -21,9 +25,16 @@ class EmailVerificationScreen extends ConsumerStatefulWidget {
 
 class _EmailVerificationScreenState
     extends ConsumerState<EmailVerificationScreen> {
+  /// Contrôleur pour le champ du token de vérification.
   final _tokenController = TextEditingController();
+
+  /// Indique si une vérification est en cours.
   bool _isVerifying = false;
+
+  /// Indique si un renvoi de code est en cours.
   bool _isResending = false;
+
+  /// Temps restant avant de pouvoir renvoyer un email (en secondes).
   int _resendCooldown = 0;
 
   @override
@@ -41,6 +52,7 @@ class _EmailVerificationScreenState
     super.dispose();
   }
 
+  /// Vérifie le token saisi auprès du serveur.
   Future<void> _verifyToken() async {
     final token = _tokenController.text.trim();
     if (token.isEmpty) return;
@@ -72,6 +84,7 @@ class _EmailVerificationScreenState
     }
   }
 
+  /// Renvoie un email de vérification à l'utilisateur.
   Future<void> _resendCode() async {
     final email = ref.read(authProvider).email;
     if (email == null) return;
@@ -98,6 +111,7 @@ class _EmailVerificationScreenState
     }
   }
 
+  /// Lance le compte à rebours avant le prochain renvoi autorisé.
   void _startCooldown() {
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted && _resendCooldown > 0) {

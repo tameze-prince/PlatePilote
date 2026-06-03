@@ -10,6 +10,7 @@ import '../../core/widgets/primary_button.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 import 'subscription_provider.dart';
 
+/// Écran de promotion et d'achat de l'abonnement Premium.
 class PremiumUpgradeScreen extends ConsumerWidget {
   const PremiumUpgradeScreen({super.key});
 
@@ -128,6 +129,7 @@ class PremiumUpgradeScreen extends ConsumerWidget {
   }
 }
 
+/// Widget d'affichage d'une fonctionnalité Premium.
 class _PremiumFeature extends StatelessWidget {
   const _PremiumFeature({
     required this.icon,
@@ -135,8 +137,11 @@ class _PremiumFeature extends StatelessWidget {
     required this.subtitle,
   });
 
+  /// Icône de la fonctionnalité.
   final IconData icon;
+  /// Titre de la fonctionnalité.
   final String title;
+  /// Sous-titre descriptif.
   final String subtitle;
 
   @override

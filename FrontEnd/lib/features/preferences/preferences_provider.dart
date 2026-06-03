@@ -7,6 +7,7 @@ import '../../core/repositories/preference_repository.dart';
 import '../../core/repositories/profile_repository.dart';
 import '../../features/onboarding/onboarding_state.dart';
 
+/// Préférences modifiables par l'utilisateur.
 class EditablePreferences {
   const EditablePreferences({
     this.householdSize = '2',
@@ -19,15 +20,24 @@ class EditablePreferences {
     this.preferredCuisines = const {'Mediterranean'},
   });
 
+  /// Taille du foyer.
   final String householdSize;
+  /// Niveau de compétence culinaire.
   final String cookingSkill;
+  /// Budget hebdomadaire.
   final String weeklyBudget;
+  /// Temps de cuisson maximal.
   final String cookingTime;
+  /// Préférences alimentaires.
   final Set<String> dietaryPreferences;
+  /// Allergies déclarées.
   final Set<String> allergies;
+  /// Objectifs utilisateur.
   final Set<String> goals;
+  /// Cuisines préférées.
   final Set<String> preferredCuisines;
 
+  /// Retourne une copie avec les champs modifiés.
   EditablePreferences copyWith({
     String? householdSize,
     String? cookingSkill,
@@ -50,6 +60,7 @@ class EditablePreferences {
     );
   }
 
+  /// Convertit les préférences en Map pour JSON.
   Map<String, dynamic> toJson() => {
     'householdSize': householdSize,
     'cookingSkill': cookingSkill,
@@ -61,6 +72,7 @@ class EditablePreferences {
     'preferredCuisines': preferredCuisines.toList(),
   };
 
+  /// Crée une instance depuis une Map JSON.
   factory EditablePreferences.fromJson(Map<String, dynamic> json) {
     return EditablePreferences(
       householdSize: json['householdSize'] as String? ?? '2',
@@ -87,7 +99,9 @@ class EditablePreferences {
   }
 }
 
+/// Notifier qui gère l'état des préférences éditables.
 class PreferencesNotifier extends Notifier<EditablePreferences> {
+  /// Clé SharedPreferences pour la persistance.
   static const _preferencesKey = 'preferences.editable';
 
   @override
@@ -112,26 +126,31 @@ class PreferencesNotifier extends Notifier<EditablePreferences> {
     );
   }
 
+  /// Définit la taille du foyer.
   Future<void> setHouseholdSize(String value) async {
     state = state.copyWith(householdSize: value);
     await _persist();
   }
 
+  /// Définit le niveau culinaire.
   Future<void> setCookingSkill(String value) async {
     state = state.copyWith(cookingSkill: value);
     await _persist();
   }
 
+  /// Définit le budget hebdomadaire.
   Future<void> setWeeklyBudget(String value) async {
     state = state.copyWith(weeklyBudget: value);
     await _persist();
   }
 
+  /// Définit le temps de cuisson.
   Future<void> setCookingTime(String value) async {
     state = state.copyWith(cookingTime: value);
     await _persist();
   }
 
+  /// Ajoute ou retire une préférence alimentaire.
   Future<void> toggleDietaryPreference(String value) async {
     state = state.copyWith(
       dietaryPreferences: _toggle(state.dietaryPreferences, value),
@@ -139,16 +158,19 @@ class PreferencesNotifier extends Notifier<EditablePreferences> {
     await _persist();
   }
 
+  /// Ajoute ou retire une allergie.
   Future<void> toggleAllergy(String value) async {
     state = state.copyWith(allergies: _toggle(state.allergies, value));
     await _persist();
   }
 
+  /// Ajoute ou retire un objectif.
   Future<void> toggleGoal(String value) async {
     state = state.copyWith(goals: _toggle(state.goals, value));
     await _persist();
   }
 
+  /// Ajoute ou retire une cuisine préférée.
   Future<void> toggleCuisine(String value) async {
     state = state.copyWith(
       preferredCuisines: _toggle(state.preferredCuisines, value),
@@ -156,6 +178,7 @@ class PreferencesNotifier extends Notifier<EditablePreferences> {
     await _persist();
   }
 
+  /// Sauvegarde les préférences via l'API.
   Future<void> saveToApi() async {
     final prefRepo = ref.read(preferenceRepositoryProvider);
     await prefRepo.updateMyPreferences(
@@ -174,12 +197,14 @@ class PreferencesNotifier extends Notifier<EditablePreferences> {
     );
   }
 
+  /// Persiste l'état actuel dans SharedPreferences.
   Future<void> _persist() async {
     await ref
         .read(sharedPreferencesProvider)
         .setString(_preferencesKey, json.encode(state.toJson()));
   }
 
+  /// Bascule une valeur dans un ensemble.
   Set<String> _toggle(Set<String> values, String value) {
     final next = {...values};
     next.contains(value) ? next.remove(value) : next.add(value);
@@ -187,6 +212,7 @@ class PreferencesNotifier extends Notifier<EditablePreferences> {
   }
 }
 
+/// Provider Riverpod pour les préférences éditables.
 final editablePreferencesProvider =
     NotifierProvider<PreferencesNotifier, EditablePreferences>(
       PreferencesNotifier.new,

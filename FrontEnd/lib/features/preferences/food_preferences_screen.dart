@@ -9,6 +9,7 @@ import '../../app/theme/app_typography.dart';
 import '../../core/premium_components.dart';
 import 'preferences_provider.dart';
 
+/// Écran des préférences alimentaires avec intelligence PlatePilot.
 class FoodPreferencesScreen extends ConsumerStatefulWidget {
   const FoodPreferencesScreen({super.key});
 
@@ -19,8 +20,10 @@ class FoodPreferencesScreen extends ConsumerStatefulWidget {
 
 class _FoodPreferencesScreenState
     extends ConsumerState<FoodPreferencesScreen> {
+  /// Indique si la sauvegarde est en cours.
   bool _saving = false;
 
+  /// Sauvegarde les préférences via l'API.
   Future<void> _savePreferences() async {
     setState(() => _saving = true);
     try {
@@ -272,9 +275,11 @@ class _FoodPreferencesScreenState
   }
 }
 
+/// Résumé intelligent des préférences actuelles de l'utilisateur.
 class _IntelligenceSummary extends StatelessWidget {
   const _IntelligenceSummary({required this.prefs});
 
+  /// Préférences éditables à résumer.
   final EditablePreferences prefs;
 
   @override
@@ -346,6 +351,7 @@ class _IntelligenceSummary extends StatelessWidget {
   }
 }
 
+/// Section de préférences avec titre et icône.
 class _PreferenceSection extends StatelessWidget {
   const _PreferenceSection({
     required this.title,
@@ -354,9 +360,13 @@ class _PreferenceSection extends StatelessWidget {
     required this.children,
   });
 
+  /// Titre de la section.
   final String title;
+  /// Icône de la section.
   final IconData icon;
+  /// Description optionnelle.
   final String? description;
+  /// Widgets enfants.
   final List<Widget> children;
 
   @override
@@ -410,6 +420,7 @@ class _PreferenceSection extends StatelessWidget {
   }
 }
 
+/// Grille de choix mono-sélection.
 class _ChoiceGrid extends StatelessWidget {
   const _ChoiceGrid({
     required this.label,
@@ -418,9 +429,13 @@ class _ChoiceGrid extends StatelessWidget {
     required this.onSelected,
   });
 
+  /// Libellé du groupe.
   final String label;
+  /// Valeurs possibles.
   final List<String> values;
+  /// Valeurs sélectionnées.
   final Set<String> selected;
+  /// Callback de sélection.
   final ValueChanged<String> onSelected;
 
   @override
@@ -453,6 +468,7 @@ class _ChoiceGrid extends StatelessWidget {
   }
 }
 
+/// Grille de chips multi-sélection.
 class _MultiChipGrid extends StatelessWidget {
   const _MultiChipGrid({
     required this.values,
@@ -460,8 +476,11 @@ class _MultiChipGrid extends StatelessWidget {
     required this.onSelected,
   });
 
+  /// Valeurs possibles.
   final List<String> values;
+  /// Valeurs sélectionnées.
   final Set<String> selected;
+  /// Callback de sélection.
   final ValueChanged<String> onSelected;
 
   @override
@@ -482,6 +501,7 @@ class _MultiChipGrid extends StatelessWidget {
   }
 }
 
+/// Chip interactif avec animation.
 class _Chip extends StatelessWidget {
   const _Chip({
     required this.label,
@@ -490,9 +510,13 @@ class _Chip extends StatelessWidget {
     required this.onTap,
   });
 
+  /// Texte du chip.
   final String label;
+  /// Vrai si sélectionné.
   final bool selected;
+  /// Vrai si le chip est en mode multi-sélection.
   final bool multiSelect;
+  /// Callback au tap.
   final VoidCallback onTap;
 
   @override

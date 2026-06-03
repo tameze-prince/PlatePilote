@@ -9,6 +9,7 @@ import '../../core/widgets/primary_button.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 import 'subscription_provider.dart';
 
+/// Écran de gestion de l'abonnement utilisateur.
 class SubscriptionManagementScreen extends ConsumerWidget {
   const SubscriptionManagementScreen({super.key});
 

@@ -6,9 +6,11 @@ import '../../core/network/api_response.dart';
 import '../../core/repositories/base_repository.dart';
 import '../../shared/models/notification.dart';
 
+/// Repository des opérations liées aux notifications.
 class NotificationRepository extends BaseRepository {
   NotificationRepository(super.apiClient);
 
+  /// Récupère la liste paginée des notifications.
   Future<PageResponse<AppNotification>> getNotifications({
     int page = 0,
     int size = 20,
@@ -24,6 +26,7 @@ class NotificationRepository extends BaseRepository {
     }
   }
 
+  /// Récupère le nombre de notifications non lues.
   Future<int> getUnreadCount() async {
     try {
       final response = await apiClient.get('/notifications/unread/count');
@@ -37,6 +40,7 @@ class NotificationRepository extends BaseRepository {
     }
   }
 
+  /// Marque une notification comme lue.
   Future<bool> markAsRead(String notificationId) async {
     try {
       await apiClient.patch('/notifications/$notificationId/read');
@@ -46,6 +50,7 @@ class NotificationRepository extends BaseRepository {
     }
   }
 
+  /// Marque toutes les notifications comme lues.
   Future<bool> markAllAsRead() async {
     try {
       await apiClient.patch('/notifications/read-all');
@@ -55,6 +60,7 @@ class NotificationRepository extends BaseRepository {
     }
   }
 
+  /// Supprime une notification.
   Future<bool> deleteNotification(String notificationId) async {
     try {
       await apiClient.delete('/notifications/$notificationId');
@@ -65,6 +71,7 @@ class NotificationRepository extends BaseRepository {
   }
 }
 
+/// Provider Riverpod pour [NotificationRepository].
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return NotificationRepository(ref.watch(apiClientProvider));
 });

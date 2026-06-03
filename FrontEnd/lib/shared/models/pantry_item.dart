@@ -1,5 +1,6 @@
 import '../../core/utils/date_utils.dart';
 
+/// Article du garde-manger.
 class PantryItem {
   const PantryItem({
     required this.id,
@@ -14,31 +15,46 @@ class PantryItem {
     this.updatedAt,
   });
 
+  /// Identifiant unique.
   final String id;
+  /// Nom de l'article.
   final String name;
+  /// Catégorie (ex: Produce, Dairy).
   final String? category;
+  /// Quantité disponible.
   final double? quantity;
+  /// Unité de mesure.
   final String? unit;
+  /// Date d'expiration.
   final String? expirationDate;
+  /// Identifiant de l'ingrédient associé.
   final String? ingredientId;
+  /// Indique si l'article est expiré.
   final bool isExpired;
+  /// Date de création.
   final String? createdAt;
+  /// Date de dernière modification.
   final String? updatedAt;
 
+  /// Nombre de jours restants avant expiration.
   int? get daysToExpiry => AppDateUtils.daysUntil(expirationDate);
 
+  /// Indique si l'article est urgent (expiré ou dans ≤2 jours).
   bool get isUrgent {
     final days = daysToExpiry;
     return isExpired || (days != null && days <= 2);
   }
 
+  /// Indique si l'article expire bientôt (dans ≤7 jours).
   bool get isExpiringSoon {
     final days = daysToExpiry;
     return isExpired || (days != null && days <= 7);
   }
 
+  /// Indique si le stock est bas (quantité < 1).
   bool get isLowStock => (quantity ?? 0) < 1;
 
+  /// Retourne une copie avec les champs modifiés.
   PantryItem copyWith({
     String? id,
     String? name,
@@ -65,6 +81,7 @@ class PantryItem {
     );
   }
 
+  /// Crée un [PantryItem] depuis une map JSON.
   factory PantryItem.fromJson(Map<String, dynamic> json) {
     return PantryItem(
       id: json['id']?.toString() ?? '',
@@ -80,6 +97,7 @@ class PantryItem {
     );
   }
 
+  /// Convertit ce [PantryItem] en map JSON.
   Map<String, dynamic> toJson() {
     return {
       'name': name,

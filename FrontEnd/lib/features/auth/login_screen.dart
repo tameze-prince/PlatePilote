@@ -12,6 +12,8 @@ import '../onboarding/onboarding_state.dart';
 import 'providers/auth_provider.dart';
 import 'providers/auth_state.dart';
 
+/// Écran de connexion à l'application.
+/// Permet à l'utilisateur de se connecter avec email et mot de passe.
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -20,8 +22,13 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
+  /// Contrôleur pour le champ email.
   final _emailController = TextEditingController();
+
+  /// Contrôleur pour le champ mot de passe.
   final _passwordController = TextEditingController();
+
+  /// Clé globale pour la validation du formulaire.
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -31,6 +38,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  /// Soumet le formulaire de connexion.
   Future<void> _onSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -76,6 +84,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
+/// Écran d'inscription premium.
+/// Permet à l'utilisateur de créer un compte avec nom, email et mot de passe.
 class PremiumSignupScreen extends ConsumerStatefulWidget {
   const PremiumSignupScreen({super.key});
 
@@ -84,9 +94,16 @@ class PremiumSignupScreen extends ConsumerStatefulWidget {
 }
 
 class _PremiumSignupScreenState extends ConsumerState<PremiumSignupScreen> {
+  /// Contrôleur pour le champ du nom complet.
   final _nameController = TextEditingController();
+
+  /// Contrôleur pour le champ email.
   final _emailController = TextEditingController();
+
+  /// Contrôleur pour le champ mot de passe.
   final _passwordController = TextEditingController();
+
+  /// Clé globale pour la validation du formulaire.
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -97,6 +114,7 @@ class _PremiumSignupScreenState extends ConsumerState<PremiumSignupScreen> {
     super.dispose();
   }
 
+  /// Soumet le formulaire d'inscription.
   Future<void> _onSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -148,6 +166,8 @@ class _PremiumSignupScreenState extends ConsumerState<PremiumSignupScreen> {
   }
 }
 
+/// Shell d'authentification premium réutilisable.
+/// Affiche le formulaire de connexion ou d'inscription avec un design premium.
 class _PremiumAuthShell extends StatefulWidget {
   const _PremiumAuthShell({
     this.isSignup = false,
@@ -161,14 +181,31 @@ class _PremiumAuthShell extends StatefulWidget {
     this.onSwitchAuthMode,
   });
 
+  /// Mode inscription (true) ou connexion (false).
   final bool isSignup;
+
+  /// Indique si une opération est en cours.
   final bool isLoading;
+
+  /// Message d'erreur à afficher.
   final String? errorMessage;
+
+  /// Clé globale du formulaire.
   final GlobalKey<FormState> formKey;
+
+  /// Contrôleur pour le champ du nom (inscription uniquement).
   final TextEditingController? nameController;
+
+  /// Contrôleur pour le champ email.
   final TextEditingController emailController;
+
+  /// Contrôleur pour le champ mot de passe.
   final TextEditingController passwordController;
+
+  /// Callback de soumission du formulaire.
   final Future<void> Function() onSubmit;
+
+  /// Callback pour basculer entre connexion et inscription.
   final VoidCallback? onSwitchAuthMode;
 
   @override
@@ -176,6 +213,7 @@ class _PremiumAuthShell extends StatefulWidget {
 }
 
 class _PremiumAuthShellState extends State<_PremiumAuthShell> {
+  /// Indique si le mot de passe est visible.
   bool _passwordVisible = false;
 
   @override
@@ -329,9 +367,11 @@ class _PremiumAuthShellState extends State<_PremiumAuthShell> {
   }
 }
 
+/// Marque visuelle de PlatePilot (logo + nom + tagline).
 class _BrandMark extends StatelessWidget {
   const _BrandMark({required this.isCompact});
 
+  /// Mode compact (true) ou normal (false).
   final bool isCompact;
 
   @override

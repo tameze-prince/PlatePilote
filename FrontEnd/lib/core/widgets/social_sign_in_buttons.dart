@@ -9,6 +9,7 @@ import '../../core/extensions/theme_extensions.dart';
 import '../../core/premium_components.dart';
 import '../../features/auth/providers/auth_provider.dart';
 
+/// Boutons de connexion sociale (Google, Apple) avec séparateur "or continue with".
 class SocialSignInButtons extends ConsumerWidget {
   const SocialSignInButtons({super.key});
 

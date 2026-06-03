@@ -13,6 +13,7 @@ import '../../core/widgets/secondary_button.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 import 'notifications_provider.dart';
 
+/// Écran des notifications de l'application.
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
 
@@ -22,6 +23,7 @@ class NotificationsScreen extends ConsumerStatefulWidget {
 }
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
+  /// Filtre de type de notification.
   String? filter;
 
   @override
@@ -138,7 +140,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                           onPressed: () =>
                               NotificationService.instance.scheduleReminder(
                                 title: 'PlatePilot reminder',
-                                body: 'Don’t forget to buy 5 remaining items.',
+                                body: 'Don\'t forget to buy 5 remaining items.',
                                 delay: const Duration(seconds: 8),
                                 payload: '/grocery',
                               ),
@@ -221,6 +223,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     );
   }
 
+  /// Libellé lisible pour un type de notification.
   String _typeLabel(String type) {
     return switch (type) {
       'pantry' => 'Pantry',
@@ -232,6 +235,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     };
   }
 
+  /// Icône correspondant à un type de notification.
   IconData _typeIcon(String? type) {
     return switch (type) {
       'pantry' => Icons.kitchen_outlined,

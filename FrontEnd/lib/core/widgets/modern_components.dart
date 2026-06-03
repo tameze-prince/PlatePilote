@@ -6,7 +6,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_elevation.dart';
 import '../../app/theme/app_typography.dart';
 
-/// Modern card component with optional features
+/// Carte moderne avec fonctionnalités optionnelles (en-tête, badge, titre).
 class ModernCard extends StatelessWidget {
   const ModernCard({
     required this.child,
@@ -133,7 +133,7 @@ class ModernCard extends StatelessWidget {
   }
 }
 
-/// Stat card for displaying metrics
+/// Carte statistique pour afficher une métrique avec icône.
 class StatCard extends StatelessWidget {
   const StatCard({
     required this.icon,
@@ -200,7 +200,7 @@ class StatCard extends StatelessWidget {
   }
 }
 
-/// Progress card with visual indicator
+/// Carte de progression avec barre de progression visuelle.
 class ProgressCard extends StatelessWidget {
   const ProgressCard({
     required this.label,
@@ -290,7 +290,7 @@ class ProgressCard extends StatelessWidget {
   }
 }
 
-/// Info card with icon and description
+/// Carte d'information avec icône, titre et description.
 class InfoCard extends StatelessWidget {
   const InfoCard({
     required this.icon,
@@ -366,7 +366,7 @@ class InfoCard extends StatelessWidget {
   }
 }
 
-/// Alert card for warnings and notifications
+/// Carte d'alerte pour les avertissements et notifications.
 class AlertCard extends StatelessWidget {
   const AlertCard({
     required this.type,
@@ -477,6 +477,7 @@ class AlertCard extends StatelessWidget {
   }
 }
 
+/// Type d'alerte pour [AlertCard].
 enum AlertType { success, warning, error, info }
 
 class _AlertConfig {
@@ -495,7 +496,7 @@ class _AlertConfig {
   });
 }
 
-/// Empty state component
+/// Composant d'état vide avec icône, titre, message et action optionnelle.
 class EmptyState extends StatelessWidget {
   const EmptyState({
     required this.icon,
@@ -569,7 +570,7 @@ class EmptyState extends StatelessWidget {
   }
 }
 
-/// Loading skeleton for content placeholders
+/// Squelette de chargement pour les placeholders de contenu.
 class LoadingSkeleton extends StatelessWidget {
   const LoadingSkeleton({
     this.height,
@@ -600,7 +601,7 @@ class LoadingSkeleton extends StatelessWidget {
   }
 }
 
-/// Shimmer loading effect
+/// Effet de chargement shimmer (simplifié, utiliser un package dédié en production).
 class ShimmerLoading extends StatelessWidget {
   const ShimmerLoading({
     required this.child,
@@ -622,7 +623,7 @@ class ShimmerLoading extends StatelessWidget {
   }
 }
 
-/// Badge component
+/// Composant badge avec libellé, couleur et icône optionnelle.
 class Badge extends StatelessWidget {
   const Badge({
     required this.label,
@@ -679,7 +680,7 @@ class Badge extends StatelessWidget {
   }
 }
 
-/// Divider with optional label
+/// Séparateur avec libellé optionnel au centre.
 class LabeledDivider extends StatelessWidget {
   const LabeledDivider({
     this.label,

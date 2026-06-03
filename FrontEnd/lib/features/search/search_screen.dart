@@ -15,6 +15,7 @@ import '../../core/widgets/floating_components.dart';
 import '../../shared/widgets/recipe_image.dart';
 import '../support/filter_bottom_sheet.dart';
 
+/// Écran de recherche de recettes.
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 
@@ -23,10 +24,15 @@ class SearchScreen extends ConsumerStatefulWidget {
 }
 
 class _SearchScreenState extends ConsumerState<SearchScreen> {
+  /// Requête de recherche en cours.
   String query = '';
+  /// Résultats de la recherche.
   List<RecipeDetail> _results = [];
+  /// Indique si une recherche est en cours.
   bool _isLoading = false;
+  /// Message d'erreur éventuel.
   String? _error;
+  /// Timer de debounce pour éviter les appels API trop fréquents.
   Timer? _debounce;
 
   @override
@@ -35,12 +41,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     super.dispose();
   }
 
+  /// Appelée lorsque la requête change.
   void _onSearchChanged(String value) {
     setState(() => query = value);
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 400), _performSearch);
   }
 
+  /// Effectue la recherche via le repository.
   Future<void> _performSearch() async {
     if (query.trim().isEmpty) {
       setState(() {
@@ -229,6 +237,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
+  /// Construit une carte de résultat de recherche.
   Widget _buildResultCard({
     required BuildContext context,
     required bool isDark,

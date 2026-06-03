@@ -9,9 +9,11 @@ import '../../core/widgets/primary_button.dart';
 import '../../shared/models/demo_data.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 
+/// Écran des détails d'un repas.
 class MealDetailsScreen extends StatelessWidget {
   const MealDetailsScreen({required this.mealId, super.key});
 
+  /// Identifiant du repas.
   final String mealId;
 
   @override
@@ -70,10 +72,13 @@ class MealDetailsScreen extends StatelessWidget {
   }
 }
 
+/// Ligne d'information d'adéquation pour un repas.
 class _FitRow extends StatelessWidget {
   const _FitRow({required this.label, required this.value});
 
+  /// Libellé de la ligne.
   final String label;
+  /// Valeur associée.
   final String value;
 
   @override

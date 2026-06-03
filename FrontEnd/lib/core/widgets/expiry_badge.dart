@@ -5,8 +5,10 @@ import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 
+/// Niveau d'urgence pour la date de péremption.
 enum ExpiryUrgency { none, fresh, soon, urgent, expired }
 
+/// Badge coloré indiquant l'urgence de péremption d'un produit.
 class ExpiryBadge extends StatelessWidget {
   const ExpiryBadge({
     required this.daysToExpiry,
@@ -14,9 +16,13 @@ class ExpiryBadge extends StatelessWidget {
     super.key,
   });
 
+  /// Nombre de jours avant péremption (négatif si déjà périmé).
   final int? daysToExpiry;
+
+  /// Force l'état expiré.
   final bool isExpired;
 
+  /// Calcule l'urgence en fonction des jours restants.
   ExpiryUrgency get urgency {
     if (isExpired || (daysToExpiry != null && daysToExpiry! < 0)) {
       return ExpiryUrgency.expired;

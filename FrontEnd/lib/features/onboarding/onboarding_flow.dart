@@ -10,6 +10,7 @@ import '../../core/premium_components.dart';
 import '../../core/providers/app_session_provider.dart';
 import 'onboarding_state.dart';
 
+/// Écran principal du parcours d'onboarding en 3 étapes.
 class OnboardingFlow extends ConsumerStatefulWidget {
   const OnboardingFlow({super.key});
 
@@ -18,6 +19,7 @@ class OnboardingFlow extends ConsumerStatefulWidget {
 }
 
 class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
+  /// Étape courante (0, 1 ou 2).
   int step = 0;
 
   @override
@@ -95,6 +97,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     );
   }
 
+  /// Passe à l'étape suivante ou termine l'onboarding.
   Future<void> _continue() async {
     HapticFeedback.selectionClick();
     if (step == 2) {
@@ -107,6 +110,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     setState(() => step += 1);
   }
 
+  /// Construit le contenu de l'étape courante.
   Widget _buildStep(
     BuildContext context,
     OnboardingState state,
@@ -212,6 +216,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     };
   }
 
+  /// Libellé de l'étape courante.
   String _stepLabel(int step) => switch (step) {
         0 => 'Household setup',
         1 => 'Budget & constraints',
@@ -219,10 +224,13 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       };
 }
 
+/// En-tête de progression avec barre de progression animée.
 class _ProgressHeader extends StatelessWidget {
   const _ProgressHeader({required this.step, required this.label});
 
+  /// Étape courante (0-indexée).
   final int step;
+  /// Libellé de l'étape.
   final String label;
 
   @override
@@ -254,6 +262,7 @@ class _ProgressHeader extends StatelessWidget {
   }
 }
 
+/// Une étape de l'onboarding avec titre, sous-titre et contenu.
 class _OnboardingStep extends StatelessWidget {
   const _OnboardingStep({
     required this.title,
@@ -261,8 +270,11 @@ class _OnboardingStep extends StatelessWidget {
     required this.children,
   });
 
+  /// Titre de l'étape.
   final String title;
+  /// Sous-titre de l'étape.
   final String subtitle;
+  /// Liste des widgets enfants.
   final List<Widget> children;
 
   @override
@@ -292,6 +304,7 @@ class _OnboardingStep extends StatelessWidget {
   }
 }
 
+/// Grille de choix pour une question de l'onboarding.
 class _ChoiceGrid extends StatelessWidget {
   const _ChoiceGrid({
     required this.title,
@@ -301,10 +314,15 @@ class _ChoiceGrid extends StatelessWidget {
     this.multiSelect = false,
   });
 
+  /// Titre de la question.
   final String title;
+  /// Liste des options disponibles.
   final List<String> choices;
+  /// Ensemble des valeurs sélectionnées.
   final Set<String> selectedValues;
+  /// Callback de sélection.
   final ValueChanged<String> onSelected;
+  /// Vrai si la sélection multiple est autorisée.
   final bool multiSelect;
 
   @override

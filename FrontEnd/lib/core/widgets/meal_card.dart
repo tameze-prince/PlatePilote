@@ -8,6 +8,7 @@ import '../../core/extensions/theme_extensions.dart';
 import '../../shared/models/demo_data.dart';
 import 'app_card.dart';
 
+/// Carte affichant un repas avec image, titre, calories et temps de préparation.
 class MealCard extends StatelessWidget {
   const MealCard({
     required this.meal,
@@ -17,9 +18,16 @@ class MealCard extends StatelessWidget {
     super.key,
   });
 
+  /// Le repas à afficher.
   final Meal meal;
+
+  /// Version compacte si vrai.
   final bool compact;
+
+  /// Callback au tap sur la carte.
   final VoidCallback? onTap;
+
+  /// Callback pour échanger le repas.
   final VoidCallback? onSwap;
 
   @override

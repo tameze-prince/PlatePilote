@@ -8,40 +8,53 @@ import '../app/theme/app_radius.dart';
 import '../app/theme/app_spacing.dart';
 import '../app/theme/app_typography.dart';
 
+/// Variante de [PremiumCard].
 enum PremiumCardVariant { standard, elevated, glass, accent }
 
+/// Variante de [GlassButton].
 enum GlassButtonVariant { filled, outlined, ghost }
 
+/// Thème premium fournissant des couleurs, ombres et dégradés
+/// pour les composants vitrés et premium.
 class PremiumTheme {
   const PremiumTheme._();
 
+  /// Vrai si le contexte actuel est en mode sombre.
   static bool isDark(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;
 
+  /// Couleur de fond selon le mode.
   static Color background(BuildContext context) =>
       isDark(context) ? AppColors.darkBackground : AppColors.background;
 
+  /// Couleur de surface selon le mode.
   static Color surface(BuildContext context) =>
       isDark(context) ? AppColors.darkSurface : AppColors.surface;
 
+  /// Couleur de surface surélevée selon le mode.
   static Color elevatedSurface(BuildContext context) => isDark(context)
       ? AppColors.darkElevatedSurface
       : AppColors.elevatedSurface;
 
+  /// Couleur de texte principale selon le mode.
   static Color textPrimary(BuildContext context) =>
       isDark(context) ? AppColors.darkOnSurface : AppColors.onSurface;
 
+  /// Couleur de texte secondaire selon le mode.
   static Color textSecondary(BuildContext context) => isDark(context)
       ? AppColors.darkOnSurfaceVariant
       : AppColors.onSurfaceVariant;
 
+  /// Couleur de texte tertiaire selon le mode.
   static Color textTertiary(BuildContext context) => isDark(context)
       ? AppColors.darkOnSurfaceTertiary
       : AppColors.onSurfaceTertiary;
 
+  /// Couleur de bordure selon le mode.
   static Color border(BuildContext context) =>
       isDark(context) ? AppColors.darkOutline : AppColors.outline;
 
+  /// Couleur de verre (glassmorphism) selon le mode et l'état surélevé.
   static Color glass(BuildContext context, {bool elevated = false}) {
     if (isDark(context)) {
       return Colors.white.withOpacity(elevated ? 0.16 : 0.09);
@@ -49,6 +62,7 @@ class PremiumTheme {
     return Colors.white.withOpacity(elevated ? 0.78 : 0.64);
   }
 
+  /// Ombre douce par défaut.
   static List<BoxShadow> softShadow(BuildContext context) {
     final dark = isDark(context);
     return [
@@ -60,6 +74,7 @@ class PremiumTheme {
     ];
   }
 
+  /// Ombre pour les éléments flottants.
   static List<BoxShadow> floatingShadow(BuildContext context) {
     final dark = isDark(context);
     return [
@@ -76,6 +91,7 @@ class PremiumTheme {
     ];
   }
 
+  /// Ombre pour la barre de navigation.
   static List<BoxShadow> navbarShadow(BuildContext context) {
     final dark = isDark(context);
     return [
@@ -97,6 +113,7 @@ class PremiumTheme {
     ];
   }
 
+  /// Effet de lueur (glow) autour d'un élément.
   static List<BoxShadow> glow(BuildContext context, {Color? color}) => [
     BoxShadow(
       color: (color ?? AppColors.primaryAccentGreen).withOpacity(
@@ -107,6 +124,7 @@ class PremiumTheme {
     ),
   ];
 
+  /// Dégradé de fond de page selon le mode.
   static LinearGradient pageGradient(BuildContext context) {
     final dark = isDark(context);
     return LinearGradient(
@@ -127,6 +145,7 @@ class PremiumTheme {
   }
 }
 
+/// Fond de page premium avec dégradé et lueurs ambiantes.
 class PremiumBackground extends StatelessWidget {
   const PremiumBackground({
     required this.child,
@@ -135,8 +154,13 @@ class PremiumBackground extends StatelessWidget {
     super.key,
   });
 
+  /// Contenu de la page.
   final Widget child;
+
+  /// Padding optionnel.
   final EdgeInsetsGeometry? padding;
+
+  /// Applique SafeArea si vrai.
   final bool safeArea;
 
   @override
@@ -198,6 +222,7 @@ class _AmbientGlow extends StatelessWidget {
   }
 }
 
+/// Conteneur vitré (glassmorphism) avec flou, ombres et bordure.
 class GlassContainer extends StatelessWidget {
   const GlassContainer({
     required this.child,
@@ -212,14 +237,31 @@ class GlassContainer extends StatelessWidget {
     super.key,
   });
 
+  /// Contenu du conteneur.
   final Widget child;
+
+  /// Padding interne.
   final EdgeInsetsGeometry? padding;
+
+  /// Marge externe.
   final EdgeInsetsGeometry? margin;
+
+  /// Rayon des coins.
   final double borderRadius;
+
+  /// Intensité du flou.
   final double blurSigma;
+
+  /// Version surélevée (ombres plus fortes) si vrai.
   final bool elevated;
+
+  /// Couleur de bordure personnalisée.
   final Color? borderColor;
+
+  /// Couleur de fond personnalisée.
   final Color? backgroundColor;
+
+  /// Ombres personnalisées.
   final List<BoxShadow>? shadows;
 
   @override
@@ -261,6 +303,7 @@ class GlassContainer extends StatelessWidget {
   }
 }
 
+/// Carte premium avec variantes (standard, surélevée, vitrée, accentuée).
 class PremiumCard extends StatelessWidget {
   const PremiumCard({
     required this.child,
@@ -273,12 +316,25 @@ class PremiumCard extends StatelessWidget {
     super.key,
   });
 
+  /// Contenu de la carte.
   final Widget child;
+
+  /// Variante de style.
   final PremiumCardVariant variant;
+
+  /// Padding interne.
   final EdgeInsetsGeometry padding;
+
+  /// Marge externe.
   final EdgeInsetsGeometry? margin;
+
+  /// Callback au tap.
   final VoidCallback? onTap;
+
+  /// Rayon des coins.
   final double borderRadius;
+
+  /// Couleur de fond personnalisée.
   final Color? color;
 
   @override
@@ -376,6 +432,7 @@ class _PressableState extends State<_Pressable> {
   }
 }
 
+/// Bouton vitré premium avec variantes (plein, contour, fantôme).
 class GlassButton extends StatelessWidget {
   const GlassButton({
     required this.label,
@@ -386,10 +443,19 @@ class GlassButton extends StatelessWidget {
     super.key,
   });
 
+  /// Texte du bouton.
   final String label;
+
+  /// Callback au tap.
   final VoidCallback? onPressed;
+
+  /// Icône optionnelle.
   final IconData? icon;
+
+  /// Variante de style.
   final GlassButtonVariant variant;
+
+  /// Prend toute la largeur disponible si vrai.
   final bool expand;
 
   @override
@@ -447,6 +513,7 @@ class GlassButton extends StatelessWidget {
   }
 }
 
+/// Bouton vitré avec contour (variante outline de [GlassButton]).
 class GlassOutlinedButton extends StatelessWidget {
   const GlassOutlinedButton({
     required this.label,
@@ -455,8 +522,13 @@ class GlassOutlinedButton extends StatelessWidget {
     super.key,
   });
 
+  /// Texte du bouton.
   final String label;
+
+  /// Callback au tap.
   final VoidCallback? onPressed;
+
+  /// Icône optionnelle.
   final IconData? icon;
 
   @override
@@ -470,6 +542,7 @@ class GlassOutlinedButton extends StatelessWidget {
   }
 }
 
+/// Champ de texte vitré avec effet glassmorphism.
 class GlassTextField extends StatelessWidget {
   const GlassTextField({
     this.controller,
@@ -542,10 +615,14 @@ class GlassTextField extends StatelessWidget {
   }
 }
 
+/// Barre de progression animée avec dégradé de couleurs.
 class AnimatedProgressBar extends StatelessWidget {
   const AnimatedProgressBar({required this.value, this.height = 8, super.key});
 
+  /// Valeur de progression (0.0 à 1.0).
   final double value;
+
+  /// Hauteur de la barre.
   final double height;
 
   @override
@@ -587,6 +664,7 @@ class AnimatedProgressBar extends StatelessWidget {
   }
 }
 
+/// Carte vitrée sélectionnable avec animation d'échelle.
 class SelectableGlassCard extends StatelessWidget {
   const SelectableGlassCard({
     required this.selected,
@@ -646,6 +724,7 @@ class SelectableGlassCard extends StatelessWidget {
   }
 }
 
+/// Badge avec effet de lueur (glow).
 class GlowBadge extends StatelessWidget {
   const GlowBadge({
     required this.label,
@@ -688,6 +767,7 @@ class GlowBadge extends StatelessWidget {
   }
 }
 
+/// En-tête flottant vitré avec titre, sous-titre et actions.
 class FloatingHeader extends StatelessWidget {
   const FloatingHeader({
     required this.title,
@@ -768,6 +848,7 @@ class FloatingHeader extends StatelessWidget {
   }
 }
 
+/// Conteneur de navigation vitré avec flou et ombres.
 class GlassNavigationContainer extends StatelessWidget {
   const GlassNavigationContainer({
     required this.child,
@@ -810,6 +891,7 @@ class GlassNavigationContainer extends StatelessWidget {
   }
 }
 
+/// Barre de navigation inférieure flottante et vitrée.
 class FloatingBottomNavigation extends StatelessWidget {
   const FloatingBottomNavigation({
     required this.currentIndex,
@@ -874,6 +956,7 @@ class FloatingBottomNavigation extends StatelessWidget {
   }
 }
 
+/// Destination pour la barre de navigation flottante [FloatingBottomNavigation].
 class FloatingBottomDestination {
   const FloatingBottomDestination({
     required this.icon,
@@ -881,8 +964,13 @@ class FloatingBottomDestination {
     this.selectedIcon,
   });
 
+  /// Icône par défaut.
   final IconData icon;
+
+  /// Libellé de la destination.
   final String label;
+
+  /// Icône alternative lorsque sélectionné.
   final IconData? selectedIcon;
 }
 

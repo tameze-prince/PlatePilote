@@ -7,6 +7,8 @@ import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../core/widgets/app_card.dart';
 
+/// Écran de répartition des coûts des courses.
+/// Affiche le total estimé, la répartition par catégorie et les articles les plus chers.
 class GroceryCostBreakdownScreen extends ConsumerStatefulWidget {
   const GroceryCostBreakdownScreen({super.key});
 
@@ -17,9 +19,13 @@ class GroceryCostBreakdownScreen extends ConsumerStatefulWidget {
 
 class _GroceryCostBreakdownScreenState
     extends ConsumerState<GroceryCostBreakdownScreen> {
+  /// Coût total estimé des courses.
   final double _totalCost = 142.85;
+
+  /// Budget hebdomadaire défini.
   final double _budget = 400;
 
+  /// Répartition des coûts par catégorie.
   final List<Map<String, dynamic>> _categories = [
     {
       'name': 'Produce',
@@ -63,6 +69,7 @@ class _GroceryCostBreakdownScreenState
     },
   ];
 
+  /// Articles les plus coûteux de la liste.
   final List<Map<String, dynamic>> _topItems = [
     {'name': 'Atlantic Salmon', 'cost': 19.48, 'quantity': '1.5 lb'},
     {'name': 'Chicken Breast', 'cost': 13.80, 'quantity': '2 lb'},
@@ -264,6 +271,7 @@ class _GroceryCostBreakdownScreenState
     );
   }
 
+  /// Construit une ligne de catégorie avec sa barre de progression.
   Widget _buildCategoryRow(Map<String, dynamic> cat) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -330,6 +338,7 @@ class _GroceryCostBreakdownScreenState
     );
   }
 
+  /// Construit une ligne d'article le plus coûteux.
   Widget _buildTopItemRow(int rank, Map<String, dynamic> item) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),

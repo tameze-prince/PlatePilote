@@ -1,3 +1,4 @@
+/// Modèle représentant un utilisateur.
 class User {
   const User({
     required this.id,
@@ -18,29 +19,47 @@ class User {
     this.createdAt,
   });
 
+  /// Identifiant unique.
   final String id;
+  /// Adresse email.
   final String email;
+  /// Prénom.
   final String? firstName;
+  /// Nom de famille.
   final String? lastName;
+  /// Date de naissance.
   final String? dateOfBirth;
+  /// Genre.
   final String? gender;
+  /// Taille en cm.
   final double? heightCm;
+  /// Poids en kg.
   final double? weightKg;
+  /// Niveau d'activité.
   final String? activityLevel;
+  /// Objectifs de santé.
   final String? healthGoals;
+  /// Code pays.
   final String? countryCode;
+  /// Code devise.
   final String? currencyCode;
+  /// Locale préférée.
   final String? locale;
+  /// Niveau de compétence culinaire.
   final String? cookingSkill;
+  /// Taille du foyer.
   final int? householdSize;
+  /// Date de création du compte.
   final String? createdAt;
 
+  /// Nom d'affichage complet.
   String get displayName {
     if (firstName != null && lastName != null) return '$firstName $lastName';
     if (firstName != null) return firstName!;
     return email;
   }
 
+  /// Crée un [User] depuis une map JSON.
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id']?.toString() ?? '',
@@ -62,6 +81,7 @@ class User {
     );
   }
 
+  /// Convertit cet [User] en map JSON.
   Map<String, dynamic> toJson() {
     return {
       'id': id,

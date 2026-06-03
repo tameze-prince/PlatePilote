@@ -10,6 +10,8 @@ import '../../core/widgets/app_card.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../core/repositories/auth_repository.dart';
 
+/// Écran de mot de passe oublié.
+/// Permet à l'utilisateur de demander un lien de réinitialisation par email.
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
@@ -19,9 +21,16 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
+  /// Contrôleur pour le champ email.
   final _emailController = TextEditingController();
+
+  /// Clé globale pour la validation du formulaire.
   final _formKey = GlobalKey<FormState>();
+
+  /// Indique si la requête est en cours.
   bool _isLoading = false;
+
+  /// Indique si l'email a été envoyé avec succès.
   bool _emailSent = false;
 
   @override
@@ -30,6 +39,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     super.dispose();
   }
 
+  /// Envoie le lien de réinitialisation à l'adresse email saisie.
   Future<void> _sendResetLink() async {
     if (!_formKey.currentState!.validate()) return;
 

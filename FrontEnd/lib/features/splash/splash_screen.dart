@@ -7,6 +7,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../core/providers/app_session_provider.dart';
 import '../auth/providers/auth_provider.dart';
 
+/// Écran de démarrage (splash) de l'application.
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -16,7 +17,9 @@ class SplashScreen extends ConsumerStatefulWidget {
 
 class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
+  /// Contrôleur d'animation pour le splash.
   late final AnimationController _controller;
+  /// Animation d'échelle du logo.
   late final Animation<double> _scaleAnim;
 
   @override
@@ -34,6 +37,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     _checkSession();
   }
 
+  /// Vérifie la session utilisateur et redirige.
   Future<void> _checkSession() async {
     await ref.read(authProvider.notifier).checkSession();
     if (!mounted) return;

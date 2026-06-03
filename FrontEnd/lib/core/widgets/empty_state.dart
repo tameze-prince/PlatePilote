@@ -4,6 +4,7 @@ import '../../app/theme/color_tokens.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 
+/// État vide affiché lorsqu'aucune donnée n'est disponible.
 class EmptyState extends StatelessWidget {
   const EmptyState({
     required this.icon,
@@ -12,8 +13,13 @@ class EmptyState extends StatelessWidget {
     super.key,
   });
 
+  /// Icône affichée au centre.
   final IconData icon;
+
+  /// Titre principal.
   final String title;
+
+  /// Message descriptif.
   final String message;
 
   @override

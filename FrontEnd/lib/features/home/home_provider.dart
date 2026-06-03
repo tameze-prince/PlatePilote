@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/repositories/dashboard_repository.dart';
 
+/// État de l'écran d'accueil.
+/// Contient les données du tableau de bord et l'état de chargement.
 class HomeState {
   const HomeState({
     this.isLoading = true,
@@ -9,10 +11,16 @@ class HomeState {
     this.errorMessage,
   });
 
+  /// Indique si le chargement est en cours.
   final bool isLoading;
+
+  /// Données du tableau de bord.
   final DashboardData? dashboard;
+
+  /// Message d'erreur éventuel.
   final String? errorMessage;
 
+  /// Crée une copie avec des champs mis à jour.
   HomeState copyWith({
     bool? isLoading,
     DashboardData? dashboard,
@@ -26,6 +34,7 @@ class HomeState {
   }
 }
 
+/// Notifier qui gère le chargement des données de l'accueil.
 class HomeNotifier extends Notifier<HomeState> {
   @override
   HomeState build() {
@@ -33,6 +42,7 @@ class HomeNotifier extends Notifier<HomeState> {
     return const HomeState(isLoading: true);
   }
 
+  /// Charge les données du tableau de bord.
   Future<void> loadHome() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
@@ -53,6 +63,7 @@ class HomeNotifier extends Notifier<HomeState> {
   }
 }
 
+/// Fournisseur de l'état de l'accueil.
 final homeProvider = NotifierProvider<HomeNotifier, HomeState>(
   HomeNotifier.new,
 );

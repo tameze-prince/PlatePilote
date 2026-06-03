@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import '../../app/theme/color_tokens.dart';
 import '../../core/extensions/theme_extensions.dart';
 
+/// Chip de sélection pour les catégories du garde-manger.
 class PantryChip extends StatelessWidget {
   const PantryChip({required this.label, this.selected = false, super.key});
 
+  /// Texte du chip.
   final String label;
+
+  /// État sélectionné (couleur pleine si vrai).
   final bool selected;
 
   @override

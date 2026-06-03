@@ -6,6 +6,7 @@ import 'app/app.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/providers/preferences_provider.dart';
 
+/// Point d'entrée de l'application PlatePilot.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final preferences = await SharedPreferences.getInstance();

@@ -5,6 +5,7 @@ import '../../../core/providers/preferences_provider.dart';
 import '../../../core/repositories/profile_repository.dart';
 import '../../auth/providers/auth_provider.dart';
 
+/// Profil utilisateur avec toutes les informations personnelles.
 class UserProfile {
   const UserProfile({
     this.displayName = '',
@@ -23,21 +24,36 @@ class UserProfile {
     this.avatarBytes,
   });
 
+  /// Nom d'affichage.
   final String displayName;
+  /// Adresse email.
   final String email;
+  /// Taille en cm.
   final double? heightCm;
+  /// Poids en kg.
   final double? weightKg;
+  /// Date de naissance (ISO 8601).
   final String? dateOfBirth;
+  /// Genre.
   final String? gender;
+  /// Niveau d'activité.
   final String? activityLevel;
+  /// Code pays (ISO 3166-1 alpha-2).
   final String countryCode;
+  /// Code devise (ISO 4217).
   final String currencyCode;
+  /// Code langue (ex: en-US).
   final String locale;
+  /// Niveau culinaire.
   final String? cookingSkill;
+  /// Taille du foyer.
   final int? householdSize;
+  /// Objectifs de santé.
   final String? healthGoals;
+  /// Avatar encodé en base64.
   final String? avatarBytes;
 
+  /// Âge calculé à partir de la date de naissance.
   int? get age {
     if (dateOfBirth == null) return null;
     try {
@@ -54,6 +70,7 @@ class UserProfile {
     }
   }
 
+  /// Score de complétion du profil (0-8).
   int get completeness {
     int score = 0;
     if (gender != null) score++;
@@ -67,6 +84,7 @@ class UserProfile {
     return score;
   }
 
+  /// Retourne une copie avec les champs modifiés.
   UserProfile copyWith({
     String? displayName,
     String? email,
@@ -101,6 +119,7 @@ class UserProfile {
     );
   }
 
+  /// Convertit en Map pour JSON.
   Map<String, dynamic> toJson() => {
         'displayName': displayName,
         'email': email,
@@ -118,6 +137,7 @@ class UserProfile {
         'avatarBytes': avatarBytes,
       };
 
+  /// Crée une instance depuis une Map JSON.
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
       displayName: json['displayName'] as String? ?? '',
@@ -138,10 +158,14 @@ class UserProfile {
   }
 }
 
+/// Notifier qui gère le profil utilisateur avec persistance locale et API.
 class ProfileNotifier extends Notifier<UserProfile> {
+  /// Clé SharedPreferences pour le profil.
   static const _key = 'profile.user';
+  /// Indique si des modifications non sauvegardées existent.
   bool _hasUnsavedChanges = false;
 
+  /// Vrai si des modifications non sauvegardées existent.
   bool get hasUnsavedChanges => _hasUnsavedChanges;
 
   @override
@@ -156,6 +180,7 @@ class ProfileNotifier extends Notifier<UserProfile> {
     return const UserProfile();
   }
 
+  /// Charge les données du profil depuis l'API.
   Future<void> loadFromApi() async {
     try {
       final repo = ref.read(profileRepositoryProvider);
@@ -181,6 +206,7 @@ class ProfileNotifier extends Notifier<UserProfile> {
     } catch (_) {}
   }
 
+  /// Met à jour un ou plusieurs champs du profil.
   Future<void> updateProfile({
     String? displayName,
     String? email,
@@ -215,6 +241,7 @@ class ProfileNotifier extends Notifier<UserProfile> {
     await _persist();
   }
 
+  /// Sauvegarde le profil via l'API.
   Future<void> saveToApi() async {
     final repo = ref.read(profileRepositoryProvider);
     await repo.updateProfile(
@@ -232,18 +259,21 @@ class ProfileNotifier extends Notifier<UserProfile> {
     _hasUnsavedChanges = false;
   }
 
+  /// Définit l'avatar (base64).
   Future<void> setAvatarBytes(String? bytes) async {
     state = state.copyWith(avatarBytes: bytes);
     _hasUnsavedChanges = true;
     await _persist();
   }
 
+  /// Persiste le profil en local.
   Future<void> _persist() async {
     await ref
         .read(sharedPreferencesProvider)
         .setString(_key, json.encode(state.toJson()));
   }
 
+  /// Construit le nom d'affichage à partir des données API et auth.
   String _buildDisplayName(Map<String, dynamic> apiProfile, String? authName) {
     if (authName != null && authName.isNotEmpty) return authName;
     final firstName = apiProfile['firstName'] as String?;
@@ -253,10 +283,12 @@ class ProfileNotifier extends Notifier<UserProfile> {
   }
 }
 
+/// Provider Riverpod pour le profil utilisateur.
 final profileProvider = NotifierProvider<ProfileNotifier, UserProfile>(
   ProfileNotifier.new,
 );
 
+/// Provider du taux de complétion du profil (0.0 - 1.0).
 final profileCompletenessProvider = Provider<double>((ref) {
   final profile = ref.watch(profileProvider);
   const totalFields = 8;

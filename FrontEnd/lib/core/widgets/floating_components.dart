@@ -9,7 +9,7 @@ import '../../app/theme/app_typography.dart';
 import '../../app/theme/app_elevation.dart';
 import '../premium_components.dart';
 
-/// Floating navigation bar with blur effect
+/// Barre de navigation flottante avec effet de flou.
 class FloatingNavigationBar extends StatelessWidget {
   const FloatingNavigationBar({
     required this.currentIndex,
@@ -23,13 +23,28 @@ class FloatingNavigationBar extends StatelessWidget {
     super.key,
   });
 
+  /// Index de la destination sélectionnée.
   final int currentIndex;
+
+  /// Callback lors de la sélection d'une destination.
   final ValueChanged<int> onDestinationSelected;
+
+  /// Liste des destinations de navigation.
   final List<FloatingNavDestination> destinations;
+
+  /// Marge extérieure du conteneur.
   final EdgeInsetsGeometry? margin;
+
+  /// Intensité du flou.
   final double blurSigma;
+
+  /// Couleur de fond personnalisée.
   final Color? backgroundColor;
+
+  /// Couleur de bordure personnalisée.
   final Color? borderColor;
+
+  /// Élévation optionnelle.
   final double? elevation;
 
   @override
@@ -110,7 +125,7 @@ class FloatingNavigationBar extends StatelessWidget {
   }
 }
 
-/// Destination item for floating navigation bar
+/// Élément de destination pour la barre de navigation flottante.
 class FloatingNavDestination {
   const FloatingNavDestination({
     required this.icon,
@@ -119,13 +134,20 @@ class FloatingNavDestination {
     this.badge,
   });
 
+  /// Icône par défaut.
   final IconData icon;
+
+  /// Libellé de la destination.
   final String label;
+
+  /// Icône alternative lorsque sélectionné.
   final IconData? selectedIcon;
+
+  /// Badge optionnel (ex: compteur de notifications).
   final Widget? badge;
 }
 
-/// Floating search bar with blur effect
+/// Barre de recherche flottante avec effet de flou.
 class FloatingSearchBar extends StatefulWidget {
   const FloatingSearchBar({
     this.controller,
@@ -143,17 +165,40 @@ class FloatingSearchBar extends StatefulWidget {
     super.key,
   });
 
+  /// Contrôleur de texte optionnel.
   final TextEditingController? controller;
+
+  /// Texte indicatif.
   final String? hintText;
+
+  /// Callback à chaque changement de texte.
   final ValueChanged<String>? onChanged;
+
+  /// Callback à la soumission du texte.
   final ValueChanged<String>? onSubmitted;
+
+  /// Callback au tap sur le champ.
   final VoidCallback? onTap;
+
+  /// Marge extérieure.
   final EdgeInsetsGeometry? margin;
+
+  /// Intensité du flou.
   final double blurSigma;
+
+  /// Couleur de fond personnalisée.
   final Color? backgroundColor;
+
+  /// Couleur de bordure personnalisée.
   final Color? borderColor;
+
+  /// Élévation optionnelle.
   final double? elevation;
+
+  /// Widget précédant le champ de recherche.
   final Widget? leading;
+
+  /// Widget suivant le champ de recherche.
   final Widget? trailing;
 
   @override
@@ -277,7 +322,7 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
   }
 }
 
-/// Floating action button with blur effect
+/// Bouton d'action flottant avec effet de flou.
 class FloatingButton extends StatelessWidget {
   const FloatingButton({
     required this.child,
@@ -292,14 +337,31 @@ class FloatingButton extends StatelessWidget {
     super.key,
   });
 
+  /// Contenu du bouton.
   final Widget child;
+
+  /// Callback au tap.
   final VoidCallback? onPressed;
+
+  /// Marge extérieure.
   final EdgeInsetsGeometry? margin;
+
+  /// Intensité du flou.
   final double blurSigma;
+
+  /// Couleur de fond personnalisée.
   final Color? backgroundColor;
+
+  /// Couleur du texte/icône.
   final Color? foregroundColor;
+
+  /// Couleur de bordure personnalisée.
   final Color? borderColor;
+
+  /// Élévation optionnelle.
   final double? elevation;
+
+  /// Taille du bouton (largeur et hauteur).
   final double size;
 
   @override
@@ -346,7 +408,7 @@ class FloatingButton extends StatelessWidget {
   }
 }
 
-/// Floating app bar with blur effect
+/// Barre d'application flottante avec effet de flou.
 class FloatingAppBar extends StatelessWidget implements PreferredSizeWidget {
   const FloatingAppBar({
     this.title,
@@ -360,13 +422,28 @@ class FloatingAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
   });
 
+  /// Titre affiché dans la barre.
   final Widget? title;
+
+  /// Widget précédant le titre.
   final Widget? leading;
+
+  /// Liste d'actions (icônes) affichées à droite.
   final List<Widget>? actions;
+
+  /// Intensité du flou.
   final double blurSigma;
+
+  /// Couleur de fond personnalisée.
   final Color? backgroundColor;
+
+  /// Couleur de bordure personnalisée.
   final Color? borderColor;
+
+  /// Élévation optionnelle.
   final double? elevation;
+
+  /// Marge extérieure.
   final EdgeInsetsGeometry? margin;
 
   @override

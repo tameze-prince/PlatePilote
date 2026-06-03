@@ -5,6 +5,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 import 'app_card.dart';
 
+/// Carte affichant un résumé des économies du mois.
 class SavingsCard extends StatelessWidget {
   const SavingsCard({super.key});
 

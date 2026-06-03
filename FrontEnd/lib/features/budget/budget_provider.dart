@@ -4,6 +4,7 @@ import '../../core/repositories/base_repository.dart';
 import '../../shared/models/budget.dart';
 import 'budget_repository.dart';
 
+/// État du budget.
 class BudgetState {
   const BudgetState({
     this.currentBudget,
@@ -15,17 +16,27 @@ class BudgetState {
     this.useDemoFallback = false,
   });
 
+  /// Budget actuel (depuis l'API).
   final Budget? currentBudget;
+  /// Montant du budget hebdomadaire.
   final double weeklyBudget;
+  /// Montant dépensé.
   final double spentAmount;
+  /// Historique des cycles précédents.
   final List<double> history;
+  /// Vrai si le chargement est en cours.
   final bool isLoading;
+  /// Message d'erreur.
   final String? error;
+  /// Vrai si on utilise des données de démonstration.
   final bool useDemoFallback;
 
+  /// Montant restant.
   double get remaining => weeklyBudget - spentAmount;
+  /// Pourcentage utilisé (0.0 - 1.0).
   double get percentUsed => weeklyBudget > 0 ? (spentAmount / weeklyBudget).clamp(0, 1) : 0;
 
+  /// Retourne une copie avec les champs modifiés.
   BudgetState copyWith({
     Budget? currentBudget,
     double? weeklyBudget,
@@ -48,6 +59,7 @@ class BudgetState {
   }
 }
 
+/// Notifier qui gère l'état du budget.
 class BudgetNotifier extends Notifier<BudgetState> {
   @override
   BudgetState build() {
@@ -55,6 +67,7 @@ class BudgetNotifier extends Notifier<BudgetState> {
     return const BudgetState(isLoading: true, useDemoFallback: true);
   }
 
+  /// Charge le budget depuis l'API.
   Future<void> _loadBudget() async {
     try {
       final repo = ref.read(budgetRepositoryProvider);
@@ -71,6 +84,7 @@ class BudgetNotifier extends Notifier<BudgetState> {
     }
   }
 
+  /// Crée un nouveau budget via l'API.
   Future<void> createBudget({required double amount, String period = 'WEEKLY'}) async {
     final now = DateTime.now();
     final startDate = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
@@ -90,12 +104,14 @@ class BudgetNotifier extends Notifier<BudgetState> {
     }
   }
 
+  /// Augmente le budget d'une valeur donnée.
   void increaseBudget(double value) {
     state = state.copyWith(
       weeklyBudget: state.weeklyBudget + value,
     );
   }
 
+  /// Remplace le budget par une nouvelle valeur.
   void replaceBudget(double value) {
     state = state.copyWith(
       weeklyBudget: value,
@@ -103,6 +119,7 @@ class BudgetNotifier extends Notifier<BudgetState> {
     );
   }
 
+  /// Réinitialise le cycle et archive les dépenses dans l'historique.
   void resetCycle() {
     state = state.copyWith(
       history: [...state.history, state.spentAmount],
@@ -110,9 +127,11 @@ class BudgetNotifier extends Notifier<BudgetState> {
     );
   }
 
+  /// Recharge le budget depuis l'API.
   Future<void> refresh() => _loadBudget();
 }
 
+/// Provider Riverpod pour le budget.
 final budgetProvider = NotifierProvider<BudgetNotifier, BudgetState>(
   BudgetNotifier.new,
 );

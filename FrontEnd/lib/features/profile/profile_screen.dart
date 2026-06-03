@@ -16,6 +16,7 @@ import '../auth/providers/auth_provider.dart';
 import '../auth/providers/auth_state.dart';
 import 'providers/profile_provider.dart';
 
+/// Écran du profil utilisateur avec paramètres et navigation.
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
@@ -24,6 +25,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  /// Indique si la sauvegarde est en cours.
   bool _saving = false;
 
   @override
@@ -34,6 +36,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     });
   }
 
+  /// Ouvre le sélecteur d'image pour l'avatar.
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final image = await picker.pickImage(
@@ -47,6 +50,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     await ref.read(profileProvider.notifier).setAvatarBytes(base64);
   }
 
+  /// Sauvegarde les modifications du profil via l'API.
   Future<void> _saveProfile() async {
     setState(() => _saving = true);
     try {
@@ -199,6 +203,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
+  /// Construit un titre de section.
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(left: AppSpacing.xs),
@@ -213,9 +218,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 }
 
+/// Carte indiquant le taux de complétion du profil.
 class _ProfileCompleteness extends ConsumerWidget {
   const _ProfileCompleteness({required this.profile});
 
+  /// Profil utilisateur.
   final UserProfile profile;
 
   @override
@@ -263,6 +270,7 @@ class _ProfileCompleteness extends ConsumerWidget {
     );
   }
 
+  /// Affiche une boîte de dialogue avec la liste des champs manquants.
   void _showMissingInfo(BuildContext context, UserProfile profile) {
     final missing = <String>[];
     if (profile.gender == null) missing.add('Gender');
@@ -310,7 +318,6 @@ class _ProfileCompleteness extends ConsumerWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              // Scroll to the bottom of the profile form
             },
             child: const Text('Fill Now'),
           ),
@@ -320,6 +327,7 @@ class _ProfileCompleteness extends ConsumerWidget {
   }
 }
 
+/// Carte d'en-tête du profil avec avatar et informations.
 class _ProfileHeaderCard extends ConsumerWidget {
   const _ProfileHeaderCard({
     required this.profile,
@@ -327,8 +335,11 @@ class _ProfileHeaderCard extends ConsumerWidget {
     required this.onAvatarTap,
   });
 
+  /// Profil utilisateur.
   final UserProfile profile;
+  /// État d'authentification.
   final AuthState authState;
+  /// Callback au tap sur l'avatar.
   final VoidCallback onAvatarTap;
 
   @override
@@ -379,20 +390,20 @@ class _ProfileHeaderCard extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                  Text(
-                    authState.name ?? profile.displayName,
-                    style: AppTypography.headlineSmall.copyWith(
-                      color: PremiumTheme.textPrimary(context),
-                      fontWeight: FontWeight.w700,
-                    ),
+                Text(
+                  authState.name ?? profile.displayName,
+                  style: AppTypography.headlineSmall.copyWith(
+                    color: PremiumTheme.textPrimary(context),
+                    fontWeight: FontWeight.w700,
                   ),
+                ),
                 const SizedBox(height: 2),
-                  Text(
-                    authState.email ?? profile.email,
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: PremiumTheme.textSecondary(context),
-                    ),
+                Text(
+                  authState.email ?? profile.email,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: PremiumTheme.textSecondary(context),
                   ),
+                ),
               ],
             ),
           ),
@@ -422,9 +433,11 @@ class _ProfileHeaderCard extends ConsumerWidget {
   }
 }
 
+/// Carte des informations personnelles éditables.
 class _ProfileInfoCard extends ConsumerWidget {
   const _ProfileInfoCard({required this.profile});
 
+  /// Profil utilisateur.
   final UserProfile profile;
 
   @override
@@ -560,6 +573,7 @@ class _ProfileInfoCard extends ConsumerWidget {
     );
   }
 
+  /// Affiche un dialogue de saisie textuelle.
   void _showEditDialog(
     BuildContext context,
     String field,
@@ -590,6 +604,7 @@ class _ProfileInfoCard extends ConsumerWidget {
     );
   }
 
+  /// Affiche un dialogue de saisie numérique.
   void _showNumberDialog(
     BuildContext context,
     String field,
@@ -624,6 +639,7 @@ class _ProfileInfoCard extends ConsumerWidget {
     );
   }
 
+  /// Affiche un sélecteur de date.
   void _showDatePicker(BuildContext context, ValueChanged<String?> onSave) {
     showDatePicker(
       context: context,
@@ -637,6 +653,7 @@ class _ProfileInfoCard extends ConsumerWidget {
     });
   }
 
+  /// Affiche un sélecteur par liste d'options.
   void _showPicker(
     BuildContext context,
     String title,
@@ -662,6 +679,7 @@ class _ProfileInfoCard extends ConsumerWidget {
   }
 }
 
+/// Ligne éditable avec icône, label et valeur.
 class _EditableRow extends StatelessWidget {
   const _EditableRow({
     required this.label,
@@ -670,9 +688,13 @@ class _EditableRow extends StatelessWidget {
     this.onTap,
   });
 
+  /// Label du champ.
   final String label;
+  /// Valeur affichée.
   final String value;
+  /// Icône optionnelle.
   final IconData? icon;
+  /// Callback de modification.
   final VoidCallback? onTap;
 
   @override
@@ -731,6 +753,7 @@ class _EditableRow extends StatelessWidget {
   }
 }
 
+/// Carte de navigation vers un écran.
 class _NavigationCard extends StatelessWidget {
   const _NavigationCard({
     required this.icon,
@@ -739,9 +762,13 @@ class _NavigationCard extends StatelessWidget {
     required this.onTap,
   });
 
+  /// Icône de la carte.
   final IconData icon;
+  /// Titre de la carte.
   final String title;
+  /// Sous-titre de la carte.
   final String subtitle;
+  /// Callback de navigation.
   final VoidCallback onTap;
 
   @override
@@ -795,6 +822,7 @@ class _NavigationCard extends StatelessWidget {
   }
 }
 
+/// Sélecteur de thème (clair / système / sombre).
 class _ThemeSelector extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -858,6 +886,7 @@ class _ThemeSelector extends ConsumerWidget {
   }
 }
 
+/// Bouton de sauvegarde du profil avec détection de changements.
 class _SaveProfileButton extends StatelessWidget {
   const _SaveProfileButton({
     required this.hasChanges,
@@ -865,8 +894,11 @@ class _SaveProfileButton extends StatelessWidget {
     required this.onSave,
   });
 
+  /// Vrai si des modifications non sauvegardées existent.
   final bool hasChanges;
+  /// Vrai si la sauvegarde est en cours.
   final bool saving;
+  /// Callback de sauvegarde.
   final VoidCallback onSave;
 
   @override
@@ -935,6 +967,7 @@ class _SaveProfileButton extends StatelessWidget {
   }
 }
 
+/// Zone de danger avec déconnexion et suppression de compte.
 class _DangerZone extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -996,6 +1029,7 @@ class _DangerZone extends ConsumerWidget {
     );
   }
 
+  /// Affiche la confirmation de suppression de compte.
   void _showDeleteConfirmation(BuildContext context) {
     showDialog(
       context: context,

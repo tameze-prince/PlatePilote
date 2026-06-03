@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Représente un repas dans les données de démonstration.
 class Meal {
   const Meal({
     required this.day,
@@ -14,18 +15,29 @@ class Meal {
     this.recipeId,
   });
 
+  /// Jour de la semaine.
   final String day;
+  /// Type de repas (Breakfast, Lunch, Dinner).
   final String type;
+  /// Titre du repas.
   final String title;
+  /// Temps de préparation en minutes.
   final int minutes;
+  /// Calories du repas.
   final int kcal;
+  /// Icône représentative.
   final IconData icon;
+  /// Couleur d'accentuation.
   final Color tint;
+  /// Indique si le repas est verrouillé.
   final bool locked;
+  /// URL de l'image.
   final String? imageUrl;
+  /// Identifiant de la recette associée.
   final String? recipeId;
 }
 
+/// Article de liste de courses (démo).
 class GroceryItem {
   const GroceryItem({
     required this.name,
@@ -35,13 +47,19 @@ class GroceryItem {
     this.checked = false,
   });
 
+  /// Nom de l'article.
   final String name;
+  /// Quantité.
   final String quantity;
+  /// Prix.
   final String price;
+  /// Catégorie.
   final String category;
+  /// Indique si l'article est coché.
   final bool checked;
 }
 
+/// Article du garde-manger (démo).
 class PantryItem {
   const PantryItem({
     required this.name,
@@ -52,14 +70,21 @@ class PantryItem {
     required this.urgent,
   });
 
+  /// Nom de l'article.
   final String name;
+  /// Quantité.
   final String quantity;
+  /// Date d'expiration.
   final String expires;
+  /// Catégorie.
   final String category;
+  /// Icône représentative.
   final IconData icon;
+  /// Indique si l'article est urgent.
   final bool urgent;
 }
 
+/// Liste de repas de démonstration pour la semaine.
 const demoMeals = <Meal>[
   Meal(
     day: 'Mon',
@@ -127,6 +152,7 @@ const demoMeals = <Meal>[
   ),
 ];
 
+/// Liste des repas du jour (démo).
 const todayMeals = <Meal>[
   Meal(
     day: 'Today',
@@ -157,6 +183,7 @@ const todayMeals = <Meal>[
   ),
 ];
 
+/// Liste d'articles de courses de démonstration.
 const groceryItems = <GroceryItem>[
   GroceryItem(
     name: 'Organic Honeycrisp Apples',
@@ -208,6 +235,7 @@ const groceryItems = <GroceryItem>[
   ),
 ];
 
+/// Liste d'articles de garde-manger de démonstration.
 const pantryItems = <PantryItem>[
   PantryItem(
     name: 'Fresh Spinach',

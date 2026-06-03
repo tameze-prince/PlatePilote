@@ -7,6 +7,7 @@ import '../../core/widgets/primary_button.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 import 'subscription_provider.dart';
 
+/// Écran de gestion du moyen de paiement.
 class PaymentMethodScreen extends ConsumerStatefulWidget {
   const PaymentMethodScreen({super.key});
 
@@ -16,7 +17,9 @@ class PaymentMethodScreen extends ConsumerStatefulWidget {
 }
 
 class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
+  /// Clé du formulaire pour la validation.
   final _formKey = GlobalKey<FormState>();
+  /// Contrôleur du champ de carte.
   final _cardController = TextEditingController();
 
   @override

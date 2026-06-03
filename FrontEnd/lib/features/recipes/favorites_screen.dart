@@ -10,6 +10,7 @@ import '../../core/premium_components.dart';
 import '../../core/repositories/recipe_repository.dart';
 import '../../core/widgets/empty_state.dart';
 
+/// Écran des recettes favorites de l'utilisateur.
 class FavoritesScreen extends ConsumerStatefulWidget {
   const FavoritesScreen({super.key});
 
@@ -18,8 +19,11 @@ class FavoritesScreen extends ConsumerStatefulWidget {
 }
 
 class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
+  /// Liste des recettes favorites.
   List<RecipeDetail> _favorites = [];
+  /// Vrai si le chargement est en cours.
   bool _isLoading = true;
+  /// Message d'erreur éventuel.
   String? _error;
 
   @override
@@ -28,6 +32,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
     _loadFavorites();
   }
 
+  /// Charge les favoris depuis l'API.
   Future<void> _loadFavorites() async {
     setState(() => _isLoading = true);
     try {
@@ -51,6 +56,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
     }
   }
 
+  /// Retire une recette des favoris.
   Future<void> _removeFavorite(RecipeDetail recipe) async {
     final success =
         await ref.read(recipeRepositoryProvider).unfavoriteRecipe(recipe.id!);
@@ -101,6 +107,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
     );
   }
 
+  /// Construit une carte de recette favorite.
   Widget _buildFavoriteCard(RecipeDetail recipe) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),

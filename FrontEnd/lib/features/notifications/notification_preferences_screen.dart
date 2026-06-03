@@ -5,6 +5,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 import 'notifications_provider.dart';
 
+/// Écran des préférences de notifications.
 class NotificationPreferencesScreen extends ConsumerWidget {
   const NotificationPreferencesScreen({super.key});
 

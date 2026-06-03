@@ -10,9 +10,11 @@ import '../../core/premium_components.dart';
 import '../../core/repositories/recipe_repository.dart';
 import '../../shared/widgets/recipe_image.dart';
 
+/// Écran des détails d'une recette.
 class RecipeDetailsScreen extends ConsumerStatefulWidget {
   const RecipeDetailsScreen({required this.recipeId, super.key});
 
+  /// Identifiant de la recette.
   final String recipeId;
 
   @override
@@ -21,8 +23,11 @@ class RecipeDetailsScreen extends ConsumerStatefulWidget {
 }
 
 class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
+  /// Recette chargée depuis l'API.
   RecipeDetail? _recipe;
+  /// Indique si le chargement est en cours.
   bool _isLoading = true;
+  /// Message d'erreur éventuel.
   String? _error;
 
   @override
@@ -31,6 +36,7 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
     _loadRecipe();
   }
 
+  /// Charge les détails de la recette depuis l'API.
   Future<void> _loadRecipe() async {
     setState(() => _isLoading = true);
     try {
@@ -72,10 +78,12 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
     );
   }
 
+  /// Affiche l'état de chargement.
   Widget _buildLoading() {
     return const Center(child: CircularProgressIndicator());
   }
 
+  /// Affiche l'état d'erreur.
   Widget _buildError() {
     return Center(
       child: Column(
@@ -99,6 +107,7 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
     );
   }
 
+  /// Affiche le contenu de la recette.
   Widget _buildContent() {
     final recipe = _recipe!;
 
@@ -338,10 +347,13 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
   }
 }
 
+/// Pastille d'information pour une recette.
 class _InfoChip extends StatelessWidget {
   const _InfoChip({required this.icon, required this.label});
 
+  /// Icône de la pastille.
   final IconData icon;
+  /// Libellé de la pastille.
   final String label;
 
   @override

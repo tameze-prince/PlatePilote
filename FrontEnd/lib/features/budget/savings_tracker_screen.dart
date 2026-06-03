@@ -8,6 +8,7 @@ import '../../core/extensions/theme_extensions.dart';
 import '../../core/widgets/app_card.dart';
 import 'budget_repository.dart';
 
+/// Écran de suivi des économies réalisées.
 class SavingsTrackerScreen extends ConsumerStatefulWidget {
   const SavingsTrackerScreen({super.key});
 
@@ -17,10 +18,15 @@ class SavingsTrackerScreen extends ConsumerStatefulWidget {
 }
 
 class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
+  /// Montant total économisé.
   double _totalSaved = 0;
+  /// Objectif mensuel.
   double _monthlyGoal = 0;
+  /// Historique mensuel des économies.
   List<Map<String, dynamic>> _monthlyHistory = [];
+  /// Sources d'économies.
   List<Map<String, dynamic>> _savingsSources = [];
+  /// Vrai si le chargement est en cours.
   bool _isLoading = true;
 
   @override
@@ -29,6 +35,7 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadSavings());
   }
 
+  /// Charge les données d'économies depuis l'API.
   Future<void> _loadSavings() async {
     try {
       final repo = ref.read(budgetRepositoryProvider);
@@ -266,6 +273,7 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
     );
   }
 
+  /// Construit une ligne de source d'économie.
   Widget _buildSourceRow(Map<String, dynamic> source) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -321,6 +329,7 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
     );
   }
 
+  /// Construit une carte de succès (achievement).
   Widget _buildAchievement({
     required IconData icon,
     required String title,
@@ -380,9 +389,13 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
   }
 }
 
+/// Peintre personnalisé pour le graphique d'économies mensuelles.
 class _SavingsChartPainter extends CustomPainter {
+  /// Données mensuelles.
   final List<Map<String, dynamic>> data;
+  /// Couleur des barres d'économies.
   final Color barColor;
+  /// Couleur de la ligne d'objectif.
   final Color targetColor;
 
   _SavingsChartPainter({

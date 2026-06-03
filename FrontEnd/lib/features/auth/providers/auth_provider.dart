@@ -9,12 +9,15 @@ import '../../../core/services/secure_storage_service.dart';
 import '../../onboarding/onboarding_state.dart';
 import 'auth_state.dart';
 
+/// Notifier qui gère l'état d'authentification.
+/// Vérifie la session, connecte/déconnecte l'utilisateur et gère les tokens.
 class AuthNotifier extends Notifier<AuthState> {
   @override
   AuthState build() {
     return const AuthState();
   }
 
+  /// Vérifie la session existante et tente un refresh si les tokens sont expirés.
   Future<void> checkSession() async {
     final secureStorage = ref.read(secureStorageProvider);
     final hasTokens = await secureStorage.hasTokens();
@@ -62,6 +65,8 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  /// Connecte l'utilisateur avec email et mot de passe.
+  /// Retourne true si la connexion a réussi.
   Future<bool> login({required String email, required String password}) async {
     state = const AuthState(isLoading: true);
 
@@ -87,6 +92,8 @@ class AuthNotifier extends Notifier<AuthState> {
     return false;
   }
 
+  /// Enregistre un nouvel utilisateur.
+  /// Retourne true si l'inscription a réussi.
   Future<bool> register({
     required String firstName,
     required String lastName,
@@ -126,6 +133,7 @@ class AuthNotifier extends Notifier<AuthState> {
     return false;
   }
 
+  /// Synchronise les préférences de l'onboarding avec le profil utilisateur.
   Future<void> _syncOnboardingPreferences() async {
     try {
       final onboarding = ref.read(onboardingProvider);
@@ -148,6 +156,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (_) {}
   }
 
+  /// Vérifie l'email avec le token fourni.
   Future<bool> verifyEmail(String token) async {
     final repo = ref.read(authRepositoryProvider);
     final success = await repo.verifyEmail(token);
@@ -157,11 +166,13 @@ class AuthNotifier extends Notifier<AuthState> {
     return success;
   }
 
+  /// Renvoie l'email de vérification.
   Future<bool> resendVerification({required String email}) async {
     final repo = ref.read(authRepositoryProvider);
     return repo.resendVerification(email);
   }
 
+  /// Connecte l'utilisateur avec Google OAuth2.
   Future<bool> signInWithGoogle() async {
     state = const AuthState(isLoading: true);
     try {
@@ -190,6 +201,7 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  /// Connecte l'utilisateur avec Apple OAuth2.
   Future<bool> signInWithApple() async {
     state = const AuthState(isLoading: true);
     try {
@@ -218,6 +230,7 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  /// Déconnecte l'utilisateur et efface les tokens.
   Future<void> logout() async {
     final secureStorage = ref.read(secureStorageProvider);
     final refreshToken = await secureStorage.getRefreshToken();
@@ -231,6 +244,7 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 }
 
+/// Fournisseur global de l'état d'authentification.
 final authProvider = NotifierProvider<AuthNotifier, AuthState>(
   AuthNotifier.new,
 );

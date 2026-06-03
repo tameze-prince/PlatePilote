@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 
+/// Bottom sheet de filtres pour la recherche.
 class FilterBottomSheet extends StatelessWidget {
   const FilterBottomSheet({super.key});
 

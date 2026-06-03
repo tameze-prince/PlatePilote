@@ -12,6 +12,7 @@ import '../../core/widgets/modern_animations.dart';
 import '../../core/widgets/floating_components.dart';
 import '../../core/premium_components.dart';
 
+/// Écran des paramètres de l'application.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -37,7 +38,6 @@ class SettingsScreen extends ConsumerWidget {
         safeArea: false,
         child: CustomScrollView(
           slivers: [
-          // Floating App Bar
           SliverToBoxAdapter(
             child: FloatingAppBar(
               title: Text(
@@ -58,8 +58,7 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
           ),
-          
-          // Content
+
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(
@@ -71,7 +70,7 @@ class SettingsScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: AppSpacing.md),
-                  
+
                   // Profile Card
                   AnimatedListItem(
                     child: ModernCard(
@@ -128,13 +127,12 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.lg),
-                  
-                  // Settings Sections
+
                   _buildSectionTitle(context, isDark, 'Account'),
                   const SizedBox(height: AppSpacing.sm),
-                  
+
                   AnimatedListItem(
                     delay: 1,
                     child: InfoCard(
@@ -145,9 +143,9 @@ class SettingsScreen extends ConsumerWidget {
                       onTap: () => context.push('/preferences'),
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.xs),
-                  
+
                   AnimatedListItem(
                     delay: 2,
                     child: InfoCard(
@@ -158,9 +156,9 @@ class SettingsScreen extends ConsumerWidget {
                       onTap: () => context.push('/budget'),
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.xs),
-                  
+
                   AnimatedListItem(
                     delay: 3,
                     child: InfoCard(
@@ -171,9 +169,9 @@ class SettingsScreen extends ConsumerWidget {
                       onTap: () => context.push('/language'),
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.xs),
-                  
+
                   AnimatedListItem(
                     delay: 4,
                     child: InfoCard(
@@ -184,9 +182,9 @@ class SettingsScreen extends ConsumerWidget {
                       onTap: () => context.push('/notification-preferences'),
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.xs),
-                  
+
                   AnimatedListItem(
                     delay: 5,
                     child: InfoCard(
@@ -197,12 +195,12 @@ class SettingsScreen extends ConsumerWidget {
                       onTap: () => context.push('/recipes/add'),
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.lg),
-                  
+
                   _buildSectionTitle(context, isDark, 'Appearance'),
                   const SizedBox(height: AppSpacing.sm),
-                  
+
                   AnimatedListItem(
                     delay: 6,
                     child: ModernCard(
@@ -270,12 +268,12 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.lg),
-                  
+
                   _buildSectionTitle(context, isDark, 'Subscription'),
                   const SizedBox(height: AppSpacing.sm),
-                  
+
                   AnimatedListItem(
                     delay: 7,
                     child: ModernCard(
@@ -364,12 +362,12 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.lg),
-                  
+
                   _buildSectionTitle(context, isDark, 'Support'),
                   const SizedBox(height: AppSpacing.sm),
-                  
+
                   AnimatedListItem(
                     delay: 8,
                     child: InfoCard(
@@ -380,9 +378,9 @@ class SettingsScreen extends ConsumerWidget {
                       onTap: () {},
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.xs),
-                  
+
                   AnimatedListItem(
                     delay: 9,
                     child: InfoCard(
@@ -393,9 +391,9 @@ class SettingsScreen extends ConsumerWidget {
                       onTap: () {},
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.xs),
-                  
+
                   AnimatedListItem(
                     delay: 10,
                     child: InfoCard(
@@ -406,10 +404,9 @@ class SettingsScreen extends ConsumerWidget {
                       onTap: () {},
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.xl),
-                  
-                  // Logout Button
+
                   AnimatedListItem(
                     delay: 11,
                     child: TextButton.icon(
@@ -438,6 +435,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
+  /// Construit un titre de section.
   Widget _buildSectionTitle(
     BuildContext context,
     bool isDark,

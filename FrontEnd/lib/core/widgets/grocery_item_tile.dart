@@ -7,6 +7,7 @@ import '../../core/extensions/theme_extensions.dart';
 import '../../shared/models/grocery_list.dart';
 import 'app_card.dart';
 
+/// Tuile d'article de liste de courses avec actions de balayage (modifier, supprimer).
 class GroceryItemTile extends StatefulWidget {
   const GroceryItemTile({
     required this.item,
@@ -16,9 +17,16 @@ class GroceryItemTile extends StatefulWidget {
     super.key,
   });
 
+  /// L'article de courses à afficher.
   final GroceryItem item;
+
+  /// Callback pour basculer l'état coché/décoché.
   final void Function()? onToggle;
+
+  /// Callback pour modifier l'article.
   final void Function()? onEdit;
+
+  /// Callback pour supprimer l'article.
   final void Function()? onDelete;
 
   @override

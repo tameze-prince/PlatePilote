@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 
+/// Bouton principal (FilledButton) avec icône et libellé.
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({
     required this.label,
@@ -11,8 +12,13 @@ class PrimaryButton extends StatelessWidget {
     super.key,
   });
 
+  /// Texte du bouton.
   final String label;
+
+  /// Callback au tap.
   final VoidCallback? onPressed;
+
+  /// Icône optionnelle (flèche par défaut).
   final IconData? icon;
 
   @override

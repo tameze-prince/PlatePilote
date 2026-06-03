@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 
+/// Écran affiché lorsque l'application est hors ligne.
 class OfflineScreen extends StatelessWidget {
   const OfflineScreen({super.key});
 

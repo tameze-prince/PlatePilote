@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/network/api_client.dart';
 
+/// État de l'abonnement utilisateur.
 class SubscriptionState {
   const SubscriptionState({
     this.isLoading = true,
@@ -14,14 +15,22 @@ class SubscriptionState {
     this.errorMessage,
   });
 
+  /// Vrai si le chargement est en cours.
   final bool isLoading;
+  /// Vrai si l'utilisateur est Premium.
   final bool isPremium;
+  /// Nom du plan (FREE, PREMIUM, etc.).
   final String planName;
+  /// Statut de l'abonnement.
   final String? status;
+  /// Date de fin d'essai.
   final String? trialEndDate;
+  /// Vrai si l'abonnement est résilié en fin de période.
   final bool cancelAtPeriodEnd;
+  /// Message d'erreur éventuel.
   final String? errorMessage;
 
+  /// Retourne une copie avec les champs modifiés.
   SubscriptionState copyWith({
     bool? isLoading,
     bool? isPremium,
@@ -43,6 +52,7 @@ class SubscriptionState {
   }
 }
 
+/// Notifier qui gère l'état de l'abonnement.
 class SubscriptionNotifier extends Notifier<SubscriptionState> {
   @override
   SubscriptionState build() {
@@ -50,6 +60,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
     return const SubscriptionState();
   }
 
+  /// Charge les données d'abonnement depuis l'API.
   Future<void> _loadSubscription() async {
     try {
       final apiClient = ref.read(apiClientProvider);
@@ -70,6 +81,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
     }
   }
 
+  /// Crée une session de checkout Stripe et retourne l'URL.
   Future<String?> createCheckoutSession() async {
     try {
       final apiClient = ref.read(apiClientProvider);
@@ -84,6 +96,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
     }
   }
 
+  /// Crée un portail client Stripe et retourne l'URL.
   Future<String?> createCustomerPortal() async {
     try {
       final apiClient = ref.read(apiClientProvider);
@@ -95,9 +108,11 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
     }
   }
 
+  /// Recharge les données d'abonnement.
   Future<void> refresh() => _loadSubscription();
 }
 
+/// Provider Riverpod pour l'abonnement.
 final subscriptionProvider = NotifierProvider<SubscriptionNotifier, SubscriptionState>(
   SubscriptionNotifier.new,
 );

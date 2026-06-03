@@ -5,10 +5,14 @@ import '../../app/theme/color_tokens.dart';
 import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
 
+/// Squelette de chargement animé (shimmer) pour un élément.
 class LoadingSkeleton extends StatelessWidget {
   const LoadingSkeleton({this.height = 18, this.width, super.key});
 
+  /// Hauteur du squelette.
   final double height;
+
+  /// Largeur du squelette (null = toute la largeur disponible).
   final double? width;
 
   @override
@@ -35,6 +39,7 @@ class LoadingSkeleton extends StatelessWidget {
   }
 }
 
+/// Squelette de chargement pour une carte entière (shimmer).
 class LoadingSkeletonCard extends StatelessWidget {
   const LoadingSkeletonCard({super.key});
 

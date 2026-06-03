@@ -8,6 +8,7 @@ import '../../core/widgets/app_card.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 import 'preferences_provider.dart';
 
+/// Écran d'édition des préférences utilisateur.
 class EditPreferencesScreen extends ConsumerWidget {
   const EditPreferencesScreen({super.key});
 
@@ -95,6 +96,7 @@ class EditPreferencesScreen extends ConsumerWidget {
   }
 }
 
+/// Section de choix avec titre et options cliquables.
 class _ChoiceSection extends StatelessWidget {
   const _ChoiceSection({
     required this.title,
@@ -104,10 +106,15 @@ class _ChoiceSection extends StatelessWidget {
     this.multiSelect = false,
   });
 
+  /// Titre de la section.
   final String title;
+  /// Liste des valeurs possibles.
   final List<String> values;
+  /// Ensemble des valeurs sélectionnées.
   final Set<String> selected;
+  /// Callback de sélection.
   final ValueChanged<String> onSelected;
+  /// Vrai si la sélection multiple est autorisée.
   final bool multiSelect;
 
   @override

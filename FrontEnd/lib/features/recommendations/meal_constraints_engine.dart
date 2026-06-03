@@ -1,5 +1,6 @@
 import '../../shared/models/demo_data.dart';
 
+/// Contraintes pour les recommandations de repas.
 @Deprecated('No longer used. Will be removed in a future version.')
 class MealRecommendationConstraints {
   const MealRecommendationConstraints({
@@ -16,19 +17,31 @@ class MealRecommendationConstraints {
     this.groceryAdditionsAcceptable = true,
   });
 
+  /// Budget hebdomadaire total.
   final double weeklyBudget;
+  /// Budget restant pour la semaine.
   final double remainingBudget;
+  /// Taille du foyer.
   final int householdSize;
+  /// Niveau de compétence culinaire.
   final String cookingSkill;
+  /// Minutes disponibles pour cuisiner.
   final int availableCookingMinutes;
+  /// Restrictions alimentaires.
   final Set<String> dietaryRestrictions;
+  /// Allergies alimentaires.
   final Set<String> allergies;
+  /// Ingrédients disponibles dans le garde-manger.
   final Set<String> pantryContents;
+  /// Cuisines préférées.
   final Set<String> preferredCuisines;
+  /// Objectifs nutritionnels.
   final Set<String> goals;
+  /// Indique si des achats supplémentaires sont acceptables.
   final bool groceryAdditionsAcceptable;
 }
 
+/// Repas classé avec un score de recommandation.
 @Deprecated('No longer used. Will be removed in a future version.')
 class RankedMeal {
   const RankedMeal({
@@ -38,16 +51,22 @@ class RankedMeal {
     required this.pantryMatchCount,
   });
 
+  /// Le repas.
   final Meal meal;
+  /// Score de recommandation.
   final double score;
+  /// Coût estimé.
   final double estimatedCost;
+  /// Nombre d'ingrédients correspondant au garde-manger.
   final int pantryMatchCount;
 }
 
+/// Moteur de classement des repas selon les contraintes utilisateur.
 @Deprecated('No longer used. Will be removed in a future version.')
 class MealConstraintsEngine {
   const MealConstraintsEngine();
 
+  /// Classe les repas selon les contraintes données.
   List<RankedMeal> rankMeals(
     List<Meal> meals,
     MealRecommendationConstraints constraints,
@@ -100,6 +119,7 @@ class MealConstraintsEngine {
     return ranked;
   }
 
+  /// Vérifie si le repas viole les restrictions alimentaires.
   bool _violatesDiet(Meal meal, Set<String> dietaryRestrictions) {
     final title = meal.title.toLowerCase();
     if (dietaryRestrictions.contains('Vegetarian') &&
@@ -114,16 +134,19 @@ class MealConstraintsEngine {
     return false;
   }
 
+  /// Vérifie si le repas viole les allergies.
   bool _violatesAllergies(Meal meal, Set<String> allergies) {
     final title = meal.title.toLowerCase();
     return allergies.any((allergy) => title.contains(allergy.toLowerCase()));
   }
 
+  /// Estime le coût d'un repas pour un foyer donné.
   double _estimateCost(Meal meal, int householdSize) {
     final base = meal.kcal / 100;
     return (base + (meal.minutes / 10)) * householdSize;
   }
 
+  /// Compte le nombre d'ingrédients du garde-manger utilisés.
   int _pantryMatchCount(Meal meal, Set<String> pantryContents) {
     final title = meal.title.toLowerCase();
     return pantryContents

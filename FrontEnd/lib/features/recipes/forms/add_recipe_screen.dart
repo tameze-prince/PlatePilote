@@ -6,6 +6,7 @@ import '../../../shared/models/mvp_entities.dart';
 import '../../../shared/widgets/form_page.dart';
 import '../../../shared/widgets/plate_scaffold.dart';
 
+/// Écran d'ajout d'une recette personnalisée.
 class AddRecipeScreen extends ConsumerStatefulWidget {
   const AddRecipeScreen({super.key});
 
@@ -14,6 +15,7 @@ class AddRecipeScreen extends ConsumerStatefulWidget {
 }
 
 class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
+  /// Clé globale pour la validation du formulaire.
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -24,6 +26,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
   final _instructionsController = TextEditingController();
   final _tagsController = TextEditingController();
   final _costController = TextEditingController();
+  /// Difficulté sélectionnée.
   String _difficulty = 'Easy';
 
   @override
@@ -40,6 +43,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
     super.dispose();
   }
 
+  /// Soumet le formulaire et enregistre la recette.
   Future<void> _submit() async {
     ref
         .read(customRecipesProvider.notifier)

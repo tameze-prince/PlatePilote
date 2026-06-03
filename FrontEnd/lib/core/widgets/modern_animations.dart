@@ -6,7 +6,7 @@ import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 
-/// Animated button with press effect
+/// Bouton animé avec effet de pression (scale à 0.95 au tap).
 class AnimatedButton extends StatefulWidget {
   const AnimatedButton({
     required this.child,
@@ -110,7 +110,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
   }
 }
 
-/// Animated card with hover effect
+/// Carte animée avec effet de survol (scale à 1.02 au tap).
 class AnimatedCard extends StatefulWidget {
   const AnimatedCard({
     required this.child,
@@ -216,7 +216,7 @@ class _AnimatedCardState extends State<AnimatedCard>
   }
 }
 
-/// Animated list item with slide-in effect
+/// Élément de liste animé avec effet d'apparition par glissement.
 class AnimatedListItem extends StatefulWidget {
   const AnimatedListItem({
     required this.child,
@@ -299,7 +299,7 @@ class _AnimatedListItemState extends State<AnimatedListItem>
   }
 }
 
-/// Animated progress indicator
+/// Indicateur de progression animé.
 class AnimatedProgressIndicator extends StatefulWidget {
   const AnimatedProgressIndicator({
     required this.value,
@@ -394,7 +394,7 @@ class _AnimatedProgressIndicatorState
   }
 }
 
-/// Animated counter
+/// Compteur animé avec transition fluide entre les valeurs.
 class AnimatedCounter extends StatefulWidget {
   const AnimatedCounter({
     required this.value,
@@ -482,7 +482,7 @@ class _AnimatedCounterState extends State<AnimatedCounter>
   }
 }
 
-/// Animated icon button
+/// Bouton d'icône animé avec effets de pression et rotation.
 class AnimatedIconButton extends StatefulWidget {
   const AnimatedIconButton({
     required this.icon,

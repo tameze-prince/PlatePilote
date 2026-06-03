@@ -7,6 +7,7 @@ import '../../core/premium_components.dart';
 import '../../shared/widgets/shimmer_glass_skeleton.dart';
 import 'budget_provider.dart';
 
+/// Écran de gestion du budget hebdomadaire.
 class BudgetManagementScreen extends ConsumerStatefulWidget {
   const BudgetManagementScreen({super.key});
 
@@ -15,6 +16,7 @@ class BudgetManagementScreen extends ConsumerStatefulWidget {
 }
 
 class _BudgetManagementScreenState extends ConsumerState<BudgetManagementScreen> {
+  /// Évite le double appel à refresh.
   bool _didInit = false;
 
   @override

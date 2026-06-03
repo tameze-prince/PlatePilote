@@ -5,6 +5,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 import 'secondary_button.dart';
 
+/// État d'erreur avec titre, message et bouton de réessai optionnel.
 class ErrorState extends StatelessWidget {
   const ErrorState({
     required this.title,
@@ -13,8 +14,13 @@ class ErrorState extends StatelessWidget {
     super.key,
   });
 
+  /// Titre de l'erreur.
   final String title;
+
+  /// Message descriptif.
   final String message;
+
+  /// Callback de réessai (affiche un bouton si non nul).
   final VoidCallback? onRetry;
 
   @override

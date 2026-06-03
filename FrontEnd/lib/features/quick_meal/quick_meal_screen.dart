@@ -6,6 +6,7 @@ import '../../core/repositories/recommendation_repository.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 
+/// Écran de sélection de repas rapides.
 class QuickMealScreen extends ConsumerStatefulWidget {
   const QuickMealScreen({super.key});
 
@@ -14,8 +15,11 @@ class QuickMealScreen extends ConsumerStatefulWidget {
 }
 
 class _QuickMealScreenState extends ConsumerState<QuickMealScreen> {
+  /// Liste des repas rapides disponibles.
   List<Map<String, dynamic>> _meals = [];
+  /// Indique si le chargement est en cours.
   bool _isLoading = true;
+  /// Temps maximum en minutes pour les repas.
   int _maxTime = 30;
 
   @override
@@ -24,6 +28,7 @@ class _QuickMealScreenState extends ConsumerState<QuickMealScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadMeals());
   }
 
+  /// Charge les repas rapides depuis le repository.
   Future<void> _loadMeals() async {
     setState(() => _isLoading = true);
     try {

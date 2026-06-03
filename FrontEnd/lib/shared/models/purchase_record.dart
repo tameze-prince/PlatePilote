@@ -1,3 +1,4 @@
+/// Enregistrement d'un achat effectué.
 class PurchaseRecord {
   PurchaseRecord({
     required this.id,
@@ -6,11 +7,16 @@ class PurchaseRecord {
     required this.boughtDate,
   });
 
+  /// Identifiant unique.
   final String id;
+  /// Noms des articles achetés.
   final List<String> itemNames;
+  /// Prix total de l'achat.
   final double totalPrice;
+  /// Date de l'achat.
   final DateTime boughtDate;
 
+  /// Crée un [PurchaseRecord] depuis une map JSON.
   factory PurchaseRecord.fromJson(Map<String, dynamic> json) {
     return PurchaseRecord(
       id: json['id'] as String? ?? '',
@@ -22,6 +28,7 @@ class PurchaseRecord {
     );
   }
 
+  /// Convertit ce [PurchaseRecord] en map JSON.
   Map<String, dynamic> toJson() => {
         'id': id,
         'itemNames': itemNames,
@@ -29,6 +36,7 @@ class PurchaseRecord {
         'boughtDate': boughtDate.toIso8601String(),
       };
 
+  /// Date formatée (YYYY-MM-DD).
   String get formattedDate {
     final d = boughtDate;
     return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';

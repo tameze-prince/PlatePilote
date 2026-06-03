@@ -7,6 +7,7 @@ import '../../app/theme/app_typography.dart';
 import '../../shared/models/ingredient.dart';
 import '../premium_components.dart';
 
+/// Résultat de recherche d'ingrédient avec surbrillance du terme recherché.
 class SearchResultItem extends StatelessWidget {
   const SearchResultItem({
     required this.ingredient,
@@ -18,11 +19,22 @@ class SearchResultItem extends StatelessWidget {
     super.key,
   });
 
+  /// L'ingrédient trouvé.
   final Ingredient ingredient;
+
+  /// Requête de recherche pour la surbrillance.
   final String query;
+
+  /// Icône de catégorie.
   final IconData icon;
+
+  /// État sélectionné.
   final bool selected;
+
+  /// Icône de fin optionnelle.
   final IconData? trailingIcon;
+
+  /// Callback au tap.
   final VoidCallback? onTap;
 
   @override

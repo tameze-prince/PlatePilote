@@ -6,7 +6,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 import '../../app/theme/app_elevation.dart';
 
-/// Modern app shell with navigation
+/// Shell d'application moderne avec navigation, barre et tiroir.
 class ModernAppShell extends StatefulWidget {
   const ModernAppShell({
     required this.navigationShell,
@@ -167,7 +167,7 @@ class _ModernAppShellState extends State<ModernAppShell>
   }
 }
 
-/// Modern app bar with search and actions
+/// Barre d'application moderne avec recherche et notifications.
 class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
   const ModernAppBar({
     this.title,
@@ -270,7 +270,7 @@ class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// Modern drawer with navigation
+/// Tiroir de navigation moderne avec profil et actions.
 class ModernDrawer extends StatelessWidget {
   const ModernDrawer({
     required this.currentUser,

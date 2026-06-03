@@ -5,6 +5,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 import 'locale_provider.dart';
 
+/// Écran de sélection de la langue de l'application.
 class LanguageSettingsScreen extends ConsumerWidget {
   const LanguageSettingsScreen({super.key});
 

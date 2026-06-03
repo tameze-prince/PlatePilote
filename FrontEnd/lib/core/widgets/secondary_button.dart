@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 
+/// Bouton secondaire (OutlinedButton) avec icône et libellé.
 class SecondaryButton extends StatelessWidget {
   const SecondaryButton({
     required this.label,
@@ -11,8 +12,13 @@ class SecondaryButton extends StatelessWidget {
     super.key,
   });
 
+  /// Texte du bouton.
   final String label;
+
+  /// Callback au tap.
   final VoidCallback? onPressed;
+
+  /// Icône optionnelle.
   final IconData? icon;
 
   @override

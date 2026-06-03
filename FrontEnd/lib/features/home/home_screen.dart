@@ -14,6 +14,8 @@ import '../../core/widgets/modern_components.dart';
 import '../../shared/widgets/recipe_image.dart';
 import 'home_provider.dart';
 
+/// Écran d'accueil principal.
+/// Affiche le tableau de bord avec les recommandations, le budget, le garde-manger et la liste de courses.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -22,6 +24,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  /// Recharge les données du tableau de bord.
   Future<void> _onRefresh() async {
     await ref.read(homeProvider.notifier).loadHome();
   }
@@ -115,6 +118,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  /// Construit le tableau de bord complet.
   Widget _buildDashboard({
     required BuildContext context,
     required bool isDark,
@@ -229,6 +233,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  /// Construit le panneau de bienvenue avec le budget et les alertes.
   Widget _buildWelcomePanel({
     required BuildContext context,
     required bool isDark,
@@ -291,6 +296,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  /// Construit la carte de la prochaine action recommandée.
   Widget _buildNextBestAction({
     required BuildContext context,
     required bool isDark,
@@ -346,6 +352,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  /// Construit la carte des recommandations de repas.
   Widget _buildPrimaryPlanCard({
     required BuildContext context,
     required bool isDark,
@@ -400,6 +407,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  /// Construit la grille des opérations (budget, courses, garde-manger).
   Widget _buildOperationsGrid({
     required BuildContext context,
     required bool isDark,
@@ -453,6 +461,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  /// Construit la carte des repas rapides.
   Widget _buildQuickMealCard({
     required BuildContext context,
     required bool isDark,
@@ -510,6 +519,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  /// Construit les boutons d'actions rapides.
   Widget _buildQuickActions(BuildContext context, bool isDark) {
     return Row(
       children: [
@@ -560,6 +570,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  /// Retourne l'action recommandée en fonction de l'état courant.
   _HomeAction _homeAction(String? nextAction) {
     switch (nextAction) {
       case 'generate_plan':
@@ -621,6 +632,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  /// Construit l'état de chargement avec des squelettes.
   Widget _buildLoadingState() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -701,6 +713,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  /// Génère un message de bienvenue avec le prénom.
   String _greeting(String? name) {
     final hour = DateTime.now().hour;
     final greeting = hour < 12
@@ -713,12 +726,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return '$greeting, $first!';
   }
 
+  /// Retourne l'initiale pour l'avatar utilisateur.
   String _avatarInitial(String? name) {
     final trimmed = name?.trim();
     if (trimmed == null || trimmed.isEmpty) return 'P';
     return trimmed.characters.first.toUpperCase();
   }
 
+  /// Construit un élément de recommandation individuel.
   Widget _buildRecoItem({
     required BuildContext context,
     required bool isDark,
@@ -789,6 +804,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
 }
 
+/// Pilule de statut colorée pour afficher une information.
 class _StatusPill extends StatelessWidget {
   const _StatusPill({
     required this.icon,
@@ -796,8 +812,13 @@ class _StatusPill extends StatelessWidget {
     required this.color,
   });
 
+  /// Icône à afficher.
   final IconData icon;
+
+  /// Texte du statut.
   final String label;
+
+  /// Couleur de la pilule.
   final Color color;
 
   @override
@@ -830,6 +851,7 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
+/// Tuile d'action pour naviguer vers une section (courses, garde-manger).
 class _ActionTile extends StatelessWidget {
   const _ActionTile({
     required this.icon,
@@ -838,9 +860,16 @@ class _ActionTile extends StatelessWidget {
     required this.onTap,
   });
 
+  /// Icône de l'action.
   final IconData icon;
+
+  /// Titre de l'action.
   final String title;
+
+  /// Sous-titre descriptif.
   final String subtitle;
+
+  /// Callback au clic.
   final VoidCallback onTap;
 
   @override
@@ -878,6 +907,7 @@ class _ActionTile extends StatelessWidget {
   }
 }
 
+/// Modèle interne représentant une action recommandée sur l'accueil.
 class _HomeAction {
   const _HomeAction({
     required this.icon,
@@ -887,9 +917,18 @@ class _HomeAction {
     required this.color,
   });
 
+  /// Icône de l'action.
   final IconData icon;
+
+  /// Titre de l'action.
   final String title;
+
+  /// Sous-titre descriptif.
   final String subtitle;
+
+  /// Route de navigation.
   final String route;
+
+  /// Couleur associée.
   final Color color;
 }

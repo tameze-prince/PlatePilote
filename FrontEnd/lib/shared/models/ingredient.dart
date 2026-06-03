@@ -1,32 +1,62 @@
+/// Modèle représentant un ingrédient avec ses informations nutritionnelles.
 class Ingredient {
+  /// Identifiant unique de l'ingrédient.
   final String id;
+  /// Nom canonique.
   final String canonicalName;
+  /// Slug unique.
   final String slug;
+  /// Catégorie (ex: légume, épice).
   final String category;
+  /// Description optionnelle.
   final String? description;
+  /// Unité par défaut (ex: g, ml, unit).
   final String defaultUnit;
+  /// Calories pour 100g.
   final double? caloriesPer100g;
+  /// Protéines pour 100g.
   final double? proteinPer100g;
+  /// Glucides pour 100g.
   final double? carbohydratesPer100g;
+  /// Lipides pour 100g.
   final double? fatPer100g;
+  /// Fibres pour 100g.
   final double? fiberPer100g;
+  /// Sucres pour 100g.
   final double? sugarPer100g;
+  /// Sodium en mg pour 100g.
   final double? sodiumMgPer100g;
+  /// Cholestérol en mg pour 100g.
   final double? cholesterolMgPer100g;
+  /// Contient du gluten.
   final bool? containsGluten;
+  /// Contient du lactose.
   final bool? containsLactose;
+  /// Contient des fruits à coque.
   final bool? containsNuts;
+  /// Contient du soja.
   final bool? containsSoy;
+  /// Contient des œufs.
   final bool? containsEggs;
+  /// Contient du poisson.
   final bool? containsFish;
+  /// Contient des crustacés.
   final bool? containsShellfish;
+  /// Adapté aux végétaliens.
   final bool? vegan;
+  /// Adapté aux végétariens.
   final bool? vegetarian;
+  /// Halal friendly.
   final bool? halalFriendly;
+  /// Kasher friendly.
   final bool? kosherFriendly;
+  /// Faible en glucides.
   final bool? lowCarb;
+  /// Compatible cétogène.
   final bool? ketoFriendly;
+  /// Prix moyen au kg.
   final double? averagePricePerKg;
+  /// Score de popularité.
   final int popularityScore;
 
   const Ingredient({
@@ -61,6 +91,7 @@ class Ingredient {
     this.popularityScore = 0,
   });
 
+  /// Crée un [Ingredient] depuis une map JSON.
   factory Ingredient.fromJson(Map<String, dynamic> json) {
     return Ingredient(
       id: json['id']?.toString() ?? '',

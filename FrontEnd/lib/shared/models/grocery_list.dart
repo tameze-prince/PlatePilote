@@ -1,3 +1,4 @@
+/// Modèle représentant une liste de courses.
 class GroceryList {
   const GroceryList({
     required this.id,
@@ -9,14 +10,22 @@ class GroceryList {
     this.updatedAt,
   });
 
+  /// Identifiant unique de la liste.
   final String id;
+  /// Nom de la liste.
   final String? name;
+  /// Statut de la liste.
   final String? status;
+  /// Articles de la liste.
   final List<GroceryItem> items;
+  /// Identifiant du plan de repas associé.
   final String? mealPlanId;
+  /// Date de création.
   final String? createdAt;
+  /// Date de dernière modification.
   final String? updatedAt;
 
+  /// Crée une [GroceryList] depuis une map JSON.
   factory GroceryList.fromJson(Map<String, dynamic> json) {
     return GroceryList(
       id: json['id']?.toString() ?? '',
@@ -33,6 +42,7 @@ class GroceryList {
     );
   }
 
+  /// Convertit cette [GroceryList] en map JSON.
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -42,6 +52,7 @@ class GroceryList {
   }
 }
 
+/// Article individuel dans une liste de courses.
 class GroceryItem {
   const GroceryItem({
     this.id,
@@ -59,20 +70,34 @@ class GroceryItem {
     this.lastPurchased,
   });
 
+  /// Identifiant unique de l'article.
   final String? id;
+  /// Nom de l'article.
   final String name;
+  /// Catégorie (ex: Produce, Dairy).
   final String? category;
+  /// Quantité.
   final double? quantity;
+  /// Unité de mesure.
   final String? unit;
+  /// Prix estimé.
   final double? estimatedPrice;
+  /// Niveau de confiance du prix.
   final double? priceConfidence;
+  /// Indique si l'article est coché (acheté).
   final bool checked;
+  /// Notes supplémentaires.
   final String? notes;
+  /// Ordre d'affichage.
   final int? sortOrder;
+  /// Identifiant de l'ingrédient associé.
   final String? ingredientId;
+  /// Indique si l'article est haute priorité.
   final bool isHighPriority;
+  /// Date du dernier achat.
   final String? lastPurchased;
 
+  /// Retourne une copie avec les champs modifiés.
   GroceryItem copyWith({
     bool? checked,
     double? quantity,
@@ -99,6 +124,7 @@ class GroceryItem {
     );
   }
 
+  /// Crée un [GroceryItem] depuis une map JSON.
   factory GroceryItem.fromJson(Map<String, dynamic> json) {
     return GroceryItem(
       id: json['id']?.toString(),
@@ -120,6 +146,7 @@ class GroceryItem {
     );
   }
 
+  /// Convertit cet [GroceryItem] en map JSON.
   Map<String, dynamic> toJson() {
     return {
       'name': name,

@@ -4,6 +4,7 @@ import '../../core/network/api_client.dart';
 import '../../shared/models/notification.dart' as ntf;
 import 'notification_repository.dart';
 
+/// Préférences de notifications utilisateur.
 class NotificationPreferences {
   const NotificationPreferences({
     this.pantryAlerts = true,
@@ -12,11 +13,16 @@ class NotificationPreferences {
     this.promotionalNotifications = false,
   });
 
+  /// Alertes de garde-manger.
   final bool pantryAlerts;
+  /// Alertes de budget.
   final bool budgetAlerts;
+  /// Rappels hebdomadaires.
   final bool weeklyReminders;
+  /// Notifications promotionnelles.
   final bool promotionalNotifications;
 
+  /// Retourne une copie avec les champs modifiés.
   NotificationPreferences copyWith({
     bool? pantryAlerts,
     bool? budgetAlerts,
@@ -33,6 +39,7 @@ class NotificationPreferences {
   }
 }
 
+/// Notifier qui gère la liste des notifications.
 class NotificationsNotifier extends Notifier<AsyncValue<List<ntf.AppNotification>>> {
   @override
   AsyncValue<List<ntf.AppNotification>> build() {
@@ -40,6 +47,7 @@ class NotificationsNotifier extends Notifier<AsyncValue<List<ntf.AppNotification
     return const AsyncValue.loading();
   }
 
+  /// Charge les notifications depuis l'API.
   Future<void> _loadNotifications() async {
     try {
       final repo = ref.read(notificationRepositoryProvider);
@@ -50,6 +58,7 @@ class NotificationsNotifier extends Notifier<AsyncValue<List<ntf.AppNotification
     }
   }
 
+  /// Marque toutes les notifications comme lues.
   Future<void> markAllRead() async {
     await ref.read(notificationRepositoryProvider).markAllAsRead();
     state = state.whenData(
@@ -57,6 +66,7 @@ class NotificationsNotifier extends Notifier<AsyncValue<List<ntf.AppNotification
     );
   }
 
+  /// Marque une notification comme lue.
   Future<void> toggleRead(String id) async {
     await ref.read(notificationRepositoryProvider).markAsRead(id);
     state = state.whenData(
@@ -64,6 +74,7 @@ class NotificationsNotifier extends Notifier<AsyncValue<List<ntf.AppNotification
     );
   }
 
+  /// Supprime une notification.
   Future<void> delete(String id) async {
     await ref.read(notificationRepositoryProvider).deleteNotification(id);
     state = state.whenData(
@@ -71,9 +82,11 @@ class NotificationsNotifier extends Notifier<AsyncValue<List<ntf.AppNotification
     );
   }
 
+  /// Recharge les notifications.
   Future<void> refresh() => _loadNotifications();
 }
 
+/// Notifier qui gère les préférences de notifications.
 class NotificationPreferencesNotifier
     extends Notifier<NotificationPreferences> {
   @override
@@ -82,6 +95,7 @@ class NotificationPreferencesNotifier
     return const NotificationPreferences();
   }
 
+  /// Charge les préférences depuis l'API.
   Future<void> _loadPreferences() async {
     try {
       final response = await ref.read(apiClientProvider).get('/notification-preferences');
@@ -95,26 +109,31 @@ class NotificationPreferencesNotifier
     } catch (_) {}
   }
 
+  /// Définit les alertes de garde-manger.
   Future<void> setPantryAlerts(bool value) async {
     state = state.copyWith(pantryAlerts: value);
     await _syncPreferences();
   }
 
+  /// Définit les alertes de budget.
   Future<void> setBudgetAlerts(bool value) async {
     state = state.copyWith(budgetAlerts: value);
     await _syncPreferences();
   }
 
+  /// Définit les rappels hebdomadaires.
   Future<void> setWeeklyReminders(bool value) async {
     state = state.copyWith(weeklyReminders: value);
     await _syncPreferences();
   }
 
+  /// Définit les notifications promotionnelles.
   Future<void> setPromotionalNotifications(bool value) async {
     state = state.copyWith(promotionalNotifications: value);
     await _syncPreferences();
   }
 
+  /// Synchronise les préférences avec l'API.
   Future<void> _syncPreferences() async {
     try {
       await ref.read(apiClientProvider).put('/notification-preferences', data: {
@@ -127,11 +146,13 @@ class NotificationPreferencesNotifier
   }
 }
 
+/// Provider Riverpod pour la liste des notifications.
 final notificationsProvider =
     NotifierProvider<NotificationsNotifier, AsyncValue<List<ntf.AppNotification>>>(
       NotificationsNotifier.new,
     );
 
+/// Provider Riverpod pour les préférences de notifications.
 final notificationPreferencesProvider =
     NotifierProvider<NotificationPreferencesNotifier, NotificationPreferences>(
       NotificationPreferencesNotifier.new,

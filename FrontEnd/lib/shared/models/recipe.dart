@@ -1,3 +1,4 @@
+/// Modèle représentant une recette complète.
 class Recipe {
   const Recipe({
     required this.id,
@@ -20,25 +21,44 @@ class Recipe {
     this.updatedAt,
   });
 
+  /// Identifiant unique de la recette.
   final String id;
+  /// Nom de la recette.
   final String? name;
+  /// Description.
   final String? description;
+  /// Minutes de préparation.
   final int? prepTimeMinutes;
+  /// Minutes de cuisson.
   final int? cookTimeMinutes;
+  /// Minutes totales.
   final int? totalTimeMinutes;
+  /// Nombre de portions.
   final int? servings;
+  /// Niveau de difficulté.
   final String? difficulty;
+  /// Type de cuisine.
   final String? cuisineType;
+  /// Type de repas.
   final String? mealType;
+  /// URL de l'image.
   final String? imageUrl;
+  /// Source de la recette.
   final String? source;
+  /// Visibilité publique.
   final bool? isPublic;
+  /// Identifiant du créateur.
   final String? userId;
+  /// Ingrédients de la recette.
   final List<RecipeIngredient> ingredients;
+  /// Étapes de la recette.
   final List<RecipeStep> steps;
+  /// Date de création.
   final String? createdAt;
+  /// Date de mise à jour.
   final String? updatedAt;
 
+  /// Crée une [Recipe] depuis une map JSON.
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(
       id: json['id']?.toString() ?? '',
@@ -70,6 +90,7 @@ class Recipe {
     );
   }
 
+  /// Convertit cette [Recipe] en map JSON.
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -90,6 +111,7 @@ class Recipe {
   }
 }
 
+/// Ingrédient d'une recette.
 class RecipeIngredient {
   const RecipeIngredient({
     this.id,
@@ -101,14 +123,22 @@ class RecipeIngredient {
     this.ingredientId,
   });
 
+  /// Identifiant unique.
   final String? id;
+  /// Nom de l'ingrédient.
   final String name;
+  /// Quantité nécessaire.
   final double? quantity;
+  /// Unité de mesure.
   final String? unit;
+  /// Notes supplémentaires.
   final String? notes;
+  /// Ordre d'affichage.
   final int? sortOrder;
+  /// Identifiant de l'ingrédient référencé.
   final String? ingredientId;
 
+  /// Crée un [RecipeIngredient] depuis une map JSON.
   factory RecipeIngredient.fromJson(Map<String, dynamic> json) {
     return RecipeIngredient(
       id: json['id']?.toString(),
@@ -121,6 +151,7 @@ class RecipeIngredient {
     );
   }
 
+  /// Convertit ce [RecipeIngredient] en map JSON.
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -132,6 +163,7 @@ class RecipeIngredient {
   }
 }
 
+/// Étape d'une recette.
 class RecipeStep {
   const RecipeStep({
     this.id,
@@ -140,11 +172,16 @@ class RecipeStep {
     this.durationMinutes,
   });
 
+  /// Identifiant unique.
   final String? id;
+  /// Numéro de l'étape.
   final int stepNumber;
+  /// Instruction textuelle.
   final String instruction;
+  /// Durée estimée en minutes.
   final int? durationMinutes;
 
+  /// Crée un [RecipeStep] depuis une map JSON.
   factory RecipeStep.fromJson(Map<String, dynamic> json) {
     return RecipeStep(
       id: json['id']?.toString(),
@@ -154,6 +191,7 @@ class RecipeStep {
     );
   }
 
+  /// Convertit ce [RecipeStep] en map JSON.
   Map<String, dynamic> toJson() {
     return {
       'stepNumber': stepNumber,

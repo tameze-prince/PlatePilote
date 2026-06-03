@@ -1,3 +1,4 @@
+/// Modèle représentant une notification de l'application.
 class AppNotification {
   const AppNotification({
     required this.id,
@@ -10,15 +11,24 @@ class AppNotification {
     this.createdAt,
   });
 
+  /// Identifiant unique de la notification.
   final String id;
+  /// Type de notification (pantry, budget, mealPlan, etc.).
   final String? type;
+  /// Titre de la notification.
   final String? title;
+  /// Corps du message.
   final String? body;
+  /// Payload de données supplémentaires.
   final String? dataPayload;
+  /// Indique si la notification a été lue.
   final bool isRead;
+  /// Date de lecture.
   final String? readAt;
+  /// Date de création.
   final String? createdAt;
 
+  /// Crée une [AppNotification] depuis une map JSON.
   factory AppNotification.fromJson(Map<String, dynamic> json) {
     return AppNotification(
       id: json['id']?.toString() ?? '',
@@ -32,6 +42,7 @@ class AppNotification {
     );
   }
 
+  /// Retourne une copie avec les champs modifiés.
   AppNotification copyWith({
     String? id,
     String? type,
@@ -54,6 +65,7 @@ class AppNotification {
     );
   }
 
+  /// Convertit cette [AppNotification] en map JSON.
   Map<String, dynamic> toJson() {
     return {
       'type': type,

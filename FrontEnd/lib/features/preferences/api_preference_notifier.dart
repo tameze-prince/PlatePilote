@@ -4,6 +4,7 @@ import '../../core/repositories/preference_repository.dart';
 import '../../core/repositories/profile_repository.dart';
 import 'preferences_provider.dart';
 
+/// Provider qui synchronise les préférences locales vers l'API.
 final apiPreferencesProvider = FutureProvider<void>((ref) async {
   final local = ref.watch(editablePreferencesProvider);
 
