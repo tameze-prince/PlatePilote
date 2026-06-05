@@ -1,18 +1,11 @@
 package com.platepilote.platepilote.authentication.application.service;
 
-import com.platepilote.platepilote.authentication.application.config.OAuth2LoginProperties;
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Vérificateur composite OAuth2 qui achemine la validation vers le vérificateur approprié.

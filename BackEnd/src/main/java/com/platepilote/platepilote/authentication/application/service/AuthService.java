@@ -40,6 +40,7 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null") // Suppression des warnings de nullabilité pour les champs injectés et les variables locales  
 public class AuthService {
 
     private final UserRepository userRepository;

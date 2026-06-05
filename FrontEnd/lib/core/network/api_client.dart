@@ -10,7 +10,7 @@ final dioProvider = Provider<Dio>((ref) {
     BaseOptions(
       baseUrl: const String.fromEnvironment(
               'PLATEPILOT_API_BASE_URL',
-              defaultValue: 'http://localhost:8080/api/v1',
+              defaultValue: 'http://localhost:8081/api/v1',
             ),
       connectTimeout: const Duration(seconds: 60),
       receiveTimeout: const Duration(seconds: 60),
@@ -57,7 +57,7 @@ class _AuthTokenInterceptor extends Interceptor {
     BaseOptions(
       baseUrl: const String.fromEnvironment(
               'PLATEPILOT_API_BASE_URL',
-              defaultValue: 'http://localhost:8080/api/v1',
+              defaultValue: 'http://localhost:8081/api/v1',
             ),
       connectTimeout: const Duration(seconds: 60),
       receiveTimeout: const Duration(seconds: 60),

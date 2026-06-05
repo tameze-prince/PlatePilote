@@ -29,6 +29,7 @@ import java.util.Locale;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("null") // Suppression des warnings de nullabilité pour les champs injectés et les variables locales  
 public class FacebookOAuth2Verifier implements OAuth2IdentityVerifier {
 
     private final OAuth2LoginProperties properties;

@@ -33,6 +33,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("null") // Suppression des warnings de nullabilité pour les champs injectés et les variables locales
 public class EmailVerificationService {
 
     private final EmailVerificationTokenRepository tokenRepository;
