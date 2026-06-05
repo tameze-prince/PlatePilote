@@ -98,7 +98,7 @@ class _GroceryCostBreakdownScreenState
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: ColorTokens.primaryGreen.withOpacity(0.1),
+                          color: ColorTokens.primaryGreen.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.input),
                         ),
                         child: const Icon(
@@ -133,7 +133,7 @@ class _GroceryCostBreakdownScreenState
                           vertical: AppSpacing.xs,
                         ),
                         decoration: BoxDecoration(
-                          color: ColorTokens.primaryGreen.withOpacity(0.1),
+                          color: ColorTokens.primaryGreen.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                         child: Text(
@@ -229,7 +229,7 @@ class _GroceryCostBreakdownScreenState
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: ColorTokens.accentAmber.withOpacity(0.1),
+                          color: ColorTokens.accentAmber.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.input),
                         ),
                         child: const Icon(
@@ -280,7 +280,7 @@ class _GroceryCostBreakdownScreenState
           Container(
             padding: const EdgeInsets.all(AppSpacing.xs),
             decoration: BoxDecoration(
-              color: (cat['color'] as Color).withOpacity(0.1),
+              color: (cat['color'] as Color).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
             child: Icon(
@@ -349,7 +349,7 @@ class _GroceryCostBreakdownScreenState
             height: 24,
             decoration: BoxDecoration(
               color: rank <= 3
-                  ? ColorTokens.primaryGreen.withOpacity(0.1)
+                  ? ColorTokens.primaryGreen.withValues(alpha: 0.1)
                   : ColorTokens.surfaceContainerLow,
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),

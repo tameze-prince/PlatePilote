@@ -58,7 +58,7 @@ class RecipeImage extends StatelessWidget {
     };
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.primaryAccentGreen.withOpacity(0.1),
+        color: AppColors.primaryAccentGreen.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(borderRadius ?? AppRadius.sm),
       ),
       child: Icon(icon, color: AppColors.primaryAccentGreen, size: width * 0.5),
@@ -108,7 +108,7 @@ class RecipeHeroImage extends StatelessWidget {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withOpacity(0.4),
+                            Colors.black.withValues(alpha: 0.4),
                           ],
                         ),
                       ),
@@ -134,7 +134,7 @@ class RecipeHeroImage extends StatelessWidget {
     };
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.primaryAccentGreen.withOpacity(0.1),
+        color: AppColors.primaryAccentGreen.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppRadius.xl),
       ),
       child: Center(

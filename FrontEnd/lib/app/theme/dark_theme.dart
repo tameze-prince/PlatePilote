@@ -22,19 +22,19 @@ ThemeData buildDarkTheme() {
       brightness: Brightness.dark,
       primary: AppColors.primaryAccentGreen,
       onPrimary: AppColors.darkBackground,
-      primaryContainer: AppColors.primaryAccentGreen.withOpacity(0.2),
+      primaryContainer: AppColors.primaryAccentGreen.withValues(alpha: 0.2),
       onPrimaryContainer: AppColors.primaryAccentGreen,
       secondary: AppColors.premiumCyanAccent,
       onSecondary: AppColors.darkBackground,
-      secondaryContainer: AppColors.premiumCyanAccent.withOpacity(0.2),
+      secondaryContainer: AppColors.premiumCyanAccent.withValues(alpha: 0.2),
       onSecondaryContainer: AppColors.premiumCyanAccent,
       tertiary: AppColors.warmAccent,
       onTertiary: AppColors.darkBackground,
-      tertiaryContainer: AppColors.warmAccent.withOpacity(0.2),
+      tertiaryContainer: AppColors.warmAccent.withValues(alpha: 0.2),
       onTertiaryContainer: AppColors.warmAccent,
       error: AppColors.error,
       onError: AppColors.darkBackground,
-      errorContainer: AppColors.error.withOpacity(0.2),
+      errorContainer: AppColors.error.withValues(alpha: 0.2),
       onErrorContainer: AppColors.error,
       surface: AppColors.darkSurface,
       onSurface: AppColors.primaryText,
@@ -55,7 +55,7 @@ ThemeData buildDarkTheme() {
     primaryTextTheme: textTheme.copyWith(
       bodyLarge: textTheme.bodyLarge?.copyWith(color: AppColors.darkBackground),
       bodyMedium: textTheme.bodyMedium?.copyWith(color: AppColors.darkBackground),
-      bodySmall: textTheme.bodySmall?.copyWith(color: AppColors.darkOnInverseSurface.withOpacity(0.7)),
+      bodySmall: textTheme.bodySmall?.copyWith(color: AppColors.darkOnInverseSurface.withValues(alpha: 0.7)),
     ),
 
     // Scaffold
@@ -63,7 +63,7 @@ ThemeData buildDarkTheme() {
 
     // App bar
     appBarTheme: AppBarTheme(
-      backgroundColor: AppColors.darkSurface.withOpacity(0.95),
+      backgroundColor: AppColors.darkSurface.withValues(alpha: 0.95),
       foregroundColor: AppColors.darkOnSurface,
       elevation: AppElevation.appBar,
       centerTitle: false,
@@ -135,7 +135,7 @@ ThemeData buildDarkTheme() {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.card),
         side: BorderSide(
-          color: AppColors.darkOutline.withOpacity(0.5),
+          color: AppColors.darkOutline.withValues(alpha: 0.5),
           width: 1,
         ),
       ),
@@ -150,7 +150,7 @@ ThemeData buildDarkTheme() {
         color: AppColors.darkOnSurface,
       ),
       side: BorderSide(
-        color: AppColors.darkOutline.withOpacity(0.5),
+        color: AppColors.darkOutline.withValues(alpha: 0.5),
         width: 1,
       ),
       shape: RoundedRectangleBorder(
@@ -316,7 +316,7 @@ ThemeData buildDarkTheme() {
       disabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.input),
         borderSide: BorderSide(
-          color: AppColors.darkOutline.withOpacity(0.5),
+          color: AppColors.darkOutline.withValues(alpha: 0.5),
           width: 1,
         ),
       ),
@@ -324,7 +324,7 @@ ThemeData buildDarkTheme() {
         color: AppColors.darkOnSurfaceVariant,
       ),
       hintStyle: textTheme.bodyMedium?.copyWith(
-        color: AppColors.darkOnSurfaceVariant.withOpacity(0.6),
+        color: AppColors.darkOnSurfaceVariant.withValues(alpha: 0.6),
       ),
       errorStyle: textTheme.bodySmall?.copyWith(
         color: AppColors.error,
@@ -498,7 +498,7 @@ ThemeData buildDarkTheme() {
       activeTrackColor: AppColors.primaryLight,
       inactiveTrackColor: AppColors.darkSurfaceContainerHigh,
       thumbColor: AppColors.primaryLight,
-      overlayColor: AppColors.primaryLight.withOpacity(0.1),
+      overlayColor: AppColors.primaryLight.withValues(alpha: 0.1),
       valueIndicatorColor: AppColors.primaryLight,
       valueIndicatorTextStyle: textTheme.bodySmall?.copyWith(
         color: AppColors.darkBackground,

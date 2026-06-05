@@ -202,7 +202,7 @@ class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
     
     return AppBar(
       backgroundColor: (isDark ? AppColors.darkSurface : AppColors.surface)
-          .withOpacity(0.95),
+          .withValues(alpha: 0.95),
       foregroundColor: isDark
           ? AppColors.darkOnSurface
           : AppColors.onSurface,

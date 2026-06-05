@@ -312,7 +312,7 @@ class _PlanAcceptanceScreenState extends ConsumerState<PlanAcceptanceScreen> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.xs),
             decoration: BoxDecoration(
-              color: AppColors.primaryAccentGreen.withOpacity(0.12),
+              color: AppColors.primaryAccentGreen.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
             child: const Icon(
@@ -357,7 +357,7 @@ class _PlanAcceptanceScreenState extends ConsumerState<PlanAcceptanceScreen> {
         Container(
           padding: const EdgeInsets.all(AppSpacing.xs),
           decoration: BoxDecoration(
-            color: AppColors.primaryAccentGreen.withOpacity(0.10),
+            color: AppColors.primaryAccentGreen.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
           child: Icon(

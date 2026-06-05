@@ -63,6 +63,7 @@ class FloatingNavigationBar extends StatelessWidget {
     );
   }
 
+  // ignore: unused_element
   Widget _buildDestination({
     required BuildContext context,
     required bool isDark,
@@ -88,8 +89,8 @@ class FloatingNavigationBar extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isSelected
                         ? (isDark
-                            ? AppColors.primary.withOpacity(0.2)
-                            : AppColors.primary.withOpacity(0.1))
+                            ? AppColors.primary.withValues(alpha: 0.2)
+                            : AppColors.primary.withValues(alpha: 0.1))
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(AppRadius.lg),
                   ),
@@ -207,6 +208,7 @@ class FloatingSearchBar extends StatefulWidget {
 
 class _FloatingSearchBarState extends State<FloatingSearchBar> {
   late TextEditingController _controller;
+  // ignore: unused_field
   final bool _isFocused = false;
 
   @override
@@ -249,19 +251,19 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
                       (isDark
                           ? AppColors.darkSurface
                           : AppColors.surface))
-                  .withOpacity(0.85),
+                  .withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(AppRadius.full),
               border: Border.all(
                 color: widget.borderColor ??
                     (isDark
-                        ? AppColors.darkOutline.withOpacity(0.3)
-                        : AppColors.outline.withOpacity(0.3)),
+                        ? AppColors.darkOutline.withValues(alpha: 0.3)
+                        : AppColors.outline.withValues(alpha: 0.3)),
                 width: 1,
               ),
               boxShadow: widget.elevation != null
                   ? [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: widget.elevation! * 4,
                         offset: Offset(0, widget.elevation! * 2),
                         spreadRadius: widget.elevation! * -0.5,
@@ -277,8 +279,8 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
                 hintText: widget.hintText ?? 'Search...',
                 hintStyle: AppTypography.bodyMedium.copyWith(
                   color: isDark
-                      ? AppColors.darkOnSurfaceVariant.withOpacity(0.6)
-                      : AppColors.onSurfaceVariant.withOpacity(0.6),
+                      ? AppColors.darkOnSurfaceVariant.withValues(alpha: 0.6)
+                      : AppColors.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
                 prefixIcon: widget.leading ??
                     Icon(
@@ -382,7 +384,7 @@ class FloatingButton extends StatelessWidget {
           child: Material(
             color: (backgroundColor ??
                     (isDark ? AppColors.primaryLight : AppColors.primary))
-                .withOpacity(0.9),
+                .withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(AppRadius.full),
             elevation: elevation ?? AppElevation.fab,
             child: InkWell(
@@ -471,19 +473,19 @@ class FloatingAppBar extends StatelessWidget implements PreferredSizeWidget {
                       (isDark
                           ? AppColors.darkSurface
                           : AppColors.surface))
-                  .withOpacity(0.85),
+                  .withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(AppRadius.xl),
               border: Border.all(
                 color: borderColor ??
                     (isDark
-                        ? AppColors.darkOutline.withOpacity(0.3)
-                        : AppColors.outline.withOpacity(0.3)),
+                        ? AppColors.darkOutline.withValues(alpha: 0.3)
+                        : AppColors.outline.withValues(alpha: 0.3)),
                 width: 1,
               ),
               boxShadow: elevation != null
                   ? [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: elevation! * 4,
                         offset: Offset(0, elevation! * 2),
                         spreadRadius: elevation! * -0.5,

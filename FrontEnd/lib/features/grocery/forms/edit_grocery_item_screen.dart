@@ -109,7 +109,7 @@ class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
       ),
     );
 
-    if (confirmed == true && context.mounted) {
+    if (confirmed == true && mounted) {
       context.pop();
     }
   }
@@ -251,7 +251,7 @@ class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
                           onSelected: (selected) {
                             setState(() => _selectedCategory = category);
                           },
-                          selectedColor: ColorTokens.primaryGreen.withOpacity(
+                          selectedColor: ColorTokens.primaryGreen.withValues(alpha: 
                             0.2,
                           ),
                           checkmarkColor: ColorTokens.primaryGreen,

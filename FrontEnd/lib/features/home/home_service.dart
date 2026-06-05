@@ -12,14 +12,30 @@ class HomeService {
 
   /// Récupère les données du tableau de bord.
   Future<Map<String, dynamic>> fetchDashboard() async {
-    // TODO: Replace with actual API call using client
-    return {};
+    try {
+      final response = await client.get('/dashboard');
+      final data = response.data;
+      if (data is Map<String, dynamic> && data['data'] is Map<String, dynamic>) {
+        return data['data'] as Map<String, dynamic>;
+      }
+      return {};
+    } catch (_) {
+      return {};
+    }
   }
 
   /// Récupère le montant des économies réalisées.
   Future<double> fetchSavings() async {
-    // TODO: Replace with actual API call using client
-    return 0.0;
+    try {
+      final response = await client.get('/dashboard/savings');
+      final data = response.data;
+      if (data is Map<String, dynamic> && data['data'] != null) {
+        return (data['data'] as num).toDouble();
+      }
+      return 0.0;
+    } catch (_) {
+      return 0.0;
+    }
   }
 }
 

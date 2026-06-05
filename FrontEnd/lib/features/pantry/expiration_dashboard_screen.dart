@@ -153,7 +153,7 @@ class _PantryExpirationScreenState
                               Container(
                                 padding: const EdgeInsets.all(AppSpacing.sm),
                                 decoration: BoxDecoration(
-                                  color: ColorTokens.primaryGreen.withOpacity(
+                                  color: ColorTokens.primaryGreen.withValues(alpha: 
                                     0.1,
                                   ),
                                   borderRadius: BorderRadius.circular(
@@ -240,7 +240,7 @@ class _PantryExpirationScreenState
             vertical: 2,
           ),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
           child: Text(
@@ -267,8 +267,8 @@ class _PantryExpirationScreenState
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
                 color: isExpired
-                    ? ColorTokens.error.withOpacity(0.1)
-                    : ColorTokens.accentAmber.withOpacity(0.1),
+                    ? ColorTokens.error.withValues(alpha: 0.1)
+                    : ColorTokens.accentAmber.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppRadius.input),
               ),
               child: Icon(

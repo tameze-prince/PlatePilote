@@ -22,19 +22,19 @@ ThemeData buildLightTheme() {
       brightness: Brightness.light,
       primary: AppColors.primary,
       onPrimary: Colors.white,
-      primaryContainer: AppColors.primaryLight.withOpacity(0.1),
+      primaryContainer: AppColors.primaryLight.withValues(alpha: 0.1),
       onPrimaryContainer: AppColors.primary,
       secondary: AppColors.secondary,
       onSecondary: Colors.white,
-      secondaryContainer: AppColors.secondaryLight.withOpacity(0.1),
+      secondaryContainer: AppColors.secondaryLight.withValues(alpha: 0.1),
       onSecondaryContainer: AppColors.secondary,
       tertiary: AppColors.tertiary,
       onTertiary: Colors.white,
-      tertiaryContainer: AppColors.tertiary.withOpacity(0.1),
+      tertiaryContainer: AppColors.tertiary.withValues(alpha: 0.1),
       onTertiaryContainer: AppColors.tertiary,
       error: AppColors.error,
       onError: Colors.white,
-      errorContainer: AppColors.error.withOpacity(0.1),
+      errorContainer: AppColors.error.withValues(alpha: 0.1),
       onErrorContainer: AppColors.error,
       surface: AppColors.surface,
       onSurface: AppColors.onSurface,
@@ -63,7 +63,7 @@ ThemeData buildLightTheme() {
 
     // App bar
     appBarTheme: AppBarTheme(
-      backgroundColor: AppColors.surface.withOpacity(0.95),
+      backgroundColor: AppColors.surface.withValues(alpha: 0.95),
       foregroundColor: AppColors.onSurface,
       elevation: AppElevation.appBar,
       centerTitle: false,
@@ -135,7 +135,7 @@ ThemeData buildLightTheme() {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.card),
         side: BorderSide(
-          color: AppColors.outline.withOpacity(0.5),
+          color: AppColors.outline.withValues(alpha: 0.5),
           width: 1,
         ),
       ),
@@ -150,7 +150,7 @@ ThemeData buildLightTheme() {
         color: AppColors.onSurface,
       ),
       side: BorderSide(
-        color: AppColors.outline.withOpacity(0.5),
+        color: AppColors.outline.withValues(alpha: 0.5),
         width: 1,
       ),
       shape: RoundedRectangleBorder(
@@ -316,7 +316,7 @@ ThemeData buildLightTheme() {
       disabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.input),
         borderSide: BorderSide(
-          color: AppColors.outline.withOpacity(0.5),
+          color: AppColors.outline.withValues(alpha: 0.5),
           width: 1,
         ),
       ),
@@ -324,7 +324,7 @@ ThemeData buildLightTheme() {
         color: AppColors.onSurfaceVariant,
       ),
       hintStyle: textTheme.bodyMedium?.copyWith(
-        color: AppColors.onSurfaceVariant.withOpacity(0.6),
+        color: AppColors.onSurfaceVariant.withValues(alpha: 0.6),
       ),
       errorStyle: textTheme.bodySmall?.copyWith(
         color: AppColors.error,
@@ -498,7 +498,7 @@ ThemeData buildLightTheme() {
       activeTrackColor: AppColors.primary,
       inactiveTrackColor: AppColors.surfaceContainerHigh,
       thumbColor: AppColors.primary,
-      overlayColor: AppColors.primary.withOpacity(0.1),
+      overlayColor: AppColors.primary.withValues(alpha: 0.1),
       valueIndicatorColor: AppColors.primary,
       valueIndicatorTextStyle: textTheme.bodySmall?.copyWith(
         color: Colors.white,

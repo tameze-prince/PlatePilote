@@ -301,8 +301,8 @@ class _IntelligenceSummary extends StatelessWidget {
     return GlassContainer(
       padding: const EdgeInsets.all(AppSpacing.md),
       elevated: true,
-      backgroundColor: AppColors.primaryAccentGreen.withOpacity(0.08),
-      borderColor: AppColors.primaryAccentGreen.withOpacity(0.2),
+      backgroundColor: AppColors.primaryAccentGreen.withValues(alpha: 0.08),
+      borderColor: AppColors.primaryAccentGreen.withValues(alpha: 0.2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -383,7 +383,7 @@ class _PreferenceSection extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryAccentGreen.withOpacity(0.15),
+                  color: AppColors.primaryAccentGreen.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 child: Icon(icon, color: AppColors.primaryAccentGreen, size: 20),

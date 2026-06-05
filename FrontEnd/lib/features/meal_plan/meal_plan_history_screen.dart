@@ -101,8 +101,8 @@ class _MealPlanHistoryScreenState
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
                     color: plan.status == 'ACTIVE'
-                        ? ColorTokens.primaryGreen.withOpacity(0.1)
-                        : ColorTokens.textSecondary.withOpacity(0.1),
+                        ? ColorTokens.primaryGreen.withValues(alpha: 0.1)
+                        : ColorTokens.textSecondary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppRadius.input),
                   ),
                   child: Icon(

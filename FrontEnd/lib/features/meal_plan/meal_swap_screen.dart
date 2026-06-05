@@ -102,7 +102,7 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
         final repo = ref.read(mealPlanRepositoryProvider);
         await repo.applySwap(widget.currentEntry!.id!, _selectedMeal!.recipeId!);
         await ref.read(mealPlanProvider.notifier).refresh();
-        if (context.mounted) {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Meal swapped successfully!'),
@@ -123,13 +123,13 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
             .replaceEntry(widget.dayIndex, newEntry);
       }
     }
-    if (context.mounted) context.pop();
+    if (mounted) context.pop();
   }
 
   /// Régénère l'intégralité du plan de repas.
   Future<void> _regenerateAll() async {
     await ref.read(mealPlanProvider.notifier).generateNewPlan();
-    if (context.mounted) context.pop();
+    if (mounted) context.pop();
   }
 
   @override
@@ -178,7 +178,7 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: widget.currentMeal.tint.withOpacity(0.2),
+                      color: widget.currentMeal.tint.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
                     child: Icon(
@@ -269,7 +269,7 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
                             padding: const EdgeInsets.all(AppSpacing.md),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? AppColors.primaryAccentGreen.withOpacity(0.12)
+                                  ? AppColors.primaryAccentGreen.withValues(alpha: 0.12)
                                   : PremiumTheme.glass(context, elevated: true),
                               borderRadius: BorderRadius.circular(AppRadius.xl),
                               border: Border.all(
@@ -284,7 +284,7 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(AppSpacing.sm),
                                   decoration: BoxDecoration(
-                                    color: tint.withOpacity(0.15),
+                                    color: tint.withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(
                                       AppRadius.md,
                                     ),

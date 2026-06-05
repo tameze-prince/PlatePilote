@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme/app_spacing.dart';
 import '../../core/repositories/recommendation_repository.dart';
@@ -110,7 +111,10 @@ class _QuickMealScreenState extends ConsumerState<QuickMealScreen> {
                                   ? Text('\$${(meal['estimatedCost'] as num).toStringAsFixed(0)}')
                                   : null,
                               onTap: () {
-                                // TODO: Navigate to recipe detail
+                                final id = meal['id']?.toString();
+                                if (id != null) {
+                                  context.push('/recipe/$id');
+                                }
                               },
                             ),
                           );

@@ -282,8 +282,8 @@ class SettingsScreen extends ConsumerWidget {
                           ? AppColors.primaryContainer
                           : AppColors.primaryContainer,
                       borderColor: isDark
-                          ? AppColors.primaryLight.withOpacity(0.3)
-                          : AppColors.primary.withOpacity(0.3),
+                          ? AppColors.primaryLight.withValues(alpha: 0.3)
+                          : AppColors.primary.withValues(alpha: 0.3),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -293,8 +293,8 @@ class SettingsScreen extends ConsumerWidget {
                                 padding: const EdgeInsets.all(AppSpacing.xs),
                                 decoration: BoxDecoration(
                                   color: isDark
-                                      ? AppColors.primaryLight.withOpacity(0.2)
-                                      : AppColors.primary.withOpacity(0.2),
+                                      ? AppColors.primaryLight.withValues(alpha: 0.2)
+                                      : AppColors.primary.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(
                                     AppRadius.sm,
                                   ),
@@ -326,8 +326,8 @@ class SettingsScreen extends ConsumerWidget {
                                       style: AppTypography.bodySmall.copyWith(
                                         color: isDark
                                             ? AppColors.primaryLight
-                                                .withOpacity(0.7)
-                                            : AppColors.primary.withOpacity(0.7),
+                                                .withValues(alpha: 0.7)
+                                            : AppColors.primary.withValues(alpha: 0.7),
                                       ),
                                     ),
                                   ],

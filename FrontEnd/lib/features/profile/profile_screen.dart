@@ -234,8 +234,8 @@ class _ProfileCompleteness extends ConsumerWidget {
     return GlassContainer(
       padding: const EdgeInsets.all(AppSpacing.md),
       elevated: true,
-      backgroundColor: AppColors.warning.withOpacity(0.08),
-      borderColor: AppColors.warning.withOpacity(0.2),
+      backgroundColor: AppColors.warning.withValues(alpha: 0.08),
+      borderColor: AppColors.warning.withValues(alpha: 0.2),
       child: InkWell(
         onTap: () => _showMissingInfo(context, profile),
         borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -355,7 +355,7 @@ class _ProfileHeaderCard extends ConsumerWidget {
               children: [
                 CircleAvatar(
                   radius: 32,
-                  backgroundColor: AppColors.primaryAccentGreen.withOpacity(0.2),
+                  backgroundColor: AppColors.primaryAccentGreen.withValues(alpha: 0.2),
                   backgroundImage: profile.avatarBytes != null
                       ? MemoryImage(
                           base64Decode(profile.avatarBytes!),
@@ -413,10 +413,10 @@ class _ProfileHeaderCard extends ConsumerWidget {
               vertical: AppSpacing.xxs,
             ),
             decoration: BoxDecoration(
-              color: AppColors.primaryAccentGreen.withOpacity(0.15),
+              color: AppColors.primaryAccentGreen.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(AppRadius.full),
               border: Border.all(
-                color: AppColors.primaryAccentGreen.withOpacity(0.3),
+                color: AppColors.primaryAccentGreen.withValues(alpha: 0.3),
               ),
             ),
             child: Text(
@@ -665,15 +665,22 @@ class _ProfileInfoCard extends ConsumerWidget {
       context: context,
       builder: (ctx) => SimpleDialog(
         title: Text(title),
-        children: options.map((opt) => RadioListTile<String>(
-          title: Text(opt),
-          value: opt,
-          groupValue: current,
-          onChanged: (v) {
-            if (v != null) onSave(v);
-            Navigator.pop(ctx);
-          },
-        )).toList(),
+        children: [
+          RadioGroup<String>(
+            groupValue: current,
+            onChanged: (v) {
+              if (v != null) onSave(v);
+              Navigator.pop(ctx);
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: options.map((opt) => RadioListTile<String>(
+                title: Text(opt),
+                value: opt,
+              )).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -785,7 +792,7 @@ class _NavigationCard extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.primaryAccentGreen.withOpacity(0.15),
+                color: AppColors.primaryAccentGreen.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Icon(icon, color: AppColors.primaryAccentGreen, size: 22),
@@ -907,8 +914,8 @@ class _SaveProfileButton extends StatelessWidget {
     return GlassContainer(
       padding: const EdgeInsets.all(AppSpacing.md),
       elevated: true,
-      backgroundColor: AppColors.primaryAccentGreen.withOpacity(0.08),
-      borderColor: AppColors.primaryAccentGreen.withOpacity(0.2),
+      backgroundColor: AppColors.primaryAccentGreen.withValues(alpha: 0.08),
+      borderColor: AppColors.primaryAccentGreen.withValues(alpha: 0.2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -975,8 +982,8 @@ class _DangerZone extends ConsumerWidget {
     return GlassContainer(
       padding: const EdgeInsets.all(AppSpacing.md),
       elevated: true,
-      backgroundColor: AppColors.error.withOpacity(0.06),
-      borderColor: AppColors.error.withOpacity(0.2),
+      backgroundColor: AppColors.error.withValues(alpha: 0.06),
+      borderColor: AppColors.error.withValues(alpha: 0.2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1005,7 +1012,7 @@ class _DangerZone extends ConsumerWidget {
               label: const Text('Logout'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.error,
-                side: BorderSide(color: AppColors.error.withOpacity(0.4)),
+                side: BorderSide(color: AppColors.error.withValues(alpha: 0.4)),
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
               ),
             ),
@@ -1018,8 +1025,8 @@ class _DangerZone extends ConsumerWidget {
               icon: const Icon(Icons.delete_forever, size: 18),
               label: const Text('Delete Account'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.error.withOpacity(0.7),
-                side: BorderSide(color: AppColors.error.withOpacity(0.2)),
+                foregroundColor: AppColors.error.withValues(alpha: 0.7),
+                side: BorderSide(color: AppColors.error.withValues(alpha: 0.2)),
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
               ),
             ),

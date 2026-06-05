@@ -61,8 +61,8 @@ class ModernCard extends StatelessWidget {
               border: Border.all(
                 color: borderColor ??
                     (isDark
-                        ? AppColors.darkOutline.withOpacity(0.5)
-                        : AppColors.outline.withOpacity(0.5)),
+                        ? AppColors.darkOutline.withValues(alpha: 0.5)
+                        : AppColors.outline.withValues(alpha: 0.5)),
                 width: 1,
               ),
             ),
@@ -165,7 +165,7 @@ class StatCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(AppSpacing.xs),
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+              color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
             child: Icon(
@@ -324,7 +324,7 @@ class InfoCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(AppSpacing.xs),
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+              color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
             child: Icon(
@@ -424,7 +424,7 @@ class AlertCard extends StatelessWidget {
           Text(
             message,
             style: AppTypography.bodySmall.copyWith(
-              color: config.textColor.withOpacity(0.8),
+              color: config.textColor.withValues(alpha: 0.8),
             ),
           ),
           if (actions != null && actions!.isNotEmpty) ...[
@@ -446,32 +446,32 @@ class AlertCard extends StatelessWidget {
           icon: Icons.check_circle_outline,
           iconColor: AppColors.success,
           textColor: isDark ? AppColors.success : AppColors.success,
-          backgroundColor: AppColors.success.withOpacity(0.1),
-          borderColor: AppColors.success.withOpacity(0.3),
+          backgroundColor: AppColors.success.withValues(alpha: 0.1),
+          borderColor: AppColors.success.withValues(alpha: 0.3),
         );
       case AlertType.warning:
         return _AlertConfig(
           icon: Icons.warning_amber_outlined,
           iconColor: AppColors.warning,
           textColor: isDark ? AppColors.warning : AppColors.warning,
-          backgroundColor: AppColors.warning.withOpacity(0.1),
-          borderColor: AppColors.warning.withOpacity(0.3),
+          backgroundColor: AppColors.warning.withValues(alpha: 0.1),
+          borderColor: AppColors.warning.withValues(alpha: 0.3),
         );
       case AlertType.error:
         return _AlertConfig(
           icon: Icons.error_outline,
           iconColor: AppColors.error,
           textColor: isDark ? AppColors.error : AppColors.error,
-          backgroundColor: AppColors.error.withOpacity(0.1),
-          borderColor: AppColors.error.withOpacity(0.3),
+          backgroundColor: AppColors.error.withValues(alpha: 0.1),
+          borderColor: AppColors.error.withValues(alpha: 0.3),
         );
       case AlertType.info:
         return _AlertConfig(
           icon: Icons.info_outline,
           iconColor: AppColors.info,
           textColor: isDark ? AppColors.info : AppColors.info,
-          backgroundColor: AppColors.info.withOpacity(0.1),
-          borderColor: AppColors.info.withOpacity(0.3),
+          backgroundColor: AppColors.info.withValues(alpha: 0.1),
+          borderColor: AppColors.info.withValues(alpha: 0.3),
         );
     }
   }
@@ -616,9 +616,6 @@ class ShimmerLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    
     return child; // Simplified - would use shimmer package in production
   }
 }

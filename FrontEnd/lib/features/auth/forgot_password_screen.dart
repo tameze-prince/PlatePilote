@@ -75,7 +75,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: ColorTokens.accentAmber.withOpacity(0.1),
+                      color: ColorTokens.accentAmber.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppRadius.modal),
                     ),
                     child: Icon(
@@ -143,7 +143,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             Container(
                               padding: const EdgeInsets.all(AppSpacing.md),
                               decoration: BoxDecoration(
-                                color: ColorTokens.primaryGreen.withOpacity(
+                                color: ColorTokens.primaryGreen.withValues(alpha: 
                                   0.1,
                                 ),
                                 borderRadius: BorderRadius.circular(

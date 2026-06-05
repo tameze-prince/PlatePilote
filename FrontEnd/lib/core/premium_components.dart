@@ -57,9 +57,9 @@ class PremiumTheme {
   /// Couleur de verre (glassmorphism) selon le mode et l'état surélevé.
   static Color glass(BuildContext context, {bool elevated = false}) {
     if (isDark(context)) {
-      return Colors.white.withOpacity(elevated ? 0.16 : 0.09);
+      return Colors.white.withValues(alpha: elevated ? 0.16 : 0.09);
     }
-    return Colors.white.withOpacity(elevated ? 0.78 : 0.64);
+    return Colors.white.withValues(alpha: elevated ? 0.78 : 0.64);
   }
 
   /// Ombre douce par défaut.
@@ -67,7 +67,7 @@ class PremiumTheme {
     final dark = isDark(context);
     return [
       BoxShadow(
-        color: Colors.black.withOpacity(dark ? 0.28 : 0.08),
+        color: Colors.black.withValues(alpha: dark ? 0.28 : 0.08),
         blurRadius: 30,
         offset: const Offset(0, 12),
       ),
@@ -79,12 +79,12 @@ class PremiumTheme {
     final dark = isDark(context);
     return [
       BoxShadow(
-        color: Colors.black.withOpacity(dark ? 0.36 : 0.14),
+        color: Colors.black.withValues(alpha: dark ? 0.36 : 0.14),
         blurRadius: 40,
         offset: const Offset(0, 16),
       ),
       BoxShadow(
-        color: AppColors.primaryAccentGreen.withOpacity(dark ? 0.12 : 0.08),
+        color: AppColors.primaryAccentGreen.withValues(alpha: dark ? 0.12 : 0.08),
         blurRadius: 26,
         offset: const Offset(0, 8),
       ),
@@ -96,17 +96,17 @@ class PremiumTheme {
     final dark = isDark(context);
     return [
       BoxShadow(
-        color: Colors.black.withOpacity(dark ? 0.35 : 0.14),
+        color: Colors.black.withValues(alpha: dark ? 0.35 : 0.14),
         blurRadius: 40,
         offset: const Offset(0, 12),
       ),
       BoxShadow(
-        color: Colors.black.withOpacity(dark ? 0.18 : 0.08),
+        color: Colors.black.withValues(alpha: dark ? 0.18 : 0.08),
         blurRadius: 12,
         offset: const Offset(0, 4),
       ),
       BoxShadow(
-        color: AppColors.primaryAccentGreen.withOpacity(dark ? 0.15 : 0.08),
+        color: AppColors.primaryAccentGreen.withValues(alpha: dark ? 0.15 : 0.08),
         blurRadius: 20,
         spreadRadius: -2,
       ),
@@ -116,7 +116,7 @@ class PremiumTheme {
   /// Effet de lueur (glow) autour d'un élément.
   static List<BoxShadow> glow(BuildContext context, {Color? color}) => [
     BoxShadow(
-      color: (color ?? AppColors.primaryAccentGreen).withOpacity(
+      color: (color ?? AppColors.primaryAccentGreen).withValues(alpha: 
         isDark(context) ? 0.26 : 0.16,
       ),
       blurRadius: 24,
@@ -177,8 +177,8 @@ class PremiumBackground extends StatelessWidget {
             child: _AmbientGlow(
               size: 260,
               color: dark
-                  ? AppColors.premiumCyanAccent.withOpacity(0.12)
-                  : AppColors.premiumCyanAccent.withOpacity(0.18),
+                  ? AppColors.premiumCyanAccent.withValues(alpha: 0.12)
+                  : AppColors.premiumCyanAccent.withValues(alpha: 0.18),
             ),
           ),
           Positioned(
@@ -187,8 +187,8 @@ class PremiumBackground extends StatelessWidget {
             child: _AmbientGlow(
               size: 300,
               color: dark
-                  ? AppColors.warmAccent.withOpacity(0.13)
-                  : AppColors.primaryAccentGreen.withOpacity(0.12),
+                  ? AppColors.warmAccent.withValues(alpha: 0.13)
+                  : AppColors.primaryAccentGreen.withValues(alpha: 0.12),
             ),
           ),
           child,
@@ -291,8 +291,8 @@ class GlassContainer extends StatelessWidget {
                 color:
                     borderColor ??
                     (PremiumTheme.isDark(context)
-                        ? Colors.white.withOpacity(0.08)
-                        : Colors.white.withOpacity(0.82)),
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.white.withValues(alpha: 0.82)),
               ),
             ),
             child: child,
@@ -355,8 +355,8 @@ class PremiumCard extends StatelessWidget {
       PremiumCardVariant.elevated => PremiumTheme.elevatedSurface(context),
       PremiumCardVariant.accent =>
         dark
-            ? AppColors.primaryAccentGreen.withOpacity(0.14)
-            : AppColors.primaryAccentGreen.withOpacity(0.09),
+            ? AppColors.primaryAccentGreen.withValues(alpha: 0.14)
+            : AppColors.primaryAccentGreen.withValues(alpha: 0.09),
       PremiumCardVariant.glass => PremiumTheme.surface(context),
     };
 
@@ -381,7 +381,7 @@ class PremiumCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(borderRadius),
               border: Border.all(
                 color: variant == PremiumCardVariant.accent
-                    ? AppColors.primaryAccentGreen.withOpacity(
+                    ? AppColors.primaryAccentGreen.withValues(alpha: 
                         dark ? 0.22 : 0.18,
                       )
                     : PremiumTheme.border(context),
@@ -488,9 +488,9 @@ class GlassButton extends StatelessWidget {
               label: Text(label),
               style: FilledButton.styleFrom(
                 backgroundColor: background,
-                disabledBackgroundColor: background.withOpacity(0.45),
+                disabledBackgroundColor: background.withValues(alpha: 0.45),
                 foregroundColor: foreground,
-                disabledForegroundColor: foreground.withOpacity(0.45),
+                disabledForegroundColor: foreground.withValues(alpha: 0.45),
                 minimumSize: const Size.fromHeight(56),
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 shape: RoundedRectangleBorder(
@@ -498,7 +498,7 @@ class GlassButton extends StatelessWidget {
                   side: BorderSide(
                     color: outlined
                         ? AppColors.primaryAccentGreen
-                        : Colors.white.withOpacity(0.08),
+                        : Colors.white.withValues(alpha: 0.08),
                   ),
                 ),
                 textStyle: AppTypography.labelLarge.copyWith(
@@ -634,7 +634,7 @@ class AnimatedProgressBar extends StatelessWidget {
           height: height,
           decoration: BoxDecoration(
             color: PremiumTheme.isDark(context)
-                ? Colors.white.withOpacity(0.12)
+                ? Colors.white.withValues(alpha: 0.12)
                 : AppColors.outline,
             borderRadius: BorderRadius.circular(AppRadius.full),
           ),
@@ -742,9 +742,9 @@ class GlowBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(PremiumTheme.isDark(context) ? 0.14 : 0.10),
+        color: color.withValues(alpha: PremiumTheme.isDark(context) ? 0.14 : 0.10),
         borderRadius: BorderRadius.circular(AppRadius.full),
-        border: Border.all(color: color.withOpacity(0.32)),
+        border: Border.all(color: color.withValues(alpha: 0.32)),
         boxShadow: PremiumTheme.glow(context, color: color),
       ),
       child: Row(
@@ -874,13 +874,13 @@ class GlassNavigationContainer extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: PremiumTheme.isDark(context)
-                  ? Colors.white.withOpacity(0.08)
-                  : Colors.white.withOpacity(0.70),
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.white.withValues(alpha: 0.70),
               borderRadius: BorderRadius.circular(AppRadius.full),
               border: Border.all(
                 color: PremiumTheme.isDark(context)
-                    ? Colors.white.withOpacity(0.08)
-                    : Colors.white.withOpacity(0.85),
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.white.withValues(alpha: 0.85),
               ),
             ),
             child: child,
@@ -999,7 +999,7 @@ class _FloatingNavItemState extends State<_FloatingNavItem> {
         : Colors.white;
     final color = widget.selected
         ? selectedForeground
-        : PremiumTheme.textSecondary(context).withOpacity(0.78);
+        : PremiumTheme.textSecondary(context).withValues(alpha: 0.78);
 
     return Tooltip(
       message: widget.destination.label,
@@ -1033,7 +1033,7 @@ class _FloatingNavItemState extends State<_FloatingNavItem> {
                   boxShadow: widget.selected
                       ? [
                           BoxShadow(
-                            color: AppColors.primaryAccentGreen.withOpacity(
+                            color: AppColors.primaryAccentGreen.withValues(alpha: 
                               0.35,
                             ),
                             blurRadius: 24,

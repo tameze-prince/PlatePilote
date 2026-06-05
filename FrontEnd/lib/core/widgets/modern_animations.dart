@@ -89,7 +89,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
             boxShadow: widget.elevation != null
                 ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: widget.elevation! * 2,
                       offset: Offset(0, widget.elevation!),
                     ),
@@ -200,7 +200,7 @@ class _AnimatedCardState extends State<AnimatedCard>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: _elevationAnimation.value * 4,
                     offset: Offset(0, _elevationAnimation.value * 2),
                     spreadRadius: _elevationAnimation.value * -0.5,

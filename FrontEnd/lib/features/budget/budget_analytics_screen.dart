@@ -95,7 +95,7 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: ColorTokens.primaryGreen.withOpacity(0.1),
+                          color: ColorTokens.primaryGreen.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.input),
                         ),
                         child: const Icon(
@@ -131,8 +131,8 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: _percentUsed > 0.8
-                              ? ColorTokens.error.withOpacity(0.1)
-                              : ColorTokens.primaryGreen.withOpacity(0.1),
+                              ? ColorTokens.error.withValues(alpha: 0.1)
+                              : ColorTokens.primaryGreen.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                         child: Text(
@@ -390,7 +390,7 @@ class _BarChartPainter extends CustomPainter {
 
     final budgetY = size.height - 20 - (budgetLine / maxValue * maxBarHeight);
     final budgetPaint = Paint()
-      ..color = ColorTokens.error.withOpacity(0.5)
+      ..color = ColorTokens.error.withValues(alpha: 0.5)
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
     canvas.drawLine(

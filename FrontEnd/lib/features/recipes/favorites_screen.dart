@@ -123,7 +123,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryAccentGreen.withOpacity(0.1),
+                  color: AppColors.primaryAccentGreen.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppRadius.input),
                 ),
                 child: const Icon(

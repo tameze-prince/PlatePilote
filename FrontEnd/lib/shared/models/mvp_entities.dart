@@ -1,43 +1,6 @@
 /// Catégories de notification disponibles.
 enum NotificationCategory { pantry, budget, mealPlan, grocery, premium }
 
-/// Notification de l'application (version MVP).
-class AppNotification {
-  const AppNotification({
-    required this.id,
-    required this.title,
-    required this.message,
-    required this.category,
-    required this.createdAt,
-    this.isRead = false,
-  });
-
-  /// Identifiant unique.
-  final String id;
-  /// Titre de la notification.
-  final String title;
-  /// Message de la notification.
-  final String message;
-  /// Catégorie de la notification.
-  final NotificationCategory category;
-  /// Date de création.
-  final DateTime createdAt;
-  /// Indique si la notification a été lue.
-  final bool isRead;
-
-  /// Retourne une copie avec les champs modifiés.
-  AppNotification copyWith({bool? isRead}) {
-    return AppNotification(
-      id: id,
-      title: title,
-      message: message,
-      category: category,
-      createdAt: createdAt,
-      isRead: isRead ?? this.isRead,
-    );
-  }
-}
-
 /// Préférences utilisateur.
 class UserPreferences {
   const UserPreferences({

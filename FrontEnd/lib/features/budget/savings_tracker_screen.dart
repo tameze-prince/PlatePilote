@@ -94,7 +94,7 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: ColorTokens.primaryGreen.withOpacity(0.1),
+                          color: ColorTokens.primaryGreen.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.input),
                         ),
                         child: const Icon(
@@ -282,7 +282,7 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.xs),
             decoration: BoxDecoration(
-              color: (source['color'] as Color).withOpacity(0.1),
+              color: (source['color'] as Color).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
             child: Icon(
@@ -342,7 +342,7 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
           padding: const EdgeInsets.all(AppSpacing.xs),
           decoration: BoxDecoration(
             color: unlocked
-                ? ColorTokens.accentAmber.withOpacity(0.1)
+                ? ColorTokens.accentAmber.withValues(alpha: 0.1)
                 : ColorTokens.surfaceContainerLow,
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
@@ -431,7 +431,7 @@ class _SavingsChartPainter extends CustomPainter {
 
       final targetY = size.height - 30 - targetHeight;
       final targetPaint = Paint()
-        ..color = targetColor.withOpacity(0.3)
+        ..color = targetColor.withValues(alpha: 0.3)
         ..strokeWidth = 1
         ..style = PaintingStyle.stroke;
       canvas.drawLine(
