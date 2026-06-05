@@ -237,52 +237,55 @@ public class PreferencesService {
     }
 
     /**
-     * Remplace l'ensemble des préférences d'un utilisateur.
-     * Les anciennes valeurs sont supprimées avant réinsertion.
-     *
-     * @param userId  identifiant de l'utilisateur
-     * @param request nouvelles préférences
-     */
-    public void updateAllPreferences(UUID userId, UserPreferencesRequest request) {
-        if (request.getDietaryPreferences() != null) {
-            dietaryPreferenceRepository.deleteAll(dietaryPreferenceRepository.findByUserId(userId));
+         * Remplace l'ensemble des préférences d'un utilisateur.
+         * Les anciennes valeurs sont supprimées (hard delete) avant réinsertion.
+         *
+         * @param userId  identifiant de l'utilisateur
+         * @param request nouvelles préférences
+         */
+        public void updateAllPreferences(UUID userId, UserPreferencesRequest request) {
+            if (request.getDietaryPreferences() != null) {
+                // Hard delete toutes les entrées (y compris soft-deleted) pour éviter
+                // les conflits de contrainte d'unicité car la contrainte ne tient pas
+                // compte de deleted_at
+                dietaryPreferenceRepository.deleteAllByUserId(userId);
 
-            List<DietaryPreference> newDiets = request.getDietaryPreferences().stream()
-                    .filter(diet -> diet != null && !diet.isBlank())
-                    .map(diet -> DietaryPreference.builder()
-                            .userId(userId)
-                            .dietType(diet.toLowerCase())
-                            .build())
-                    .collect(Collectors.toList());
-            dietaryPreferenceRepository.saveAll(newDiets);
+                List<DietaryPreference> newDiets = request.getDietaryPreferences().stream()
+                        .filter(diet -> diet != null && !diet.isBlank())
+                        .map(diet -> DietaryPreference.builder()
+                                .userId(userId)
+                                .dietType(diet.toLowerCase())
+                                .build())
+                        .collect(Collectors.toList());
+                dietaryPreferenceRepository.saveAll(newDiets);
+            }
+
+            if (request.getAllergies() != null) {
+                allergyRepository.deleteAllByUserId(userId);
+
+                List<Allergy> newAllergies = request.getAllergies().stream()
+                        .filter(a -> a.getAllergen() != null && !a.getAllergen().isBlank())
+                        .map(a -> Allergy.builder()
+                                .userId(userId)
+                                .allergen(a.getAllergen().toLowerCase())
+                                .severity(a.getSeverity())
+                                .build())
+                        .collect(Collectors.toList());
+                allergyRepository.saveAll(newAllergies);
+            }
+
+            if (request.getCuisines() != null) {
+                cuisinePreferenceRepository.deleteAllByUserId(userId);
+
+                List<CuisinePreference> newCuisines = request.getCuisines().stream()
+                        .filter(cuisine -> cuisine != null && !cuisine.isBlank())
+                        .map(cuisine -> CuisinePreference.builder()
+                                .userId(userId)
+                                .cuisineType(cuisine.toLowerCase())
+                                .preferenceLevel("LIKE")
+                                .build())
+                        .collect(Collectors.toList());
+                cuisinePreferenceRepository.saveAll(newCuisines);
+            }
         }
-
-        if (request.getAllergies() != null) {
-            allergyRepository.deleteAll(allergyRepository.findByUserId(userId));
-
-            List<Allergy> newAllergies = request.getAllergies().stream()
-                    .filter(a -> a.getAllergen() != null && !a.getAllergen().isBlank())
-                    .map(a -> Allergy.builder()
-                            .userId(userId)
-                            .allergen(a.getAllergen().toLowerCase())
-                            .severity(a.getSeverity())
-                            .build())
-                    .collect(Collectors.toList());
-            allergyRepository.saveAll(newAllergies);
-        }
-
-        if (request.getCuisines() != null) {
-            cuisinePreferenceRepository.deleteAll(cuisinePreferenceRepository.findByUserId(userId));
-
-            List<CuisinePreference> newCuisines = request.getCuisines().stream()
-                    .filter(cuisine -> cuisine != null && !cuisine.isBlank())
-                    .map(cuisine -> CuisinePreference.builder()
-                            .userId(userId)
-                            .cuisineType(cuisine.toLowerCase())
-                            .preferenceLevel("LIKE")
-                            .build())
-                    .collect(Collectors.toList());
-            cuisinePreferenceRepository.saveAll(newCuisines);
-        }
-    }
 }
