@@ -58,40 +58,13 @@ public class OpenFoodFactsImporter {
                 products = (List<Map<String, Object>>) response.get("products");
             }
         } catch (RestClientException e) {
-            log.warn("OpenFoodFacts API call failed: {}. Falling back to demo data.", e.getMessage());
+            log.warn("OpenFoodFacts API call failed: {}", e.getMessage());
         }
 
         if (products == null || products.isEmpty()) {
-            log.info("OpenFoodFacts API returned no data. Generating demo products.");
-            int imported = 0;
-            for (int i = 0; i < maxResults; i++) {
-                try {
-                    String uniqueId = java.util.UUID.randomUUID().toString().substring(0, 8);
-                    String productName = query.substring(0, Math.min(query.length(), 20)) + " #" + (i + 1);
-                    Ingredient ingredient = Ingredient.builder()
-                            .canonicalName(productName + " " + uniqueId)
-                            .slug(normalizer.toSlug(productName + "-" + uniqueId))
-                            .category("Imported")
-                            .defaultUnit("g")
-                            .sourceName("Open Food Facts")
-                            .sourceUrl("https://world.openfoodfacts.org/")
-                            .build();
-                    ingredient = ingredientRepository.save(ingredient);
-                    barcodeProductRepository.save(BarcodeProduct.builder()
-                            .barcode("OFF-" + uniqueId + "-" + (i + 1))
-                            .productName(productName)
-                            .ingredientId(ingredient.getId())
-                            .openFoodFactsCode("OFF-" + uniqueId + "-" + (i + 1))
-                            .build());
-                    imported++;
-                } catch (Exception e) {
-                    log.warn("Failed to create demo product {}: {}", i, e.getMessage());
-                    job.setFailedRecords(job.getFailedRecords() != null ? job.getFailedRecords() + 1 : 1);
-                }
-            }
-            job.setSuccessfulRecords(imported);
-            if (job.getFailedRecords() == null) job.setFailedRecords(0);
-            log.info("OpenFoodFacts import (fallback) completed: {} imported, {} failed", imported, job.getFailedRecords());
+            log.warn("OpenFoodFacts API returned no data. Skipping import.");
+            job.setSuccessfulRecords(0);
+            job.setFailedRecords(0);
             return;
         }
 

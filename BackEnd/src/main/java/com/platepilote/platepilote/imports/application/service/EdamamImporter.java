@@ -70,11 +70,13 @@ public class EdamamImporter {
                 hits = (List<Map<String, Object>>) response.get("hits");
             }
         } catch (RestClientException e) {
-            log.warn("Edamam API call failed: {}. Falling back to demo data.", e.getMessage());
+            log.warn("Edamam API call failed: {}", e.getMessage());
         }
 
         if (hits == null || hits.isEmpty()) {
-            fallbackDemo(query, maxResults, job);
+            log.warn("Edamam API returned no data. Skipping import.");
+            job.setSuccessfulRecords(0);
+            job.setFailedRecords(0);
             return;
         }
 
@@ -166,29 +168,6 @@ public class EdamamImporter {
         job.setSuccessfulRecords(imported);
         if (job.getFailedRecords() == null) job.setFailedRecords(0);
         log.info("Edamam import completed: {} imported, {} failed", imported, job.getFailedRecords());
-    }
-
-    private void fallbackDemo(String query, int maxResults, ImportJob job) {
-        log.info("Edamam API returned no data. Generating demo recipes.");
-        int imported = 0;
-        for (int i = 0; i < maxResults; i++) {
-            try {
-                String name = query.substring(0, Math.min(query.length(), 20)) + " Edamam #" + (i + 1);
-                Recipe recipe = Recipe.builder()
-                        .name(name).description("Demo Edamam recipe").servings(4).isPublic(true)
-                        .source("Edamam (demo)").caloriesPerServing(400 + i * 50).build();
-                recipe = recipeRepository.save(recipe);
-                recipeIngredientRepository.save(RecipeIngredient.builder()
-                        .recipe(recipe).name("Demo Ingredient").quantity(BigDecimal.ONE).unit("piece").sortOrder(1).build());
-                recipeStepRepository.save(RecipeStep.builder()
-                        .recipe(recipe).stepNumber(1).instruction("Cook the " + name).build());
-                imported++;
-            } catch (Exception e) {
-                job.setFailedRecords(job.getFailedRecords() != null ? job.getFailedRecords() + 1 : 1);
-            }
-        }
-        job.setSuccessfulRecords(imported);
-        if (job.getFailedRecords() == null) job.setFailedRecords(0);
     }
 
     private String extractFirst(Map<String, Object> map, String key) {

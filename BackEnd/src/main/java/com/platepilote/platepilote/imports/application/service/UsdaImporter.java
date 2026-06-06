@@ -64,35 +64,13 @@ public class UsdaImporter {
                 foods = (List<Map<String, Object>>) response.get("foods");
             }
         } catch (RestClientException e) {
-            log.warn("USDA API call failed: {}. Falling back to demo data.", e.getMessage());
+            log.warn("USDA API call failed: {}", e.getMessage());
         }
 
         if (foods == null || foods.isEmpty()) {
-            log.info("USDA API returned no data. Generating demo ingredients.");
-            int imported = 0;
-            for (int i = 0; i < maxResults; i++) {
-                try {
-                    String uniqueId = java.util.UUID.randomUUID().toString().substring(0, 8);
-                    String name = query.substring(0, Math.min(query.length(), 20)) + " #" + (i + 1);
-                    Ingredient ingredient = Ingredient.builder()
-                            .canonicalName("USDA " + name)
-                            .slug(normalizer.toSlug("usda-" + name + "-" + uniqueId))
-                            .category("Imported")
-                            .description("Imported from USDA FoodData Central")
-                            .defaultUnit("g")
-                            .sourceName("USDA FoodData Central")
-                            .sourceUrl("https://fdc.nal.usda.gov/")
-                            .build();
-                    ingredientRepository.save(ingredient);
-                    imported++;
-                } catch (Exception e) {
-                    log.warn("Failed to create demo ingredient {}: {}", i, e.getMessage());
-                    job.setFailedRecords(job.getFailedRecords() != null ? job.getFailedRecords() + 1 : 1);
-                }
-            }
-            job.setSuccessfulRecords(imported);
-            if (job.getFailedRecords() == null) job.setFailedRecords(0);
-            log.info("USDA import (fallback) completed: {} imported, {} failed", imported, job.getFailedRecords());
+            log.warn("USDA API returned no data. Skipping import.");
+            job.setSuccessfulRecords(0);
+            job.setFailedRecords(0);
             return;
         }
 

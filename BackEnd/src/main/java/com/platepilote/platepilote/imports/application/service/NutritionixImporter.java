@@ -74,11 +74,13 @@ public class NutritionixImporter {
                 if (items.size() > maxResults) items = items.subList(0, maxResults);
             }
         } catch (RestClientException e) {
-            log.warn("Nutritionix API call failed: {}. Falling back to demo data.", e.getMessage());
+            log.warn("Nutritionix API call failed: {}", e.getMessage());
         }
 
         if (items == null || items.isEmpty()) {
-            fallbackDemo(query, maxResults, job);
+            log.warn("Nutritionix API returned no data. Skipping import.");
+            job.setSuccessfulRecords(0);
+            job.setFailedRecords(0);
             return;
         }
 
@@ -130,25 +132,6 @@ public class NutritionixImporter {
         job.setSuccessfulRecords(imported);
         if (job.getFailedRecords() == null) job.setFailedRecords(0);
         log.info("Nutritionix import completed: {} imported, {} failed", imported, job.getFailedRecords());
-    }
-
-    private void fallbackDemo(String query, int maxResults, ImportJob job) {
-        log.info("Nutritionix API returned no data. Generating demo ingredients.");
-        int imported = 0;
-        for (int i = 0; i < maxResults; i++) {
-            try {
-                String name = query.substring(0, Math.min(query.length(), 20)) + " Nutritionix #" + (i + 1);
-                Ingredient ingredient = Ingredient.builder()
-                        .canonicalName(name).slug(normalizer.toSlug("nutritionix-" + name + "-" + i))
-                        .category("Imported").defaultUnit("g").sourceName("Nutritionix").build();
-                ingredientRepository.save(ingredient);
-                imported++;
-            } catch (Exception e) {
-                job.setFailedRecords(job.getFailedRecords() != null ? job.getFailedRecords() + 1 : 1);
-            }
-        }
-        job.setSuccessfulRecords(imported);
-        if (job.getFailedRecords() == null) job.setFailedRecords(0);
     }
 
     private Double getDouble(Map<String, Object> map, String key) {

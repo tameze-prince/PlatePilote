@@ -20,7 +20,7 @@ import java.util.Map;
  * <p>
  * Permet de rechercher des produits par code-barres, d'importer les données
  * dans la base d'ingrédients et d'enregistrer les correspondances code-barres.
- * Utilise UPCItemDB comme source principale avec fallback sur des données démo.
+ * Utilise UPCItemDB comme source principale.
  */
 @Service
 @RequiredArgsConstructor
@@ -51,7 +51,7 @@ public class BarcodeLookupImporter {
      * Lance l'import des données depuis BarcodeLookup.
      * <p>
      * Chaque produit trouvé est transformé en entité Ingredient + BarcodeProduct.
-     * En cas d'échec de l'API, un fallback génère des données démo.
+     * Si l'API échoue, l'import est ignoré.
      *
      * @param query      terme de recherche
      * @param maxResults nombre maximum de résultats
@@ -71,11 +71,13 @@ public class BarcodeLookupImporter {
                 if (items.size() > maxResults) items = items.subList(0, maxResults);
             }
         } catch (RestClientException e) {
-            log.warn("UPCItemDB API call failed: {}. Falling back to demo data.", e.getMessage());
+            log.warn("UPCItemDB API call failed: {}", e.getMessage());
         }
 
         if (items == null || items.isEmpty()) {
-            fallbackDemo(query, maxResults, job);
+            log.warn("BarcodeLookup API returned no data. Skipping import.");
+            job.setSuccessfulRecords(0);
+            job.setFailedRecords(0);
             return;
         }
 
@@ -128,26 +130,4 @@ public class BarcodeLookupImporter {
         log.info("BarcodeLookup import completed: {} imported, {} failed", imported, job.getFailedRecords());
     }
 
-    private void fallbackDemo(String query, int maxResults, ImportJob job) {
-        log.info("BarcodeLookup API returned no data. Generating demo products.");
-        int imported = 0;
-        for (int i = 0; i < maxResults; i++) {
-            try {
-                String uniqueId = java.util.UUID.randomUUID().toString().substring(0, 8);
-                String name = query.substring(0, Math.min(query.length(), 20)) + " Barcode #" + (i + 1);
-                Ingredient ingredient = Ingredient.builder()
-                        .canonicalName(name).slug(normalizer.toSlug("barcode-" + name + "-" + uniqueId))
-                        .category("Imported").defaultUnit("g").sourceName("UPCItemDB").build();
-                ingredient = ingredientRepository.save(ingredient);
-                barcodeProductRepository.save(BarcodeProduct.builder()
-                        .barcode("DEMO-" + uniqueId + "-" + (i + 1)).productName(name)
-                        .ingredientId(ingredient.getId()).build());
-                imported++;
-            } catch (Exception e) {
-                job.setFailedRecords(job.getFailedRecords() != null ? job.getFailedRecords() + 1 : 1);
-            }
-        }
-        job.setSuccessfulRecords(imported);
-        if (job.getFailedRecords() == null) job.setFailedRecords(0);
-    }
 }

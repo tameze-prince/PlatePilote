@@ -34,6 +34,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import lombok.extern.slf4j.Slf4j;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ import java.util.Map;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
+@Slf4j
 public class GlobalExceptionHandler {
 
     private final Environment environment;
@@ -162,7 +164,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        ex.printStackTrace();
+        log.error("Unhandled exception: {}", ex.getMessage(), ex);
         boolean production = Arrays.asList(environment.getActiveProfiles()).contains("prod");
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),

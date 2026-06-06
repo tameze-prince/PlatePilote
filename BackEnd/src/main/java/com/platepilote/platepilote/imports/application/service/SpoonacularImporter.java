@@ -73,11 +73,13 @@ public class SpoonacularImporter {
                 results = (List<Map<String, Object>>) response.get("results");
             }
         } catch (RestClientException e) {
-            log.warn("Spoonacular API call failed: {}. Falling back to demo data.", e.getMessage());
+            log.warn("Spoonacular API call failed: {}", e.getMessage());
         }
 
         if (results == null || results.isEmpty()) {
-            fallbackDemo(query, maxResults, job);
+            log.warn("Spoonacular API returned no data. Skipping import.");
+            job.setSuccessfulRecords(0);
+            job.setFailedRecords(0);
             return;
         }
 
@@ -167,29 +169,6 @@ public class SpoonacularImporter {
         job.setSuccessfulRecords(imported);
         if (job.getFailedRecords() == null) job.setFailedRecords(0);
         log.info("Spoonacular import completed: {} imported, {} failed", imported, job.getFailedRecords());
-    }
-
-    private void fallbackDemo(String query, int maxResults, ImportJob job) {
-        log.info("Spoonacular API returned no data. Generating demo recipes.");
-        int imported = 0;
-        for (int i = 0; i < maxResults; i++) {
-            try {
-                String name = query.substring(0, Math.min(query.length(), 20)) + " Spoonacular #" + (i + 1);
-                Recipe recipe = Recipe.builder()
-                        .name(name).description("Demo Spoonacular recipe").servings(4).isPublic(true)
-                        .source("Spoonacular (demo)").caloriesPerServing(350 + i * 30).build();
-                recipe = recipeRepository.save(recipe);
-                recipeIngredientRepository.save(RecipeIngredient.builder()
-                        .recipe(recipe).name("Ingredient 1").quantity(BigDecimal.ONE).unit("piece").sortOrder(1).build());
-                recipeStepRepository.save(RecipeStep.builder()
-                        .recipe(recipe).stepNumber(1).instruction("Prepare " + name).build());
-                imported++;
-            } catch (Exception e) {
-                job.setFailedRecords(job.getFailedRecords() != null ? job.getFailedRecords() + 1 : 1);
-            }
-        }
-        job.setSuccessfulRecords(imported);
-        if (job.getFailedRecords() == null) job.setFailedRecords(0);
     }
 
     private String extractFirst(Map<String, Object> map, String key) {

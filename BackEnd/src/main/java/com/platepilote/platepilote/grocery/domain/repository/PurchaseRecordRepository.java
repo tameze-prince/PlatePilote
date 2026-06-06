@@ -10,8 +10,10 @@ import com.platepilote.platepilote.grocery.domain.entity.PurchaseRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
+@Repository
 public interface PurchaseRecordRepository extends JpaRepository<PurchaseRecord, UUID> {
 
     /**

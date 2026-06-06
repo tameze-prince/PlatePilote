@@ -65,11 +65,13 @@ public class TastyImporter {
                 recipes = (List<Map<String, Object>>) response.get("results");
             }
         } catch (RestClientException e) {
-            log.warn("Tasty API call failed: {}. Falling back to demo data.", e.getMessage());
+            log.warn("Tasty API call failed: {}", e.getMessage());
         }
 
         if (recipes == null || recipes.isEmpty()) {
-            fallbackDemo(query, maxResults, job);
+            log.warn("Tasty API returned no data. Skipping import.");
+            job.setSuccessfulRecords(0);
+            job.setFailedRecords(0);
             return;
         }
 
@@ -156,29 +158,6 @@ public class TastyImporter {
         job.setSuccessfulRecords(imported);
         if (job.getFailedRecords() == null) job.setFailedRecords(0);
         log.info("Tasty import completed: {} imported, {} failed", imported, job.getFailedRecords());
-    }
-
-    private void fallbackDemo(String query, int maxResults, ImportJob job) {
-        log.info("Tasty API returned no data. Generating demo recipes.");
-        int imported = 0;
-        for (int i = 0; i < maxResults; i++) {
-            try {
-                String name = query.substring(0, Math.min(query.length(), 20)) + " Tasty #" + (i + 1);
-                Recipe recipe = Recipe.builder()
-                        .name(name).description("Demo Tasty recipe").servings(4).isPublic(true)
-                        .source("Tasty (demo)").caloriesPerServing(300 + i * 40).build();
-                recipe = recipeRepository.save(recipe);
-                recipeIngredientRepository.save(RecipeIngredient.builder()
-                        .recipe(recipe).name("Ingredient").quantity(BigDecimal.ONE).unit("piece").sortOrder(1).build());
-                recipeStepRepository.save(RecipeStep.builder()
-                        .recipe(recipe).stepNumber(1).instruction("Make " + name).build());
-                imported++;
-            } catch (Exception e) {
-                job.setFailedRecords(job.getFailedRecords() != null ? job.getFailedRecords() + 1 : 1);
-            }
-        }
-        job.setSuccessfulRecords(imported);
-        if (job.getFailedRecords() == null) job.setFailedRecords(0);
     }
 
     private String extractFirst(Map<String, Object> map, String key) {

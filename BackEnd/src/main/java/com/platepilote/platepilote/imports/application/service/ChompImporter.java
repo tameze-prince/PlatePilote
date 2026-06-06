@@ -59,11 +59,13 @@ public class ChompImporter {
             String url = "https://chompthis.com/api/v2/food/branded/name.php?name={query}&api_key={key}";
             response = restTemplate.getForObject(url, Map.class, query, apiKey);
         } catch (RestClientException e) {
-            log.warn("Chomp API call failed: {}. Falling back to demo data.", e.getMessage());
+            log.warn("Chomp API call failed: {}", e.getMessage());
         }
 
         if (response == null || response.isEmpty()) {
-            fallbackDemo(query, maxResults, job);
+            log.warn("Chomp API returned no data. Skipping import.");
+            job.setSuccessfulRecords(0);
+            job.setFailedRecords(0);
             return;
         }
 
@@ -73,7 +75,9 @@ public class ChompImporter {
         else if (results instanceof Map) items = List.of((Map<String, Object>) results);
 
         if (items == null || items.isEmpty()) {
-            fallbackDemo(query, maxResults, job);
+            log.warn("Chomp API returned no data. Skipping import.");
+            job.setSuccessfulRecords(0);
+            job.setFailedRecords(0);
             return;
         }
 
@@ -117,26 +121,4 @@ public class ChompImporter {
         log.info("Chomp import completed: {} imported, {} failed", imported, job.getFailedRecords());
     }
 
-    private void fallbackDemo(String query, int maxResults, ImportJob job) {
-        log.info("Chomp API returned no data. Generating demo products.");
-        int imported = 0;
-        for (int i = 0; i < maxResults; i++) {
-            try {
-                String uniqueId = java.util.UUID.randomUUID().toString().substring(0, 8);
-                String name = query.substring(0, Math.min(query.length(), 20)) + " Chomp #" + (i + 1);
-                Ingredient ingredient = Ingredient.builder()
-                        .canonicalName(name).slug(normalizer.toSlug("chomp-demo-" + name + "-" + uniqueId))
-                        .category("Imported").defaultUnit("g").sourceName("Chomp (demo)").build();
-                ingredient = ingredientRepository.save(ingredient);
-                barcodeProductRepository.save(BarcodeProduct.builder()
-                        .barcode("DEMO-CHOMP-" + uniqueId + "-" + (i + 1)).productName(name)
-                        .ingredientId(ingredient.getId()).build());
-                imported++;
-            } catch (Exception e) {
-                job.setFailedRecords(job.getFailedRecords() != null ? job.getFailedRecords() + 1 : 1);
-            }
-        }
-        job.setSuccessfulRecords(imported);
-        if (job.getFailedRecords() == null) job.setFailedRecords(0);
-    }
 }

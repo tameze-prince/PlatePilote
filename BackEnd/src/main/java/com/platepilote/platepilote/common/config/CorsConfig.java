@@ -1,11 +1,9 @@
 package com.platepilote.platepilote.common.config;
 
-import org.springframework.context.annotation.Configuration;
-
 /**
  * Configuration CORS pour l'application.
- * Autorise les requêtes cross-origin depuis le client Flutter.
+ * La configuration effective est définie dans {@link com.platepilote.platepilote.common.security.SecurityConfig}.
  */
-@Configuration
-public class CorsConfig {
+public final class CorsConfig {
+  private CorsConfig() {}
 }

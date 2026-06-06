@@ -81,11 +81,13 @@ public class RecipeAPIImporter {
                 results = (List<Map<String, Object>>) response.get("data");
             }
         } catch (RestClientException e) {
-            log.warn("RecipeAPI call failed: {}. Falling back to demo data.", e.getMessage());
+            log.warn("RecipeAPI call failed: {}", e.getMessage());
         }
 
         if (results == null || results.isEmpty()) {
-            fallbackDemo(query, maxResults, job);
+            log.warn("RecipeAPI returned no data. Skipping import.");
+            job.setSuccessfulRecords(0);
+            job.setFailedRecords(0);
             return;
         }
 
@@ -156,26 +158,4 @@ public class RecipeAPIImporter {
         log.info("RecipeAPI import completed: {} imported, {} failed", imported, job.getFailedRecords());
     }
 
-    private void fallbackDemo(String query, int maxResults, ImportJob job) {
-        log.info("RecipeAPI returned no data. Generating demo recipes.");
-        int imported = 0;
-        for (int i = 0; i < maxResults; i++) {
-            try {
-                String name = query.substring(0, Math.min(query.length(), 20)) + " RecipeAPI #" + (i + 1);
-                Recipe recipe = Recipe.builder()
-                        .name(name).description("Demo RecipeAPI recipe").servings(4).isPublic(true)
-                        .source("RecipeAPI (demo)").caloriesPerServing(300 + i * 25).build();
-                recipe = recipeRepository.save(recipe);
-                recipeIngredientRepository.save(RecipeIngredient.builder()
-                        .recipe(recipe).name("Ingredient 1").quantity(BigDecimal.ONE).unit("piece").sortOrder(1).build());
-                recipeStepRepository.save(RecipeStep.builder()
-                        .recipe(recipe).stepNumber(1).instruction("Prepare " + name).build());
-                imported++;
-            } catch (Exception e) {
-                job.setFailedRecords(job.getFailedRecords() != null ? job.getFailedRecords() + 1 : 1);
-            }
-        }
-        job.setSuccessfulRecords(imported);
-        if (job.getFailedRecords() == null) job.setFailedRecords(0);
-    }
 }
