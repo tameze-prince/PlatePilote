@@ -16,6 +16,7 @@ package com.platepilote.platepilote.common.security;
  * </ul>
  */
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,6 +38,8 @@ import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -44,7 +47,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
-    private final UserDetailsService userDetailsService;
+        private final RateLimitingFilter rateLimitingFilter;
+        private final UserDetailsService userDetailsService;
+
+        /** Origines CORS autorisées, injectées via application properties / profiles. */
+        @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000}")
+        private List<String> corsAllowedOrigins;
 
     /** Endpoints publics accessibles sans authentification. */
     private static final String[] PUBLIC_ENDPOINTS = {
@@ -105,7 +113,8 @@ public class SecurityConfig {
 
                 .authenticationProvider(authenticationProvider())
 
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -149,21 +158,27 @@ public class SecurityConfig {
     }
 
     /**
-     * Source de configuration CORS pour autoriser les requêtes cross-origin.
-     *
-     * @return source de configuration CORS
-     */
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(java.util.List.of("http://localhost:*"));
-        configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(java.util.List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
-        configuration.setMaxAge(java.time.Duration.ofHours(1));
-        configuration.setAllowCredentials(true);
+         * Source de configuration CORS pour autoriser les requêtes cross-origin.
+         * Les origines autorisées sont définies par le profil Spring (dev / prod)
+         * via la propriété {@code app.cors.allowed-origins}.
+         * <ul>
+         *   <li>Profil {@code dev} (défaut) : {@code http://localhost:5173}, {@code http://localhost:3000}</li>
+         *   <li>Profil {@code prod} : {@code https://platepilote.com}, {@code https://www.platepilote.com}</li>
+         * </ul>
+         *
+         * @return source de configuration CORS
+         */
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+            CorsConfiguration configuration = new CorsConfiguration();
+            configuration.setAllowedOriginPatterns(corsAllowedOrigins);
+            configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+            configuration.setAllowedHeaders(java.util.List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
+            configuration.setMaxAge(java.time.Duration.ofHours(1));
+            configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+            source.registerCorsConfiguration("/**", configuration);
+            return source;
+        }
 }

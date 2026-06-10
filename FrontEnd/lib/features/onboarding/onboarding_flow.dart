@@ -148,10 +148,36 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
               title: 'Weekly grocery budget',
               choices: const [r'$75', r'$120', r'$180', 'Custom'],
               selectedValues: {
-                if (state.weeklyBudget != null) state.weeklyBudget!,
+                if (state.weeklyBudget != null && !state.weeklyBudget!.startsWith(r'$'))
+                  if (state.weeklyBudget != 'Custom') state.weeklyBudget!,
               },
               onSelected: notifier.setWeeklyBudget,
             ),
+            if (state.weeklyBudget == 'Custom')
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                child: _CustomBudgetField(
+                  onSubmitted: (value) {
+                    final budget = double.tryParse(value);
+                    if (budget != null && budget > 0) {
+                      notifier.setWeeklyBudget(budget.toStringAsFixed(0));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Row(
+                            children: [
+                              Icon(Icons.check_circle, color: Colors.white, size: 18),
+                              SizedBox(width: 8),
+                              Text('✓ Budget enregistré'),
+                            ],
+                          ),
+                          duration: Duration(seconds: 2),
+                          backgroundColor: Color(0xFF2E7D32),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
             _ChoiceGrid(
               title: 'Cooking time',
               choices: const ['15 min', '30 min', '45 min', 'Flexible'],
@@ -353,6 +379,7 @@ class _ChoiceGrid extends StatelessWidget {
             itemBuilder: (context, index) {
               final value = choices[index];
               final selected = selectedValues.contains(value);
+              final isCustom = value == 'Custom';
               return SelectableGlassCard(
                 selected: selected,
                 onTap: () {
@@ -372,12 +399,113 @@ class _ChoiceGrid extends StatelessWidget {
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
+                        style: isCustom && selected
+                            ? AppTypography.bodyMedium.copyWith(
+                                color: AppColors.primaryAccentGreen,
+                                fontWeight: FontWeight.w700,
+                              )
+                            : null,
                       ),
                     ),
                   ],
                 ),
               );
             },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Champ de saisie pour le budget personnalisé.
+class _CustomBudgetField extends StatefulWidget {
+  const _CustomBudgetField({required this.onSubmitted});
+
+  /// Callback appelé quand l'utilisateur soumet une valeur.
+  final ValueChanged<String> onSubmitted;
+
+  @override
+  State<_CustomBudgetField> createState() => _CustomBudgetFieldState();
+}
+
+class _CustomBudgetFieldState extends State<_CustomBudgetField> {
+  final _controller = TextEditingController();
+  final _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    // Auto-focus when widget appears
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.glassWhite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.primaryAccentGreen.withValues(alpha: 0.5),
+          width: 1.5,
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.edit_outlined,
+            color: AppColors.primaryAccentGreen,
+            size: 20,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          const Text(
+            r'$',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Expanded(
+            child: TextField(
+              controller: _controller,
+              focusNode: _focusNode,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              style: AppTypography.bodyLarge.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              decoration: const InputDecoration(
+                hintText: 'Enter amount',
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+              onSubmitted: (value) {
+                widget.onSubmitted(value);
+              },
+            ),
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.check_circle,
+              color: AppColors.primaryAccentGreen,
+            ),
+            onPressed: () => widget.onSubmitted(_controller.text),
           ),
         ],
       ),

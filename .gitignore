@@ -2,6 +2,8 @@ node_modules/
 
 .vscode
 .opencode
+.playwright-mcp
+.hermes
 
 # Logs
 logs

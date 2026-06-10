@@ -222,6 +222,7 @@ class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
           IconButton(
             icon: const Icon(Icons.search_outlined),
             onPressed: onSearchPressed,
+            semanticsLabel: 'Rechercher',
             color: isDark
                 ? AppColors.darkOnSurfaceVariant
                 : AppColors.onSurfaceVariant,

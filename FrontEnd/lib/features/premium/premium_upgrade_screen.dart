@@ -32,6 +32,39 @@ class PremiumUpgradeScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Trial badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: ColorTokens.accentAmber.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: ColorTokens.accentAmber.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.star,
+                        color: ColorTokens.accentAmber,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '7 jours gratuits',
+                        style: context.text.labelMedium?.copyWith(
+                          color: ColorTokens.accentAmber,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
                 const Icon(
                   Icons.workspace_premium,
                   color: ColorTokens.accentAmber,
@@ -54,6 +87,13 @@ class PremiumUpgradeScreen extends ConsumerWidget {
                   r'$6.99 / month',
                   style: context.text.displaySmall?.copyWith(
                     color: context.colors.primary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Annulez à tout moment. Essai gratuit inclus.',
+                  style: context.text.bodySmall?.copyWith(
+                    color: context.text.bodyMedium?.color,
                   ),
                 ),
               ],
@@ -110,7 +150,7 @@ class PremiumUpgradeScreen extends ConsumerWidget {
           ],
           const SizedBox(height: AppSpacing.lg),
           PrimaryButton(
-            label: 'Start Premium Trial',
+            label: 'Commencer mon essai gratuit',
             icon: Icons.arrow_forward,
             onPressed: () async {
               final url = await ref.read(subscriptionProvider.notifier).createCheckoutSession();
