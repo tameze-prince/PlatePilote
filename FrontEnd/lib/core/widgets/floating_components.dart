@@ -301,6 +301,7 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
                               size: 20,
                             ),
                             onPressed: () => _controller.clear(),
+                            semanticsLabel: 'Effacer la recherche',
                           )
                         : null),
                 border: InputBorder.none,

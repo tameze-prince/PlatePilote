@@ -233,6 +233,7 @@ class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
               IconButton(
                 icon: const Icon(Icons.notifications_outlined),
                 onPressed: onNotificationsPressed,
+                semanticsLabel: 'Notifications',
                 color: isDark
                     ? AppColors.darkOnSurfaceVariant
                     : AppColors.onSurfaceVariant,

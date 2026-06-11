@@ -140,13 +140,21 @@ app:
     barcode-lookup-key: ${BARCODE_LOOKUP_API_KEY:}
     chomp-key: ${CHOMP_API_KEY:}
   rate-limit:
-    max-requests: ${RATE_LIMIT_MAX_REQUESTS:100}
-    window-seconds: ${RATE_LIMIT_WINDOW_SECONDS:60}
-  cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
-    recipeapi-key: ${RECIPEAPI_API_KEY:}
-    serp-api-key: ${SERP_API_KEY:}
-  jwt:
+      max-requests: ${RATE_LIMIT_MAX_REQUESTS:100}
+      window-seconds: ${RATE_LIMIT_WINDOW_SECONDS:60}
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+      recipeapi-key: ${RECIPEAPI_API_KEY:}
+      serp-api-key: ${SERP_API_KEY:}
+    storage:
+      r2:
+        endpoint: ${R2_ENDPOINT:}
+        region: ${R2_REGION:auto}
+        access-key: ${R2_ACCESS_KEY:}
+        secret-key: ${R2_SECRET_KEY:}
+        bucket: ${R2_BUCKET:platepilote-images}
+        public-url-template: ${R2_PUBLIC_URL_TEMPLATE:https://pub-{hash}.r2.dev}
+    jwt:
     # Secret key for signing JWT tokens (Base64 encoded)
     # CHANGE THIS IN PRODUCTION to a long random string!
     secret: ${JWT_SECRET:Y2hhbmdlLXRoaXMtdG8tYS1sb25nLXNlY3VyZS1rZXktaW4tcHJvZHVjdGlvbi1lbnZpcm9ubWVudC1wbGVhc2U=}

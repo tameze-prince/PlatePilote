@@ -490,6 +490,7 @@ class AnimatedIconButton extends StatefulWidget {
     this.color,
     this.size,
     this.padding,
+    this.semanticsLabel,
     super.key,
   });
 
@@ -498,6 +499,7 @@ class AnimatedIconButton extends StatefulWidget {
   final Color? color;
   final double? size;
   final EdgeInsetsGeometry? padding;
+  final String? semanticsLabel;
 
   @override
   State<AnimatedIconButton> createState() => _AnimatedIconButtonState();
@@ -547,14 +549,17 @@ class _AnimatedIconButtonState extends State<AnimatedIconButton>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     
-    return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) {
-        _controller.reverse();
-        widget.onPressed?.call();
-      },
-      onTapCancel: () => _controller.reverse(),
-      child: AnimatedBuilder(
+    return Semantics(
+        label: widget.semanticsLabel ?? 'Bouton',
+        button: true,
+        child: GestureDetector(
+          onTapDown: (_) => _controller.forward(),
+          onTapUp: (_) {
+            _controller.reverse();
+            widget.onPressed?.call();
+          },
+          onTapCancel: () => _controller.reverse(),
+          child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
           return Transform.scale(
@@ -572,6 +577,7 @@ class _AnimatedIconButtonState extends State<AnimatedIconButton>
             ),
           );
         },
+      ),
       ),
     );
   }
