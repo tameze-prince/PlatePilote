@@ -8,6 +8,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 import '../../core/premium_components.dart';
 import '../../core/providers/app_session_provider.dart';
+import '../../features/preferences/preferences_provider.dart';
 import 'onboarding_state.dart';
 
 /// Écran principal du parcours d'onboarding en 3 étapes.
@@ -161,6 +162,8 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                     final budget = double.tryParse(value);
                     if (budget != null && budget > 0) {
                       notifier.setWeeklyBudget(budget.toStringAsFixed(0));
+                      // Sync to main preferences so budget persists after onboarding
+                      ref.read(editablePreferencesProvider.notifier).setWeeklyBudget(budget.toStringAsFixed(0));
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Row(

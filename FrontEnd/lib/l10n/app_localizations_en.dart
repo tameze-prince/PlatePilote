@@ -398,4 +398,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String weeklyCap(Object amount) {
     return '$amount weekly grocery cap';
   }
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get settingsLanguageEn => 'English';
+
+  @override
+  String get settingsLanguageFr => 'Français';
+
+  @override
+  String get settingsLanguageDe => 'Deutsch';
+
+  @override
+  String get activeUsers => 'active users';
+
+  @override
+  String get appRating => 'on the App Store';
+
+  @override
+  String get avgSavings => 'saved on average';
+
+  @override
+  String get testimonial1Text =>
+      'I save 45€ per month on groceries thanks to smart substitutions!';
+
+  @override
+  String get testimonial2Text =>
+      'The AI meal plan made me discover recipes I would never have tried alone.';
+
+  @override
+  String get testimonial3Text =>
+      'Finally an app that understands African cuisine!';
 }

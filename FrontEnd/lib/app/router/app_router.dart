@@ -17,7 +17,7 @@ import '../../features/grocery/grocery_list_screen.dart';
 import '../../features/grocery/cost_breakdown_screen.dart';
 import '../../features/grocery/purchase_history_screen.dart';
 import '../../features/home/home_screen.dart';
-import '../../features/localization/language_settings_screen.dart';
+import '../../features/settings/language_settings_screen.dart';
 import '../../features/meal_details/meal_details_screen.dart';
 import '../../features/meal_plan/weekly_plan_screen.dart';
 import '../../features/meal_plan/meal_swap_screen.dart';

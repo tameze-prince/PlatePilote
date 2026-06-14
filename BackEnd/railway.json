@@ -1,0 +1,15 @@
+{
+  "buildCommand": "./mvnw clean package -DskipTests -q",
+  "startCommand": "java -jar target/*.jar",
+  "healthCheck": {
+    "path": "/actuator/health",
+    "port": 8080
+  },
+  "resources": {
+    "memory": "1GB",
+    "cpu": "0.5"
+  },
+  "environmentVariables": {
+    "SPRING_PROFILES_ACTIVE": "prod"
+  }
+}

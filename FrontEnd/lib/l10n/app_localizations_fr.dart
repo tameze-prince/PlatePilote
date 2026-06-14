@@ -401,4 +401,40 @@ class AppLocalizationsFr extends AppLocalizations {
   String weeklyCap(Object amount) {
     return 'Plafond hebdomadaire de $amount';
   }
+
+  @override
+  String get settings => 'Paramètres';
+
+  @override
+  String get settingsLanguage => 'Langue';
+
+  @override
+  String get settingsLanguageEn => 'English';
+
+  @override
+  String get settingsLanguageFr => 'Français';
+
+  @override
+  String get settingsLanguageDe => 'Deutsch';
+
+  @override
+  String get activeUsers => 'utilisateurs actifs';
+
+  @override
+  String get appRating => "sur l'App Store";
+
+  @override
+  String get avgSavings => 'économisés en moyenne';
+
+  @override
+  String get testimonial1Text =>
+      "J'économise 45€ par mois sur mes courses grâce aux substitutions intelligentes.";
+
+  @override
+  String get testimonial2Text =>
+      "Le plan de repas AI m'a fait découvrir des recettes que je n'aurais jamais essayé seul.";
+
+  @override
+  String get testimonial3Text =>
+      "Enfin une app qui comprend la cuisine africaine!";
 }

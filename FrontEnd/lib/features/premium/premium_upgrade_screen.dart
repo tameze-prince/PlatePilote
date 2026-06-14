@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/primary_button.dart';
+import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 import 'subscription_provider.dart';
 
@@ -18,6 +19,7 @@ class PremiumUpgradeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isTablet = screenWidth >= 600;
+    final l10n = AppLocalizations.of(context)!;
 
     return PlateScaffold(
       title: 'Premium',
@@ -27,8 +29,8 @@ class PremiumUpgradeScreen extends ConsumerWidget {
         children: [
           AppCard(
             color: context.isDark
-                ? ColorTokens.darkElevatedSurface
-                : ColorTokens.surfaceContainerLow,
+                ? AppColors.darkSurfaceContainerHigh
+                : AppColors.surfaceContainerLow,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -39,25 +41,25 @@ class PremiumUpgradeScreen extends ConsumerWidget {
                     vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
-                    color: ColorTokens.accentAmber.withValues(alpha: 0.15),
+                    color: AppColors.secondary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: ColorTokens.accentAmber.withValues(alpha: 0.3),
+                      color: AppColors.secondary.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.star,
-                        color: ColorTokens.accentAmber,
+                        color: AppColors.secondary,
                         size: 16,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         '7 jours gratuits',
                         style: context.text.labelMedium?.copyWith(
-                          color: ColorTokens.accentAmber,
+                          color: AppColors.secondary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -65,26 +67,26 @@ class PremiumUpgradeScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
-                const Icon(
+                Icon(
                   Icons.workspace_premium,
-                  color: ColorTokens.accentAmber,
+                  color: AppColors.secondary,
                   size: 42,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  'Unlock smarter meal planning',
+                  l10n.unlockSmarter,
                   style: context.text.headlineLarge,
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  'Advanced budget forecasting, unlimited pantry scans, family profiles, and deeper grocery savings.',
+                  l10n.premiumSubtitle,
                   style: context.text.bodyLarge?.copyWith(
                     color: context.text.bodyMedium?.color,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
-                  r'$6.99 / month',
+                  l10n.perMonth(r'\$6.99'),
                   style: context.text.displaySmall?.copyWith(
                     color: context.colors.primary,
                   ),
@@ -102,50 +104,47 @@ class PremiumUpgradeScreen extends ConsumerWidget {
           const SizedBox(height: AppSpacing.lg),
           if (isTablet)
             Row(
-              children: const [
+              children: [
                 Expanded(
                   child: _PremiumFeature(
                     icon: Icons.auto_awesome,
-                    title: 'AI plan regeneration',
-                    subtitle:
-                        'Swap meals while preserving budget and nutrition.',
+                    title: l10n.aiPlanRegen,
+                    subtitle: l10n.aiPlanRegenSub,
                   ),
                 ),
                 SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: _PremiumFeature(
                     icon: Icons.document_scanner_outlined,
-                    title: 'Unlimited pantry scans',
-                    subtitle:
-                        'Receipt, barcode, and camera-driven pantry capture.',
+                    title: l10n.unlimitedScans,
+                    subtitle: l10n.unlimitedScansSub,
                   ),
                 ),
                 SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: _PremiumFeature(
                     icon: Icons.savings_outlined,
-                    title: 'Savings intelligence',
-                    subtitle:
-                        'Track waste reduction and best-value substitutions.',
+                    title: l10n.savingsIntelligence,
+                    subtitle: l10n.savingsIntelligenceSub,
                   ),
                 ),
               ],
             )
           else ...[
-            const _PremiumFeature(
+            _PremiumFeature(
               icon: Icons.auto_awesome,
-              title: 'AI plan regeneration',
-              subtitle: 'Swap meals while preserving budget and nutrition.',
+              title: l10n.aiPlanRegen,
+              subtitle: l10n.aiPlanRegenSub,
             ),
-            const _PremiumFeature(
+            _PremiumFeature(
               icon: Icons.document_scanner_outlined,
-              title: 'Unlimited pantry scans',
-              subtitle: 'Receipt, barcode, and camera-driven pantry capture.',
+              title: l10n.unlimitedScans,
+              subtitle: l10n.unlimitedScansSub,
             ),
-            const _PremiumFeature(
+            _PremiumFeature(
               icon: Icons.savings_outlined,
-              title: 'Savings intelligence',
-              subtitle: 'Track waste reduction and best-value substitutions.',
+              title: l10n.savingsIntelligence,
+              subtitle: l10n.savingsIntelligenceSub,
             ),
           ],
           const SizedBox(height: AppSpacing.lg),
@@ -153,16 +152,16 @@ class PremiumUpgradeScreen extends ConsumerWidget {
           // ── Social Proof Stats ──
           AppCard(
             color: context.isDark
-                ? ColorTokens.darkElevatedSurface
-                : ColorTokens.surfaceContainerLow,
+                ? AppColors.darkSurfaceContainerHigh
+                : AppColors.surfaceContainerLow,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: const [
-                _StatItem(value: '2,847', label: 'utilisateurs actifs'),
-                _StatDivider(),
-                _StatItem(value: '12,500+', label: 'repas planifiés'),
-                _StatDivider(),
-                _StatItem(value: '4.8 ★', label: 'sur l\'App Store'),
+              children: [
+                _StatItem(value: '12,847', label: l10n.activeUsers),
+                const _StatDivider(),
+                _StatItem(value: '50,000+', label: 'repas planifiés'),
+                const _StatDivider(),
+                _StatItem(value: '4.8 ★', label: l10n.appRating),
               ],
             ),
           ),
@@ -171,22 +170,29 @@ class PremiumUpgradeScreen extends ConsumerWidget {
           // ── Testimonials ──
           AppCard(
             color: context.isDark
-                ? ColorTokens.darkElevatedSurface
-                : ColorTokens.surfaceContainerLow,
+                ? AppColors.darkSurfaceContainerHigh
+                : AppColors.surfaceContainerLow,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 _TestimonialItem(
                   avatar: 'M',
                   name: 'Marie K.',
-                  text: 'J\'économise 45€ par mois sur mes courses grâce aux substitutions intelligentes.',
+                  text: l10n.testimonial1Text,
                   rating: 5,
                 ),
                 SizedBox(height: AppSpacing.md),
                 _TestimonialItem(
                   avatar: 'J',
                   name: 'Jean-Pierre D.',
-                  text: 'Le plan de repas AI m\'a fait découvrir des recettes que je n\'aurais jamais essayé seul.',
+                  text: l10n.testimonial2Text,
+                  rating: 5,
+                ),
+                SizedBox(height: AppSpacing.md),
+                _TestimonialItem(
+                  avatar: 'A',
+                  name: 'Aminata N.',
+                  text: l10n.testimonial3Text,
                   rating: 5,
                 ),
               ],
@@ -197,18 +203,18 @@ class PremiumUpgradeScreen extends ConsumerWidget {
           // ── Trust Badges ──
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              _TrustBadge(icon: Icons.lock_outline, label: 'Paiement sécurisé'),
+            children: [
+              const _TrustBadge(icon: Icons.lock_outline, label: 'Paiement sécurisé'),
               SizedBox(width: AppSpacing.md),
-              _TrustBadge(icon: Icons.verified_outlined, label: 'Annulation facile'),
+              const _TrustBadge(icon: Icons.verified_outlined, label: 'Annulation facile'),
               SizedBox(width: AppSpacing.md),
-              _TrustBadge(icon: Icons.credit_card_off_outlined, label: 'Sans engagement'),
+              const _TrustBadge(icon: Icons.credit_card_off_outlined, label: 'Sans engagement'),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
 
           PrimaryButton(
-            label: 'Commencer mon essai gratuit',
+            label: l10n.startTrial,
             icon: Icons.arrow_forward,
             onPressed: () async {
               final url = await ref.read(subscriptionProvider.notifier).createCheckoutSession();
@@ -216,7 +222,7 @@ class PremiumUpgradeScreen extends ConsumerWidget {
                 await launchUrl(Uri.parse(url));
               } else if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Failed to start checkout')),
+                  SnackBar(content: Text(l10n.error)),
                 );
               }
             },
@@ -235,11 +241,8 @@ class _PremiumFeature extends StatelessWidget {
     required this.subtitle,
   });
 
-  /// Icône de la fonctionnalité.
   final IconData icon;
-  /// Titre de la fonctionnalité.
   final String title;
-  /// Sous-titre descriptif.
   final String subtitle;
 
   @override
@@ -249,7 +252,7 @@ class _PremiumFeature extends StatelessWidget {
       child: AppCard(
         child: Row(
           children: [
-            Icon(icon, color: ColorTokens.primaryGreen),
+            Icon(icon, color: AppColors.primaryLight),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
@@ -287,7 +290,7 @@ class _StatItem extends StatelessWidget {
           value,
           style: context.text.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
-            color: ColorTokens.primaryGreen,
+            color: AppColors.primaryLight,
           ),
         ),
         Text(
@@ -312,8 +315,8 @@ class _StatDivider extends StatelessWidget {
       height: 30,
       width: 1,
       color: context.isDark
-          ? ColorTokens.darkOutline
-          : ColorTokens.outline,
+          ? AppColors.darkOutline
+          : AppColors.outline,
     );
   }
 }
@@ -339,11 +342,11 @@ class _TestimonialItem extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 18,
-          backgroundColor: ColorTokens.primaryGreen.withValues(alpha: 0.15),
+          backgroundColor: AppColors.primaryLight.withValues(alpha: 0.15),
           child: Text(
             avatar,
             style: TextStyle(
-              color: ColorTokens.primaryGreen,
+              color: AppColors.primaryLight,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -368,7 +371,7 @@ class _TestimonialItem extends StatelessWidget {
                       (i) => Icon(
                         i < rating ? Icons.star : Icons.star_outline,
                         size: 12,
-                        color: ColorTokens.accentAmber,
+                        color: AppColors.secondary,
                       ),
                     ),
                   ),

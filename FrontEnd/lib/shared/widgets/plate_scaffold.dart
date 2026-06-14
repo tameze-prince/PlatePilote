@@ -37,6 +37,8 @@ class PlateScaffold extends StatelessWidget {
                 title: title,
                 leading: showBack
                     ? IconButton(
+                        tooltip: 'Retour',
+                        semanticLabel: 'Retour à la page précédente',
                         onPressed: () => context.pop(),
                         icon: const Icon(Icons.arrow_back),
                       )
@@ -45,11 +47,13 @@ class PlateScaffold extends StatelessWidget {
                   ?trailing,
                   IconButton(
                     tooltip: 'Search',
+                    semanticLabel: 'Rechercher',
                     onPressed: () => context.push('/search'),
                     icon: Icon(Icons.search, color: context.colors.primary),
                   ),
                   IconButton(
                     tooltip: 'Notifications',
+                    semanticLabel: 'Voir les notifications',
                     onPressed: () => context.push('/notifications'),
                     icon: Icon(
                       Icons.notifications_outlined,

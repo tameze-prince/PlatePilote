@@ -97,9 +97,14 @@
   "customRecipes": "Custom Recipes",
   "customRecipesSub": "Save your own recipes",
   "theme": "Theme",
+  "settings": "Settings",
   "upgradeToPremium": "Upgrade to Premium",
   "language": "Language",
-  "languageSub": "English / Français",
+  "languageSub": "English / Français / Deutsch",
+  "settingsLanguage": "Language",
+  "settingsLanguageEn": "English",
+  "settingsLanguageFr": "Français",
+  "settingsLanguageDe": "Deutsch",
   "editPreferences": "Edit Preferences",
   "budgetManagement": "Budget Management",
   "addPantryItem": "Add Pantry Item",
@@ -118,5 +123,11 @@
   "followsSystem": "Follows system appearance",
   "darkMode": "Dark mode",
   "lightMode": "Light mode",
-  "weeklyCap": "{amount} weekly grocery cap"
+  "weeklyCap": "{amount} weekly grocery cap",
+  "activeUsers": "active users",
+  "appRating": "on the App Store",
+  "avgSavings": "saved on average",
+  "testimonial1Text": "I save 45€ per month on groceries thanks to smart substitutions!",
+  "testimonial2Text": "The AI meal plan made me discover recipes I would never have tried alone.",
+  "testimonial3Text": "Finally an app that understands African cuisine!"
 }

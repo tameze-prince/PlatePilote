@@ -7,6 +7,7 @@ import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
 import 'app_localizations_fr.dart';
+import 'app_localizations_de.dart';
 
 // ignore_for_file: type=lint
 
@@ -94,9 +95,10 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('en'),
-    Locale('fr'),
-  ];
+      Locale('en'),
+      Locale('fr'),
+      Locale('de'),
+    ];
 
   /// No description provided for @appName.
   ///
@@ -823,8 +825,8 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'fr'].contains(locale.languageCode);
+    bool isSupported(Locale locale) =>
+        <String>['en', 'fr', 'de'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -832,12 +834,14 @@ class _AppLocalizationsDelegate
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
-  switch (locale.languageCode) {
-    case 'en':
-      return AppLocalizationsEn();
-    case 'fr':
-      return AppLocalizationsFr();
-  }
+    switch (locale.languageCode) {
+      case 'en':
+        return AppLocalizationsEn();
+      case 'fr':
+        return AppLocalizationsFr();
+      case 'de':
+        return AppLocalizationsDe();
+    }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '

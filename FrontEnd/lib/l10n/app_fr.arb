@@ -97,9 +97,14 @@
   "customRecipes": "Recettes personnalisées",
   "customRecipesSub": "Sauvegardez vos propres recettes",
   "theme": "Thème",
+  "settings": "Paramètres",
   "upgradeToPremium": "Passer à Premium",
   "language": "Langue",
-  "languageSub": "Français / English",
+  "languageSub": "English / Français / Deutsch",
+  "settingsLanguage": "Langue",
+  "settingsLanguageEn": "English",
+  "settingsLanguageFr": "Français",
+  "settingsLanguageDe": "Deutsch",
   "editPreferences": "Modifier les préférences",
   "budgetManagement": "Gestion du budget",
   "addPantryItem": "Ajouter au garde-manger",
@@ -118,5 +123,11 @@
   "followsSystem": "Suit l'apparence du système",
   "darkMode": "Mode sombre",
   "lightMode": "Mode clair",
-  "weeklyCap": "Plafond hebdomadaire de {amount}"
+  "weeklyCap": "Plafond hebdomadaire de {amount}",
+  "activeUsers": "utilisateurs actifs",
+  "appRating": "sur l'App Store",
+  "avgSavings": "économisés en moyenne",
+  "testimonial1Text": "J'économise 45€ par mois sur mes courses grâce aux substitutions intelligentes.",
+  "testimonial2Text": "Le plan de repas AI m'a fait découvrir des recettes que je n'aurais jamais essayé seul.",
+  "testimonial3Text": "Enfin une app qui comprend la cuisine africaine!"
 }

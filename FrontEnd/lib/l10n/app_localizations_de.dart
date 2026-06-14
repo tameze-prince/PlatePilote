@@ -1,0 +1,421 @@
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for German (`de`).
+class AppLocalizationsDe extends AppLocalizations {
+  AppLocalizationsDe([String locale = 'de']) : super(locale);
+
+  @override
+  String get appName => 'PlatePilote';
+
+  @override
+  String get splashTagline => 'Dein intelligenter Essens-Begleiter';
+
+  @override
+  String get splashGetStarted => 'Loslegen';
+
+  @override
+  String get step1Title => 'Lernen wir deinen Haushalt kennen';
+
+  @override
+  String get step1Subtitle =>
+      'PlatePilote passt Portionen, Zubereitungszeit und Budget an deine Küche an.';
+
+  @override
+  String get step2Title => 'Setze dein Budget und deine Grenzen';
+
+  @override
+  String get step2Subtitle =>
+      'Halte Mahlzeiten realistisch, ohne an Vielfalt zu verlieren.';
+
+  @override
+  String get step3Title => 'Wähle deine Ziele';
+
+  @override
+  String get step3Subtitle =>
+      'Eine optionale Vorratskammer-Einrichtung hilft PlatePilote, das zu nutzen, was du bereits hast.';
+
+  @override
+  String get householdSize => 'Für wie viele Personen kochst du normalerweise?';
+
+  @override
+  String get cookingProfile => 'Kochprofil';
+
+  @override
+  String get weeklyBudget => 'Wöchentliches Lebensmittelbudget';
+
+  @override
+  String get cookingTime => 'Kochzeit';
+
+  @override
+  String get dietaryPrefs => 'Ernährungspräferenzen';
+
+  @override
+  String get goals => 'Was sollte PlatePilote optimieren?';
+
+  @override
+  String get continueBtn => 'Weiter';
+
+  @override
+  String get backBtn => 'Zurück';
+
+  @override
+  String get doneBtn => 'Weiter zur Anmeldung';
+
+  @override
+  String stepOf(Object current, Object total) =>
+      'Schritt {current} von {total}'.replaceAll('{current}', '\$current').replaceAll('{total}', '\$total');
+
+  @override
+  String get householdSetup => 'Haushalt einrichten';
+
+  @override
+  String get budgetConstraints => 'Budget & Einschränkungen';
+
+  @override
+  String get goalsPantry => 'Ziele & Vorratskammer';
+
+  @override
+  String get beginner => 'Anfänger';
+
+  @override
+  String get balanced => 'Ausgewogen';
+
+  @override
+  String get batchCook => 'Batch-Kochen';
+
+  @override
+  String get chefMode => 'Chef-Modus';
+
+  @override
+  String get flexible => 'Flexibel';
+
+  @override
+  String get custom => 'Benutzerdefiniert';
+
+  @override
+  String get highProtein => 'Hoher Proteingehalt';
+
+  @override
+  String get vegetarian => 'Vegetarisch';
+
+  @override
+  String get glutenFree => 'Glutenfrei';
+
+  @override
+  String get lowCarb => 'Low Carb';
+
+  @override
+  String get saveMoney => 'Geld sparen';
+
+  @override
+  String get eatHealthier => 'Gesünder essen';
+
+  @override
+  String get wasteLess => 'Weniger verschwenden';
+
+  @override
+  String get cookFaster => 'Schneller kochen';
+
+  @override
+  String get pantryLater =>
+      'Die Vorratskammer-Einrichtung kann später über den Vorratskammer-Tab abgeschlossen werden.';
+
+  @override
+  String goodMorning(Object name) => 'Guten Morgen, \$name!';
+
+  @override
+  String get homeSubtitle => 'Bereit, auf Kurs zu bleiben und heute zu sparen?';
+
+  @override
+  String get budgetStatus => 'Budgetstatus';
+
+  @override
+  String percentSpent(Object percent) => '\$percent% ausgegeben';
+
+  @override
+  String get budgetRemaining => 'Verbleibendes Budget';
+
+  @override
+  String get yourPlanToday => 'Dein Plan für heute';
+
+  @override
+  String get viewFullPlan => 'Vollständigen Plan anzeigen';
+
+  @override
+  String get quickMealMode => 'Schnellgericht-Modus';
+
+  @override
+  String pantryWarning(Object items) =>
+      '\$items sollten diese Woche verwendet werden.';
+
+  @override
+  String get welcomeBack => 'Willkommen zurück';
+
+  @override
+  String get signInSubtitle =>
+      'Melde dich an, um deinen Wochenplan und deine Einkaufsliste synchron zu halten.';
+
+  @override
+  String get signIn => 'Anmelden';
+
+  @override
+  String get createAccount => 'Konto erstellen';
+
+  @override
+  String get createAccountTitle => 'Erstelle dein PlatePilote-Konto';
+
+  @override
+  String get signupSubtitle =>
+      'Personalisierte Mahlzeitenplanung beginnt mit ein paar Grundlagen.';
+
+  @override
+  String get fullName => 'Vollständiger Name';
+
+  @override
+  String get emailAddress => 'E-Mail-Adresse';
+
+  @override
+  String get password => 'Passwort';
+
+  @override
+  String get haveAccount => 'Ich habe bereits ein Konto';
+
+  @override
+  String get yourWeek => 'Deine Woche';
+
+  @override
+  String mealsSelected(Object count) =>
+      '\$count ausgewogene Mahlzeiten für deinen Haushalt ausgewählt.';
+
+  @override
+  String get quickMeal => 'Schnellgericht';
+
+  @override
+  String get expressMode => 'Express-Modus';
+
+  @override
+  String get groceryList => 'Einkaufsliste';
+
+  @override
+  String get readyToBuy => 'Kaufbereit';
+
+  @override
+  String get estimatedBudget => 'Geschätztes Budget';
+
+  @override
+  String budgetDetail(Object items, Object pantry, Object total) =>
+      '\$total für \$items Einkaufsartikel, einschließlich \$pantry Vorratskammer-Zutaten.';
+
+  @override
+  String get replace => 'Ersetzen';
+
+  @override
+  String get regenerate => 'Neu generieren';
+
+  @override
+  String get estimatedTotal => 'Geschätzte Summe';
+
+  @override
+  String get withinBudget => 'Innerhalb des Budgets';
+
+  @override
+  String itemsToBuy(Object count, Object pantry) =>
+      '\$count Artikel zu kaufen - \$pantry Artikel in der Vorratskammer';
+
+  @override
+  String get items => 'Artikel';
+
+  @override
+  String get searchIngredients => 'Zutaten suchen...';
+
+  @override
+  String get allItems => 'Alle Artikel';
+
+  @override
+  String get scanOrAdd => 'Scannen oder zur Vorratskammer hinzufügen';
+
+  @override
+  String get useSoon => 'Bald verwenden';
+
+  @override
+  String preventWaste(Object amount, Object item, Object recipe) =>
+      'Verwende \$item heute Abend in \$recipe, um Verschwendung zu vermeiden und ca. \$amount zu sparen.';
+
+  @override
+  String dinnerIn(Object minutes) => 'Abendessen in \$minutes Minuten';
+
+  @override
+  String get quickMealDesc =>
+      'Basierend auf deiner Vorratskammer, Budget und Präferenz für schnelle Zubereitung.';
+
+  @override
+  String get bestMatches => 'Beste Übereinstimmungen';
+
+  @override
+  String get swap => 'Tauschen';
+
+  @override
+  String get cook => 'Kochen';
+
+  @override
+  String get unlockSmarter => 'Schalte intelligentere Mahlzeitenplanung frei';
+
+  @override
+  String get premiumSubtitle =>
+      'Erweiterte Budgetprognosen, unbegrenzte Vorratskammer-Scans, Familienprofile und tiefere Einkaufsersparnisse.';
+
+  @override
+  String perMonth(Object price) => '\$price / Monat';
+
+  @override
+  String get aiPlanRegen => 'KI-Planregenerierung';
+
+  @override
+  String get aiPlanRegenSub =>
+      'Tausche Mahlzeiten aus, während du Budget und Ernährung bewahrst.';
+
+  @override
+  String get unlimitedScans => 'Unbegrenzte Vorratskammer-Scans';
+
+  @override
+  String get unlimitedScansSub =>
+      'Quittungs-, Barcode- und kamerabasierte Vorratskammer-Erfassung.';
+
+  @override
+  String get savingsIntelligence => 'Spar-Intelligenz';
+
+  @override
+  String get savingsIntelligenceSub =>
+      'Verfolge Abfallvermeidung und beste Substitutionen.';
+
+  @override
+  String get startTrial => 'Premium-Testversion starten';
+
+  @override
+  String get profilePrefs => 'Profil & Präferenzen';
+
+  @override
+  String get profilePrefsSub => 'Haushalt, Ziele, Küchen, Allergien';
+
+  @override
+  String get notifications => 'Benachrichtigungen';
+
+  @override
+  String get notificationsSub => 'Vorratskammer-Warnungen und Plan-Erinnerungen';
+
+  @override
+  String get customRecipes => 'Eigene Rezepte';
+
+  @override
+  String get customRecipesSub => 'Speichere deine eigenen Rezepte';
+
+  @override
+  String get theme => 'Design';
+
+  @override
+  String get upgradeToPremium => 'Auf Premium upgraden';
+
+  @override
+  String get language => 'Sprache';
+
+  @override
+  String get languageSub => 'English / Français / Deutsch';
+
+  @override
+  String get settingsLanguage => 'Sprache';
+
+  @override
+  String get settingsLanguageEn => 'English';
+
+  @override
+  String get settingsLanguageFr => 'Français';
+
+  @override
+  String get settingsLanguageDe => 'Deutsch';
+
+  @override
+  String get settings => 'Einstellungen';
+
+  @override
+  String get editPreferences => 'Präferenzen bearbeiten';
+
+  @override
+  String get budgetManagement => 'Budgetverwaltung';
+
+  @override
+  String get addPantryItem => 'Zur Vorratskammer hinzufügen';
+
+  @override
+  String get addGroceryItem => 'Artikel hinzufügen';
+
+  @override
+  String get addRecipe => 'Rezept hinzufügen';
+
+  @override
+  String get save => 'Speichern';
+
+  @override
+  String get cancel => 'Abbrechen';
+
+  @override
+  String get delete => 'Löschen';
+
+  @override
+  String get confirm => 'Bestätigen';
+
+  @override
+  String get loading => 'Laden...';
+
+  @override
+  String get error => 'Etwas ist schiefgelaufen';
+
+  @override
+  String get retry => 'Erneut versuchen';
+
+  @override
+  String get search => 'Suchen';
+
+  @override
+  String get noResults => 'Keine Ergebnisse gefunden';
+
+  @override
+  String premiumTrialDays(Object days) =>
+      'Premium-Testversion - \$days Tage übrig';
+
+  @override
+  String get followsSystem => 'Folgt der Systemdarstellung';
+
+  @override
+  String get darkMode => 'Dunkelmodus';
+
+  @override
+  String get lightMode => 'Hellmodus';
+
+  @override
+  String weeklyCap(Object amount) =>
+      'Wöchentliches Limit \$amount';
+
+  @override
+  String get activeUsers => 'aktive Nutzer';
+
+  @override
+  String get appRating => 'im Play Store';
+
+  @override
+  String get avgSavings => 'durchschnittlich gespart';
+
+  @override
+  String get testimonial1Text =>
+      'Ich spare jede Woche 2 Stunden beim Einkaufen!';
+
+  @override
+  String get testimonial2Text =>
+      'Die Mahlzeitenpläne haben meine Ernährung verändert.';
+
+  @override
+  String get testimonial3Text =>
+      'Endlich eine App, die afrikanische Küche versteht!';
+}

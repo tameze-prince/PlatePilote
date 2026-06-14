@@ -293,6 +293,7 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
                 suffixIcon: widget.trailing ??
                     (_controller.text.isNotEmpty
                         ? IconButton(
+                            tooltip: 'Effacer',
                             icon: Icon(
                               Icons.clear,
                               color: isDark

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/preferences_provider.dart';
@@ -6,6 +8,7 @@ import '../../core/providers/preferences_provider.dart';
 class OnboardingState {
   /// Crée un [OnboardingState] avec des valeurs optionnelles.
   const OnboardingState({
+    this.currentStep = 0,
     this.householdSize,
     this.cookingSkill,
     this.weeklyBudget,
@@ -14,6 +17,8 @@ class OnboardingState {
     this.goals = const {},
   });
 
+  /// Étape actuelle de l'onboarding (0 = non commencé, 1-3 = étapes).
+  final int currentStep;
   /// Taille du foyer sélectionnée.
   final String? householdSize;
   /// Niveau de compétence culinaire.
@@ -39,6 +44,7 @@ class OnboardingState {
 
   /// Retourne une copie avec les champs modifiés.
   OnboardingState copyWith({
+    int? currentStep,
     String? householdSize,
     String? cookingSkill,
     String? weeklyBudget,
@@ -47,6 +53,7 @@ class OnboardingState {
     Set<String>? goals,
   }) {
     return OnboardingState(
+      currentStep: currentStep ?? this.currentStep,
       householdSize: householdSize ?? this.householdSize,
       cookingSkill: cookingSkill ?? this.cookingSkill,
       weeklyBudget: weeklyBudget ?? this.weeklyBudget,

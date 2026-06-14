@@ -11,6 +11,7 @@ import '../../core/widgets/modern_components.dart';
 import '../../core/widgets/modern_animations.dart';
 import '../../core/widgets/floating_components.dart';
 import '../../core/premium_components.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Écran des paramètres de l'application.
 class SettingsScreen extends ConsumerWidget {
@@ -22,6 +23,7 @@ class SettingsScreen extends ConsumerWidget {
     final isDark = theme.brightness == Brightness.dark;
     final themeMode = ref.watch(themeModeProvider);
     final isSystem = themeMode == ThemeMode.system;
+    final l10n = AppLocalizations.of(context)!;
 
     String themeLabel;
     if (isSystem) {
@@ -41,7 +43,7 @@ class SettingsScreen extends ConsumerWidget {
           SliverToBoxAdapter(
             child: FloatingAppBar(
               title: Text(
-                'Settings',
+                l10n.settings,
                 style: AppTypography.titleLarge.copyWith(
                   color: isDark ? AppColors.primaryLight : AppColors.primary,
                   fontWeight: FontWeight.w700,
@@ -130,15 +132,15 @@ class SettingsScreen extends ConsumerWidget {
 
                   const SizedBox(height: AppSpacing.lg),
 
-                  _buildSectionTitle(context, isDark, 'Account'),
+                  _buildSectionTitle(context, isDark, l10n.profilePrefs),
                   const SizedBox(height: AppSpacing.sm),
 
                   AnimatedListItem(
                     delay: 1,
                     child: InfoCard(
                       icon: Icons.people_outline,
-                      title: 'Profile & Preferences',
-                      description: 'Household, goals, cuisines, allergies',
+                      title: l10n.profilePrefs,
+                      description: l10n.profilePrefsSub,
                       trailing: const Icon(Icons.chevron_right, size: 20),
                       onTap: () => context.push('/preferences'),
                     ),
@@ -150,8 +152,8 @@ class SettingsScreen extends ConsumerWidget {
                     delay: 2,
                     child: InfoCard(
                       icon: Icons.payments_outlined,
-                      title: 'Budget Management',
-                      description: '\$400 weekly grocery cap',
+                      title: l10n.budgetManagement,
+                      description: '\$400 ${l10n.weeklyCap.split(' ').skip(1).join(' ')}',
                       trailing: const Icon(Icons.chevron_right, size: 20),
                       onTap: () => context.push('/budget'),
                     ),
@@ -163,8 +165,8 @@ class SettingsScreen extends ConsumerWidget {
                     delay: 3,
                     child: InfoCard(
                       icon: Icons.language,
-                      title: 'Language',
-                      description: 'English / Français',
+                      title: l10n.language,
+                      description: l10n.languageSub,
                       trailing: const Icon(Icons.chevron_right, size: 20),
                       onTap: () => context.push('/language'),
                     ),
@@ -176,8 +178,8 @@ class SettingsScreen extends ConsumerWidget {
                     delay: 4,
                     child: InfoCard(
                       icon: Icons.notifications_outlined,
-                      title: 'Notifications',
-                      description: 'Pantry alerts and plan reminders',
+                      title: l10n.notifications,
+                      description: l10n.notificationsSub,
                       trailing: const Icon(Icons.chevron_right, size: 20),
                       onTap: () => context.push('/notification-preferences'),
                     ),
@@ -189,8 +191,8 @@ class SettingsScreen extends ConsumerWidget {
                     delay: 5,
                     child: InfoCard(
                       icon: Icons.menu_book_outlined,
-                      title: 'Custom Recipes',
-                      description: 'Save your own recipes',
+                      title: l10n.customRecipes,
+                      description: l10n.customRecipesSub,
                       trailing: const Icon(Icons.chevron_right, size: 20),
                       onTap: () => context.push('/recipes/add'),
                     ),
@@ -198,7 +200,7 @@ class SettingsScreen extends ConsumerWidget {
 
                   const SizedBox(height: AppSpacing.lg),
 
-                  _buildSectionTitle(context, isDark, 'Appearance'),
+                  _buildSectionTitle(context, isDark, l10n.theme),
                   const SizedBox(height: AppSpacing.sm),
 
                   AnimatedListItem(
@@ -222,7 +224,7 @@ class SettingsScreen extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Theme',
+                                  l10n.theme,
                                   style: AppTypography.bodyLarge.copyWith(
                                     color: isDark
                                         ? AppColors.darkOnSurface
@@ -347,7 +349,7 @@ class SettingsScreen extends ConsumerWidget {
                                 const Icon(Icons.arrow_forward, size: 18),
                                 const SizedBox(width: AppSpacing.sm),
                                 Text(
-                                  'Upgrade to Premium',
+                                  l10n.upgradeToPremium,
                                   style: AppTypography.labelLarge.copyWith(
                                     color: isDark
                                         ? AppColors.darkBackground
