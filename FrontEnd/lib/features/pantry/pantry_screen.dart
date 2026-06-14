@@ -10,6 +10,7 @@ import '../../core/premium_components.dart';
 import '../../core/widgets/expiry_badge.dart';
 import '../../shared/models/pantry_item.dart';
 import '../../shared/widgets/shimmer_glass_skeleton.dart';
+import 'pantry_fab.dart';
 import 'pantry_provider.dart';
 
 /// Écran principal du garde-manger.
@@ -196,6 +197,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
     return Scaffold(
       backgroundColor: PremiumTheme.background(context),
       extendBody: true,
+      floatingActionButton: const PantryFab(),
       body: PremiumBackground(
         safeArea: false,
         child: RefreshIndicator(

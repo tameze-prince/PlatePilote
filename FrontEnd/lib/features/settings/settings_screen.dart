@@ -153,7 +153,8 @@ class SettingsScreen extends ConsumerWidget {
                     child: InfoCard(
                       icon: Icons.payments_outlined,
                       title: l10n.budgetManagement,
-                      description: '\$400 ${l10n.weeklyCap.split(' ').skip(1).join(' ')}',
+                      description:
+                          l10n.weeklyCap('\$400 ${l10n.weeklyCap('').split(' ').skip(1).join(' ')}'),
                       trailing: const Icon(Icons.chevron_right, size: 20),
                       onTap: () => context.push('/budget'),
                     ),

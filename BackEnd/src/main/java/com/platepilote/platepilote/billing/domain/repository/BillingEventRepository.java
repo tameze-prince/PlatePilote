@@ -4,15 +4,12 @@ import com.platepilote.platepilote.billing.domain.entity.BillingEvent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Repository pour l'accès aux données des événements de facturation.
  */
-@Repository
 public interface BillingEventRepository extends JpaRepository<BillingEvent, UUID> {
 
     /**

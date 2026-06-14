@@ -6,6 +6,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../core/widgets/app_card.dart';
+import '../premium/premium_gate.dart';
 import 'budget_repository.dart';
 
 /// Écran d'analyse et de suivi du budget.
@@ -81,7 +82,9 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
       appBar: AppBar(
         title: const Text('Budget Analytics'),
       ),
-      body: SingleChildScrollView(
+      body: PremiumGate(
+        message: 'Analyses avancées de budget',
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -262,6 +265,7 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

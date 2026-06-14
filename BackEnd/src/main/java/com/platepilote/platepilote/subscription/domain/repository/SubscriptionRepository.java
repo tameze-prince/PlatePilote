@@ -2,15 +2,12 @@ package com.platepilote.platepilote.subscription.domain.repository;
 
 import com.platepilote.platepilote.subscription.domain.entity.Subscription;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Repository pour l'accès aux données des abonnements.
  */
-@Repository
 public interface SubscriptionRepository extends JpaRepository<Subscription, UUID> {
 
     /**

@@ -9,12 +9,9 @@ package com.platepilote.platepilote.grocery.domain.repository;
 
 import com.platepilote.platepilote.grocery.domain.entity.GroceryItem;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.UUID;
 
-@Repository
 public interface GroceryItemRepository extends JpaRepository<GroceryItem, UUID> {
 
     /**

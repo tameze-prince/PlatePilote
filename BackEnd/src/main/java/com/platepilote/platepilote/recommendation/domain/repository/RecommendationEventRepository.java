@@ -2,8 +2,6 @@ package com.platepilote.platepilote.recommendation.domain.repository;
 
 import com.platepilote.platepilote.recommendation.domain.entity.RecommendationEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.time.Instant;
 import java.util.UUID;
 
@@ -12,7 +10,6 @@ import java.util.UUID;
  * <p>
  * Permet le comptage des requêtes pour la gestion des quotas et les statistiques d'utilisation.
  */
-@Repository
 public interface RecommendationEventRepository extends JpaRepository<RecommendationEvent, UUID> {
 
     /**

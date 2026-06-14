@@ -14,6 +14,7 @@ import '../../core/widgets/modern_animations.dart';
 import '../../core/widgets/floating_components.dart';
 import '../../shared/widgets/recipe_image.dart';
 import '../support/filter_bottom_sheet.dart';
+import 'what_if.dart';
 
 /// Écran de recherche de recettes.
 class SearchScreen extends ConsumerStatefulWidget {
@@ -34,11 +35,49 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   String? _error;
   /// Timer de debounce pour éviter les appels API trop fréquents.
   Timer? _debounce;
+  /// Mode What-If : affiche comparaison prix & impact budget.
+  bool _whatIfMode = false;
+  /// Map de savings simulés (recipe_id → WhatIfResult).
+  final Map<String, WhatIfResult> _whatIfResults = {};
 
   @override
   void dispose() {
     _debounce?.cancel();
     super.dispose();
+  }
+
+  /// Quand l'utilisateur toggle le mode What-If, on génère/annule
+  /// les estimations pour chaque résultat déjà chargé.
+  Future<void> _toggleWhatIf(bool value) async {
+    setState(() => _whatIfMode = value);
+    if (!value) {
+      setState(() => _whatIfResults.clear());
+      return;
+    }
+    for (final r in _results) {
+      _computeWhatIf(r);
+    }
+  }
+
+  /// Génère une comparaison What-If déterministe+heuristique pour une recette.
+  void _computeWhatIf(RecipeDetail recipe) {
+    final id = recipe.id?.toString() ?? recipe.name ?? '';
+    final cost = (recipe as dynamic).costPerServing;
+    double costPerServing = 0;
+    if (cost is num) costPerServing = cost.toDouble();
+    // Heuristique simple : coût moyen ~ 0.85€/ingrédient pour 4 pers.
+    costPerServing = costPerServing > 0
+        ? costPerServing
+        : (4.5 + ((recipe.totalTimeMinutes ?? 30) % 7) * 0.3);
+
+    // 3 substituts "what-if" durables, plus chers à similitude haute
+    final subs = WhatIfCatalog.suggest(recipe.name ?? '');
+    setState(() {
+      _whatIfResults[id] = WhatIfResult(
+        originalCost: costPerServing,
+        substitutes: subs,
+      );
+    });
   }
 
   /// Appelée lorsque la requête change.
@@ -125,6 +164,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             child: FloatingSearchBar(
               hintText: 'Search meals, pantry items, recipes...',
               onChanged: _onSearchChanged,
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: _WhatIfToggle(
+                value: _whatIfMode,
+                onChanged: (v) => _toggleWhatIf(v),
+              ),
             ),
           ),
 
@@ -243,51 +292,123 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     required bool isDark,
     required RecipeDetail recipe,
   }) {
+    final id = recipe.id?.toString() ?? recipe.name ?? '';
+    final whatIf = _whatIfMode ? _whatIfResults[id] : null;
     return ModernCard(
       padding: const EdgeInsets.all(AppSpacing.md),
       onTap: () => context.push('/recipe/${recipe.id}'),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RecipeImage(
-            imageUrl: recipe.imageUrl,
-            cuisine: recipe.name,
-            width: 48,
-            height: 48,
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  recipe.name ?? '',
-                  style: AppTypography.bodyLarge.copyWith(
-                    color: isDark
-                        ? AppColors.darkOnSurface
-                        : AppColors.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
+          Row(
+            children: [
+              RecipeImage(
+                imageUrl: recipe.imageUrl,
+                cuisine: recipe.name,
+                width: 48,
+                height: 48,
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      recipe.name ?? '',
+                      style: AppTypography.bodyLarge.copyWith(
+                        color: isDark
+                            ? AppColors.darkOnSurface
+                            : AppColors.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${recipe.totalTimeMinutes ?? 0} min • ${recipe.mealType ?? ''}',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: isDark
+                            ? AppColors.darkOnSurfaceVariant
+                            : AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '${recipe.totalTimeMinutes ?? 0} min • ${recipe.mealType ?? ''}',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: isDark
-                        ? AppColors.darkOnSurfaceVariant
-                        : AppColors.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: isDark
+                    ? AppColors.darkOnSurfaceVariant
+                    : AppColors.onSurfaceVariant,
+                size: 16,
+              ),
+            ],
           ),
-          Icon(
-            Icons.arrow_forward_ios,
-            color: isDark
-                ? AppColors.darkOnSurfaceVariant
-                : AppColors.onSurfaceVariant,
-            size: 16,
-          ),
+          if (whatIf != null) WhatIfBadge(result: whatIf),
         ],
+      ),
+    );
+  }
+}
+
+/// Toggle visuel pour activer/désactiver le mode What-If.
+///
+/// Affiche un chip-pill en mode "off" et un chip rempli vert en mode "on",
+/// avec une icône compare_arrows et un label court.
+class _WhatIfToggle extends StatelessWidget {
+  const _WhatIfToggle({required this.value, required this.onChanged});
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = const Color(0xFF1B7F3A);
+
+    return InkWell(
+      onTap: () => onChanged(!value),
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: value
+              ? accent.withValues(alpha: 0.12)
+              : (isDark ? Colors.grey.shade800 : Colors.grey.shade100),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: value
+                ? accent
+                : (isDark ? Colors.grey.shade700 : Colors.grey.shade300),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.compare_arrows,
+              size: 16,
+              color: value
+                  ? accent
+                  : (isDark ? Colors.grey.shade300 : Colors.grey.shade700),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              value ? 'What-If ON' : 'What-If',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: value
+                    ? accent
+                    : (isDark ? Colors.grey.shade300 : Colors.grey.shade700),
+              ),
+            ),
+            const SizedBox(width: 4),
+            if (value)
+              Icon(Icons.check_circle, size: 14, color: accent)
+            else
+              const Icon(Icons.circle_outlined, size: 14, color: Colors.grey),
+          ],
+        ),
       ),
     );
   }

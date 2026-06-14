@@ -2,15 +2,12 @@ package com.platepilote.platepilote.billing.domain.repository;
 
 import com.platepilote.platepilote.billing.domain.entity.BillingCustomer;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Repository pour l'accès aux données des clients de facturation.
  */
-@Repository
 public interface BillingCustomerRepository extends JpaRepository<BillingCustomer, UUID> {
 
     /**

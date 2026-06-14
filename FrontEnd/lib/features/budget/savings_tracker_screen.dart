@@ -6,6 +6,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../core/widgets/app_card.dart';
+import '../premium/premium_gate.dart';
 import 'budget_repository.dart';
 
 /// Écran de suivi des économies réalisées.
@@ -80,7 +81,9 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
       appBar: AppBar(
         title: const Text('Savings Tracker'),
       ),
-      body: SingleChildScrollView(
+      body: PremiumGate(
+        message: 'Suivi des économies',
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -269,6 +272,7 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

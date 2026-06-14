@@ -4,8 +4,6 @@ import com.platepilote.platepilote.imports.domain.entity.ImportJob;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.UUID;
 
 /**
@@ -13,7 +11,6 @@ import java.util.UUID;
  * <p>
  * Fournit des méthodes de requête pour lister l'historique des imports.
  */
-@Repository
 public interface ImportJobRepository extends JpaRepository<ImportJob, UUID> {
 
     /**

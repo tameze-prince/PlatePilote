@@ -168,6 +168,7 @@ public class SecurityConfig {
          *
          * @return source de configuration CORS
          */
+        @SuppressWarnings("null")
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
             CorsConfiguration configuration = new CorsConfiguration();

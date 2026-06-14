@@ -2,8 +2,6 @@ package com.platepilote.platepilote.recommendation.domain.repository;
 
 import com.platepilote.platepilote.recommendation.domain.entity.UserInteraction;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -13,7 +11,6 @@ import java.util.UUID;
  * <p>
  * Les interactions sont utilisées par le moteur de recommandation pour calculer les scores de feedback.
  */
-@Repository
 public interface UserInteractionRepository extends JpaRepository<UserInteraction, UUID> {
 
     /**

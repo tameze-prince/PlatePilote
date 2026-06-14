@@ -8,6 +8,7 @@ import '../../core/widgets/modern_components.dart';
 import '../../core/widgets/floating_components.dart';
 import '../localization/locale_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../shared/widgets/plate_scaffold.dart';
 
 /// Écran de selection de la langue.
 class LanguageSettingsScreen extends ConsumerWidget {

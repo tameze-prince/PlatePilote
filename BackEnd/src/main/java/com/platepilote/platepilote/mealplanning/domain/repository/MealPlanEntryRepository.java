@@ -2,8 +2,6 @@ package com.platepilote.platepilote.mealplanning.domain.repository;
 
 import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanEntry;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -14,7 +12,6 @@ import java.util.UUID;
  * Table associée : {@code meal_plan_entries}.
  * </p>
  */
-@Repository
 public interface MealPlanEntryRepository extends JpaRepository<MealPlanEntry, UUID> {
 
     /**

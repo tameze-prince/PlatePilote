@@ -1,3 +1,4 @@
+// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
@@ -65,8 +66,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get doneBtn => 'Weiter zur Anmeldung';
 
   @override
-  String stepOf(Object current, Object total) =>
-      'Schritt {current} von {total}'.replaceAll('{current}', '\$current').replaceAll('{total}', '\$total');
+  String stepOf(Object current, Object total) {
+    return 'Schritt $current von $total';
+  }
 
   @override
   String get householdSetup => 'Haushalt einrichten';
@@ -124,7 +126,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die Vorratskammer-Einrichtung kann später über den Vorratskammer-Tab abgeschlossen werden.';
 
   @override
-  String goodMorning(Object name) => 'Guten Morgen, \$name!';
+  String goodMorning(Object name) {
+    return 'Guten Morgen, $name!';
+  }
 
   @override
   String get homeSubtitle => 'Bereit, auf Kurs zu bleiben und heute zu sparen?';
@@ -133,7 +137,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get budgetStatus => 'Budgetstatus';
 
   @override
-  String percentSpent(Object percent) => '\$percent% ausgegeben';
+  String percentSpent(Object percent) {
+    return '$percent% ausgegeben';
+  }
 
   @override
   String get budgetRemaining => 'Verbleibendes Budget';
@@ -148,8 +154,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get quickMealMode => 'Schnellgericht-Modus';
 
   @override
-  String pantryWarning(Object items) =>
-      '\$items sollten diese Woche verwendet werden.';
+  String pantryWarning(Object items) {
+    return '$items sollten diese Woche verwendet werden.';
+  }
 
   @override
   String get welcomeBack => 'Willkommen zurück';
@@ -187,8 +194,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get yourWeek => 'Deine Woche';
 
   @override
-  String mealsSelected(Object count) =>
-      '\$count ausgewogene Mahlzeiten für deinen Haushalt ausgewählt.';
+  String mealsSelected(Object count) {
+    return '$count ausgewogene Mahlzeiten für deinen Haushalt ausgewählt.';
+  }
 
   @override
   String get quickMeal => 'Schnellgericht';
@@ -206,8 +214,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get estimatedBudget => 'Geschätztes Budget';
 
   @override
-  String budgetDetail(Object items, Object pantry, Object total) =>
-      '\$total für \$items Einkaufsartikel, einschließlich \$pantry Vorratskammer-Zutaten.';
+  String budgetDetail(Object items, Object pantry, Object total) {
+    return '$total für $items Einkaufsartikel, einschließlich $pantry Vorratskammer-Zutaten.';
+  }
 
   @override
   String get replace => 'Ersetzen';
@@ -222,8 +231,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get withinBudget => 'Innerhalb des Budgets';
 
   @override
-  String itemsToBuy(Object count, Object pantry) =>
-      '\$count Artikel zu kaufen - \$pantry Artikel in der Vorratskammer';
+  String itemsToBuy(Object count, Object pantry) {
+    return '$count Artikel zu kaufen - $pantry Artikel in der Vorratskammer';
+  }
 
   @override
   String get items => 'Artikel';
@@ -241,11 +251,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get useSoon => 'Bald verwenden';
 
   @override
-  String preventWaste(Object amount, Object item, Object recipe) =>
-      'Verwende \$item heute Abend in \$recipe, um Verschwendung zu vermeiden und ca. \$amount zu sparen.';
+  String preventWaste(Object amount, Object item, Object recipe) {
+    return 'Verwende $item heute Abend in $recipe, um Verschwendung zu vermeiden und ca. $amount zu sparen.';
+  }
 
   @override
-  String dinnerIn(Object minutes) => 'Abendessen in \$minutes Minuten';
+  String dinnerIn(Object minutes) {
+    return 'Abendessen in $minutes Minuten';
+  }
 
   @override
   String get quickMealDesc =>
@@ -268,7 +281,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Erweiterte Budgetprognosen, unbegrenzte Vorratskammer-Scans, Familienprofile und tiefere Einkaufsersparnisse.';
 
   @override
-  String perMonth(Object price) => '\$price / Monat';
+  String perMonth(Object price) {
+    return '$price / Monat';
+  }
 
   @override
   String get aiPlanRegen => 'KI-Planregenerierung';
@@ -304,7 +319,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get notifications => 'Benachrichtigungen';
 
   @override
-  String get notificationsSub => 'Vorratskammer-Warnungen und Plan-Erinnerungen';
+  String get notificationsSub =>
+      'Vorratskammer-Warnungen und Plan-Erinnerungen';
 
   @override
   String get customRecipes => 'Eigene Rezepte';
@@ -314,6 +330,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get theme => 'Design';
+
+  @override
+  String get settings => 'Settings';
 
   @override
   String get upgradeToPremium => 'Auf Premium upgraden';
@@ -335,9 +354,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsLanguageDe => 'Deutsch';
-
-  @override
-  String get settings => 'Einstellungen';
 
   @override
   String get editPreferences => 'Präferenzen bearbeiten';
@@ -382,8 +398,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noResults => 'Keine Ergebnisse gefunden';
 
   @override
-  String premiumTrialDays(Object days) =>
-      'Premium-Testversion - \$days Tage übrig';
+  String premiumTrialDays(Object days) {
+    return 'Premium-Testversion - $days Tage übrig';
+  }
 
   @override
   String get followsSystem => 'Folgt der Systemdarstellung';
@@ -395,8 +412,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get lightMode => 'Hellmodus';
 
   @override
-  String weeklyCap(Object amount) =>
-      'Wöchentliches Limit \$amount';
+  String weeklyCap(Object amount) {
+    return 'Wöchentliches Limit $amount';
+  }
 
   @override
   String get activeUsers => 'aktive Nutzer';
@@ -409,7 +427,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get testimonial1Text =>
-      'Ich spare jede Woche 2 Stunden beim Einkaufen!';
+      'Ich spare jeden Woche 2 Stunden beim Einkaufen!';
 
   @override
   String get testimonial2Text =>

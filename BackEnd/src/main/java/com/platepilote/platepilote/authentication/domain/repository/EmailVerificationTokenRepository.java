@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -16,7 +15,6 @@ import java.util.UUID;
  * Fournit les opérations d'accès aux données pour les tokens de vérification d'email.
  * </p>
  */
-@Repository
 public interface EmailVerificationTokenRepository extends JpaRepository<EmailVerificationToken, UUID> {
 
     /**

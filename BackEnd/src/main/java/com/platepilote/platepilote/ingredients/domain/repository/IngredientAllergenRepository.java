@@ -2,7 +2,6 @@ package com.platepilote.platepilote.ingredients.domain.repository;
 
 import com.platepilote.platepilote.ingredients.domain.entity.IngredientAllergen;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -16,7 +15,6 @@ import java.util.UUID;
  * Table associée : {@code ingredient_allergens}.
  * </p>
  */
-@Repository
 public interface IngredientAllergenRepository extends JpaRepository<IngredientAllergen, UUID> {
 
     /**

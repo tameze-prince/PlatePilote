@@ -223,7 +223,6 @@ class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
             icon: const Icon(Icons.search_outlined),
             onPressed: onSearchPressed,
             tooltip: 'Rechercher',
-            semanticsLabel: 'Rechercher',
             color: isDark
                 ? AppColors.darkOnSurfaceVariant
                 : AppColors.onSurfaceVariant,
@@ -235,7 +234,6 @@ class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
                 icon: const Icon(Icons.notifications_outlined),
                 onPressed: onNotificationsPressed,
                 tooltip: 'Notifications',
-                semanticsLabel: 'Notifications',
                 color: isDark
                     ? AppColors.darkOnSurfaceVariant
                     : AppColors.onSurfaceVariant,

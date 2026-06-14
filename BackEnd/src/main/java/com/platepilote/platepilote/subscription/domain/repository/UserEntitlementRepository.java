@@ -2,8 +2,6 @@ package com.platepilote.platepilote.subscription.domain.repository;
 
 import com.platepilote.platepilote.subscription.domain.entity.UserEntitlement;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +10,6 @@ import java.util.UUID;
 /**
  * Repository pour l'accès aux données des entitlements utilisateur.
  */
-@Repository
 public interface UserEntitlementRepository extends JpaRepository<UserEntitlement, UUID> {
 
     /**

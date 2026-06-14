@@ -4,8 +4,6 @@ import com.platepilote.platepilote.notification.domain.entity.Notification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.UUID;
 
 /**
@@ -14,7 +12,6 @@ import java.util.UUID;
  * Fournit des méthodes de requête avec pagination pour les notifications
  * actives (non supprimées) d'un utilisateur, avec filtrage par statut de lecture.
  */
-@Repository
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
 
     /**

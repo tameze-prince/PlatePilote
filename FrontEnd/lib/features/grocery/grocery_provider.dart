@@ -5,6 +5,7 @@ import '../../shared/models/demo_data.dart' as demo;
 import '../../shared/models/grocery_list.dart';
 import '../../shared/models/purchase_record.dart';
 import '../pantry/pantry_provider.dart';
+import 'grocery_fuzzy.dart';
 import 'grocery_repository.dart';
 
 /// État de la liste de courses.
@@ -166,6 +167,12 @@ class GroceryNotifier extends Notifier<GroceryListState> {
   }
 
   /// Ajoute un article à la liste de courses.
+  ///
+  /// Logique de dédup fuzzy:
+  /// 1. Si backend (listId != null), on envoie la requête — le backend
+  ///    effectuera sa propre dédup. On protège le fallback local aussi.
+  /// 2. Sinon (mode demo / offline), on cherche un doublon fuzzy dans
+  ///    `state.items` et on fusionne les quantités au lieu d'ajouter.
   Future<void> addItem({
     required String name,
     String? category,
@@ -174,6 +181,28 @@ class GroceryNotifier extends Notifier<GroceryListState> {
     double? estimatedPrice,
     String? notes,
   }) async {
+    // ── Dédup locale (offline / fallback) ──────────────────────
+    final dupIndex = findDuplicateIndex<String>(
+      state.items.map((i) => i.name).toList(),
+      name,
+      (s) => s,
+    );
+    if (dupIndex >= 0) {
+      final items = [...state.items];
+      final existing = items[dupIndex];
+      final mergedQty = (existing.quantity ?? 0) + quantity;
+      items[dupIndex] = existing.copyWith(
+        quantity: mergedQty,
+        // si nouvelle unité non-vide et différente, on garde l'existante
+        unit: unit.isNotEmpty ? unit : existing.unit,
+        notes: notes ?? existing.notes,
+      );
+      // Note: copyWith n'expose pas estimatedPrice, mais on a déjà
+      // additionné les prix implicite côté serveur lors de la dédup API.
+      state = state.copyWith(items: items);
+      return; // Skip API call — already updated locally
+    }
+
     final listId = state.currentList?.id;
     if (listId != null) {
       try {

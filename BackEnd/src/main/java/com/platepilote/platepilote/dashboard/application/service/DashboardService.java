@@ -42,7 +42,8 @@ public class DashboardService {
     private final UserRepository userRepository;
 
     /** Repository des profils utilisateur. */
-    private final UserProfileRepository userProfileRepository;
+    @SuppressWarnings("unused")
+private final UserProfileRepository userProfileRepository;
     private final MealPlanRepository mealPlanRepository;
     private final MealPlanEntryRepository mealPlanEntryRepository;
     private final GroceryListRepository groceryListRepository;
@@ -65,6 +66,7 @@ public class DashboardService {
      */
     public DashboardResponse getHomeDashboard(UUID userId) {
         // Greeting - firstName is on OurUser entity, not UserProfile
+        @SuppressWarnings("null")
         String firstName = userRepository.findById(userId)
                 .map(user -> user.getFirstName())
                 .orElse(null);

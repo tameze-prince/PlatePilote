@@ -2,8 +2,6 @@ package com.platepilote.platepilote.ingredients.domain.repository;
 
 import com.platepilote.platepilote.ingredients.domain.entity.IngredientAlias;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -13,7 +11,6 @@ import java.util.UUID;
  * Table associée : {@code ingredient_aliases}.
  * </p>
  */
-@Repository
 public interface IngredientAliasRepository extends JpaRepository<IngredientAlias, UUID> {
 
     /**

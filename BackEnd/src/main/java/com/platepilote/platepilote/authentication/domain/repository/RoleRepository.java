@@ -2,7 +2,6 @@ package com.platepilote.platepilote.authentication.domain.repository;
 
 import com.platepilote.platepilote.authentication.domain.entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -13,7 +12,6 @@ import java.util.UUID;
  * Fournit les opérations d'accès aux données pour les rôles utilisateur.
  * </p>
  */
-@Repository
 public interface RoleRepository extends JpaRepository<Role, UUID> {
 
     /**

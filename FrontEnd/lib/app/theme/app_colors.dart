@@ -95,6 +95,8 @@ abstract final class AppColors {
   // Text
   /// Texte principal (blanc).
   static const primaryText = Color(0xFFFFFFFF);
+  /// Texte principal (alias, pour compat avec onBoarding).
+  static const textPrimary = onSurface;
   /// Texte secondaire.
   static const secondaryText = Color.fromRGBO(255, 255, 255, 0.75);
   /// Texte tertiaire.
@@ -117,6 +119,8 @@ abstract final class AppColors {
   static const darkOnSurfaceTertiary = Color.fromRGBO(255, 255, 255, 0.50);
 
   // Utility
+  /// Surface verre (blanche transparente).
+  static const glassWhite = Color.fromRGBO(255, 255, 255, 0.65);
   /// Bordure (clair).
   static const outline = Color(0xFFE2E8F0);
   /// Bordure variante (clair).

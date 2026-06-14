@@ -330,13 +330,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get theme => 'Theme';
 
   @override
+  String get settings => 'Settings';
+
+  @override
   String get upgradeToPremium => 'Upgrade to Premium';
 
   @override
   String get language => 'Language';
 
   @override
-  String get languageSub => 'English / Français';
+  String get languageSub => 'English / Français / Deutsch';
+
+  @override
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get settingsLanguageEn => 'English';
+
+  @override
+  String get settingsLanguageFr => 'Français';
+
+  @override
+  String get settingsLanguageDe => 'Deutsch';
 
   @override
   String get editPreferences => 'Edit Preferences';
@@ -398,21 +413,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String weeklyCap(Object amount) {
     return '$amount weekly grocery cap';
   }
-
-  @override
-  String get settings => 'Settings';
-
-  @override
-  String get settingsLanguage => 'Language';
-
-  @override
-  String get settingsLanguageEn => 'English';
-
-  @override
-  String get settingsLanguageFr => 'Français';
-
-  @override
-  String get settingsLanguageDe => 'Deutsch';
 
   @override
   String get activeUsers => 'active users';

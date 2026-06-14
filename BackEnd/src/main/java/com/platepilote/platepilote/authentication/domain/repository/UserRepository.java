@@ -4,8 +4,6 @@ import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,7 +14,6 @@ import java.util.UUID;
  * Spring Data JPA génère automatiquement les implémentations des méthodes.
  * </p>
  */
-@Repository
 public interface UserRepository extends JpaRepository<OurUser, UUID> {
 
     /**
