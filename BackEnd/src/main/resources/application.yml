@@ -139,51 +139,49 @@ app:
     upcitemdb-key: ${UPCITEMDB_API_KEY:}
     barcode-lookup-key: ${BARCODE_LOOKUP_API_KEY:}
     chomp-key: ${CHOMP_API_KEY:}
+    recipeapi-key: ${RECIPEAPI_API_KEY:}
+    serp-api-key: ${SERP_API_KEY:}
   rate-limit:
-      max-requests: ${RATE_LIMIT_MAX_REQUESTS:100}
-      window-seconds: ${RATE_LIMIT_WINDOW_SECONDS:60}
-    cors:
-      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
-      recipeapi-key: ${RECIPEAPI_API_KEY:}
-      serp-api-key: ${SERP_API_KEY:}
-    storage:
-      r2:
-        endpoint: ${R2_ENDPOINT:}
-        region: ${R2_REGION:auto}
-        access-key: ${R2_ACCESS_KEY:}
-        secret-key: ${R2_SECRET_KEY:}
-        bucket: ${R2_BUCKET:platepilote-images}
-        public-url-template: ${R2_PUBLIC_URL_TEMPLATE:https://pub-{hash}.r2.dev}
-    jwt:
+    max-requests: ${RATE_LIMIT_MAX_REQUESTS:100}
+    window-seconds: ${RATE_LIMIT_WINDOW_SECONDS:60}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+    allowed-headers: Authorization,Content-Type,X-Requested-With,Accept
+    max-age: 3600
+  storage:
+    r2:
+      endpoint: ${R2_ENDPOINT:}
+      region: ${R2_REGION:auto}
+      access-key: ${R2_ACCESS_KEY:}
+      secret-key: ${R2_SECRET_KEY:}
+      bucket: ${R2_BUCKET:platepilote-images}
+      public-url-template: ${R2_PUBLIC_URL_TEMPLATE:https://pub-{hash}.r2.dev}
+  jwt:
     # Secret key for signing JWT tokens (Base64 encoded)
     # CHANGE THIS IN PRODUCTION to a long random string!
     secret: ${JWT_SECRET:Y2hhbmdlLXRoaXMtdG8tYS1sb25nLXNlY3VyZS1rZXktaW4tcHJvZHVjdGlvbi1lbnZpcm9ubWVudC1wbGVhc2U=}
     expiration: ${JWT_EXPIRATION:3600000}       # Access token: 1 hour
     refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # Refresh token: 7 days
   oauth2:
-      google:
-        client-id: ${GOOGLE_OAUTH_CLIENT_IDS:}                          # comma-separated
-        jwk-set-uri: ${GOOGLE_OAUTH_JWK_SET_URI:https://www.googleapis.com/oauth2/v3/certs}
-        issuers: ${GOOGLE_OAUTH_ISSUERS:https://accounts.google.com,accounts.google.com}
-      apple:
-        client-id: ${APPLE_OAUTH_CLIENT_IDS:}                            # comma-separated (Service ID)
-        jwk-set-uri: ${APPLE_OAUTH_JWK_SET_URI:https://appleid.apple.com/auth/keys}
-        issuers: ${APPLE_OAUTH_ISSUERS:https://appleid.apple.com}
-      facebook:
-        client-ids: ${FACEBOOK_OAUTH_CLIENT_ID:}
-        graph-uri: ${FACEBOOK_OAUTH_GRAPH_URI:https://graph.facebook.com/v19.0}
-        app-secret: ${FACEBOOK_OAUTH_CLIENT_SECRET:}
+    google:
+      client-id: ${GOOGLE_OAUTH_CLIENT_IDS:}                          # comma-separated
+      jwk-set-uri: ${GOOGLE_OAUTH_JWK_SET_URI:https://www.googleapis.com/oauth2/v3/certs}
+      issuers: ${GOOGLE_OAUTH_ISSUERS:https://accounts.google.com,accounts.google.com}
+    apple:
+      client-id: ${APPLE_OAUTH_CLIENT_IDS:}                            # comma-separated (Service ID)
+      jwk-set-uri: ${APPLE_OAUTH_JWK_SET_URI:https://appleid.apple.com/auth/keys}
+      issuers: ${APPLE_OAUTH_ISSUERS:https://appleid.apple.com}
+    facebook:
+      client-ids: ${FACEBOOK_OAUTH_CLIENT_ID:}
+      graph-uri: ${FACEBOOK_OAUTH_GRAPH_URI:https://graph.facebook.com/v19.0}
+      app-secret: ${FACEBOOK_OAUTH_CLIENT_SECRET:}
   email:
     verification:
       from: ${EMAIL_VERIFICATION_FROM:PlatePilote <no-reply@platepilote.com>}
       frontend-url: ${EMAIL_VERIFICATION_URL:http://localhost:3000/verify-email}
       expiration-hours: ${EMAIL_VERIFICATION_EXPIRATION_HOURS:24}
       fail-on-send-error: ${EMAIL_VERIFICATION_FAIL_ON_SEND_ERROR:false}
-  cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:59043,http://localhost:8081,http://localhost:*}
-    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
-    allowed-headers: Authorization,Content-Type,X-Requested-With,Accept
-    max-age: 3600
   billing:
     free-trial-days: ${BILLING_FREE_TRIAL_DAYS:30}
     past-due-grace-days: ${BILLING_PAST_DUE_GRACE_DAYS:3}

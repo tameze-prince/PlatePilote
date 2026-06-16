@@ -1,61 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/app_colors.dart';
-import '../../app/theme/app_spacing.dart';
 
-/// FAB personnalisé pour l'écran Pantry.
-///
-/// Reproduit le design CustomFAB (overlay + 3 actions révélées par stagger),
-/// mais stylisé avec les couleurs PlatePilote (vert primaryAccentGreen / deepGreen)
-/// et routing GoRouter vers :
-///   - /search (recherche d'ingrédients)
-///   - /pantry/add (ajout manuel)
-///   - /pantry/add?scan=true (scan/codebar — affiché en mode formulaire
-///     avec un bouton scan capturé par l'écran d'ajout)
-class PantryFab extends StatefulWidget {
+/// Provider global d'état du menu FAB du Pantry.
+/// Plusieurs widgets partagent cet état — le FAB principal ET l'overlay plein écran.
+final pantryMenuOpenProvider = StateProvider<bool>((ref) => false);
+
+/// Rotation du + — le bouton principal pivote à 45° (= ✕) pour fermer le menu.
+class PantryFab extends ConsumerStatefulWidget {
   const PantryFab({super.key});
 
   @override
-  State<PantryFab> createState() => _PantryFabState();
+  ConsumerState<PantryFab> createState() => _PantryFabState();
 }
 
-class _PantryFabState extends State<PantryFab>
+class _PantryFabState extends ConsumerState<PantryFab>
     with SingleTickerProviderStateMixin {
-  /// Couleur principale PlatePilote (vert accent).
-  static const _greenLight = AppColors.primaryAccentGreen; // 0xFF22C55E
-  static const _greenDark = AppColors.deepGreen; // 0xFF16A34A
-
-  bool _isOpen = false;
+  // Couleurs PlatePilote
+  static const _green = AppColors.primaryAccentGreen; // #22C55E
+  static const _greenDark = AppColors.deepGreen; // #16A34A
 
   late final AnimationController _controller;
   late final Animation<double> _rotateAnim;
-  late final Animation<double> _overlayAnim;
 
   late final List<_FabAction> _actions = [
     _FabAction(
       icon: Icons.search_rounded,
       label: 'Rechercher',
-      onTap: () {
-        _toggle();
-        context.push('/search');
-      },
+      onTap: () => _go('/search'),
     ),
     _FabAction(
-      icon: Icons.edit_outlined,
+      icon: Icons.edit_note_rounded,
       label: 'Ajout manuel',
-      onTap: () {
-        _toggle();
-        context.push('/pantry/add');
-      },
+      onTap: () => _go('/pantry/add'),
     ),
     _FabAction(
       icon: Icons.qr_code_scanner_rounded,
       label: 'Scan code-barres',
-      onTap: () {
-        _toggle();
-        context.push('/pantry/add?scan=true');
-      },
+      onTap: () => _go('/pantry/add?scan=true'),
     ),
   ];
 
@@ -66,11 +51,10 @@ class _PantryFabState extends State<PantryFab>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _rotateAnim = Tween<double>(begin: 0, end: 0.125) // 45°
-        .animate(
-            CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-    _overlayAnim =
-        CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _rotateAnim = Tween<double>(
+      begin: 0,
+      end: 0.125,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
   }
 
   @override
@@ -80,57 +64,57 @@ class _PantryFabState extends State<PantryFab>
   }
 
   void _toggle() {
-    setState(() => _isOpen = !_isOpen);
-    _isOpen ? _controller.forward() : _controller.reverse();
+    final isOpen = ref.read(pantryMenuOpenProvider.notifier).state;
+    ref.read(pantryMenuOpenProvider.notifier).state = !isOpen;
+  }
+
+  void _go(String route) {
+    ref.read(pantryMenuOpenProvider.notifier).state = false;
+    context.push(route);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.bottomRight,
-      children: [
-        // ── Overlay teinté ──
-        if (_isOpen)
-          Positioned.fill(
-            child: GestureDetector(
-              onTap: _toggle,
-              child: FadeTransition(
-                opacity: _overlayAnim,
-                child: Container(
-                  color: Colors.black.withValues(alpha: 0.20),
-                ),
-              ),
-            ),
-          ),
+    // Synchroniser l'animation avec l'état du provider
+    ref.listen<bool>(pantryMenuOpenProvider, (prev, next) {
+      if (next) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    });
+    final isOpen = ref.watch(pantryMenuOpenProvider);
 
-        // ── Colonne actions + bouton principal ──
-        Padding(
-          // Marge basse pour ne pas couvrir la BottomNav si présente
-          padding: const EdgeInsets.only(
-            right: AppSpacing.md,
-            bottom: AppSpacing.md,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // Actions secondaires (Recherche, Ajout, Scan)
-              ..._actions.asMap().entries.map((entry) {
-                final index = entry.key;
-                final action = entry.value;
-                final delayedAnim = CurvedAnimation(
-                  parent: _controller,
-                  curve: Interval(
-                    index * 0.08,
-                    0.6 + index * 0.08,
-                    curve: Curves.easeOutCubic,
-                  ),
-                );
-                return AnimatedBuilder(
-                  animation: _controller,
-                  builder: (_, child) {
-                    return FadeTransition(
-                      opacity: delayedAnim,
+    return SizedBox(
+      // Hauteur suffisante pour empiler 3 actions au-dessus du bouton principal
+      width: 280.0,
+      height: 64.0 + 70.0 * _actions.length, // bouton + 3×70px par ligne
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.bottomRight,
+        children: [
+          // ── Actions secondaires (du bas vers le haut, stagger) ──
+          ..._actions.asMap().entries.map((entry) {
+            final index = entry.key;
+            final action = entry.value;
+            final delayedAnim = CurvedAnimation(
+              parent: _controller,
+              curve: Interval(
+                index * 0.08,
+                0.5 + index * 0.10,
+                curve: Curves.easeOutCubic,
+              ),
+            );
+            return AnimatedBuilder(
+              animation: _controller,
+              builder: (_, child) {
+                return Positioned(
+                  right: 6,
+                  bottom: 70 + index * 70.0, // 70px (FAB) + 70 par action
+                  child: Opacity(
+                    opacity: delayedAnim.value,
+                    child: IgnorePointer(
+                      ignoring: !isOpen,
                       child: SlideTransition(
                         position: Tween<Offset>(
                           begin: const Offset(0, 0.4),
@@ -138,63 +122,77 @@ class _PantryFabState extends State<PantryFab>
                         ).animate(delayedAnim),
                         child: child,
                       ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: _FabRow(
-                      action: action,
-                      color: _greenLight,
-                      colorDark: _greenDark,
                     ),
                   ),
                 );
-              }),
-
-              // ── Bouton principal (+) ──
-              GestureDetector(
-                onTap: _toggle,
-                child: AnimatedBuilder(
-                  animation: _rotateAnim,
-                  builder: (_, child) => RotationTransition(
-                    turns: _rotateAnim,
-                    child: child,
-                  ),
-                  child: Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [_greenLight, _greenDark],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: _greenLight.withValues(alpha: 0.45),
-                          blurRadius: 14,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.add_rounded,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                  ),
-                ),
+              },
+              child: _FabRow(
+                action: action,
+                color: _green,
+                colorDark: _greenDark,
               ),
-            ],
+            );
+          }),
+
+          // ── Bouton principal (+) ──
+          Positioned(
+            right: 6,
+            bottom: 10,
+            child: AnimatedBuilder(
+              animation: _rotateAnim,
+              builder: (_, child) =>
+                  RotationTransition(turns: _rotateAnim, child: child),
+              child: FloatingActionButton(
+                onPressed: _toggle,
+                backgroundColor: _green,
+                foregroundColor: Colors.white,
+                elevation: 6,
+                tooltip: isOpen ? 'Fermer' : 'Ajouter un ingrédient',
+                shape: const CircleBorder(),
+                child: const Icon(Icons.add_rounded, size: 30),
+              ),
+            ),
           ),
-        ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Overlay plein-écran — affiche un voile sombre cliquable quand le menu
+/// est ouvert. À placer **autour** du contenu scrollable de la page (au-
+/// dessus du body, sous le FAB).
+class PantryMenuOverlay extends ConsumerWidget {
+  const PantryMenuOverlay({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // L'overlay a sa propre animation interne pour FadeIn/Out
+    final isOpen = ref.watch(pantryMenuOpenProvider);
+    return Stack(
+      children: [
+        child,
+        if (isOpen)
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () =>
+                  ref.read(pantryMenuOpenProvider.notifier).state = false,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                color: Colors.black.withValues(alpha: 0.20),
+              ),
+            ),
+          ),
       ],
     );
   }
 }
 
-/// Modèle interne — chaque action révélée par le FAB.
+/// Modèle d'une action FAB.
 class _FabAction {
   final IconData icon;
   final String label;
@@ -207,7 +205,7 @@ class _FabAction {
   });
 }
 
-/// Ligne : pastille label + pastille bouton (avec micro-interaction scale).
+/// Ligne : pastille label à gauche + bouton rond à droite (44x44).
 class _FabRow extends StatefulWidget {
   final _FabAction action;
   final Color color;
@@ -231,19 +229,17 @@ class _FabRowState extends State<_FabRow> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // ── Pastille label ──
+        // ── Pastille label (blanc + bordure légère) ──
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.black.withValues(alpha: 0.10),
-            ),
+            border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 8,
+                blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -259,7 +255,7 @@ class _FabRowState extends State<_FabRow> {
         ),
         const SizedBox(width: 10),
 
-        // ── Bouton rond ──
+        // ── Bouton rond 44x44 (Material/HIG guideline) ──
         GestureDetector(
           onTapDown: (_) => setState(() => _pressed = true),
           onTapUp: (_) {
@@ -271,8 +267,8 @@ class _FabRowState extends State<_FabRow> {
             scale: _pressed ? 0.92 : 1.0,
             duration: const Duration(milliseconds: 120),
             child: Container(
-              width: 50,
-              height: 50,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 color: _pressed ? widget.colorDark : widget.color,
                 shape: BoxShape.circle,
@@ -284,11 +280,7 @@ class _FabRowState extends State<_FabRow> {
                   ),
                 ],
               ),
-              child: Icon(
-                widget.action.icon,
-                color: Colors.white,
-                size: 22,
-              ),
+              child: Icon(widget.action.icon, color: Colors.white, size: 22),
             ),
           ),
         ),

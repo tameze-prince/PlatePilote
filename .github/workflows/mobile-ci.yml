@@ -1,0 +1,70 @@
+name: Mobile CI (Flutter)
+
+on:
+  pull_request:
+    paths:
+      - 'FrontEnd/**'
+      - '.github/workflows/mobile-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'FrontEnd/**'
+      - '.github/workflows/mobile-ci.yml'
+
+defaults:
+  run:
+    working-directory: FrontEnd
+
+jobs:
+  flutter-ci:
+    name: Flutter CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Show Flutter version
+        run: flutter --version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Static analysis
+        run: flutter analyze --no-fatal-warnings || true
+
+      - name: Run unit tests with coverage
+        run: flutter test --no-pub --coverage
+
+      - name: Upload coverage to Codecov
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: codecov/codecov-action@v4
+        with:
+          directory: FrontEnd/coverage
+          flags: flutter
+          fail_ci_if_error: false
+
+      - name: Build debug APKs (split per ABI)
+        run: flutter build apk --debug --split-per-abi
+
+      - name: List APK artifacts
+        run: ls -lh build/app/outputs/flutter-apk/
+
+      - name: Upload APK artifacts
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-apk-debug
+          path: FrontEnd/build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: warn
+          retention-days: 14

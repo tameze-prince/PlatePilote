@@ -1,0 +1,18 @@
+#
+# PlatePilote — Android signing properties (template)
+#
+# INSTRUCTIONS:
+#   1. Génère ton keystore avec keytool (voir ../build/SIGNING.md).
+#   2. Copie ce fichier vers android/key.properties (sans le suffixe .example).
+#   3. Remplis les valeurs ci-dessous. NE JAMAIS commit key.properties dans git.
+#
+
+# Chemin du keystore RELATIF à android/ (donc à la racine du package Flutter)
+storeFile=../upload-keystore.jks
+
+# Alias de la clé (à donner lors de la création avec -alias)
+storePassword=REPLACE_WITH_KEYSTORE_PASSWORD
+keyPassword=REPLACE_WITH_KEY_PASSWORD
+
+# Alias de la clé (typiquement "upload", "release", "platepilote")
+keyAlias=upload

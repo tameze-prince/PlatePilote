@@ -1,0 +1,140 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: flutter-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter-version:
+    name: Read Flutter version
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: FrontEnd
+    outputs:
+      flutter-version: ${{ steps.get_version.outputs.flutter-version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: stable
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:hash:"
+      - name: Extract Flutter version
+        id: get_version
+        run: echo "flutter-version=$(flutter --version | head -1 | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+  analyze-test:
+    name: Analyze + Test
+    needs: flutter-version
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: FrontEnd
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Flutter ${{ needs.flutter-version.outputs.flutter-version }}
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: stable
+
+      - name: Show Flutter & Dart versions
+        run: |
+          flutter --version
+          dart --version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate localization (l10n)
+        run: flutter gen-l10n
+        continue-on-error: true
+
+      - name: Static analysis
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos
+
+      - name: Run unit & widget tests
+        run: flutter test --coverage --no-pub
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: flutter-coverage-${{ github.run_id }}
+          path: FrontEnd/coverage/
+          retention-days: 7
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: flutter-test-results-${{ github.run_id }}
+          path: |
+            FrontEnd/test-results/
+          retention-days: 7
+
+  build-apk:
+    name: Build APK (debug)
+    needs: flutter-version
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    defaults:
+      run:
+        working-directory: FrontEnd
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: platepilote-debug-apk
+          path: FrontEnd/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
+
+  build-web:
+    name: Build Web (release)
+    needs: flutter-version
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    defaults:
+      run:
+        working-directory: FrontEnd
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: stable
+      - run: flutter pub get
+      - run: flutter build web --release --source-maps
+      - uses: actions/upload-artifact@v4
+        with:
+          name: platepilote-web-build
+          path: FrontEnd/build/web/
+          retention-days: 7

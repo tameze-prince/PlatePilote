@@ -198,6 +198,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
       backgroundColor: PremiumTheme.background(context),
       extendBody: true,
       floatingActionButton: const PantryFab(),
+      floatingActionButtonLocation: _CustomFabLocation(),
       body: PremiumBackground(
         safeArea: false,
         child: RefreshIndicator(
@@ -1049,5 +1050,19 @@ class _SmallBadge extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Localisation personnalisée du FAB décalée de 2 cm vers le haut.
+class _CustomFabLocation extends FloatingActionButtonLocation {
+  /// Décalage vers le haut en pixels (2 cm ≈ 75 pixels).
+  static const double _upOffset = 75;
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    // Utilise endFloat comme base et décale vers le haut
+    final baseOffset =
+        FloatingActionButtonLocation.endFloat.getOffset(scaffoldGeometry);
+    return Offset(baseOffset.dx, baseOffset.dy - _upOffset);
   }
 }
