@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
@@ -98,12 +98,12 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: ColorTokens.primaryGreen.withValues(alpha: 0.1),
+                          color: AppColors.primaryLight.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.input),
                         ),
                         child: const Icon(
                           Icons.account_balance_wallet,
-                          color: ColorTokens.primaryGreen,
+                          color: AppColors.primaryLight,
                           size: 24,
                         ),
                       ),
@@ -115,7 +115,7 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
                             Text(
                               'Weekly Budget',
                               style: context.text.bodySmall?.copyWith(
-                                color: ColorTokens.textSecondary,
+                                color: AppColors.onSurfaceVariant,
                               ),
                             ),
                             Text(
@@ -134,16 +134,16 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: _percentUsed > 0.8
-                              ? ColorTokens.error.withValues(alpha: 0.1)
-                              : ColorTokens.primaryGreen.withValues(alpha: 0.1),
+                              ? AppColors.error.withValues(alpha: 0.1)
+                              : AppColors.primaryLight.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                         child: Text(
                           '${(_percentUsed * 100).toInt()}% used',
                           style: context.text.bodySmall?.copyWith(
                             color: _percentUsed > 0.8
-                                ? ColorTokens.error
-                                : ColorTokens.primaryGreen,
+                                ? AppColors.error
+                                : AppColors.primaryLight,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -155,11 +155,11 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
                     borderRadius: BorderRadius.circular(AppRadius.sm),
                     child: LinearProgressIndicator(
                       value: _percentUsed,
-                      backgroundColor: ColorTokens.surfaceContainerLow,
+                      backgroundColor: AppColors.surfaceContainerLow,
                       valueColor: AlwaysStoppedAnimation<Color>(
                         _percentUsed > 0.8
-                            ? ColorTokens.error
-                            : ColorTokens.primaryGreen,
+                            ? AppColors.error
+                            : AppColors.primaryLight,
                       ),
                       minHeight: 8,
                     ),
@@ -171,13 +171,13 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
                       Text(
                         '\$${_spentAmount.toStringAsFixed(2)} spent',
                         style: context.text.bodySmall?.copyWith(
-                          color: ColorTokens.textSecondary,
+                          color: AppColors.onSurfaceVariant,
                         ),
                       ),
                       Text(
                         '\$${_remaining.toStringAsFixed(2)} remaining',
                         style: context.text.bodySmall?.copyWith(
-                          color: ColorTokens.primaryGreen,
+                          color: AppColors.primaryLight,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -194,7 +194,7 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
                     icon: Icons.trending_down,
                     label: 'Avg Weekly',
                     value: '\$${_avgWeeklySpend.toStringAsFixed(0)}',
-                    color: ColorTokens.accentBlue,
+                    color: AppColors.tertiary,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -203,7 +203,7 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
                     icon: Icons.savings,
                     label: 'Saved',
                     value: '\$${(_weeklyBudget - _avgWeeklySpend).toStringAsFixed(0)}',
-                    color: ColorTokens.primaryGreen,
+                    color: AppColors.primaryLight,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -212,7 +212,7 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
                     icon: Icons.calendar_today,
                     label: 'Streak',
                     value: '4 weeks',
-                    color: ColorTokens.accentAmber,
+                    color: AppColors.secondary,
                   ),
                 ),
               ],
@@ -238,7 +238,7 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
                         values: _weeklyHistory,
                         labels: _weekLabels,
                         maxValue: _weeklyBudget,
-                        barColor: ColorTokens.primaryGreen,
+                        barColor: AppColors.primaryLight,
                         budgetLine: _weeklyBudget,
                       ),
                     ),
@@ -292,7 +292,7 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
           Text(
             label,
             style: context.text.bodySmall?.copyWith(
-              color: ColorTokens.textSecondary,
+              color: AppColors.onSurfaceVariant,
             ),
           ),
         ],
@@ -303,11 +303,11 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
   /// Construit la répartition des dépenses par catégorie.
   Widget _buildCategoryBreakdown() {
     final categories = [
-      {'name': 'Produce', 'amount': 85.50, 'color': ColorTokens.primaryGreen},
-      {'name': 'Protein', 'amount': 72.30, 'color': ColorTokens.accentBlue},
-      {'name': 'Dairy', 'amount': 45.20, 'color': ColorTokens.accentAmber},
+      {'name': 'Produce', 'amount': 85.50, 'color': AppColors.primaryLight},
+      {'name': 'Protein', 'amount': 72.30, 'color': AppColors.tertiary},
+      {'name': 'Dairy', 'amount': 45.20, 'color': AppColors.secondary},
       {'name': 'Pantry', 'amount': 38.00, 'color': Color(0xFF8B5CF6)},
-      {'name': 'Other', 'amount': 15.00, 'color': ColorTokens.textSecondary},
+      {'name': 'Other', 'amount': 15.00, 'color': AppColors.onSurfaceVariant},
     ];
 
     return Column(
@@ -338,7 +338,7 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                   child: LinearProgressIndicator(
                     value: percent,
-                    backgroundColor: ColorTokens.surfaceContainerLow,
+                    backgroundColor: AppColors.surfaceContainerLow,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       cat['color'] as Color,
                     ),
@@ -394,7 +394,7 @@ class _BarChartPainter extends CustomPainter {
 
     final budgetY = size.height - 20 - (budgetLine / maxValue * maxBarHeight);
     final budgetPaint = Paint()
-      ..color = ColorTokens.error.withValues(alpha: 0.5)
+      ..color = AppColors.error.withValues(alpha: 0.5)
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
     canvas.drawLine(
@@ -426,7 +426,7 @@ class _BarChartPainter extends CustomPainter {
           text: labels[i],
           style: const TextStyle(
             fontSize: 10,
-            color: ColorTokens.textSecondary,
+            color: AppColors.onSurfaceVariant,
           ),
         ),
         textDirection: TextDirection.ltr,

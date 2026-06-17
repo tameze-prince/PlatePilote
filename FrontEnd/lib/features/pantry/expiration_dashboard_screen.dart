@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
@@ -117,7 +117,7 @@ class _PantryExpirationScreenState
                         icon: Icons.error_outline,
                         title: 'Expired',
                         count: _expiredItems.length,
-                        color: ColorTokens.error,
+                        color: AppColors.error,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       ..._expiredItems.map(
@@ -133,7 +133,7 @@ class _PantryExpirationScreenState
                         icon: Icons.warning_amber_outlined,
                         title: 'Expiring Soon',
                         count: _expiringItems.length,
-                        color: ColorTokens.accentAmber,
+                        color: AppColors.secondary,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       ..._expiringItems.map(
@@ -153,7 +153,7 @@ class _PantryExpirationScreenState
                               Container(
                                 padding: const EdgeInsets.all(AppSpacing.sm),
                                 decoration: BoxDecoration(
-                                  color: ColorTokens.primaryGreen.withValues(alpha: 
+                                  color: AppColors.primaryLight.withValues(alpha: 
                                     0.1,
                                   ),
                                   borderRadius: BorderRadius.circular(
@@ -162,7 +162,7 @@ class _PantryExpirationScreenState
                                 ),
                                 child: const Icon(
                                   Icons.eco,
-                                  color: ColorTokens.primaryGreen,
+                                  color: AppColors.primaryLight,
                                   size: 24,
                                 ),
                               ),
@@ -180,7 +180,7 @@ class _PantryExpirationScreenState
                                     Text(
                                       'Track and reduce food waste',
                                       style: context.text.bodySmall?.copyWith(
-                                        color: ColorTokens.textSecondary,
+                                        color: AppColors.onSurfaceVariant,
                                       ),
                                     ),
                                   ],
@@ -195,14 +195,14 @@ class _PantryExpirationScreenState
                                 child: _buildStatItem(
                                   label: 'Items tracked',
                                   value: '${_expiringItems.length + _expiredItems.length}',
-                                  color: ColorTokens.accentBlue,
+                                  color: AppColors.tertiary,
                                 ),
                               ),
                               Expanded(
                                 child: _buildStatItem(
                                   label: 'Saved this month',
                                   value: '\$24.50',
-                                  color: ColorTokens.primaryGreen,
+                                  color: AppColors.primaryLight,
                                 ),
                               ),
                             ],
@@ -267,13 +267,13 @@ class _PantryExpirationScreenState
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
                 color: isExpired
-                    ? ColorTokens.error.withValues(alpha: 0.1)
-                    : ColorTokens.accentAmber.withValues(alpha: 0.1),
+                    ? AppColors.error.withValues(alpha: 0.1)
+                    : AppColors.secondary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppRadius.input),
               ),
               child: Icon(
                 item.icon,
-                color: isExpired ? ColorTokens.error : ColorTokens.accentAmber,
+                color: isExpired ? AppColors.error : AppColors.secondary,
                 size: 24,
               ),
             ),
@@ -291,15 +291,15 @@ class _PantryExpirationScreenState
                   Text(
                     '${item.quantity} • ${item.category}',
                     style: context.text.bodySmall?.copyWith(
-                      color: ColorTokens.textSecondary,
+                      color: AppColors.onSurfaceVariant,
                     ),
                   ),
                   Text(
                     item.expires,
                     style: context.text.bodySmall?.copyWith(
                       color: isExpired
-                          ? ColorTokens.error
-                          : ColorTokens.accentAmber,
+                          ? AppColors.error
+                          : AppColors.secondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -352,7 +352,7 @@ class _PantryExpirationScreenState
         Text(
           label,
           style: context.text.bodySmall?.copyWith(
-            color: ColorTokens.textSecondary,
+            color: AppColors.onSurfaceVariant,
           ),
         ),
       ],

@@ -1,8 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/preferences_provider.dart';
+import 'onboarding_draft.dart';
+
+/// Clé SharedPreferences du brouillon d'onboarding.
+const _draftKey = 'pp.onboarding.draft.v1';
 
 /// État du parcours d'onboarding.
 class OnboardingState {
@@ -12,6 +17,7 @@ class OnboardingState {
     this.householdSize,
     this.cookingSkill,
     this.weeklyBudget,
+    this.customBudget,
     this.cookingTime,
     this.dietaryPreferences = const {},
     this.goals = const {},
@@ -23,8 +29,10 @@ class OnboardingState {
   final String? householdSize;
   /// Niveau de compétence culinaire.
   final String? cookingSkill;
-  /// Budget hebdomadaire sélectionné.
+  /// Budget hebdomadaire sélectionné (clé : `$75`, `$120`, `$180` ou `'Custom'`).
   final String? weeklyBudget;
+  /// Montant exact du budget personnalisé (range 20-500).
+  final double? customBudget;
   /// Temps de cuisson maximal choisi.
   final String? cookingTime;
   /// Ensemble des préférences alimentaires.
@@ -42,21 +50,51 @@ class OnboardingState {
   /// Vrai si l'étape 3 peut être validée.
   bool get canContinueStepThree => goals.isNotEmpty;
 
+  /// Convertit l'état courant en DTO persistant.
+  OnboardingDraft toDraft() => OnboardingDraft(
+        currentStep: currentStep,
+        completedSteps: List.generate(currentStep, (i) => i.toString()),
+        householdSize: householdSize,
+        cookingProfile: cookingSkill,
+        weeklyBudget: weeklyBudget,
+        customBudget: customBudget,
+        cookingTime: cookingTime,
+        dietaryPreferences: dietaryPreferences.toList(),
+        goals: goals.toList(),
+        updatedAt: DateTime.now(),
+      );
+
+  /// Construit un état à partir d'un DTO persisté.
+  factory OnboardingState.fromDraft(OnboardingDraft draft) => OnboardingState(
+        currentStep: draft.currentStep,
+        householdSize: draft.householdSize,
+        cookingSkill: draft.cookingProfile,
+        weeklyBudget: draft.weeklyBudget,
+        customBudget: draft.customBudget,
+        cookingTime: draft.cookingTime,
+        dietaryPreferences: draft.dietaryPreferences.toSet(),
+        goals: draft.goals.toSet(),
+      );
+
   /// Retourne une copie avec les champs modifiés.
   OnboardingState copyWith({
     int? currentStep,
     String? householdSize,
     String? cookingSkill,
     String? weeklyBudget,
+    double? customBudget,
     String? cookingTime,
     Set<String>? dietaryPreferences,
     Set<String>? goals,
+    bool clearCustomBudget = false,
   }) {
     return OnboardingState(
       currentStep: currentStep ?? this.currentStep,
       householdSize: householdSize ?? this.householdSize,
       cookingSkill: cookingSkill ?? this.cookingSkill,
       weeklyBudget: weeklyBudget ?? this.weeklyBudget,
+      customBudget:
+          clearCustomBudget ? null : (customBudget ?? this.customBudget),
       cookingTime: cookingTime ?? this.cookingTime,
       dietaryPreferences: dietaryPreferences ?? this.dietaryPreferences,
       goals: goals ?? this.goals,
@@ -64,97 +102,126 @@ class OnboardingState {
   }
 }
 
-/// Notifier qui gère l'état de l'onboarding et persiste dans SharedPreferences.
+/// Notifier qui gère l'état de l'onboarding et persiste les brouillons.
 class OnboardingNotifier extends Notifier<OnboardingState> {
-  /// Clé SharedPreferences pour la taille du foyer.
-  static const _householdSizeKey = 'onboarding.householdSize';
-  /// Clé SharedPreferences pour le niveau culinaire.
-  static const _cookingSkillKey = 'onboarding.cookingSkill';
-  /// Clé SharedPreferences pour le budget hebdomadaire.
-  static const _weeklyBudgetKey = 'onboarding.weeklyBudget';
-  /// Clé SharedPreferences pour le temps de cuisson.
-  static const _cookingTimeKey = 'onboarding.cookingTime';
-  /// Clé SharedPreferences pour les préférences alimentaires.
-  static const _dietaryPreferencesKey = 'onboarding.dietaryPreferences';
-  /// Clé SharedPreferences pour les objectifs.
-  static const _goalsKey = 'onboarding.goals';
+  Timer? _persistTimer;
 
   @override
   OnboardingState build() {
     final preferences = ref.watch(sharedPreferencesProvider);
-    return OnboardingState(
-      householdSize: preferences.getString(_householdSizeKey),
-      cookingSkill: preferences.getString(_cookingSkillKey),
-      weeklyBudget: preferences.getString(_weeklyBudgetKey),
-      cookingTime: preferences.getString(_cookingTimeKey),
-      dietaryPreferences:
-          (preferences.getStringList(_dietaryPreferencesKey) ?? const [])
-              .toSet(),
-      goals: (preferences.getStringList(_goalsKey) ?? const []).toSet(),
-    );
+    final raw = preferences.getString(_draftKey);
+    ref.onDispose(() => _persistTimer?.cancel());
+    if (raw != null) {
+      try {
+        final draft = OnboardingDraft.fromJson(
+          jsonDecode(raw) as Map<String, dynamic>,
+        );
+        return OnboardingState.fromDraft(draft);
+      } on FormatException {
+        // Brouillon corrompu : on l'ignore et repart d'un état vierge.
+      }
+    }
+    return const OnboardingState();
   }
 
-  /// Définit la taille du foyer et persiste.
-  Future<void> setHouseholdSize(String value) =>
-      _setString(_householdSizeKey, state.copyWith(householdSize: value));
+  /// Définit la taille du foyer.
+  void setHouseholdSize(String value) {
+    state = state.copyWith(householdSize: value);
+    _schedulePersist();
+  }
 
-  /// Définit le niveau culinaire et persiste.
-  Future<void> setCookingSkill(String value) =>
-      _setString(_cookingSkillKey, state.copyWith(cookingSkill: value));
+  /// Définit le niveau culinaire.
+  void setCookingSkill(String value) {
+    state = state.copyWith(cookingSkill: value);
+    _schedulePersist();
+  }
 
-  /// Définit le budget hebdomadaire et persiste.
-  Future<void> setWeeklyBudget(String value) =>
-      _setString(_weeklyBudgetKey, state.copyWith(weeklyBudget: value));
+  /// Définit l'option de budget prédéfinie (`$75`, `$120`, `$180`) ou
+  /// remet le mode `Custom` sans montant saisi.
+  void setWeeklyBudget(String value) {
+    final isCustom = value == 'Custom';
+    state = state.copyWith(
+      weeklyBudget: value,
+      clearCustomBudget: !isCustom,
+    );
+    _schedulePersist();
+  }
 
-  /// Définit le temps de cuisson et persiste.
-  Future<void> setCookingTime(String value) =>
-      _setString(_cookingTimeKey, state.copyWith(cookingTime: value));
+  /// Définit le montant exact du budget personnalisé.
+  void setCustomBudget(double value) {
+    state = state.copyWith(
+      weeklyBudget: value.toStringAsFixed(0),
+      customBudget: value,
+    );
+    _schedulePersist();
+  }
 
-  /// Ajoute ou retire une préférence alimentaire et persiste.
-  Future<void> toggleDietaryPreference(String value) async {
+  /// Définit le temps de cuisson.
+  void setCookingTime(String value) {
+    state = state.copyWith(cookingTime: value);
+    _schedulePersist();
+  }
+
+  /// Ajoute ou retire une préférence alimentaire.
+  void toggleDietaryPreference(String value) {
     final next = {...state.dietaryPreferences};
     next.contains(value) ? next.remove(value) : next.add(value);
     state = state.copyWith(dietaryPreferences: next);
-    await ref
-        .read(sharedPreferencesProvider)
-        .setStringList(_dietaryPreferencesKey, next.toList());
+    _schedulePersist();
   }
 
-  /// Ajoute ou retire un objectif et persiste.
-  Future<void> toggleGoal(String value) async {
+  /// Ajoute ou retire un objectif.
+  void toggleGoal(String value) {
     final next = {...state.goals};
     next.contains(value) ? next.remove(value) : next.add(value);
     state = state.copyWith(goals: next);
-    await ref
-        .read(sharedPreferencesProvider)
-        .setStringList(_goalsKey, next.toList());
+    _schedulePersist();
   }
 
-  /// Réinitialise toutes les données d'onboarding.
-  Future<void> reset() async {
+  /// Met à jour l'étape courante du parcours (utilisé pour persister le
+  /// progrès entre 0-2 avant navigation ou fermeture app).
+  void setCurrentStep(int step) {
+    if (step == state.currentStep) return;
+    state = state.copyWith(currentStep: step);
+    _schedulePersist();
+  }
+
+  /// Planifie la persistance debouncée (300 ms) du brouillon.
+  void _schedulePersist() {
+    _persistTimer?.cancel();
+    _persistTimer = Timer(const Duration(milliseconds: 300), _persistNow);
+  }
+
+  /// Sérialise immédiatement l'état courant dans SharedPreferences.
+  Future<void> _persistNow() async {
     final prefs = ref.read(sharedPreferencesProvider);
-    await prefs.remove(_householdSizeKey);
-    await prefs.remove(_cookingSkillKey);
-    await prefs.remove(_weeklyBudgetKey);
-    await prefs.remove(_cookingTimeKey);
-    await prefs.remove(_dietaryPreferencesKey);
-    await prefs.remove(_goalsKey);
-    state = const OnboardingState();
+    final draft = state.toDraft();
+    await prefs.setString(_draftKey, jsonEncode(draft.toJson()));
   }
 
-  /// Persiste une valeur simple (String) dans SharedPreferences.
-  Future<void> _setString(String key, OnboardingState next) async {
-    state = next;
-    final value = switch (key) {
-      _householdSizeKey => next.householdSize,
-      _cookingSkillKey => next.cookingSkill,
-      _weeklyBudgetKey => next.weeklyBudget,
-      _cookingTimeKey => next.cookingTime,
-      _ => null,
-    };
-    if (value != null) {
-      await ref.read(sharedPreferencesProvider).setString(key, value);
-    }
+  /// Indique si un brouillon est actuellement sauvegardé.
+  Future<bool> hasDraft() async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    return prefs.containsKey(_draftKey);
+  }
+
+  /// Supprime le brouillon après complétion ou annulation explicite.
+  Future<void> clearDraft() async {
+    _persistTimer?.cancel();
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.remove(_draftKey);
+  }
+
+  /// Force la synchronisation immédiate (utile avant navigation).
+  Future<void> flush() async {
+    _persistTimer?.cancel();
+    await _persistNow();
+  }
+
+  /// Réinitialise complètement l'état et supprime le brouillon.
+  Future<void> reset() async {
+    await clearDraft();
+    state = const OnboardingState();
   }
 }
 

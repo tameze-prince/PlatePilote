@@ -127,6 +127,24 @@ class AppLocalizationsFr extends AppLocalizations {
       'La configuration du garde-manger peut être terminée plus tard depuis l\'onglet Garde-manger.';
 
   @override
+  String get customBudgetTitle => 'Budget hebdomadaire personnalisé';
+
+  @override
+  String get customBudgetSubtitle =>
+      'Faites glisser le curseur ou saisissez le montant exact que vous souhaitez dépenser chaque semaine en courses.';
+
+  @override
+  String customBudgetApplied(int amount) {
+    return 'Budget de $amount \$ enregistré';
+  }
+
+  @override
+  String get resumeDraft => 'Reprendre mon brouillon';
+
+  @override
+  String get resumeDraftTooltip => 'Reprendre là où vous vous étiez arrêté';
+
+  @override
   String goodMorning(Object name) {
     return 'Bonjour, $name !';
   }

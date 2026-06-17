@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 import 'app_card.dart';
@@ -18,7 +18,7 @@ class SavingsCard extends StatelessWidget {
           Text(
             'Savings Summary',
             style: context.text.labelSmall?.copyWith(
-              color: ColorTokens.primaryDark,
+              color: AppColors.primaryDark,
               letterSpacing: 0.8,
             ),
           ),
@@ -35,14 +35,14 @@ class SavingsCard extends StatelessWidget {
             children: [
               const Icon(
                 Icons.trending_up,
-                color: ColorTokens.primaryDark,
+                color: AppColors.primaryDark,
                 size: 18,
               ),
               const SizedBox(width: AppSpacing.xs),
               Text(
                 '12% more than last month',
                 style: context.text.labelSmall?.copyWith(
-                  color: ColorTokens.primaryDark,
+                  color: AppColors.primaryDark,
                 ),
               ),
             ],

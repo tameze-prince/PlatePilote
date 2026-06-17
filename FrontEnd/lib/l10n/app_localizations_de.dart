@@ -126,6 +126,24 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die Vorratskammer-Einrichtung kann später über den Vorratskammer-Tab abgeschlossen werden.';
 
   @override
+  String get customBudgetTitle => 'Custom weekly budget';
+
+  @override
+  String get customBudgetSubtitle =>
+      'Drag the slider or type the exact amount you want to spend on groceries each week.';
+
+  @override
+  String customBudgetApplied(int amount) {
+    return '\$$amount budget saved';
+  }
+
+  @override
+  String get resumeDraft => 'Resume my draft';
+
+  @override
+  String get resumeDraftTooltip => 'Continue where you left off';
+
+  @override
   String goodMorning(Object name) {
     return 'Guten Morgen, $name!';
   }

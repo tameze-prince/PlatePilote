@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/providers/app_session_provider.dart';
 import '../auth/providers/auth_provider.dart';
@@ -81,13 +81,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     width: logoSize,
                     height: logoSize,
                     decoration: BoxDecoration(
-                      color: ColorTokens.primaryGreen,
+                      color: AppColors.primaryLight,
                       borderRadius: BorderRadius.circular(
                         isTablet ? 36 : 28,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: ColorTokens.primaryGreen.withValues(alpha: 0.26),
+                          color: AppColors.primaryLight.withValues(alpha: 0.26),
                           blurRadius: 32,
                           offset: const Offset(0, 16),
                         ),
@@ -104,7 +104,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 Text(
                   'PlatePilot',
                   style: text.displaySmall?.copyWith(
-                    color: ColorTokens.primary,
+                    color: AppColors.primary,
                     fontSize: isTablet ? 40 : null,
                   ),
                 ),

@@ -125,6 +125,24 @@ class AppLocalizationsEn extends AppLocalizations {
       'Pantry setup can be finished later from the Pantry tab.';
 
   @override
+  String get customBudgetTitle => 'Custom weekly budget';
+
+  @override
+  String get customBudgetSubtitle =>
+      'Drag the slider or type the exact amount you want to spend on groceries each week.';
+
+  @override
+  String customBudgetApplied(int amount) {
+    return '\$$amount budget saved';
+  }
+
+  @override
+  String get resumeDraft => 'Resume my draft';
+
+  @override
+  String get resumeDraftTooltip => 'Continue where you left off';
+
+  @override
   String goodMorning(Object name) {
     return 'Good morning, $name!';
   }

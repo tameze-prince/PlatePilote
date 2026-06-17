@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
 
@@ -18,11 +18,11 @@ class LoadingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final baseColor = context.isDark
-        ? ColorTokens.darkElevatedSurface
-        : ColorTokens.surfaceContainer;
+        ? AppColors.darkElevatedSurface
+        : AppColors.surfaceContainer;
     final highlightColor = context.isDark
-        ? ColorTokens.darkBorder
-        : ColorTokens.surfaceContainerHigh;
+        ? AppColors.darkOutline
+        : AppColors.surfaceContainerHigh;
 
     return Shimmer.fromColors(
       baseColor: baseColor,
@@ -47,11 +47,11 @@ class LoadingSkeletonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
       baseColor: context.isDark
-          ? ColorTokens.darkElevatedSurface
-          : ColorTokens.surfaceContainer,
+          ? AppColors.darkElevatedSurface
+          : AppColors.surfaceContainer,
       highlightColor: context.isDark
-          ? ColorTokens.darkBorder
-          : ColorTokens.surfaceContainerHigh,
+          ? AppColors.darkOutline
+          : AppColors.surfaceContainerHigh,
       child: Container(
         height: 96,
         decoration: BoxDecoration(

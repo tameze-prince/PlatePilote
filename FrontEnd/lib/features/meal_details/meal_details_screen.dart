@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../core/widgets/app_card.dart';
@@ -89,7 +89,7 @@ class _FitRow extends StatelessWidget {
         children: [
           const Icon(
             Icons.check_circle,
-            color: ColorTokens.primaryGreen,
+            color: AppColors.primaryLight,
             size: 18,
           ),
           const SizedBox(width: AppSpacing.xs),

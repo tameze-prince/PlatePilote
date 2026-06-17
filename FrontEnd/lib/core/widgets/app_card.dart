@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
@@ -30,10 +30,10 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isAccent = color == ColorTokens.primaryGreen ||
+    final isAccent = color == AppColors.primaryLight ||
         color == context.colors.primary ||
-        color == ColorTokens.primaryGreen.withValues(alpha: 0.16) ||
-        color == ColorTokens.primaryGreen.withValues(alpha: 0.08);
+        color == AppColors.primaryLight.withValues(alpha: 0.16) ||
+        color == AppColors.primaryLight.withValues(alpha: 0.08);
 
     return PremiumCard(
       padding: padding,

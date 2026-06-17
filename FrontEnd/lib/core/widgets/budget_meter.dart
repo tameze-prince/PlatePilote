@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 
@@ -24,10 +24,10 @@ class BudgetMeter extends StatelessWidget {
           child: LinearProgressIndicator(
             minHeight: 12,
             value: progress,
-            color: ColorTokens.primaryGreen,
+            color: AppColors.primaryLight,
             backgroundColor: context.isDark
-                ? ColorTokens.darkElevatedSurface
-                : ColorTokens.surfaceContainerLow,
+                ? AppColors.darkElevatedSurface
+                : AppColors.surfaceContainerLow,
           ),
         ),
         const SizedBox(height: AppSpacing.xs),

@@ -6,10 +6,15 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
+import '../../core/extensions/theme_extensions.dart';
 import '../../core/premium_components.dart';
 import '../../core/providers/app_session_provider.dart';
-import '../../features/preferences/preferences_provider.dart';
+import '../../l10n/app_localizations.dart';
+import '../preferences/preferences_provider.dart';
 import 'onboarding_state.dart';
+
+const double _kCustomBudgetMin = 20;
+const double _kCustomBudgetMax = 500;
 
 /// Écran principal du parcours d'onboarding en 3 étapes.
 class OnboardingFlow extends ConsumerStatefulWidget {
@@ -21,7 +26,13 @@ class OnboardingFlow extends ConsumerStatefulWidget {
 
 class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   /// Étape courante (0, 1 ou 2).
-  int step = 0;
+  late int step;
+
+  @override
+  void initState() {
+    super.initState();
+    step = ref.read(onboardingProvider).currentStep;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +43,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       1 => state.canContinueStepTwo,
       _ => state.canContinueStepThree,
     };
+    final l10n = context.l10n;
 
     return Scaffold(
       body: PremiumBackground(
@@ -47,7 +59,10 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                   AppSpacing.md,
                   AppSpacing.lg,
                 ),
-                child: _ProgressHeader(step: step, label: _stepLabel(step)),
+                child: _ProgressHeader(
+                  step: step,
+                  label: _stepLabel(context, step),
+                ),
               ),
               Expanded(
                 child: AnimatedSwitcher(
@@ -62,7 +77,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                       AppSpacing.md,
                       AppSpacing.lg,
                     ),
-                    child: _buildStep(context, state, notifier),
+                    child: _buildStep(context, state, notifier, l10n),
                   ),
                 ),
               ),
@@ -76,16 +91,21 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                 child: Column(
                   children: [
                     GlassButton(
-                      label: step == 2 ? 'Continue to sign in' : 'Continue',
+                      label: step == 2 ? l10n.doneBtn : l10n.continueBtn,
                       icon: Icons.arrow_forward,
                       onPressed: canContinue ? _continue : null,
                     ),
                     if (step > 0) ...[
                       const SizedBox(height: AppSpacing.sm),
                       GlassOutlinedButton(
-                        label: 'Back',
+                        label: l10n.backBtn,
                         icon: Icons.arrow_back,
-                        onPressed: () => setState(() => step -= 1),
+                        onPressed: () {
+                          setState(() => step -= 1);
+                          ref
+                              .read(onboardingProvider.notifier)
+                              .setCurrentStep(step);
+                        },
                       ),
                     ],
                   ],
@@ -102,13 +122,16 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   Future<void> _continue() async {
     HapticFeedback.selectionClick();
     if (step == 2) {
+      await ref.read(onboardingProvider.notifier).flush();
       await ref.read(appSessionProvider.notifier).completeOnboarding();
+      await ref.read(onboardingProvider.notifier).clearDraft();
       if (!mounted) return;
       final after = GoRouterState.of(context).uri.queryParameters['after'];
       context.go(after == 'signup' ? '/signup' : '/login');
       return;
     }
     setState(() => step += 1);
+    ref.read(onboardingProvider.notifier).setCurrentStep(step);
   }
 
   /// Construit le contenu de l'étape courante.
@@ -116,15 +139,15 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     BuildContext context,
     OnboardingState state,
     OnboardingNotifier notifier,
+    AppLocalizations l10n,
   ) {
     return switch (step) {
       0 => _OnboardingStep(
-          title: 'Let us get to know your household',
-          subtitle:
-              'PlatePilot tunes portions, prep time, and budget around your kitchen.',
+          title: l10n.step1Title,
+          subtitle: l10n.step1Subtitle,
           children: [
             _ChoiceGrid(
-              title: 'How many people do you usually cook for?',
+              title: l10n.householdSize,
               choices: const ['1', '2', '3', '4+'],
               selectedValues: {
                 if (state.householdSize != null) state.householdSize!,
@@ -132,7 +155,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
               onSelected: notifier.setHouseholdSize,
             ),
             _ChoiceGrid(
-              title: 'Cooking profile',
+              title: l10n.cookingProfile,
               choices: const ['Beginner', 'Balanced', 'Batch cook', 'Chef mode'],
               selectedValues: {
                 if (state.cookingSkill != null) state.cookingSkill!,
@@ -142,47 +165,46 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           ],
         ),
       1 => _OnboardingStep(
-          title: 'Set your budget and boundaries',
-          subtitle: 'Keep meals realistic without losing variety.',
+          title: l10n.step2Title,
+          subtitle: l10n.step2Subtitle,
           children: [
             _ChoiceGrid(
-              title: 'Weekly grocery budget',
+              title: l10n.weeklyBudget,
               choices: const [r'$75', r'$120', r'$180', 'Custom'],
               selectedValues: {
-                if (state.weeklyBudget != null && !state.weeklyBudget!.startsWith(r'$'))
-                  if (state.weeklyBudget != 'Custom') state.weeklyBudget!,
+                if (state.weeklyBudget != null &&
+                    state.weeklyBudget != 'Custom')
+                  state.weeklyBudget!,
+                if (state.customBudget != null) state.customBudget!.toStringAsFixed(0),
               },
-              onSelected: notifier.setWeeklyBudget,
+              onSelected: (value) async {
+                if (value == 'Custom') {
+                  final picked = await showCustomBudgetSheet(
+                    context,
+                    initial: state.customBudget,
+                    l10n: l10n,
+                  );
+                  if (picked != null) {
+                    notifier.setCustomBudget(picked);
+                    ref
+                        .read(editablePreferencesProvider.notifier)
+                        .setWeeklyBudget(picked.toStringAsFixed(0));
+                  } else {
+                    notifier.setWeeklyBudget('Custom');
+                  }
+                } else {
+                  notifier.setWeeklyBudget(value);
+                }
+              },
+              customValueBuilder: () {
+                if (state.customBudget != null) {
+                  return '\$${state.customBudget!.toStringAsFixed(0)}';
+                }
+                return null;
+              },
             ),
-            if (state.weeklyBudget == 'Custom')
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                child: _CustomBudgetField(
-                  onSubmitted: (value) {
-                    final budget = double.tryParse(value);
-                    if (budget != null && budget > 0) {
-                      notifier.setWeeklyBudget(budget.toStringAsFixed(0));
-                      // Sync to main preferences so budget persists after onboarding
-                      ref.read(editablePreferencesProvider.notifier).setWeeklyBudget(budget.toStringAsFixed(0));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Row(
-                            children: [
-                              Icon(Icons.check_circle, color: Colors.white, size: 18),
-                              SizedBox(width: 8),
-                              Text('✓ Budget enregistré'),
-                            ],
-                          ),
-                          duration: Duration(seconds: 2),
-                          backgroundColor: Color(0xFF2E7D32),
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ),
             _ChoiceGrid(
-              title: 'Cooking time',
+              title: l10n.cookingTime,
               choices: const ['15 min', '30 min', '45 min', 'Flexible'],
               selectedValues: {
                 if (state.cookingTime != null) state.cookingTime!,
@@ -190,7 +212,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
               onSelected: notifier.setCookingTime,
             ),
             _ChoiceGrid(
-              title: 'Dietary preferences',
+              title: l10n.dietaryPrefs,
               choices: const [
                 'High protein',
                 'Vegetarian',
@@ -204,12 +226,11 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           ],
         ),
       _ => _OnboardingStep(
-          title: 'Choose your goals',
-          subtitle:
-              'Optional pantry setup helps PlatePilot use what you already own.',
+          title: l10n.step3Title,
+          subtitle: l10n.step3Subtitle,
           children: [
             _ChoiceGrid(
-              title: 'What should PlatePilot optimize for?',
+              title: l10n.goals,
               choices: const [
                 'Save money',
                 'Eat healthier',
@@ -231,7 +252,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Text(
-                      'Pantry setup can be finished later from the Pantry tab.',
+                      l10n.pantryLater,
                       style: AppTypography.bodyMedium.copyWith(
                         color: PremiumTheme.textSecondary(context),
                       ),
@@ -245,12 +266,36 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     };
   }
 
-  /// Libellé de l'étape courante.
-  String _stepLabel(int step) => switch (step) {
-        0 => 'Household setup',
-        1 => 'Budget & constraints',
-        _ => 'Goals & pantry',
-      };
+  /// Ouvre un [showModalBottomSheet] avec slider + input numérique pour
+  /// saisir un budget personnalisé (range $20–$500).
+}
+
+/// Ouvre un bottom sheet avec slider + input numérique pour
+/// saisir un budget personnalisé (range $20–$500).
+Future<double?> showCustomBudgetSheet(
+  BuildContext context, {
+  double? initial,
+  required AppLocalizations l10n,
+}) {
+  return showModalBottomSheet<double>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (sheetCtx) => _CustomBudgetSheet(
+      initial: initial ?? 120,
+      l10n: l10n,
+    ),
+  );
+}
+
+/// Libellé de l'étape courante.
+String _stepLabel(BuildContext context, int step) {
+  final l10n = context.l10n;
+  return switch (step) {
+    0 => l10n.householdSetup,
+    1 => l10n.budgetConstraints,
+    _ => l10n.goalsPantry,
+  };
 }
 
 /// En-tête de progression avec barre de progression animée.
@@ -264,13 +309,14 @@ class _ProgressHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Step ${step + 1} of 3',
+              l10n.stepOf(step + 1, 3),
               style: AppTypography.bodyMedium.copyWith(
                 color: PremiumTheme.textSecondary(context),
               ),
@@ -341,6 +387,7 @@ class _ChoiceGrid extends StatelessWidget {
     required this.selectedValues,
     required this.onSelected,
     this.multiSelect = false,
+    this.customValueBuilder,
   });
 
   /// Titre de la question.
@@ -353,9 +400,12 @@ class _ChoiceGrid extends StatelessWidget {
   final ValueChanged<String> onSelected;
   /// Vrai si la sélection multiple est autorisée.
   final bool multiSelect;
+  /// Optionnel : libellé custom pour les choix spéciaux (ex: budget perso).
+  final String? Function()? customValueBuilder;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.xl),
       child: Column(
@@ -381,36 +431,45 @@ class _ChoiceGrid extends StatelessWidget {
             itemCount: choices.length,
             itemBuilder: (context, index) {
               final value = choices[index];
-              final selected = selectedValues.contains(value);
-              final isCustom = value == 'Custom';
+              final isCustomTrigger = value == 'Custom';
+              final customLabel = isCustomTrigger ? customValueBuilder?.call() : null;
+              final displayLabel = customLabel ?? value;
+              final selected = isCustomTrigger
+                  ? customLabel != null
+                  : selectedValues.contains(value);
               return SelectableGlassCard(
                 selected: selected,
                 onTap: () {
                   HapticFeedback.selectionClick();
                   onSelected(value);
                 },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (multiSelect && selected) ...[
-                      const Icon(Icons.check_circle, size: 18),
-                      const SizedBox(width: AppSpacing.xs),
-                    ],
-                    Flexible(
-                      child: Text(
-                        value,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: isCustom && selected
-                            ? AppTypography.bodyMedium.copyWith(
-                                color: AppColors.primaryAccentGreen,
-                                fontWeight: FontWeight.w700,
-                              )
-                            : null,
+                child: Semantics(
+                  button: true,
+                  selected: selected,
+                  label: '${l10n.custom} : $displayLabel',
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (multiSelect && selected) ...[
+                        const Icon(Icons.check_circle, size: 18),
+                        const SizedBox(width: AppSpacing.xs),
+                      ],
+                      Flexible(
+                        child: Text(
+                          displayLabel,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: isCustomTrigger && selected
+                              ? AppTypography.bodyMedium.copyWith(
+                                  color: AppColors.primaryAccentGreen,
+                                  fontWeight: FontWeight.w700,
+                                )
+                              : null,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },
@@ -421,96 +480,204 @@ class _ChoiceGrid extends StatelessWidget {
   }
 }
 
-/// Champ de saisie pour le budget personnalisé.
-class _CustomBudgetField extends StatefulWidget {
-  const _CustomBudgetField({required this.onSubmitted});
+/// Bottom sheet permettant de saisir un budget personnalisé (slider + champ).
+class _CustomBudgetSheet extends StatefulWidget {
+  const _CustomBudgetSheet({
+    required this.initial,
+    required this.l10n,
+  });
 
-  /// Callback appelé quand l'utilisateur soumet une valeur.
-  final ValueChanged<String> onSubmitted;
+  /// Valeur initiale du slider.
+  final double initial;
+
+  /// Localizations.
+  final AppLocalizations l10n;
 
   @override
-  State<_CustomBudgetField> createState() => _CustomBudgetFieldState();
+  State<_CustomBudgetSheet> createState() => _CustomBudgetSheetState();
 }
 
-class _CustomBudgetFieldState extends State<_CustomBudgetField> {
-  final _controller = TextEditingController();
-  final _focusNode = FocusNode();
+class _CustomBudgetSheetState extends State<_CustomBudgetSheet> {
+  late final TextEditingController _controller;
+  late double _value;
 
   @override
   void initState() {
     super.initState();
-    // Auto-focus when widget appears
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-    });
+    _value = widget.initial.clamp(_kCustomBudgetMin, _kCustomBudgetMax);
+    _controller = TextEditingController(text: _value.toStringAsFixed(0));
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _syncFromSlider(double v) {
+    setState(() {
+      _value = v;
+      _controller.text = v.toStringAsFixed(0);
+      _controller.selection = TextSelection.collapsed(
+        offset: _controller.text.length,
+      );
+    });
+  }
+
+  void _syncFromText(String raw) {
+    final parsed = double.tryParse(raw.replaceAll(',', '.'));
+    if (parsed == null) return;
+    final clamped = parsed.clamp(_kCustomBudgetMin, _kCustomBudgetMax);
+    setState(() {
+      _value = clamped;
+      if (clamped.toStringAsFixed(0) != raw) {
+        _controller.text = clamped.toStringAsFixed(0);
+        _controller.selection = TextSelection.collapsed(
+          offset: _controller.text.length,
+        );
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.glassWhite,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.primaryAccentGreen.withValues(alpha: 0.5),
-          width: 1.5,
+    final viewInsets = MediaQuery.viewInsetsOf(context);
+    return Padding(
+      padding: EdgeInsets.only(bottom: viewInsets.bottom),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surfaceContainerHigh,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.edit_outlined,
-            color: AppColors.primaryAccentGreen,
-            size: 20,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          const Text(
-            r'$',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              focusNode: _focusNode,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: AppTypography.bodyLarge.copyWith(
-                fontWeight: FontWeight.w600,
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.md,
+          AppSpacing.lg,
+          AppSpacing.lg,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              decoration: const InputDecoration(
-                hintText: 'Enter amount',
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: EdgeInsets.zero,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              widget.l10n.customBudgetTitle,
+              style: AppTypography.headlineSmall.copyWith(
+                color: PremiumTheme.textPrimary(context),
+                fontWeight: FontWeight.w800,
               ),
-              onSubmitted: (value) {
-                widget.onSubmitted(value);
-              },
             ),
-          ),
-          IconButton(
-            icon: const Icon(
-              Icons.check_circle,
-              color: AppColors.primaryAccentGreen,
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              widget.l10n.customBudgetSubtitle,
+              style: AppTypography.bodyMedium.copyWith(
+                color: PremiumTheme.textSecondary(context),
+              ),
             ),
-            onPressed: () => widget.onSubmitted(_controller.text),
-          ),
-        ],
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  r'$',
+                  style: AppTypography.displaySmall.copyWith(
+                    color: PremiumTheme.textPrimary(context),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: false),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    textAlign: TextAlign.center,
+                    style: AppTypography.displaySmall.copyWith(
+                      color: PremiumTheme.textPrimary(context),
+                      fontWeight: FontWeight.w800,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: _value.toStringAsFixed(0),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                      hintStyle: AppTypography.displaySmall.copyWith(
+                        color: PremiumTheme.textSecondary(context)
+                            .withValues(alpha: 0.5),
+                      ),
+                    ),
+                    onChanged: _syncFromText,
+                    onSubmitted: (_) =>
+                        Navigator.of(context).pop(_value),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Slider(
+              value: _value,
+              min: _kCustomBudgetMin,
+              max: _kCustomBudgetMax,
+              divisions: (_kCustomBudgetMax - _kCustomBudgetMin).toInt(),
+              label: '\$${_value.toStringAsFixed(0)}',
+              activeColor: AppColors.primaryAccentGreen,
+              onChanged: _syncFromSlider,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '\$${_kCustomBudgetMin.toStringAsFixed(0)}',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: PremiumTheme.textSecondary(context),
+                    ),
+                  ),
+                  Text(
+                    '\$${_kCustomBudgetMax.toStringAsFixed(0)}',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: PremiumTheme.textSecondary(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              children: [
+                Expanded(
+                  child: GlassOutlinedButton(
+                    label: widget.l10n.backBtn,
+                    icon: Icons.close,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: GlassButton(
+                    label: widget.l10n.continueBtn,
+                    icon: Icons.check,
+                    onPressed: () => Navigator.of(context).pop(_value),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

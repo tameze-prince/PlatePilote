@@ -37,6 +37,18 @@
   "wasteLess": "Waste less",
   "cookFaster": "Cook faster",
   "pantryLater": "Pantry setup can be finished later from the Pantry tab.",
+  "customBudgetTitle": "Custom weekly budget",
+  "customBudgetSubtitle": "Drag the slider or type the exact amount you want to spend on groceries each week.",
+  "customBudgetApplied": "${amount} budget saved",
+  "resumeDraft": "Resume my draft",
+  "resumeDraftTooltip": "Continue where you left off",
+  "@customBudgetApplied": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
   "goodMorning": "Good morning, {name}!",
   "homeSubtitle": "Ready to stay on track and save today?",
   "budgetStatus": "Budget Status",

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
@@ -101,8 +101,8 @@ class _MealPlanHistoryScreenState
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
                     color: plan.status == 'ACTIVE'
-                        ? ColorTokens.primaryGreen.withValues(alpha: 0.1)
-                        : ColorTokens.textSecondary.withValues(alpha: 0.1),
+                        ? AppColors.primaryLight.withValues(alpha: 0.1)
+                        : AppColors.onSurfaceVariant.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppRadius.input),
                   ),
                   child: Icon(
@@ -110,8 +110,8 @@ class _MealPlanHistoryScreenState
                         ? Icons.check_circle
                         : Icons.pending,
                     color: plan.status == 'ACTIVE'
-                        ? ColorTokens.primaryGreen
-                        : ColorTokens.textSecondary,
+                        ? AppColors.primaryLight
+                        : AppColors.onSurfaceVariant,
                     size: 20,
                   ),
                 ),
@@ -129,7 +129,7 @@ class _MealPlanHistoryScreenState
                       Text(
                         '$mealCount meals',
                         style: context.text.bodySmall?.copyWith(
-                          color: ColorTokens.textSecondary,
+                          color: AppColors.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -149,8 +149,8 @@ class _MealPlanHistoryScreenState
                     icon: const Icon(Icons.visibility_outlined, size: 16),
                     label: const Text('View'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: ColorTokens.primaryGreen,
-                      side: const BorderSide(color: ColorTokens.primaryGreen),
+                      foregroundColor: AppColors.primaryLight,
+                      side: const BorderSide(color: AppColors.primaryLight),
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.sm,
                         vertical: AppSpacing.xs,
@@ -168,8 +168,8 @@ class _MealPlanHistoryScreenState
                     icon: const Icon(Icons.refresh_outlined, size: 16),
                     label: const Text('Load'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: ColorTokens.accentBlue,
-                      side: const BorderSide(color: ColorTokens.accentBlue),
+                      foregroundColor: AppColors.tertiary,
+                      side: const BorderSide(color: AppColors.tertiary),
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.sm,
                         vertical: AppSpacing.xs,

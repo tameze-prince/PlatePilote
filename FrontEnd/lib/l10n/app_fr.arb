@@ -37,6 +37,18 @@
   "wasteLess": "Moins gaspiller",
   "cookFaster": "Cuisiner plus vite",
   "pantryLater": "La configuration du garde-manger peut être terminée plus tard depuis l'onglet Garde-manger.",
+  "customBudgetTitle": "Budget hebdomadaire personnalisé",
+  "customBudgetSubtitle": "Faites glisser le curseur ou saisissez le montant exact que vous souhaitez dépenser chaque semaine en courses.",
+  "customBudgetApplied": "Budget de {amount} $ enregistré",
+  "resumeDraft": "Reprendre mon brouillon",
+  "resumeDraftTooltip": "Reprendre là où vous vous étiez arrêté",
+  "@customBudgetApplied": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
   "goodMorning": "Bonjour, {name} !",
   "homeSubtitle": "Prêt à rester sur la bonne voie et à économiser aujourd'hui ?",
   "budgetStatus": "État du budget",

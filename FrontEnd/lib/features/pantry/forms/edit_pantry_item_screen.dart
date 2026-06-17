@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/theme/color_tokens.dart';
+import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_radius.dart';
 import '../../../core/extensions/theme_extensions.dart';
@@ -99,7 +99,7 @@ class _EditPantryItemScreenState extends ConsumerState<EditPantryItemScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: ColorTokens.error),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
             child: const Text('Delete'),
           ),
         ],
@@ -122,7 +122,7 @@ class _EditPantryItemScreenState extends ConsumerState<EditPantryItemScreen> {
           if (isEditing)
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              color: ColorTokens.error,
+              color: AppColors.error,
               onPressed: _deleteItem,
             ),
         ],
@@ -240,14 +240,14 @@ class _EditPantryItemScreenState extends ConsumerState<EditPantryItemScreen> {
                           onSelected: (selected) {
                             setState(() => _selectedCategory = category);
                           },
-                          selectedColor: ColorTokens.primaryGreen.withValues(alpha: 
+                          selectedColor: AppColors.primaryLight.withValues(alpha: 
                             0.2,
                           ),
-                          checkmarkColor: ColorTokens.primaryGreen,
+                          checkmarkColor: AppColors.primaryLight,
                           labelStyle: TextStyle(
                             color: isSelected
-                                ? ColorTokens.primaryGreen
-                                : ColorTokens.textSecondary,
+                                ? AppColors.primaryLight
+                                : AppColors.onSurfaceVariant,
                             fontWeight: isSelected
                                 ? FontWeight.w600
                                 : FontWeight.normal,
@@ -266,8 +266,8 @@ class _EditPantryItemScreenState extends ConsumerState<EditPantryItemScreen> {
                     Icon(
                       _isUrgent ? Icons.warning_amber : Icons.info_outline,
                       color: _isUrgent
-                          ? ColorTokens.error
-                          : ColorTokens.textSecondary,
+                          ? AppColors.error
+                          : AppColors.onSurfaceVariant,
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
@@ -283,7 +283,7 @@ class _EditPantryItemScreenState extends ConsumerState<EditPantryItemScreen> {
                           Text(
                             'Item expires soon or needs attention',
                             style: context.text.bodySmall?.copyWith(
-                              color: ColorTokens.textSecondary,
+                              color: AppColors.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -294,7 +294,7 @@ class _EditPantryItemScreenState extends ConsumerState<EditPantryItemScreen> {
                       onChanged: (value) {
                         setState(() => _isUrgent = value);
                       },
-                      activeThumbColor: ColorTokens.primaryGreen,
+                      activeThumbColor: AppColors.primaryLight,
                     ),
                   ],
                 ),

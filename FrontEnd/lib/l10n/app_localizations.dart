@@ -68,8 +68,8 @@ abstract class AppLocalizations {
 
   final String localeName;
 
-  static AppLocalizations? of(BuildContext context) {
-    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  static AppLocalizations of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
   static const LocalizationsDelegate<AppLocalizations> delegate =
@@ -321,6 +321,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pantry setup can be finished later from the Pantry tab.'**
   String get pantryLater;
+
+  /// No description provided for @customBudgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom weekly budget'**
+  String get customBudgetTitle;
+
+  /// No description provided for @customBudgetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the slider or type the exact amount you want to spend on groceries each week.'**
+  String get customBudgetSubtitle;
+
+  /// No description provided for @customBudgetApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'\${amount} budget saved'**
+  String customBudgetApplied(int amount);
+
+  /// No description provided for @resumeDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume my draft'**
+  String get resumeDraft;
+
+  /// No description provided for @resumeDraftTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue where you left off'**
+  String get resumeDraftTooltip;
 
   /// No description provided for @goodMorning.
   ///

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 
@@ -29,7 +29,7 @@ class EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 48, color: ColorTokens.primaryGreen),
+          Icon(icon, size: 48, color: AppColors.primaryLight),
           const SizedBox(height: AppSpacing.md),
           Text(
             title,

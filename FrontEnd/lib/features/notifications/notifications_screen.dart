@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../core/notifications/notification_service.dart';
@@ -180,7 +180,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                             padding: const EdgeInsets.only(
                               right: AppSpacing.lg,
                             ),
-                            color: ColorTokens.error,
+                            color: AppColors.error,
                             child: const Icon(
                               Icons.delete,
                               color: Colors.white,
@@ -207,7 +207,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                 : const Icon(
                                     Icons.circle,
                                     size: 10,
-                                    color: ColorTokens.primaryGreen,
+                                    color: AppColors.primaryLight,
                                   ),
                             onTap: () => ref
                                 .read(notificationsProvider.notifier)

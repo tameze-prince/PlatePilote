@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
@@ -88,7 +88,7 @@ class _SocialButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderColor =
-        context.isDark ? ColorTokens.darkBorder : ColorTokens.border;
+        context.isDark ? AppColors.darkOutline : AppColors.outline;
     return Material(
       color: Colors.transparent,
       child: InkWell(

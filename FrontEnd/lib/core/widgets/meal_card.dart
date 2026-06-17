@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../shared/models/demo_data.dart';
@@ -83,7 +83,7 @@ class MealCard extends StatelessWidget {
             child: Icon(
             meal.locked ? Icons.lock_outline : (onSwap != null ? Icons.swap_horiz : Icons.more_vert),
             color: meal.locked
-                ? ColorTokens.accentAmber
+                ? AppColors.secondary
                 : context.text.bodyMedium?.color,
           ),),
         ],

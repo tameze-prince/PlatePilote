@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../core/extensions/theme_extensions.dart';
 
 /// Chip de sélection pour les catégories du garde-manger.
@@ -20,11 +20,11 @@ class PantryChip extends StatelessWidget {
       labelStyle: context.text.labelSmall?.copyWith(
         color: selected ? Colors.white : context.text.bodyMedium?.color,
       ),
-      backgroundColor: selected ? ColorTokens.primary : context.colors.surface,
+      backgroundColor: selected ? AppColors.primary : context.colors.surface,
       side: BorderSide(
         color: selected
-            ? ColorTokens.primary
-            : (context.isDark ? ColorTokens.darkBorder : ColorTokens.border),
+            ? AppColors.primary
+            : (context.isDark ? AppColors.darkOutline : AppColors.outline),
       ),
       shape: const StadiumBorder(),
     );

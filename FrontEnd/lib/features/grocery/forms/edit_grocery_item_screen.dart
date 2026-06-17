@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/theme/color_tokens.dart';
+import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_radius.dart';
 import '../../../core/extensions/theme_extensions.dart';
@@ -102,7 +102,7 @@ class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: ColorTokens.error),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
             child: const Text('Remove'),
           ),
         ],
@@ -125,7 +125,7 @@ class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
           if (isEditing)
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              color: ColorTokens.error,
+              color: AppColors.error,
               onPressed: _deleteItem,
             ),
         ],
@@ -251,14 +251,14 @@ class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
                           onSelected: (selected) {
                             setState(() => _selectedCategory = category);
                           },
-                          selectedColor: ColorTokens.primaryGreen.withValues(alpha: 
+                          selectedColor: AppColors.primaryLight.withValues(alpha: 
                             0.2,
                           ),
-                          checkmarkColor: ColorTokens.primaryGreen,
+                          checkmarkColor: AppColors.primaryLight,
                           labelStyle: TextStyle(
                             color: isSelected
-                                ? ColorTokens.primaryGreen
-                                : ColorTokens.textSecondary,
+                                ? AppColors.primaryLight
+                                : AppColors.onSurfaceVariant,
                             fontWeight: isSelected
                                 ? FontWeight.w600
                                 : FontWeight.normal,
@@ -279,8 +279,8 @@ class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
                           ? Icons.check_circle
                           : Icons.check_circle_outline,
                       color: _isChecked
-                          ? ColorTokens.primaryGreen
-                          : ColorTokens.textSecondary,
+                          ? AppColors.primaryLight
+                          : AppColors.onSurfaceVariant,
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
@@ -296,7 +296,7 @@ class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
                           Text(
                             'Item has been bought',
                             style: context.text.bodySmall?.copyWith(
-                              color: ColorTokens.textSecondary,
+                              color: AppColors.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -307,7 +307,7 @@ class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
                       onChanged: (value) {
                         setState(() => _isChecked = value);
                       },
-                      activeThumbColor: ColorTokens.primaryGreen,
+                      activeThumbColor: AppColors.primaryLight,
                     ),
                   ],
                 ),

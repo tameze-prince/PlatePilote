@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
@@ -30,7 +30,7 @@ class _GroceryCostBreakdownScreenState
     {
       'name': 'Produce',
       'icon': Icons.eco,
-      'color': ColorTokens.primaryGreen,
+      'color': AppColors.primaryLight,
       'items': 8,
       'cost': 45.50,
       'percentage': 0.32,
@@ -38,7 +38,7 @@ class _GroceryCostBreakdownScreenState
     {
       'name': 'Protein',
       'icon': Icons.restaurant,
-      'color': ColorTokens.accentBlue,
+      'color': AppColors.tertiary,
       'items': 4,
       'cost': 52.30,
       'percentage': 0.37,
@@ -46,7 +46,7 @@ class _GroceryCostBreakdownScreenState
     {
       'name': 'Dairy & Eggs',
       'icon': Icons.icecream,
-      'color': ColorTokens.accentAmber,
+      'color': AppColors.secondary,
       'items': 5,
       'cost': 28.75,
       'percentage': 0.20,
@@ -62,7 +62,7 @@ class _GroceryCostBreakdownScreenState
     {
       'name': 'Other',
       'icon': Icons.more_horiz,
-      'color': ColorTokens.textSecondary,
+      'color': AppColors.onSurfaceVariant,
       'items': 3,
       'cost': 4.00,
       'percentage': 0.02,
@@ -98,12 +98,12 @@ class _GroceryCostBreakdownScreenState
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: ColorTokens.primaryGreen.withValues(alpha: 0.1),
+                          color: AppColors.primaryLight.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.input),
                         ),
                         child: const Icon(
                           Icons.shopping_cart,
-                          color: ColorTokens.primaryGreen,
+                          color: AppColors.primaryLight,
                           size: 24,
                         ),
                       ),
@@ -115,7 +115,7 @@ class _GroceryCostBreakdownScreenState
                             Text(
                               'Estimated Total',
                               style: context.text.bodySmall?.copyWith(
-                                color: ColorTokens.textSecondary,
+                                color: AppColors.onSurfaceVariant,
                               ),
                             ),
                             Text(
@@ -133,13 +133,13 @@ class _GroceryCostBreakdownScreenState
                           vertical: AppSpacing.xs,
                         ),
                         decoration: BoxDecoration(
-                          color: ColorTokens.primaryGreen.withValues(alpha: 0.1),
+                          color: AppColors.primaryLight.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                         child: Text(
                           'Within Budget',
                           style: context.text.bodySmall?.copyWith(
-                            color: ColorTokens.primaryGreen,
+                            color: AppColors.primaryLight,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -151,9 +151,9 @@ class _GroceryCostBreakdownScreenState
                     borderRadius: BorderRadius.circular(AppRadius.sm),
                     child: LinearProgressIndicator(
                       value: _totalCost / _budget,
-                      backgroundColor: ColorTokens.surfaceContainerLow,
+                      backgroundColor: AppColors.surfaceContainerLow,
                       valueColor: const AlwaysStoppedAnimation<Color>(
-                        ColorTokens.primaryGreen,
+                        AppColors.primaryLight,
                       ),
                       minHeight: 8,
                     ),
@@ -165,13 +165,13 @@ class _GroceryCostBreakdownScreenState
                       Text(
                         '${_categories.fold<int>(0, (sum, cat) => sum + cat['items'] as int)} items',
                         style: context.text.bodySmall?.copyWith(
-                          color: ColorTokens.textSecondary,
+                          color: AppColors.onSurfaceVariant,
                         ),
                       ),
                       Text(
                         '\$${(_budget - _totalCost).toStringAsFixed(2)} remaining',
                         style: context.text.bodySmall?.copyWith(
-                          color: ColorTokens.primaryGreen,
+                          color: AppColors.primaryLight,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -229,12 +229,12 @@ class _GroceryCostBreakdownScreenState
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: ColorTokens.accentAmber.withValues(alpha: 0.1),
+                          color: AppColors.secondary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.input),
                         ),
                         child: const Icon(
                           Icons.lightbulb_outline,
-                          color: ColorTokens.accentAmber,
+                          color: AppColors.secondary,
                           size: 20,
                         ),
                       ),
@@ -306,7 +306,7 @@ class _GroceryCostBreakdownScreenState
                     Text(
                       '(${cat['items']} items)',
                       style: context.text.bodySmall?.copyWith(
-                        color: ColorTokens.textSecondary,
+                        color: AppColors.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -316,7 +316,7 @@ class _GroceryCostBreakdownScreenState
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                   child: LinearProgressIndicator(
                     value: cat['percentage'] as double,
-                    backgroundColor: ColorTokens.surfaceContainerLow,
+                    backgroundColor: AppColors.surfaceContainerLow,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       cat['color'] as Color,
                     ),
@@ -349,8 +349,8 @@ class _GroceryCostBreakdownScreenState
             height: 24,
             decoration: BoxDecoration(
               color: rank <= 3
-                  ? ColorTokens.primaryGreen.withValues(alpha: 0.1)
-                  : ColorTokens.surfaceContainerLow,
+                  ? AppColors.primaryLight.withValues(alpha: 0.1)
+                  : AppColors.surfaceContainerLow,
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
             child: Center(
@@ -358,8 +358,8 @@ class _GroceryCostBreakdownScreenState
                 '$rank',
                 style: context.text.bodySmall?.copyWith(
                   color: rank <= 3
-                      ? ColorTokens.primaryGreen
-                      : ColorTokens.textSecondary,
+                      ? AppColors.primaryLight
+                      : AppColors.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -377,7 +377,7 @@ class _GroceryCostBreakdownScreenState
                 Text(
                   item['quantity'] as String,
                   style: context.text.bodySmall?.copyWith(
-                    color: ColorTokens.textSecondary,
+                    color: AppColors.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -400,7 +400,7 @@ class _GroceryCostBreakdownScreenState
       children: [
         const Icon(
           Icons.check_circle_outline,
-          color: ColorTokens.primaryGreen,
+          color: AppColors.primaryLight,
           size: 16,
         ),
         const SizedBox(width: AppSpacing.sm),
@@ -413,7 +413,7 @@ class _GroceryCostBreakdownScreenState
         Text(
           savings,
           style: context.text.bodySmall?.copyWith(
-            color: ColorTokens.primaryGreen,
+            color: AppColors.primaryLight,
             fontWeight: FontWeight.w600,
           ),
         ),

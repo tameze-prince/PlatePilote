@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
@@ -56,7 +56,7 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
           _savingsSources = sourcesRaw.map((e) {
             final m = Map<String, dynamic>.from(e as Map);
             if (!m.containsKey('icon')) m['icon'] = Icons.savings;
-            if (!m.containsKey('color')) m['color'] = ColorTokens.primaryGreen;
+            if (!m.containsKey('color')) m['color'] = AppColors.primaryLight;
             return m;
           }).toList();
         }
@@ -97,12 +97,12 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: ColorTokens.primaryGreen.withValues(alpha: 0.1),
+                          color: AppColors.primaryLight.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.input),
                         ),
                         child: const Icon(
                           Icons.savings,
-                          color: ColorTokens.primaryGreen,
+                          color: AppColors.primaryLight,
                           size: 24,
                         ),
                       ),
@@ -114,14 +114,14 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
                             Text(
                               'Total Saved',
                               style: context.text.bodySmall?.copyWith(
-                                color: ColorTokens.textSecondary,
+                                color: AppColors.onSurfaceVariant,
                               ),
                             ),
                             Text(
                               '\$${_totalSaved.toStringAsFixed(2)}',
                               style: context.text.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: ColorTokens.primaryGreen,
+                                color: AppColors.primaryLight,
                               ),
                             ),
                           ],
@@ -139,7 +139,7 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
                             Text(
                               'Monthly Goal',
                               style: context.text.bodySmall?.copyWith(
-                                color: ColorTokens.textSecondary,
+                                color: AppColors.onSurfaceVariant,
                               ),
                             ),
                             Text(
@@ -158,14 +158,14 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
                             Text(
                               'Progress',
                               style: context.text.bodySmall?.copyWith(
-                                color: ColorTokens.textSecondary,
+                                color: AppColors.onSurfaceVariant,
                               ),
                             ),
                             Text(
                               '${((_totalSaved / _monthlyGoal) * 100).toInt()}%',
                               style: context.text.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: ColorTokens.primaryGreen,
+                                color: AppColors.primaryLight,
                               ),
                             ),
                           ],
@@ -178,9 +178,9 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
                     borderRadius: BorderRadius.circular(AppRadius.sm),
                     child: LinearProgressIndicator(
                       value: _totalSaved / _monthlyGoal,
-                      backgroundColor: ColorTokens.surfaceContainerLow,
+                      backgroundColor: AppColors.surfaceContainerLow,
                       valueColor: const AlwaysStoppedAnimation<Color>(
-                        ColorTokens.primaryGreen,
+                        AppColors.primaryLight,
                       ),
                       minHeight: 8,
                     ),
@@ -207,8 +207,8 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
                       size: const Size(double.infinity, 180),
                       painter: _SavingsChartPainter(
                         data: _monthlyHistory,
-                        barColor: ColorTokens.primaryGreen,
-                        targetColor: ColorTokens.accentAmber,
+                        barColor: AppColors.primaryLight,
+                        targetColor: AppColors.secondary,
                       ),
                     ),
                   ),
@@ -311,7 +311,7 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                   child: LinearProgressIndicator(
                     value: source['percentage'] as double,
-                    backgroundColor: ColorTokens.surfaceContainerLow,
+                    backgroundColor: AppColors.surfaceContainerLow,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       source['color'] as Color,
                     ),
@@ -346,15 +346,15 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
           padding: const EdgeInsets.all(AppSpacing.xs),
           decoration: BoxDecoration(
             color: unlocked
-                ? ColorTokens.accentAmber.withValues(alpha: 0.1)
-                : ColorTokens.surfaceContainerLow,
+                ? AppColors.secondary.withValues(alpha: 0.1)
+                : AppColors.surfaceContainerLow,
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
           child: Icon(
             icon,
             color: unlocked
-                ? ColorTokens.accentAmber
-                : ColorTokens.textSecondary,
+                ? AppColors.secondary
+                : AppColors.onSurfaceVariant,
             size: 18,
           ),
         ),
@@ -368,14 +368,14 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
                 style: context.text.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: unlocked
-                      ? ColorTokens.textPrimary
-                      : ColorTokens.textSecondary,
+                      ? AppColors.onBackground
+                      : AppColors.onSurfaceVariant,
                 ),
               ),
               Text(
                 description,
                 style: context.text.bodySmall?.copyWith(
-                  color: ColorTokens.textSecondary,
+                  color: AppColors.onSurfaceVariant,
                 ),
               ),
             ],
@@ -384,8 +384,8 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
         Icon(
           unlocked ? Icons.check_circle : Icons.lock_outline,
           color: unlocked
-              ? ColorTokens.primaryGreen
-              : ColorTokens.textSecondary,
+              ? AppColors.primaryLight
+              : AppColors.onSurfaceVariant,
           size: 20,
         ),
       ],
@@ -459,7 +459,7 @@ class _SavingsChartPainter extends CustomPainter {
           text: data[i]['month'] as String,
           style: const TextStyle(
             fontSize: 10,
-            color: ColorTokens.textSecondary,
+            color: AppColors.onSurfaceVariant,
           ),
         ),
         textDirection: TextDirection.ltr,

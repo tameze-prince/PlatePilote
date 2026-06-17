@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme/color_tokens.dart';
+import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../core/extensions/theme_extensions.dart';
@@ -75,14 +75,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: ColorTokens.accentAmber.withValues(alpha: 0.1),
+                      color: AppColors.secondary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppRadius.modal),
                     ),
                     child: Icon(
                       _emailSent ? Icons.check_circle : Icons.lock_reset,
                       color: _emailSent
-                          ? ColorTokens.primaryGreen
-                          : ColorTokens.accentAmber,
+                          ? AppColors.primaryLight
+                          : AppColors.secondary,
                       size: 40,
                     ),
                   ),
@@ -98,7 +98,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         ? 'We sent a password reset link to\n${_emailController.text}'
                         : 'Enter your email and we\'ll send you\na reset link',
                     style: context.text.bodyMedium?.copyWith(
-                      color: ColorTokens.textSecondary,
+                      color: AppColors.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -143,7 +143,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             Container(
                               padding: const EdgeInsets.all(AppSpacing.md),
                               decoration: BoxDecoration(
-                                color: ColorTokens.primaryGreen.withValues(alpha: 
+                                color: AppColors.primaryLight.withValues(alpha: 
                                   0.1,
                                 ),
                                 borderRadius: BorderRadius.circular(
@@ -154,14 +154,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                 children: [
                                   const Icon(
                                     Icons.info_outline,
-                                    color: ColorTokens.primaryGreen,
+                                    color: AppColors.primaryLight,
                                   ),
                                   const SizedBox(width: AppSpacing.sm),
                                   Expanded(
                                     child: Text(
                                       'If an account exists, you\'ll receive an email shortly.',
                                       style: context.text.bodySmall?.copyWith(
-                                        color: ColorTokens.primaryGreen,
+                                        color: AppColors.primaryLight,
                                       ),
                                     ),
                                   ),
