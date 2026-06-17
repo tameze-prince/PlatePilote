@@ -205,5 +205,72 @@
   "emptyNotificationsSubtitle": "Im Moment keine neuen Benachrichtigungen.",
   "emptyQuickMealTitle": "Kein Rezept zur Hand",
   "emptyQuickMealSubtitle": "Füge einige Zutaten zur Vorratskammer hinzu, um Vorschläge zu aktivieren.",
-  "emptyQuickMealCta": "Vorratskammer öffnen"
+  "emptyQuickMealCta": "Vorratskammer öffnen",
+  "onboardingSingleTitle": "Willkommen bei PlatePilot",
+  "onboardingSingleSubtitle": "Ein paar Angaben und wir entwerfen deine erste Woche.",
+  "onboardingSingleHousehold": "Erzähl uns von deinem Haushalt",
+  "onboardingSingleHouseholdPeople": "{count} Personen",
+  "@onboardingSingleHouseholdPeople": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingSingleCookingProfile": "Wie kochst du?",
+  "onboardingSingleBudget": "Wöchentliches Lebensmittelbudget",
+  "onboardingSingleCustom": "Benutzerdefiniert",
+  "onboardingSingleTime": "Zeit pro Mahlzeit",
+  "onboardingSingleTimeShort": "{minutes} Min.",
+  "@onboardingSingleTimeShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSingleTimeFlexible": "Flexibel",
+  "onboardingSingleDietary": "Ernährungspräferenzen",
+  "onboardingSingleGoals": "Deine Ziele",
+  "onboardingSingleVegan": "Vegan",
+  "onboardingSingleHalal": "Halal",
+  "onboardingSingleLactoseFree": "Laktosefrei",
+  "onboardingSingleKeto": "Keto",
+  "onboardingSinglePescatarian": "Pescetarisch",
+  "onboardingSingleGoalSaveMoney": "Geld sparen",
+  "onboardingSingleGoalEatHealthier": "Gesünder essen",
+  "onboardingSingleGoalWasteLess": "Weniger verschwenden",
+  "onboardingSingleGoalCookFaster": "Schneller kochen",
+  "onboardingSinglePreviewTitle": "Deine Woche",
+  "onboardingSinglePreviewRecipes": "{count} Rezepte / Woche",
+  "@onboardingSinglePreviewRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSinglePreviewBudget": "Budget {amount}",
+  "@onboardingSinglePreviewBudget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingSinglePreviewTime": "~{minutes} Min. / Mahlzeit",
+  "@onboardingSinglePreviewTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSinglePreviewPantryHint": "Die Vorratskammer kann später eingerichtet werden.",
+  "onboardingSinglePreviewEmpty": "Wähle mindestens eine Haushaltsgröße, um die Woche anzuzeigen.",
+  "onboardingSingleCtaSeePlan": "Meinen Plan ansehen",
+  "onboardingSingleCtaCreateAccount": "Konto erstellen",
+  "onboardingSingleCtaSignInInstead": "Stattdessen anmelden",
+  "onboardingSingleCustomizeLater": "Später anpassen",
+  "onboardingSingleSkip": "Überspringen"
 }

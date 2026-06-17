@@ -218,5 +218,72 @@
   "emptyNotificationsSubtitle": "Aucune nouvelle notification pour le moment.",
   "emptyQuickMealTitle": "Pas de recette sous la main",
   "emptyQuickMealSubtitle": "Ajoutez quelques ingrédients au pantry pour activer les suggestions.",
-  "emptyQuickMealCta": "Ouvrir le pantry"
+  "emptyQuickMealCta": "Ouvrir le pantry",
+  "onboardingSingleTitle": "Bienvenue sur PlatePilot",
+  "onboardingSingleSubtitle": "Quelques infos et nous préparons votre première semaine.",
+  "onboardingSingleHousehold": "Parlez-nous de votre foyer",
+  "onboardingSingleHouseholdPeople": "{count} personnes",
+  "@onboardingSingleHouseholdPeople": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingSingleCookingProfile": "Comment cuisinez-vous ?",
+  "onboardingSingleBudget": "Budget courses hebdomadaire",
+  "onboardingSingleCustom": "Personnalisé",
+  "onboardingSingleTime": "Temps par repas",
+  "onboardingSingleTimeShort": "{minutes} min",
+  "@onboardingSingleTimeShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSingleTimeFlexible": "Flexible",
+  "onboardingSingleDietary": "Préférences alimentaires",
+  "onboardingSingleGoals": "Vos objectifs",
+  "onboardingSingleVegan": "Végan",
+  "onboardingSingleHalal": "Halal",
+  "onboardingSingleLactoseFree": "Sans lactose",
+  "onboardingSingleKeto": "Céto",
+  "onboardingSinglePescatarian": "Pescetarien",
+  "onboardingSingleGoalSaveMoney": "Économiser",
+  "onboardingSingleGoalEatHealthier": "Manger plus sain",
+  "onboardingSingleGoalWasteLess": "Moins gaspiller",
+  "onboardingSingleGoalCookFaster": "Cuisiner plus vite",
+  "onboardingSinglePreviewTitle": "Votre semaine",
+  "onboardingSinglePreviewRecipes": "{count} recettes / semaine",
+  "@onboardingSinglePreviewRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSinglePreviewBudget": "Budget {amount}",
+  "@onboardingSinglePreviewBudget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingSinglePreviewTime": "~{minutes} min / repas",
+  "@onboardingSinglePreviewTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSinglePreviewPantryHint": "La configuration du garde-manger peut être complétée plus tard.",
+  "onboardingSinglePreviewEmpty": "Choisissez au moins une taille de foyer pour prévisualiser la semaine.",
+  "onboardingSingleCtaSeePlan": "Voir mon plan",
+  "onboardingSingleCtaCreateAccount": "Créer mon compte",
+  "onboardingSingleCtaSignInInstead": "Se connecter",
+  "onboardingSingleCustomizeLater": "Configurer plus tard",
+  "onboardingSingleSkip": "Passer"
 }

@@ -658,4 +658,113 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emptyQuickMealCta => 'Open pantry';
+
+  @override
+  String get onboardingSingleTitle => 'Welcome to PlatePilot';
+
+  @override
+  String get onboardingSingleSubtitle =>
+      'Tell us a few things and we’ll draft your first week.';
+
+  @override
+  String get onboardingSingleHousehold => 'Tell us about your household';
+
+  @override
+  String onboardingSingleHouseholdPeople(String count) {
+    return '$count people';
+  }
+
+  @override
+  String get onboardingSingleCookingProfile => 'How do you cook?';
+
+  @override
+  String get onboardingSingleBudget => 'Weekly grocery budget';
+
+  @override
+  String get onboardingSingleCustom => 'Custom';
+
+  @override
+  String get onboardingSingleTime => 'Time per meal';
+
+  @override
+  String onboardingSingleTimeShort(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String get onboardingSingleTimeFlexible => 'Flexible';
+
+  @override
+  String get onboardingSingleDietary => 'Dietary preferences';
+
+  @override
+  String get onboardingSingleGoals => 'Your goals';
+
+  @override
+  String get onboardingSingleVegan => 'Vegan';
+
+  @override
+  String get onboardingSingleHalal => 'Halal';
+
+  @override
+  String get onboardingSingleLactoseFree => 'Lactose-free';
+
+  @override
+  String get onboardingSingleKeto => 'Keto';
+
+  @override
+  String get onboardingSinglePescatarian => 'Pescatarian';
+
+  @override
+  String get onboardingSingleGoalSaveMoney => 'Save money';
+
+  @override
+  String get onboardingSingleGoalEatHealthier => 'Eat healthier';
+
+  @override
+  String get onboardingSingleGoalWasteLess => 'Waste less';
+
+  @override
+  String get onboardingSingleGoalCookFaster => 'Cook faster';
+
+  @override
+  String get onboardingSinglePreviewTitle => 'Your week';
+
+  @override
+  String onboardingSinglePreviewRecipes(int count) {
+    return '$count recipes / week';
+  }
+
+  @override
+  String onboardingSinglePreviewBudget(String amount) {
+    return '\$$amount budget';
+  }
+
+  @override
+  String onboardingSinglePreviewTime(int minutes) {
+    return '~$minutes min / meal';
+  }
+
+  @override
+  String get onboardingSinglePreviewPantryHint =>
+      'Pantry setup can be finished later from the Pantry tab.';
+
+  @override
+  String get onboardingSinglePreviewEmpty =>
+      'Pick at least one household size to preview your week.';
+
+  @override
+  String get onboardingSingleCtaSeePlan => 'See your plan';
+
+  @override
+  String get onboardingSingleCtaCreateAccount => 'Create my account';
+
+  @override
+  String get onboardingSingleCtaSignInInstead => 'Sign in instead';
+
+  @override
+  String get onboardingSingleCustomizeLater => 'Customize later';
+
+  @override
+  String get onboardingSingleSkip => 'Skip';
 }

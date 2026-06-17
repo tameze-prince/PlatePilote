@@ -219,5 +219,72 @@
   "emptyNotificationsSubtitle": "No new notifications for now.",
   "emptyQuickMealTitle": "No recipe on hand",
   "emptyQuickMealSubtitle": "Add a few ingredients to your pantry to unlock suggestions.",
-  "emptyQuickMealCta": "Open pantry"
+  "emptyQuickMealCta": "Open pantry",
+  "onboardingSingleTitle": "Welcome to PlatePilot",
+  "onboardingSingleSubtitle": "Tell us a few things and we’ll draft your first week.",
+  "onboardingSingleHousehold": "Tell us about your household",
+  "onboardingSingleHouseholdPeople": "{count} people",
+  "@onboardingSingleHouseholdPeople": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingSingleCookingProfile": "How do you cook?",
+  "onboardingSingleBudget": "Weekly grocery budget",
+  "onboardingSingleCustom": "Custom",
+  "onboardingSingleTime": "Time per meal",
+  "onboardingSingleTimeShort": "{minutes} min",
+  "@onboardingSingleTimeShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSingleTimeFlexible": "Flexible",
+  "onboardingSingleDietary": "Dietary preferences",
+  "onboardingSingleGoals": "Your goals",
+  "onboardingSingleVegan": "Vegan",
+  "onboardingSingleHalal": "Halal",
+  "onboardingSingleLactoseFree": "Lactose-free",
+  "onboardingSingleKeto": "Keto",
+  "onboardingSinglePescatarian": "Pescatarian",
+  "onboardingSingleGoalSaveMoney": "Save money",
+  "onboardingSingleGoalEatHealthier": "Eat healthier",
+  "onboardingSingleGoalWasteLess": "Waste less",
+  "onboardingSingleGoalCookFaster": "Cook faster",
+  "onboardingSinglePreviewTitle": "Your week",
+  "onboardingSinglePreviewRecipes": "{count} recipes / week",
+  "@onboardingSinglePreviewRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSinglePreviewBudget": "${amount} budget",
+  "@onboardingSinglePreviewBudget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingSinglePreviewTime": "~{minutes} min / meal",
+  "@onboardingSinglePreviewTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSinglePreviewPantryHint": "Pantry setup can be finished later from the Pantry tab.",
+  "onboardingSinglePreviewEmpty": "Pick at least one household size to preview your week.",
+  "onboardingSingleCtaSeePlan": "See your plan",
+  "onboardingSingleCtaCreateAccount": "Create my account",
+  "onboardingSingleCtaSignInInstead": "Sign in instead",
+  "onboardingSingleCustomizeLater": "Customize later",
+  "onboardingSingleSkip": "Skip"
 }

@@ -16,7 +16,6 @@ import '../../core/repositories/dashboard_repository.dart';
 import '../../core/widgets/floating_components.dart';
 import '../../core/widgets/modern_animations.dart';
 import '../../core/widgets/modern_components.dart';
-import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/recipe_image.dart';
 import '../search/command_palette/pp_command_palette.dart';
 import 'home_provider.dart';
@@ -84,7 +83,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   IconButton(
                     tooltip: 'Search',
                     icon: const Icon(Icons.search),
-                    onPressed: () => PpCommandPalette.show(context),
+                    onPressed: () => PpCommandPalette.show<void>(context),
                     color: isDark
                         ? AppColors.darkOnSurfaceVariant
                         : AppColors.onSurfaceVariant,

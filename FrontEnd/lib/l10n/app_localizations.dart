@@ -1293,6 +1293,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open pantry'**
   String get emptyQuickMealCta;
+
+  /// No description provided for @onboardingSingleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to PlatePilot'**
+  String get onboardingSingleTitle;
+
+  /// No description provided for @onboardingSingleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us a few things and we’ll draft your first week.'**
+  String get onboardingSingleSubtitle;
+
+  /// No description provided for @onboardingSingleHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us about your household'**
+  String get onboardingSingleHousehold;
+
+  /// No description provided for @onboardingSingleHouseholdPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} people'**
+  String onboardingSingleHouseholdPeople(String count);
+
+  /// No description provided for @onboardingSingleCookingProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you cook?'**
+  String get onboardingSingleCookingProfile;
+
+  /// No description provided for @onboardingSingleBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly grocery budget'**
+  String get onboardingSingleBudget;
+
+  /// No description provided for @onboardingSingleCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get onboardingSingleCustom;
+
+  /// No description provided for @onboardingSingleTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time per meal'**
+  String get onboardingSingleTime;
+
+  /// No description provided for @onboardingSingleTimeShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String onboardingSingleTimeShort(int minutes);
+
+  /// No description provided for @onboardingSingleTimeFlexible.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible'**
+  String get onboardingSingleTimeFlexible;
+
+  /// No description provided for @onboardingSingleDietary.
+  ///
+  /// In en, this message translates to:
+  /// **'Dietary preferences'**
+  String get onboardingSingleDietary;
+
+  /// No description provided for @onboardingSingleGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Your goals'**
+  String get onboardingSingleGoals;
+
+  /// No description provided for @onboardingSingleVegan.
+  ///
+  /// In en, this message translates to:
+  /// **'Vegan'**
+  String get onboardingSingleVegan;
+
+  /// No description provided for @onboardingSingleHalal.
+  ///
+  /// In en, this message translates to:
+  /// **'Halal'**
+  String get onboardingSingleHalal;
+
+  /// No description provided for @onboardingSingleLactoseFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Lactose-free'**
+  String get onboardingSingleLactoseFree;
+
+  /// No description provided for @onboardingSingleKeto.
+  ///
+  /// In en, this message translates to:
+  /// **'Keto'**
+  String get onboardingSingleKeto;
+
+  /// No description provided for @onboardingSinglePescatarian.
+  ///
+  /// In en, this message translates to:
+  /// **'Pescatarian'**
+  String get onboardingSinglePescatarian;
+
+  /// No description provided for @onboardingSingleGoalSaveMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Save money'**
+  String get onboardingSingleGoalSaveMoney;
+
+  /// No description provided for @onboardingSingleGoalEatHealthier.
+  ///
+  /// In en, this message translates to:
+  /// **'Eat healthier'**
+  String get onboardingSingleGoalEatHealthier;
+
+  /// No description provided for @onboardingSingleGoalWasteLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Waste less'**
+  String get onboardingSingleGoalWasteLess;
+
+  /// No description provided for @onboardingSingleGoalCookFaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Cook faster'**
+  String get onboardingSingleGoalCookFaster;
+
+  /// No description provided for @onboardingSinglePreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your week'**
+  String get onboardingSinglePreviewTitle;
+
+  /// No description provided for @onboardingSinglePreviewRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recipes / week'**
+  String onboardingSinglePreviewRecipes(int count);
+
+  /// No description provided for @onboardingSinglePreviewBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'\${amount} budget'**
+  String onboardingSinglePreviewBudget(String amount);
+
+  /// No description provided for @onboardingSinglePreviewTime.
+  ///
+  /// In en, this message translates to:
+  /// **'~{minutes} min / meal'**
+  String onboardingSinglePreviewTime(int minutes);
+
+  /// No description provided for @onboardingSinglePreviewPantryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry setup can be finished later from the Pantry tab.'**
+  String get onboardingSinglePreviewPantryHint;
+
+  /// No description provided for @onboardingSinglePreviewEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick at least one household size to preview your week.'**
+  String get onboardingSinglePreviewEmpty;
+
+  /// No description provided for @onboardingSingleCtaSeePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'See your plan'**
+  String get onboardingSingleCtaSeePlan;
+
+  /// No description provided for @onboardingSingleCtaCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create my account'**
+  String get onboardingSingleCtaCreateAccount;
+
+  /// No description provided for @onboardingSingleCtaSignInInstead.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in instead'**
+  String get onboardingSingleCtaSignInInstead;
+
+  /// No description provided for @onboardingSingleCustomizeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize later'**
+  String get onboardingSingleCustomizeLater;
+
+  /// No description provided for @onboardingSingleSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSingleSkip;
 }
 
 class _AppLocalizationsDelegate
