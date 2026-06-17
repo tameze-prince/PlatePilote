@@ -141,5 +141,82 @@
   "avgSavings": "économisés en moyenne",
   "testimonial1Text": "J'économise 45€ par mois sur mes courses grâce aux substitutions intelligentes.",
   "testimonial2Text": "Le plan de repas AI m'a fait découvrir des recettes que je n'aurais jamais essayé seul.",
-  "testimonial3Text": "Enfin une app qui comprend la cuisine africaine!"
+  "testimonial3Text": "Enfin une app qui comprend la cuisine africaine!",
+  "funnelSkip": "Passer",
+  "funnelTrialBadge": "7 JOURS GRATUITS",
+  "funnelExplainTitle": "Décidez moins, économisez plus",
+  "funnelExplainSubtitle": "PlatePilot planifie vos repas, génère votre liste de courses et suit votre budget — automatiquement.",
+  "funnelBenefitAiTitle": "Plans IA illimités",
+  "funnelBenefitAiSub": "Régénérez la semaine quand vous voulez, budget et nutrition préservés.",
+  "funnelBenefitGroceryTitle": "Liste de courses auto-générée",
+  "funnelBenefitGrocerySub": "Triée par rayon, quantités ajustées à votre foyer.",
+  "funnelBenefitBudgetTitle": "Optimiseur de budget",
+  "funnelBenefitBudgetSub": "Substitutions intelligentes pour rester sous votre plafond hebdomadaire.",
+  "funnelCtaPickPlan": "Voir les plans",
+  "funnelPickPlanTitle": "Choisissez votre plan",
+  "funnelMonthlyLabel": "Mensuel",
+  "funnelAnnualLabel": "Annuel",
+  "funnelMonthlyTitle": "Mensuel",
+  "funnelMonthlyTag": "SANS ENGAGEMENT",
+  "funnelMonthlyPrice": "6,99 $",
+  "funnelAnnualTitle": "Annuel",
+  "funnelAnnualPrice": "59,99 $",
+  "funnelAnnualEquiv": "~4,99 $/mois",
+  "funnelPerMonth": "/ mois",
+  "funnelPerYear": "/ an",
+  "funnelSaveBadge": "ÉCONOMISEZ 28%",
+  "funnelFeaturesTitle": "Tout dans Premium",
+  "funnelFeatureAi": "Régénération de plans IA illimitée",
+  "funnelFeatureGrocery": "Liste de courses intelligente triée par rayon",
+  "funnelFeatureBudget": "Optimisation du budget et suivi des économies",
+  "funnelFeatureScans": "Scans de reçus et codes-barres illimités",
+  "funnelFeatureFamily": "Profils familiaux et préférences",
+  "funnelSocialProof": "12 400 foyers font confiance à PlatePilot",
+  "funnelCtaStartTrial": "Démarrer l'essai gratuit",
+  "funnelTrialCopy": "7 jours gratuits, annulable à tout moment",
+  "funnelPaymentTitle": "Finaliser l'abonnement",
+  "funnelPaymentMethods": "Méthode de paiement",
+  "funnelApplePay": "Apple Pay",
+  "funnelGooglePay": "Google Pay",
+  "funnelCard": "Carte bancaire",
+  "funnelSubscribe": "S'abonner",
+  "funnelLegalFooter": "En vous abonnant vous acceptez nos Conditions et notre Politique de confidentialité.",
+  "cmdPaletteSearchHint": "Rechercher partout...",
+  "cmdPalettePages": "Pages",
+  "cmdPaletteRecipes": "Recettes",
+  "cmdPalettePantry": "Garde-manger",
+  "cmdPaletteEmptyTitle": "Aucun résultat",
+  "cmdPaletteEmptyHint": "Essayez un autre mot-clé ou appuyez sur Échap pour fermer.",
+  "cmdPaletteEmptyFor": "Aucun résultat pour « {query} »",
+  "@cmdPaletteEmptyFor": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "cmdPaletteCloseHint": "Échap pour fermer",
+  "emptyPantryTitle": "Votre pantry est vide",
+  "emptyPantrySubtitle": "Ajoutez vos premiers ingrédients pour des recommandations plus précises.",
+  "emptyPantryCta": "Ajouter un ingrédient",
+  "emptyGroceryTitle": "Pas encore de courses",
+  "emptyGrocerySubtitle": "Générez un plan repas pour créer votre liste.",
+  "emptyGroceryCta": "Générer un plan",
+  "emptyFavoritesTitle": "Pas encore de recettes favorites",
+  "emptyFavoritesSubtitle": "Sauvegardez vos recettes préférées pour les retrouver rapidement.",
+  "emptyFavoritesCta": "Parcourir les recettes",
+  "emptySearchTitle": "Aucun résultat pour «{query}»",
+  "@emptySearchTitle": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "emptySearchSubtitle": "Essayez avec d'autres mots-clés.",
+  "emptyNotificationsTitle": "Vous êtes à jour",
+  "emptyNotificationsSubtitle": "Aucune nouvelle notification pour le moment.",
+  "emptyQuickMealTitle": "Pas de recette sous la main",
+  "emptyQuickMealSubtitle": "Ajoutez quelques ingrédients au pantry pour activer les suggestions.",
+  "emptyQuickMealCta": "Ouvrir le pantry"
 }

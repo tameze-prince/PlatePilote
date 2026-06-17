@@ -8,6 +8,8 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_typography.dart';
+import '../../core/design_system/components/pp_empty_state.dart';
+import '../../core/extensions/theme_extensions.dart';
 import '../../core/repositories/recipe_repository.dart';
 import '../../core/widgets/modern_components.dart';
 import '../../core/widgets/modern_animations.dart';
@@ -240,10 +242,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   else if (_error != null)
                     Column(
                       children: [
-                        EmptyState(
-                          icon: Icons.error_outline,
-                          title: 'Error',
-                          message: _error!,
+                        Builder(
+                          builder: (innerContext) {
+                            final l10n = innerContext.l10n;
+                            return PpEmptyState(
+                              icon: Icons.error_outline,
+                              title: l10n.error,
+                              subtitle: _error!,
+                            );
+                          },
                         ),
                         FilledButton(
                           onPressed: _performSearch,
@@ -252,16 +259,26 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       ],
                     )
                   else if (query.isEmpty)
-                    EmptyState(
-                      icon: Icons.search,
-                      title: 'Search recipes',
-                      message: 'Type to search across thousands of recipes',
+                    Builder(
+                      builder: (innerContext) {
+                        final l10n = innerContext.l10n;
+                        return PpEmptyState(
+                          icon: Icons.search,
+                          title: l10n.search,
+                          subtitle: l10n.emptySearchSubtitle,
+                        );
+                      },
                     )
                   else if (_results.isEmpty)
-                    EmptyState(
-                      icon: Icons.search_off,
-                      title: 'No results found',
-                      message: 'Try adjusting your search or filters',
+                    Builder(
+                      builder: (innerContext) {
+                        final l10n = innerContext.l10n;
+                        return PpEmptyState(
+                          icon: Icons.search_off,
+                          title: l10n.emptySearchTitle(query),
+                          subtitle: l10n.emptySearchSubtitle,
+                        );
+                      },
                     )
                   else
                     ..._results.asMap().entries.map(

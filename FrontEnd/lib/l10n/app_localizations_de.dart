@@ -454,4 +454,212 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get testimonial3Text =>
       'Endlich eine App, die afrikanische Küche versteht!';
+
+  @override
+  String get funnelSkip => 'Überspringen';
+
+  @override
+  String get funnelTrialBadge => '7 TAGE KOSTENLOS';
+
+  @override
+  String get funnelExplainTitle => 'Weniger entscheiden, mehr sparen';
+
+  @override
+  String get funnelExplainSubtitle =>
+      'PlatePilote plant deine Mahlzeiten, erstellt deine Einkaufsliste und überwacht dein Budget — automatisch.';
+
+  @override
+  String get funnelBenefitAiTitle => 'Unbegrenzte KI-Pläne';
+
+  @override
+  String get funnelBenefitAiSub =>
+      'Woche regenerieren, wann du willst, Budget und Ernährung bleiben erhalten.';
+
+  @override
+  String get funnelBenefitGroceryTitle => 'Automatisch erstellte Einkaufsliste';
+
+  @override
+  String get funnelBenefitGrocerySub =>
+      'Nach Gang sortiert, Mengen an deinen Haushalt angepasst.';
+
+  @override
+  String get funnelBenefitBudgetTitle => 'Budget-Optimierer';
+
+  @override
+  String get funnelBenefitBudgetSub =>
+      'Intelligente Substitutionen, um unter deinem Wochenlimit zu bleiben.';
+
+  @override
+  String get funnelCtaPickPlan => 'Pläne anzeigen';
+
+  @override
+  String get funnelPickPlanTitle => 'Wähle deinen Plan';
+
+  @override
+  String get funnelMonthlyLabel => 'Monatlich';
+
+  @override
+  String get funnelAnnualLabel => 'Jährlich';
+
+  @override
+  String get funnelMonthlyTitle => 'Monatlich';
+
+  @override
+  String get funnelMonthlyTag => 'OHNE VERPFLICHTUNG';
+
+  @override
+  String get funnelMonthlyPrice => '6,99 \$';
+
+  @override
+  String get funnelAnnualTitle => 'Jährlich';
+
+  @override
+  String get funnelAnnualPrice => '59,99 \$';
+
+  @override
+  String get funnelAnnualEquiv => '~4,99 \$/Monat';
+
+  @override
+  String get funnelPerMonth => '/ Monat';
+
+  @override
+  String get funnelPerYear => '/ Jahr';
+
+  @override
+  String get funnelSaveBadge => 'SPAARE 28%';
+
+  @override
+  String get featuresTitle => 'Premium features';
+
+  @override
+  String get funnelFeaturesTitle => 'Alles in Premium';
+
+  @override
+  String get funnelFeatureAi => 'Unbegrenzte KI-Plan-Regenerierung';
+
+  @override
+  String get funnelFeatureGrocery =>
+      'Intelligente Einkaufsliste mit Gangsortierung';
+
+  @override
+  String get funnelFeatureBudget => 'Budgetoptimierung und Spar-Tracking';
+
+  @override
+  String get funnelFeatureScans => 'Unbegrenzte Quittungs- und Barcode-Scans';
+
+  @override
+  String get funnelFeatureFamily => 'Familienprofile und Präferenzen';
+
+  @override
+  String get funnelSocialProof => '12.400 Haushalte vertrauen PlatePilote';
+
+  @override
+  String get funnelCtaStartTrial => 'Kostenlos testen';
+
+  @override
+  String get funnelTrialCopy => '7 Tage kostenlos, jederzeit kündbar';
+
+  @override
+  String get funnelPaymentTitle => 'Abonnement abschließen';
+
+  @override
+  String get funnelPaymentMethods => 'Zahlungsmethode';
+
+  @override
+  String get funnelApplePay => 'Apple Pay';
+
+  @override
+  String get funnelGooglePay => 'Google Pay';
+
+  @override
+  String get funnelCard => 'Kreditkarte';
+
+  @override
+  String get funnelSubscribe => 'Abonnieren';
+
+  @override
+  String get funnelLegalFooter =>
+      'Mit dem Abonnement akzeptierst du unsere AGB und Datenschutzerklärung.';
+
+  @override
+  String get cmdPaletteSearchHint => 'Überall suchen...';
+
+  @override
+  String get cmdPalettePages => 'Seiten';
+
+  @override
+  String get cmdPaletteRecipes => 'Rezepte';
+
+  @override
+  String get cmdPalettePantry => 'Vorratskammer';
+
+  @override
+  String get cmdPaletteEmptyTitle => 'Keine Ergebnisse';
+
+  @override
+  String get cmdPaletteEmptyHint =>
+      'Versuche ein anderes Stichwort oder drücke Esc zum Schließen.';
+
+  @override
+  String cmdPaletteEmptyFor(String query) {
+    return 'Keine Ergebnisse für „$query\"';
+  }
+
+  @override
+  String get cmdPaletteCloseHint => 'Esc zum Schließen';
+
+  @override
+  String get emptyPantryTitle => 'Deine Vorratskammer ist leer';
+
+  @override
+  String get emptyPantrySubtitle =>
+      'Füge deine ersten Zutaten hinzu, um genauere Empfehlungen zu erhalten.';
+
+  @override
+  String get emptyPantryCta => 'Zutat hinzufügen';
+
+  @override
+  String get emptyGroceryTitle => 'Noch keine Einkäufe';
+
+  @override
+  String get emptyGrocerySubtitle =>
+      'Erstelle einen Mahlzeitenplan, um deine Einkaufsliste aufzubauen.';
+
+  @override
+  String get emptyGroceryCta => 'Plan erstellen';
+
+  @override
+  String get emptyFavoritesTitle => 'Noch keine Lieblingsrezepte';
+
+  @override
+  String get emptyFavoritesSubtitle =>
+      'Speichere deine Lieblingsrezepte, um sie schnell wiederzufinden.';
+
+  @override
+  String get emptyFavoritesCta => 'Rezepte durchsuchen';
+
+  @override
+  String emptySearchTitle(String query) {
+    return 'Keine Ergebnisse für «$query»';
+  }
+
+  @override
+  String get emptySearchSubtitle => 'Versuche es mit anderen Suchbegriffen.';
+
+  @override
+  String get emptyNotificationsTitle => 'Du bist auf dem Laufenden';
+
+  @override
+  String get emptyNotificationsSubtitle =>
+      'Im Moment keine neuen Benachrichtigungen.';
+
+  @override
+  String get emptyQuickMealTitle => 'Kein Rezept zur Hand';
+
+  @override
+  String get emptyQuickMealSubtitle =>
+      'Füge einige Zutaten zur Vorratskammer hinzu, um Vorschläge zu aktivieren.';
+
+  @override
+  String get emptyQuickMealCta => 'Vorratskammer öffnen';
 }

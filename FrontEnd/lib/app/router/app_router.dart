@@ -69,6 +69,7 @@ enum AppRoute {
   mealSwap,
   planAcceptance,
   premium,
+  premiumFunnel,
   subscription,
   paymentMethod,
   search,
@@ -90,6 +91,7 @@ enum AppRoute {
   groceryHistory,
   addRecipe,
   planHistory,
+  commandPalette,
 }
 
 /// Shell avec barre de navigation pour les routes principales.

@@ -6,9 +6,11 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_typography.dart';
+import '../../core/design_system/components/pp_empty_state.dart';
+import '../../core/extensions/theme_extensions.dart';
 import '../../core/premium_components.dart';
 import '../../core/repositories/recipe_repository.dart';
-import '../../core/widgets/empty_state.dart';
+import '../../core/widgets/hero_flight.dart';
 
 /// Écran des recettes favorites de l'utilisateur.
 class FavoritesScreen extends ConsumerStatefulWidget {
@@ -91,10 +93,17 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                   ),
                 )
               : _favorites.isEmpty
-                  ? EmptyState(
-                      icon: Icons.favorite_border,
-                      title: 'No favorites yet',
-                      message: 'Save recipes you love to find them quickly',
+                  ? Builder(
+                      builder: (context) {
+                        final l10n = context.l10n;
+                        return PpEmptyState(
+                          icon: Icons.favorite_border,
+                          title: l10n.emptyFavoritesTitle,
+                          subtitle: l10n.emptyFavoritesSubtitle,
+                          actionLabel: l10n.emptyFavoritesCta,
+                          onAction: () => context.push('/search'),
+                        );
+                      },
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.all(AppSpacing.md),
@@ -109,6 +118,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
 
   /// Construit une carte de recette favorite.
   Widget _buildFavoriteCard(RecipeDetail recipe) {
+    final heroTag = PlatePilotHeroTags.recipe(recipe.id);
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: GlassContainer(
@@ -126,11 +136,20 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                   color: AppColors.primaryAccentGreen.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppRadius.input),
                 ),
-                child: const Icon(
-                  Icons.restaurant,
-                  color: AppColors.primaryAccentGreen,
-                  size: 24,
-                ),
+                child: heroTag == null
+                    ? const Icon(
+                        Icons.restaurant,
+                        color: AppColors.primaryAccentGreen,
+                        size: 24,
+                      )
+                    : PlatePilotHero(
+                        tag: heroTag,
+                        child: const Icon(
+                          Icons.restaurant,
+                          color: AppColors.primaryAccentGreen,
+                          size: 24,
+                        ),
+                      ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(

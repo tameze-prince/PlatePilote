@@ -455,4 +455,213 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get testimonial3Text =>
       'Enfin une app qui comprend la cuisine africaine!';
+
+  @override
+  String get funnelSkip => 'Passer';
+
+  @override
+  String get funnelTrialBadge => '7 JOURS GRATUITS';
+
+  @override
+  String get funnelExplainTitle => 'Décidez moins, économisez plus';
+
+  @override
+  String get funnelExplainSubtitle =>
+      'PlatePilot planifie vos repas, génère votre liste de courses et suit votre budget — automatiquement.';
+
+  @override
+  String get funnelBenefitAiTitle => 'Plans IA illimités';
+
+  @override
+  String get funnelBenefitAiSub =>
+      'Régénérez la semaine quand vous voulez, budget et nutrition préservés.';
+
+  @override
+  String get funnelBenefitGroceryTitle => 'Liste de courses auto-générée';
+
+  @override
+  String get funnelBenefitGrocerySub =>
+      'Triée par rayon, quantités ajustées à votre foyer.';
+
+  @override
+  String get funnelBenefitBudgetTitle => 'Optimiseur de budget';
+
+  @override
+  String get funnelBenefitBudgetSub =>
+      'Substitutions intelligentes pour rester sous votre plafond hebdomadaire.';
+
+  @override
+  String get funnelCtaPickPlan => 'Voir les plans';
+
+  @override
+  String get funnelPickPlanTitle => 'Choisissez votre plan';
+
+  @override
+  String get funnelMonthlyLabel => 'Mensuel';
+
+  @override
+  String get funnelAnnualLabel => 'Annuel';
+
+  @override
+  String get funnelMonthlyTitle => 'Mensuel';
+
+  @override
+  String get funnelMonthlyTag => 'SANS ENGAGEMENT';
+
+  @override
+  String get funnelMonthlyPrice => '6,99 \$';
+
+  @override
+  String get funnelAnnualTitle => 'Annuel';
+
+  @override
+  String get funnelAnnualPrice => '59,99 \$';
+
+  @override
+  String get funnelAnnualEquiv => '~4,99 \$/mois';
+
+  @override
+  String get funnelPerMonth => '/ mois';
+
+  @override
+  String get funnelPerYear => '/ an';
+
+  @override
+  String get funnelSaveBadge => 'ÉCONOMISEZ 28%';
+
+  @override
+  String get featuresTitle => 'Premium features';
+
+  @override
+  String get funnelFeaturesTitle => 'Tout dans Premium';
+
+  @override
+  String get funnelFeatureAi => 'Régénération de plans IA illimitée';
+
+  @override
+  String get funnelFeatureGrocery =>
+      'Liste de courses intelligente triée par rayon';
+
+  @override
+  String get funnelFeatureBudget =>
+      'Optimisation du budget et suivi des économies';
+
+  @override
+  String get funnelFeatureScans => 'Scans de reçus et codes-barres illimités';
+
+  @override
+  String get funnelFeatureFamily => 'Profils familiaux et préférences';
+
+  @override
+  String get funnelSocialProof => '12 400 foyers font confiance à PlatePilot';
+
+  @override
+  String get funnelCtaStartTrial => 'Démarrer l\'essai gratuit';
+
+  @override
+  String get funnelTrialCopy => '7 jours gratuits, annulable à tout moment';
+
+  @override
+  String get funnelPaymentTitle => 'Finaliser l\'abonnement';
+
+  @override
+  String get funnelPaymentMethods => 'Méthode de paiement';
+
+  @override
+  String get funnelApplePay => 'Apple Pay';
+
+  @override
+  String get funnelGooglePay => 'Google Pay';
+
+  @override
+  String get funnelCard => 'Carte bancaire';
+
+  @override
+  String get funnelSubscribe => 'S\'abonner';
+
+  @override
+  String get funnelLegalFooter =>
+      'En vous abonnant vous acceptez nos Conditions et notre Politique de confidentialité.';
+
+  @override
+  String get cmdPaletteSearchHint => 'Rechercher partout...';
+
+  @override
+  String get cmdPalettePages => 'Pages';
+
+  @override
+  String get cmdPaletteRecipes => 'Recettes';
+
+  @override
+  String get cmdPalettePantry => 'Garde-manger';
+
+  @override
+  String get cmdPaletteEmptyTitle => 'Aucun résultat';
+
+  @override
+  String get cmdPaletteEmptyHint =>
+      'Essayez un autre mot-clé ou appuyez sur Échap pour fermer.';
+
+  @override
+  String cmdPaletteEmptyFor(String query) {
+    return 'Aucun résultat pour « $query »';
+  }
+
+  @override
+  String get cmdPaletteCloseHint => 'Échap pour fermer';
+
+  @override
+  String get emptyPantryTitle => 'Votre pantry est vide';
+
+  @override
+  String get emptyPantrySubtitle =>
+      'Ajoutez vos premiers ingrédients pour des recommandations plus précises.';
+
+  @override
+  String get emptyPantryCta => 'Ajouter un ingrédient';
+
+  @override
+  String get emptyGroceryTitle => 'Pas encore de courses';
+
+  @override
+  String get emptyGrocerySubtitle =>
+      'Générez un plan repas pour créer votre liste.';
+
+  @override
+  String get emptyGroceryCta => 'Générer un plan';
+
+  @override
+  String get emptyFavoritesTitle => 'Pas encore de recettes favorites';
+
+  @override
+  String get emptyFavoritesSubtitle =>
+      'Sauvegardez vos recettes préférées pour les retrouver rapidement.';
+
+  @override
+  String get emptyFavoritesCta => 'Parcourir les recettes';
+
+  @override
+  String emptySearchTitle(String query) {
+    return 'Aucun résultat pour «$query»';
+  }
+
+  @override
+  String get emptySearchSubtitle => 'Essayez avec d\'autres mots-clés.';
+
+  @override
+  String get emptyNotificationsTitle => 'Vous êtes à jour';
+
+  @override
+  String get emptyNotificationsSubtitle =>
+      'Aucune nouvelle notification pour le moment.';
+
+  @override
+  String get emptyQuickMealTitle => 'Pas de recette sous la main';
+
+  @override
+  String get emptyQuickMealSubtitle =>
+      'Ajoutez quelques ingrédients au pantry pour activer les suggestions.';
+
+  @override
+  String get emptyQuickMealCta => 'Ouvrir le pantry';
 }

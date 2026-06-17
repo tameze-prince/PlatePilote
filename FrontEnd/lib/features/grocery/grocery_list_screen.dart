@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
+import '../../core/design_system/components/pp_empty_state.dart';
+import '../../core/extensions/theme_extensions.dart';
 import '../../core/premium_components.dart';
 import '../../core/widgets/grocery_item_tile.dart';
 import '../../shared/models/grocery_list.dart';
@@ -686,6 +688,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
 
   /// Construit la vue lorsque la liste est vide.
   Widget _buildEmptyView(BuildContext context) {
+    final l10n = context.l10n;
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.md),
       children: [
@@ -701,49 +704,12 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
           ],
         ),
         const SizedBox(height: AppSpacing.md),
-        Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryAccentGreen.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Icon(
-                    Icons.shopping_cart_outlined,
-                    size: 36,
-                    color: AppColors.primaryAccentGreen,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  'Your grocery list is empty',
-                  style: AppTypography.titleLarge.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: PremiumTheme.textPrimary(context),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  'Tap the + button below to add items',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: PremiumTheme.textSecondary(context),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                GlassButton(
-                  label: 'Browse Ingredients',
-                  icon: Icons.search,
-                  onPressed: () => context.push('/grocery/add'),
-                ),
-              ],
-            ),
-          ),
+        PpEmptyState(
+          icon: Icons.shopping_cart_outlined,
+          title: l10n.emptyGroceryTitle,
+          subtitle: l10n.emptyGrocerySubtitle,
+          actionLabel: l10n.emptyGroceryCta,
+          onAction: () => context.push('/plan'),
         ),
       ],
     );

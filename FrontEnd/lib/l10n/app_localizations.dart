@@ -909,6 +909,390 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Finally an app that understands African cuisine!'**
   String get testimonial3Text;
+
+  /// No description provided for @funnelSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get funnelSkip;
+
+  /// No description provided for @funnelTrialBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'FREE FOR 7 DAYS'**
+  String get funnelTrialBadge;
+
+  /// No description provided for @funnelExplainTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Decide less, save more'**
+  String get funnelExplainTitle;
+
+  /// No description provided for @funnelExplainSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePilot plans your meals, generates your grocery list, and tracks your budget — automatically.'**
+  String get funnelExplainSubtitle;
+
+  /// No description provided for @funnelBenefitAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited AI plans'**
+  String get funnelBenefitAiTitle;
+
+  /// No description provided for @funnelBenefitAiSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate the week whenever you want, with budget and nutrition preserved.'**
+  String get funnelBenefitAiSub;
+
+  /// No description provided for @funnelBenefitGroceryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-generated grocery list'**
+  String get funnelBenefitGroceryTitle;
+
+  /// No description provided for @funnelBenefitGrocerySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Grouped by aisle, with quantities adjusted to your household.'**
+  String get funnelBenefitGrocerySub;
+
+  /// No description provided for @funnelBenefitBudgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget optimizer'**
+  String get funnelBenefitBudgetTitle;
+
+  /// No description provided for @funnelBenefitBudgetSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart substitutions to stay under your weekly cap.'**
+  String get funnelBenefitBudgetSub;
+
+  /// No description provided for @funnelCtaPickPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'See the plans'**
+  String get funnelCtaPickPlan;
+
+  /// No description provided for @funnelPickPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick your plan'**
+  String get funnelPickPlanTitle;
+
+  /// No description provided for @funnelMonthlyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get funnelMonthlyLabel;
+
+  /// No description provided for @funnelAnnualLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual'**
+  String get funnelAnnualLabel;
+
+  /// No description provided for @funnelMonthlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get funnelMonthlyTitle;
+
+  /// No description provided for @funnelMonthlyTag.
+  ///
+  /// In en, this message translates to:
+  /// **'NO COMMITMENT'**
+  String get funnelMonthlyTag;
+
+  /// No description provided for @funnelMonthlyPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'\$6.99'**
+  String get funnelMonthlyPrice;
+
+  /// No description provided for @funnelAnnualTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual'**
+  String get funnelAnnualTitle;
+
+  /// No description provided for @funnelAnnualPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'\$59.99'**
+  String get funnelAnnualPrice;
+
+  /// No description provided for @funnelAnnualEquiv.
+  ///
+  /// In en, this message translates to:
+  /// **'~\$4.99/mo'**
+  String get funnelAnnualEquiv;
+
+  /// No description provided for @funnelPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'/ month'**
+  String get funnelPerMonth;
+
+  /// No description provided for @funnelPerYear.
+  ///
+  /// In en, this message translates to:
+  /// **'/ year'**
+  String get funnelPerYear;
+
+  /// No description provided for @funnelSaveBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'SAVE 28%'**
+  String get funnelSaveBadge;
+
+  /// No description provided for @featuresTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium features'**
+  String get featuresTitle;
+
+  /// No description provided for @funnelFeaturesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in Premium'**
+  String get funnelFeaturesTitle;
+
+  /// No description provided for @funnelFeatureAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited AI meal regeneration'**
+  String get funnelFeatureAi;
+
+  /// No description provided for @funnelFeatureGrocery.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart grocery list with aisle grouping'**
+  String get funnelFeatureGrocery;
+
+  /// No description provided for @funnelFeatureBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget optimization and savings tracking'**
+  String get funnelFeatureBudget;
+
+  /// No description provided for @funnelFeatureScans.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited receipt and barcode scans'**
+  String get funnelFeatureScans;
+
+  /// No description provided for @funnelFeatureFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family profiles and preferences'**
+  String get funnelFeatureFamily;
+
+  /// No description provided for @funnelSocialProof.
+  ///
+  /// In en, this message translates to:
+  /// **'12,400 households trust PlatePilot'**
+  String get funnelSocialProof;
+
+  /// No description provided for @funnelCtaStartTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Start free trial'**
+  String get funnelCtaStartTrial;
+
+  /// No description provided for @funnelTrialCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days free, cancel anytime'**
+  String get funnelTrialCopy;
+
+  /// No description provided for @funnelPaymentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalize subscription'**
+  String get funnelPaymentTitle;
+
+  /// No description provided for @funnelPaymentMethods.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment method'**
+  String get funnelPaymentMethods;
+
+  /// No description provided for @funnelApplePay.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple Pay'**
+  String get funnelApplePay;
+
+  /// No description provided for @funnelGooglePay.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Pay'**
+  String get funnelGooglePay;
+
+  /// No description provided for @funnelCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit card'**
+  String get funnelCard;
+
+  /// No description provided for @funnelSubscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get funnelSubscribe;
+
+  /// No description provided for @funnelLegalFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'By subscribing you accept our Terms and Privacy Policy.'**
+  String get funnelLegalFooter;
+
+  /// No description provided for @cmdPaletteSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search anything...'**
+  String get cmdPaletteSearchHint;
+
+  /// No description provided for @cmdPalettePages.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages'**
+  String get cmdPalettePages;
+
+  /// No description provided for @cmdPaletteRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get cmdPaletteRecipes;
+
+  /// No description provided for @cmdPalettePantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry'**
+  String get cmdPalettePantry;
+
+  /// No description provided for @cmdPaletteEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get cmdPaletteEmptyTitle;
+
+  /// No description provided for @cmdPaletteEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different keyword, or press Esc to close.'**
+  String get cmdPaletteEmptyHint;
+
+  /// No description provided for @cmdPaletteEmptyFor.
+  ///
+  /// In en, this message translates to:
+  /// **'No results for \"{query}\"'**
+  String cmdPaletteEmptyFor(String query);
+
+  /// No description provided for @cmdPaletteCloseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Esc to close'**
+  String get cmdPaletteCloseHint;
+
+  /// No description provided for @emptyPantryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your pantry is empty'**
+  String get emptyPantryTitle;
+
+  /// No description provided for @emptyPantrySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first ingredients to get more precise recommendations.'**
+  String get emptyPantrySubtitle;
+
+  /// No description provided for @emptyPantryCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Add ingredient'**
+  String get emptyPantryCta;
+
+  /// No description provided for @emptyGroceryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No groceries yet'**
+  String get emptyGroceryTitle;
+
+  /// No description provided for @emptyGrocerySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a meal plan to build your shopping list.'**
+  String get emptyGrocerySubtitle;
+
+  /// No description provided for @emptyGroceryCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate plan'**
+  String get emptyGroceryCta;
+
+  /// No description provided for @emptyFavoritesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No favorite recipes yet'**
+  String get emptyFavoritesTitle;
+
+  /// No description provided for @emptyFavoritesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your favorite recipes to find them quickly.'**
+  String get emptyFavoritesSubtitle;
+
+  /// No description provided for @emptyFavoritesCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse recipes'**
+  String get emptyFavoritesCta;
+
+  /// No description provided for @emptySearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No results for \"{query}\"'**
+  String emptySearchTitle(String query);
+
+  /// No description provided for @emptySearchSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try different keywords.'**
+  String get emptySearchSubtitle;
+
+  /// No description provided for @emptyNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all caught up'**
+  String get emptyNotificationsTitle;
+
+  /// No description provided for @emptyNotificationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No new notifications for now.'**
+  String get emptyNotificationsSubtitle;
+
+  /// No description provided for @emptyQuickMealTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe on hand'**
+  String get emptyQuickMealTitle;
+
+  /// No description provided for @emptyQuickMealSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a few ingredients to your pantry to unlock suggestions.'**
+  String get emptyQuickMealSubtitle;
+
+  /// No description provided for @emptyQuickMealCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Open pantry'**
+  String get emptyQuickMealCta;
 }
 
 class _AppLocalizationsDelegate

@@ -5,6 +5,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../shared/models/demo_data.dart';
 import 'app_card.dart';
+import 'hero_flight.dart';
 
 /// Carte affichant un repas avec image, titre, calories et temps de préparation.
 class MealCard extends StatelessWidget {
@@ -31,26 +32,30 @@ class MealCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = compact ? 56.0 : 72.0;
+    final heroTag = PlatePilotHeroTags.meal(meal.recipeId);
+    final imageWidget = ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: meal.imageUrl != null && meal.imageUrl!.isNotEmpty
+            ? Image.network(
+                meal.imageUrl!,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => _mealIcon(context),
+                loadingBuilder: (_, child, progress) =>
+                    progress == null ? child : _mealIcon(context),
+              )
+            : _mealIcon(context),
+      ),
+    );
     return AppCard(
       onTap: onTap,
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: SizedBox(
-              width: size,
-              height: size,
-              child: meal.imageUrl != null && meal.imageUrl!.isNotEmpty
-                  ? Image.network(
-                      meal.imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => _mealIcon(context),
-                      loadingBuilder: (_, child, progress) =>
-                          progress == null ? child : _mealIcon(context),
-                    )
-                  : _mealIcon(context),
-            ),
-          ),
+          heroTag == null
+              ? imageWidget
+              : PlatePilotHero(tag: heroTag, child: imageWidget),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(

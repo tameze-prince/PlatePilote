@@ -128,5 +128,82 @@
   "avgSavings": "durchschnittlich gespart",
   "testimonial1Text": "Ich spare jeden Woche 2 Stunden beim Einkaufen!",
   "testimonial2Text": "Die Mahlzeitenpläne haben meine Ernährung verändert.",
-  "testimonial3Text": "Endlich eine App, die afrikanische Küche versteht!"
+  "testimonial3Text": "Endlich eine App, die afrikanische Küche versteht!",
+  "funnelSkip": "Überspringen",
+  "funnelTrialBadge": "7 TAGE KOSTENLOS",
+  "funnelExplainTitle": "Weniger entscheiden, mehr sparen",
+  "funnelExplainSubtitle": "PlatePilote plant deine Mahlzeiten, erstellt deine Einkaufsliste und überwacht dein Budget — automatisch.",
+  "funnelBenefitAiTitle": "Unbegrenzte KI-Pläne",
+  "funnelBenefitAiSub": "Woche regenerieren, wann du willst, Budget und Ernährung bleiben erhalten.",
+  "funnelBenefitGroceryTitle": "Automatisch erstellte Einkaufsliste",
+  "funnelBenefitGrocerySub": "Nach Gang sortiert, Mengen an deinen Haushalt angepasst.",
+  "funnelBenefitBudgetTitle": "Budget-Optimierer",
+  "funnelBenefitBudgetSub": "Intelligente Substitutionen, um unter deinem Wochenlimit zu bleiben.",
+  "funnelCtaPickPlan": "Pläne anzeigen",
+  "funnelPickPlanTitle": "Wähle deinen Plan",
+  "funnelMonthlyLabel": "Monatlich",
+  "funnelAnnualLabel": "Jährlich",
+  "funnelMonthlyTitle": "Monatlich",
+  "funnelMonthlyTag": "OHNE VERPFLICHTUNG",
+  "funnelMonthlyPrice": "6,99 $",
+  "funnelAnnualTitle": "Jährlich",
+  "funnelAnnualPrice": "59,99 $",
+  "funnelAnnualEquiv": "~4,99 $/Monat",
+  "funnelPerMonth": "/ Monat",
+  "funnelPerYear": "/ Jahr",
+  "funnelSaveBadge": "SPAARE 28%",
+  "funnelFeaturesTitle": "Alles in Premium",
+  "funnelFeatureAi": "Unbegrenzte KI-Plan-Regenerierung",
+  "funnelFeatureGrocery": "Intelligente Einkaufsliste mit Gangsortierung",
+  "funnelFeatureBudget": "Budgetoptimierung und Spar-Tracking",
+  "funnelFeatureScans": "Unbegrenzte Quittungs- und Barcode-Scans",
+  "funnelFeatureFamily": "Familienprofile und Präferenzen",
+  "funnelSocialProof": "12.400 Haushalte vertrauen PlatePilote",
+  "funnelCtaStartTrial": "Kostenlos testen",
+  "funnelTrialCopy": "7 Tage kostenlos, jederzeit kündbar",
+  "funnelPaymentTitle": "Abonnement abschließen",
+  "funnelPaymentMethods": "Zahlungsmethode",
+  "funnelApplePay": "Apple Pay",
+  "funnelGooglePay": "Google Pay",
+  "funnelCard": "Kreditkarte",
+  "funnelSubscribe": "Abonnieren",
+  "funnelLegalFooter": "Mit dem Abonnement akzeptierst du unsere AGB und Datenschutzerklärung.",
+  "cmdPaletteSearchHint": "Überall suchen...",
+  "cmdPalettePages": "Seiten",
+  "cmdPaletteRecipes": "Rezepte",
+  "cmdPalettePantry": "Vorratskammer",
+  "cmdPaletteEmptyTitle": "Keine Ergebnisse",
+  "cmdPaletteEmptyHint": "Versuche ein anderes Stichwort oder drücke Esc zum Schließen.",
+  "cmdPaletteEmptyFor": "Keine Ergebnisse für „{query}\"",
+  "@cmdPaletteEmptyFor": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "cmdPaletteCloseHint": "Esc zum Schließen",
+  "emptyPantryTitle": "Deine Vorratskammer ist leer",
+  "emptyPantrySubtitle": "Füge deine ersten Zutaten hinzu, um genauere Empfehlungen zu erhalten.",
+  "emptyPantryCta": "Zutat hinzufügen",
+  "emptyGroceryTitle": "Noch keine Einkäufe",
+  "emptyGrocerySubtitle": "Erstelle einen Mahlzeitenplan, um deine Einkaufsliste aufzubauen.",
+  "emptyGroceryCta": "Plan erstellen",
+  "emptyFavoritesTitle": "Noch keine Lieblingsrezepte",
+  "emptyFavoritesSubtitle": "Speichere deine Lieblingsrezepte, um sie schnell wiederzufinden.",
+  "emptyFavoritesCta": "Rezepte durchsuchen",
+  "emptySearchTitle": "Keine Ergebnisse für «{query}»",
+  "@emptySearchTitle": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "emptySearchSubtitle": "Versuche es mit anderen Suchbegriffen.",
+  "emptyNotificationsTitle": "Du bist auf dem Laufenden",
+  "emptyNotificationsSubtitle": "Im Moment keine neuen Benachrichtigungen.",
+  "emptyQuickMealTitle": "Kein Rezept zur Hand",
+  "emptyQuickMealSubtitle": "Füge einige Zutaten zur Vorratskammer hinzu, um Vorschläge zu aktivieren.",
+  "emptyQuickMealCta": "Vorratskammer öffnen"
 }

@@ -6,6 +6,8 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
+import '../../core/design_system/components/pp_empty_state.dart';
+import '../../core/extensions/theme_extensions.dart';
 import '../../core/premium_components.dart';
 import '../../core/widgets/expiry_badge.dart';
 import '../../shared/models/pantry_item.dart';
@@ -426,61 +428,13 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
 
   /// Construit l'état vide lorsque le garde-manger est vide.
   Widget _buildEmptyState() {
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.xxl),
-      child: Column(
-        children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: AppColors.primaryAccentGreen.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Icon(
-              Icons.kitchen_outlined,
-              size: 36,
-              color: AppColors.primaryAccentGreen,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            'Your pantry is empty',
-            style: AppTypography.titleLarge.copyWith(
-              fontWeight: FontWeight.w700,
-              color: PremiumTheme.textPrimary(context),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Add ingredients to get started',
-            style: AppTypography.bodyMedium.copyWith(
-              color: PremiumTheme.textSecondary(context),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          _ActionCard(
-            icon: Icons.edit_note_rounded,
-            title: 'Add Manually',
-            subtitle: 'Enter ingredient details by hand',
-            onTap: () => context.push('/pantry/add'),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          _ActionCard(
-            icon: Icons.explore_outlined,
-            title: 'Browse Ingredients',
-            subtitle: 'Search our ingredient database',
-            onTap: () => context.push('/pantry/add'),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          _ActionCard(
-            icon: Icons.qr_code_scanner,
-            title: 'Scan Barcode',
-            subtitle: 'Coming soon - scan product barcodes to auto-fill',
-            badge: 'Soon',
-          ),
-        ],
-      ),
+    final l10n = context.l10n;
+    return PpEmptyState(
+      icon: Icons.kitchen_outlined,
+      title: l10n.emptyPantryTitle,
+      subtitle: l10n.emptyPantrySubtitle,
+      actionLabel: l10n.emptyPantryCta,
+      onAction: () => context.push('/pantry/add'),
     );
   }
 
@@ -515,92 +469,6 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                 onPressed: () => ref.read(pantryProvider.notifier).refresh(),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Carte d'action pour l'état vide du garde-manger.
-class _ActionCard extends StatelessWidget {
-  const _ActionCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    this.onTap,
-    this.badge,
-  });
-
-  /// Icône de l'action.
-  final IconData icon;
-
-  /// Titre de l'action.
-  final String title;
-
-  /// Sous-titre descriptif.
-  final String subtitle;
-
-  /// Callback au clic.
-  final VoidCallback? onTap;
-
-  /// Badge optionnel (ex: "Soon").
-  final String? badge;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: GlassContainer(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        elevated: true,
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.primaryAccentGreen.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-              child: Icon(icon, color: AppColors.primaryAccentGreen, size: 22),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: AppTypography.bodyLarge.copyWith(
-                      color: PremiumTheme.textPrimary(context),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: PremiumTheme.textTertiary(context),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (badge != null)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.warning.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-                child: Text(
-                  badge!,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: AppColors.warning,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
           ],
         ),
       ),

@@ -4,10 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
+import '../../core/design_system/components/pp_empty_state.dart';
 import '../../core/extensions/theme_extensions.dart';
 import '../../core/notifications/notification_service.dart';
 import '../../core/widgets/app_card.dart';
-import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/secondary_button.dart';
 import '../../shared/widgets/plate_scaffold.dart';
@@ -155,10 +155,15 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           ),
           Expanded(
             child: visible.isEmpty
-                ? const EmptyState(
-                    icon: Icons.notifications_none,
-                    title: 'No notifications',
-                    message: 'Everything is calm for now.',
+                ? Builder(
+                    builder: (context) {
+                      final l10n = context.l10n;
+                      return PpEmptyState(
+                        icon: Icons.notifications_none,
+                        title: l10n.emptyNotificationsTitle,
+                        subtitle: l10n.emptyNotificationsSubtitle,
+                      );
+                    },
                   )
                 : RefreshIndicator(
                     onRefresh: () async {

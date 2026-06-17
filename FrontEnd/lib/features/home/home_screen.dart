@@ -6,12 +6,19 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
+import '../../core/design_system/components/pp_button.dart';
+import '../../core/design_system/components/pp_empty_state.dart';
+import '../../core/design_system/components/pp_scaffold.dart';
+import '../../core/design_system/components/pp_skeleton.dart';
+import '../../core/extensions/theme_extensions.dart';
 import '../../core/premium_components.dart';
 import '../../core/repositories/dashboard_repository.dart';
 import '../../core/widgets/floating_components.dart';
 import '../../core/widgets/modern_animations.dart';
 import '../../core/widgets/modern_components.dart';
+import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/recipe_image.dart';
+import '../search/command_palette/pp_command_palette.dart';
 import 'home_provider.dart';
 
 /// Écran d'accueil principal.
@@ -36,86 +43,90 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final isLoading = homeState.isLoading;
 
-    return Scaffold(
-      backgroundColor: PremiumTheme.background(context),
-      body: PremiumBackground(
-        safeArea: false,
-        child: RefreshIndicator(
-          onRefresh: _onRefresh,
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(
-                child: FloatingAppBar(
-                  title: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 16,
-                        backgroundColor: isDark
-                            ? AppColors.darkPrimaryContainer
-                            : AppColors.primaryContainer,
-                        child: Text(
-                          _avatarInitial(homeState.dashboard?.firstName),
-                          style: AppTypography.labelMedium.copyWith(
-                            color: isDark
-                                ? AppColors.primaryLight
-                                : AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        'PlatePilot',
-                        style: AppTypography.titleLarge.copyWith(
+    return PpScaffold(
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
+              child: FloatingAppBar(
+                title: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: isDark
+                          ? AppColors.darkPrimaryContainer
+                          : AppColors.primaryContainer,
+                      child: Text(
+                        _avatarInitial(homeState.dashboard?.firstName),
+                        style: AppTypography.labelMedium.copyWith(
                           color: isDark
                               ? AppColors.primaryLight
                               : AppColors.primary,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ],
-                  ),
-                  actions: [
-                    IconButton(
-                      tooltip: 'Notifications',
-                      icon: const Icon(Icons.notifications_outlined),
-                      onPressed: () => context.push('/notifications'),
-                      color: isDark
-                          ? AppColors.darkOnSurfaceVariant
-                          : AppColors.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      'PlatePilot',
+                      style: AppTypography.titleLarge.copyWith(
+                        color: isDark
+                            ? AppColors.primaryLight
+                            : AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                 ),
+                actions: [
+                  IconButton(
+                    tooltip: 'Search',
+                    icon: const Icon(Icons.search),
+                    onPressed: () => PpCommandPalette.show(context),
+                    color: isDark
+                        ? AppColors.darkOnSurfaceVariant
+                        : AppColors.onSurfaceVariant,
+                  ),
+                  IconButton(
+                    tooltip: 'Notifications',
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () => context.push('/notifications'),
+                    color: isDark
+                        ? AppColors.darkOnSurfaceVariant
+                        : AppColors.onSurfaceVariant,
+                  ),
+                ],
               ),
-              SliverToBoxAdapter(
-                child: FloatingSearchBar(
-                  hintText: 'Search recipes, ingredients...',
-                  onTap: () => context.push('/search'),
-                ),
+            ),
+            SliverToBoxAdapter(
+              child: FloatingSearchBar(
+                hintText: 'Search recipes, ingredients...',
+                onTap: () => context.push('/search'),
               ),
-              SliverToBoxAdapter(
-                child: isLoading
-                    ? _buildLoadingState()
-                    : Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.md,
-                          AppSpacing.md,
-                          AppSpacing.md,
-                          100,
-                        ),
-                        child: _buildDashboard(
-                          context: context,
-                          isDark: isDark,
-                          homeState: homeState,
-                        ),
+            ),
+            SliverToBoxAdapter(
+              child: isLoading
+                  ? _buildLoadingState()
+                  : Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.md,
+                        AppSpacing.md,
+                        AppSpacing.md,
+                        100,
                       ),
-              ),
-            ],
-          ),
+                      child: _buildDashboard(
+                        context: context,
+                        isDark: isDark,
+                        homeState: homeState,
+                      ),
+                    ),
+            ),
+          ],
         ),
       ),
-      extendBody: true,
+      extendBodyBehindAppBar: true,
     );
   }
 
@@ -470,23 +481,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required List<RecommendationItem> quickMeals,
   }) {
     if (quickMeals.isEmpty) {
-      return AlertCard(
-        type: AlertType.info,
-        title: 'Need dinner fast?',
-        message:
-            'Quick Meal Mode can suggest meals that fit your pantry and time.',
-        actions: [
-          TextButton(
-            onPressed: () => context.push('/quick-meal'),
-            child: Text(
-              'Open Quick Meal',
-              style: AppTypography.labelMedium.copyWith(
-                color: isDark ? AppColors.primaryLight : AppColors.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
+      final l10n = context.l10n;
+      return PpEmptyState(
+        icon: Icons.restaurant_menu,
+        title: l10n.emptyQuickMealTitle,
+        subtitle: l10n.emptyQuickMealSubtitle,
+        actionLabel: l10n.emptyQuickMealCta,
+        onAction: () => context.push('/pantry'),
       );
     }
 
@@ -526,46 +527,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Row(
       children: [
         Expanded(
-          child: AnimatedButton(
+          child: PpButton(
+            label: 'Plan Week',
+            icon: Icons.calendar_month,
+            variant: PpButtonVariant.primary,
             onPressed: () => context.push('/plan'),
-            backgroundColor: isDark
-                ? AppColors.primaryLight
-                : AppColors.primary,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.calendar_month, size: 18),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  'Plan Week',
-                  style: AppTypography.labelLarge.copyWith(
-                    color: isDark ? AppColors.darkBackground : Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: AnimatedButton(
+          child: PpButton(
+            label: 'Add Items',
+            icon: Icons.add_shopping_cart,
+            variant: PpButtonVariant.primary,
             onPressed: () => context.push('/grocery/add'),
-            backgroundColor: AppColors.secondary,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.add_shopping_cart, size: 18),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  'Add Items',
-                  style: AppTypography.labelLarge.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ],
@@ -647,9 +622,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const LoadingSkeleton(height: 32, width: 240),
+          const PpSkeleton(height: 32, width: 240),
           const SizedBox(height: AppSpacing.xs),
-          const LoadingSkeleton(height: 16, width: 200),
+          const PpSkeleton(height: 16, width: 200),
           const SizedBox(height: AppSpacing.lg),
           Row(
             children: [

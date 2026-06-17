@@ -8,6 +8,7 @@ import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_typography.dart';
 import '../../core/premium_components.dart';
 import '../../core/repositories/recipe_repository.dart';
+import '../../core/widgets/hero_flight.dart';
 import '../../shared/widgets/recipe_image.dart';
 
 /// Écran des détails d'une recette.
@@ -110,6 +111,11 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
   /// Affiche le contenu de la recette.
   Widget _buildContent() {
     final recipe = _recipe!;
+    final heroTag = PlatePilotHeroTags.recipe(recipe.id);
+    final heroChild = RecipeHeroImage(
+      imageUrl: recipe.imageUrl,
+      cuisine: recipe.name,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,10 +126,9 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.md, 0, AppSpacing.md, 0,
               ),
-              child: RecipeHeroImage(
-                imageUrl: recipe.imageUrl,
-                cuisine: recipe.name,
-              ),
+              child: heroTag == null
+                  ? heroChild
+                  : PlatePilotHero(tag: heroTag, child: heroChild),
             ),
             Positioned(
               top: AppSpacing.sm,
