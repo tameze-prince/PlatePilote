@@ -51,6 +51,7 @@ class SettingsScreen extends ConsumerWidget {
               ),
               actions: [
                 IconButton(
+                  tooltip: 'Notifications',
                   icon: const Icon(Icons.notifications_outlined),
                   onPressed: () => context.push('/notifications'),
                   color: isDark
@@ -119,6 +120,7 @@ class SettingsScreen extends ConsumerWidget {
                             ),
                           ),
                           IconButton(
+                            tooltip: 'Edit',
                             icon: const Icon(Icons.edit_outlined),
                             onPressed: () => context.push('/preferences'),
                             color: isDark

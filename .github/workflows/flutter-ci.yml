@@ -1,0 +1,150 @@
+# Frontend CI — PlatePilote
+#
+# Sprint 1 (qualité): on shippe analyze + format + test + génération code uniquement.
+# Pas de build APK/IPA ici — c'est volontaire. Le build mobile (Android/iOS) demande
+# un toolchain complet (JDK, Android SDK, Xcode/macOS runner) qui n'est pas pertinent
+# tant que le code n'est pas stabilisé. On l'ajoutera en Sprint 4 quand on aura
+# figé l'archi Freezed/Riverpod et défini les flavors (dev / staging / prod).
+#
+# Jobs:
+#   - format    : vérifie que dart format n'a aucune diff (gate de style)
+#   - analyze   : flutter analyze (lint + types, meta gate)
+#   - build_runner : force la régénération Freezed/json_serializable puis analyze
+#                    pour catch les PRs où le code généré n'a pas été committé.
+#   - test      : flutter test avec reporter expanded (sortie lisible dans GH UI)
+#
+# Cache:
+#   - Pub: ~/.pub-cache keyed on pubspec.lock
+#   - .dart_tool: évite la résolution de packages à chaque run
+#
+# Trigger: push & PR limités au dossiers FrontEnd/ et au yaml lui-même,
+# pour ne pas réveiller le runner sur des edits admin/ docs/ backend.
+
+name: Frontend CI
+
+on:
+  push:
+    paths:
+      - 'FrontEnd/**'
+      - '.github/workflows/flutter-ci.yml'
+  pull_request:
+    paths:
+      - 'FrontEnd/**'
+
+defaults:
+  run:
+    working-directory: FrontEnd
+
+jobs:
+  format:
+    name: Format check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: stable
+
+      - name: Cache pub
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ hashFiles('FrontEnd/pubspec.lock') }}
+          restore-keys: pub-
+
+      - name: Cache .dart_tool
+        uses: actions/cache@v4
+        with:
+          path: FrontEnd/.dart_tool
+          key: dart-tool-${{ hashFiles('FrontEnd/pubspec.lock') }}
+          restore-keys: dart-tool-
+
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed lib/
+
+  analyze:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    needs: format
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: stable
+
+      - name: Cache pub
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ hashFiles('FrontEnd/pubspec.lock') }}
+          restore-keys: pub-
+
+      - name: Cache .dart_tool
+        uses: actions/cache@v4
+        with:
+          path: FrontEnd/.dart_tool
+          key: dart-tool-${{ hashFiles('FrontEnd/pubspec.lock') }}
+          restore-keys: dart-tool-
+
+      - run: flutter pub get
+      - run: flutter analyze
+
+  build_runner:
+    name: Codegen (build_runner) + analyze
+    runs-on: ubuntu-latest
+    needs: format
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: stable
+
+      - name: Cache pub
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ hashFiles('FrontEnd/pubspec.lock') }}
+          restore-keys: pub-
+
+      - run: flutter pub get
+      - name: Delete committed generated files to force fresh codegen
+        run: |
+          if [ -d lib/ ]; then
+            find lib/ \( -name '*.freezed.dart' -o -name '*.g.dart' \) -print -delete || true
+          fi
+          rm -rf .dart_tool/build
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter analyze
+
+  test:
+    name: Unit + widget tests
+    runs-on: ubuntu-latest
+    needs: analyze
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: stable
+
+      - name: Cache pub
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ hashFiles('FrontEnd/pubspec.lock') }}
+          restore-keys: pub-
+
+      - name: Cache .dart_tool
+        uses: actions/cache@v4
+        with:
+          path: FrontEnd/.dart_tool
+          key: dart-tool-${{ hashFiles('FrontEnd/pubspec.lock') }}
+          restore-keys: dart-tool-
+
+      - run: flutter pub get
+      - run: flutter test --reporter=expanded

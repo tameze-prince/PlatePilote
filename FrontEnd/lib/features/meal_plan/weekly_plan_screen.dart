@@ -81,6 +81,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
                     : null,
                 actions: [
                   IconButton(
+                    tooltip: 'Plan history',
                     onPressed: () => context.push('/plan-history'),
                     icon: const Icon(Icons.history),
                   ),

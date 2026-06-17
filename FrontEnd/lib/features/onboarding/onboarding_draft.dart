@@ -9,7 +9,7 @@ part 'onboarding_draft.g.dart';
 /// pour permettre à l'utilisateur de reprendre là où il s'était arrêté
 /// après avoir quitté l'application (cf. audit UX §2).
 @freezed
-class OnboardingDraft with _$OnboardingDraft {
+sealed class OnboardingDraft with _$OnboardingDraft {
   /// Crée un brouillon avec des valeurs par défaut.
   const factory OnboardingDraft({
     @Default(0) int currentStep,

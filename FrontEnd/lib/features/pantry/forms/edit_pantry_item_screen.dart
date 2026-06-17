@@ -121,6 +121,7 @@ class _EditPantryItemScreenState extends ConsumerState<EditPantryItemScreen> {
         actions: [
           if (isEditing)
             IconButton(
+              tooltip: 'Delete',
               icon: const Icon(Icons.delete_outline),
               color: AppColors.error,
               onPressed: _deleteItem,
@@ -189,6 +190,7 @@ class _EditPantryItemScreenState extends ConsumerState<EditPantryItemScreen> {
                         hintText: 'e.g., Expires in 5 days',
                         prefixIcon: const Icon(Icons.calendar_today_outlined),
                         suffixIcon: IconButton(
+                          tooltip: 'Pick date',
                           icon: const Icon(Icons.calendar_month),
                           onPressed: () async {
                             final date = await showDatePicker(

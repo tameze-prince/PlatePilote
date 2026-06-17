@@ -153,6 +153,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                 ),
               ),
               IconButton(
+                tooltip: 'Remove from favorites',
                 icon: const Icon(Icons.favorite, color: AppColors.error),
                 onPressed: () => _removeFavorite(recipe),
               ),

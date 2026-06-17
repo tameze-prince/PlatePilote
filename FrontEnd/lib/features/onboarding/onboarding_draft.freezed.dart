@@ -124,10 +124,7 @@ return $default(_that);case _:
 final _that = this;
 switch (_that) {
 case _OnboardingDraft():
-return $default(_that);case _:
-  throw StateError('Unexpected subclass');
-
-}
+return $default(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -186,10 +183,7 @@ return $default(_that.currentStep,_that.completedSteps,_that.householdSize,_that
 @optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int currentStep,  List<String> completedSteps,  String? householdSize, @JsonKey(name: 'cooking_profile')  String? cookingProfile,  String? weeklyBudget,  double? customBudget, @JsonKey(name: 'cooking_time')  String? cookingTime,  List<String> dietaryPreferences,  List<String> goals, @JsonKey(name: 'updated_at')  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _OnboardingDraft():
-return $default(_that.currentStep,_that.completedSteps,_that.householdSize,_that.cookingProfile,_that.weeklyBudget,_that.customBudget,_that.cookingTime,_that.dietaryPreferences,_that.goals,_that.updatedAt);case _:
-  throw StateError('Unexpected subclass');
-
-}
+return $default(_that.currentStep,_that.completedSteps,_that.householdSize,_that.cookingProfile,_that.weeklyBudget,_that.customBudget,_that.cookingTime,_that.dietaryPreferences,_that.goals,_that.updatedAt);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///

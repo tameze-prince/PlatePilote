@@ -132,6 +132,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           SliverToBoxAdapter(
             child: FloatingAppBar(
               leading: IconButton(
+                tooltip: 'Back',
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () => context.pop(),
                 color: isDark
@@ -147,6 +148,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
               actions: [
                 IconButton(
+                  tooltip: 'Filters',
                   icon: const Icon(Icons.tune),
                   onPressed: () => showModalBottomSheet<void>(
                     context: context,

@@ -96,6 +96,7 @@ class _PantryExpirationScreenState
         title: const Text('Expiration Dashboard'),
         actions: [
           IconButton(
+            tooltip: 'Filter',
             icon: const Icon(Icons.filter_list),
             onPressed: () {},
           ),

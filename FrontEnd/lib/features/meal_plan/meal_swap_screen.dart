@@ -147,6 +147,7 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
                 child: Row(
                   children: [
                     IconButton(
+                      tooltip: 'Back',
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () => context.pop(),
                     ),

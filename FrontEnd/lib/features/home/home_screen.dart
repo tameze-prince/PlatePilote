@@ -78,6 +78,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   actions: [
                     IconButton(
+                      tooltip: 'Notifications',
                       icon: const Icon(Icons.notifications_outlined),
                       onPressed: () => context.push('/notifications'),
                       color: isDark
@@ -344,6 +345,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SizedBox(width: AppSpacing.sm),
           IconButton.filled(
+            tooltip: 'Open',
             onPressed: () => context.push(action.route),
             icon: const Icon(Icons.arrow_forward),
           ),

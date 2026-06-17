@@ -40,6 +40,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       title: 'Notifications',
       showBack: true,
       trailing: IconButton(
+        tooltip: 'Notification preferences',
         onPressed: () => context.push('/notification-preferences'),
         icon: const Icon(Icons.tune),
       ),

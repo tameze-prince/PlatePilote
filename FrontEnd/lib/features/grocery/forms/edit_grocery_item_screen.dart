@@ -124,6 +124,7 @@ class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
         actions: [
           if (isEditing)
             IconButton(
+              tooltip: 'Delete',
               icon: const Icon(Icons.delete_outline),
               color: AppColors.error,
               onPressed: _deleteItem,

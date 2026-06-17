@@ -372,6 +372,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
                         )
                       : (_searchController.text.isNotEmpty
                             ? IconButton(
+                                tooltip: 'Clear search',
                                 icon: const Icon(Icons.clear, size: 18),
                                 onPressed: () {
                                   _searchController.clear();
