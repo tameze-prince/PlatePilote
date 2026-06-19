@@ -57,7 +57,14 @@
   "yourPlanToday": "Your Plan for Today",
   "viewFullPlan": "View Full Plan",
   "quickMealMode": "Quick Meal Mode",
-  "pantryWarning": "{items} should be used this week.",
+  "pantryWarning": "{count, plural, =0{No items expiring this week} =1{1 item should be used this week.} other{{count} items should be used this week.}}",
+  "@pantryWarning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "welcomeBack": "Welcome back",
   "signInSubtitle": "Sign in to keep your weekly plan and grocery list in sync.",
   "signIn": "Sign In",
@@ -69,18 +76,50 @@
   "password": "Password",
   "haveAccount": "I already have an account",
   "yourWeek": "Your Week",
-  "mealsSelected": "{count} balanced meals selected for your household.",
+  "mealsSelected": "{count, plural, =0{No meals selected yet} =1{1 balanced meal selected for your household.} other{{count} balanced meals selected for your household.}}",
+  "@mealsSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "quickMeal": "Quick Meal",
   "expressMode": "Express mode",
   "groceryList": "Grocery List",
   "readyToBuy": "Ready to buy",
   "estimatedBudget": "Estimated Budget",
-  "budgetDetail": "{total} for {items} grocery items, including {pantry} pantry ingredients already on hand.",
+  "budgetDetail": "{total} for {items, plural, =1{1 grocery item} other{{items} grocery items}}, including {pantry} pantry ingredients already on hand.",
+  "@budgetDetail": {
+    "description": "Estimated budget detail for grocery list",
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "items": {
+        "type": "int"
+      },
+      "pantry": {
+        "type": "int"
+      }
+    }
+  },
+  "itemsToBuy": "{count, plural, =0{No items to buy} =1{1 item to buy - {pantry} items in pantry} other{{count} items to buy - {pantry} items in pantry}}",
+  "@itemsToBuy": {
+    "description": "Items to buy breakdown",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "pantry": {
+        "type": "String"
+      }
+    }
+  },
   "replace": "Replace",
   "regenerate": "Regenerate",
   "estimatedTotal": "Estimated Total",
   "withinBudget": "Within Budget",
-  "itemsToBuy": "{count} items to buy - {pantry} items in pantry",
   "items": "items",
   "searchIngredients": "Search ingredients...",
   "allItems": "All Items",
@@ -131,7 +170,14 @@
   "retry": "Retry",
   "search": "Search",
   "noResults": "No results found",
-  "premiumTrialDays": "Premium trial - {days} days left",
+  "premiumTrialDays": "{days, plural, =0{Premium trial ended} =1{Premium trial - 1 day left} other{Premium trial - {days} days left}}",
+  "@premiumTrialDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "followsSystem": "Follows system appearance",
   "darkMode": "Dark mode",
   "lightMode": "Light mode",
