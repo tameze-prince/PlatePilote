@@ -480,7 +480,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required List<RecommendationItem> quickMeals,
   }) {
     if (quickMeals.isEmpty) {
-      final l10n = context.l10n;
+      final l10n = context.l10n!;
       return PpEmptyState(
         icon: Icons.restaurant_menu,
         title: l10n.emptyQuickMealTitle,

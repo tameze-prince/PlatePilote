@@ -171,8 +171,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quickMealMode => 'Quick Meal Mode';
 
   @override
-  String pantryWarning(Object items) {
-    return '$items should be used this week.';
+  String pantryWarning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items should be used this week.',
+      one: '1 item should be used this week.',
+      zero: 'No items expiring this week',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -211,8 +218,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yourWeek => 'Your Week';
 
   @override
-  String mealsSelected(Object count) {
-    return '$count balanced meals selected for your household.';
+  String mealsSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count balanced meals selected for your household.',
+      one: '1 balanced meal selected for your household.',
+      zero: 'No meals selected yet',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -231,8 +245,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get estimatedBudget => 'Estimated Budget';
 
   @override
-  String budgetDetail(Object items, Object pantry, Object total) {
-    return '$total for $items grocery items, including $pantry pantry ingredients already on hand.';
+  String budgetDetail(String total, int items, int pantry) {
+    String _temp0 = intl.Intl.pluralLogic(
+      items,
+      locale: localeName,
+      other: '$items grocery items',
+      one: '1 grocery item',
+    );
+    return '$total for $_temp0, including $pantry pantry ingredients already on hand.';
+  }
+
+  @override
+  String itemsToBuy(int count, String pantry) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items to buy - $pantry items in pantry',
+      one: '1 item to buy - $pantry items in pantry',
+      zero: 'No items to buy',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -246,11 +278,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get withinBudget => 'Within Budget';
-
-  @override
-  String itemsToBuy(Object count, Object pantry) {
-    return '$count items to buy - $pantry items in pantry';
-  }
 
   @override
   String get items => 'items';
@@ -414,8 +441,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noResults => 'No results found';
 
   @override
-  String premiumTrialDays(Object days) {
-    return 'Premium trial - $days days left';
+  String premiumTrialDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Premium trial - $days days left',
+      one: 'Premium trial - 1 day left',
+      zero: 'Premium trial ended',
+    );
+    return '$_temp0';
   }
 
   @override

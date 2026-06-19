@@ -32,7 +32,7 @@ Future<double?> showCustomBudgetSheet(
   double? initial,
   AppLocalizations? l10n,
 }) {
-  final locale = l10n ?? context.l10n;
+  final locale = l10n ?? context.l10n!;
   return showModalBottomSheet<double>(
     context: context,
     isScrollControlled: true,

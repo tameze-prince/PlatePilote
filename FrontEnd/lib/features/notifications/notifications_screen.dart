@@ -157,7 +157,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             child: visible.isEmpty
                 ? Builder(
                     builder: (context) {
-                      final l10n = context.l10n;
+                      final l10n = context.l10n!;
                       return PpEmptyState(
                         icon: Icons.notifications_none,
                         title: l10n.emptyNotificationsTitle,

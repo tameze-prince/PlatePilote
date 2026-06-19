@@ -99,7 +99,8 @@ class NotificationPreferencesNotifier
   Future<void> _loadPreferences() async {
     try {
       final response = await ref.read(apiClientProvider).get('/notification-preferences');
-      final data = response.data['data'] as Map<String, dynamic>;
+      final body = response.data as Map<String, dynamic>;
+      final data = body['data'] as Map<String, dynamic>;
       state = NotificationPreferences(
         pantryAlerts: data['pantryReminders'] as bool? ?? true,
         budgetAlerts: data['groceryReminders'] as bool? ?? true,

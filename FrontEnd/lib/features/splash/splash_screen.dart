@@ -41,7 +41,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Future<void> _checkSession() async {
     await ref.read(authProvider.notifier).checkSession();
     if (!mounted) return;
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
     final session = ref.read(appSessionProvider);
     if (!session.hasSeenOnboarding) {

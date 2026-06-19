@@ -20,6 +20,7 @@ import '../../core/premium_components.dart';
 import '../../core/providers/app_session_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../auth/providers/auth_provider.dart';
+import 'onboarding_completion.dart';
 import 'onboarding_flow.dart' show showCustomBudgetSheet;
 import 'onboarding_state.dart';
 
@@ -94,7 +95,7 @@ class _OnboardingSingleScreenState extends ConsumerState<OnboardingSingleScreen>
   Widget build(BuildContext context) {
     final state = ref.watch(onboardingProvider);
     final notifier = ref.read(onboardingProvider.notifier);
-    final l10n = context.l10n;
+    final l10n = context.l10n!;
     final isAuthed = ref.watch(authProvider).isAuthenticated;
 
     return PpScaffold(
@@ -181,8 +182,15 @@ class _OnboardingSingleScreenState extends ConsumerState<OnboardingSingleScreen>
     await ref.read(appSessionProvider.notifier).completeOnboarding();
     await notifier.clearDraft();
     if (!mounted) return;
-    final isAuthed = ref.read(authProvider).isAuthenticated;
-    context.go(isAuthed ? '/home' : '/login');
+    await OnboardingCompletion.commitAndGeneratePlan(
+      ref: ref,
+      context: context,
+      onSuccess: () {
+        if (!mounted) return;
+        final isAuthed = ref.read(authProvider).isAuthenticated;
+        context.go(isAuthed ? '/home' : '/login');
+      },
+    );
   }
 
   Future<void> _commitAndSignup(OnboardingNotifier notifier) async {
@@ -207,7 +215,7 @@ class _SingleScreenHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
+    final l10n = context.l10n!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         DsSpacing.lg,
@@ -288,7 +296,7 @@ class _HouseholdGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
+    final l10n = context.l10n!;
     return LayoutBuilder(
       builder: (context, constraints) {
         const spacing = DsSpacing.md;
@@ -359,7 +367,7 @@ class _CookingProfileGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
+    final l10n = context.l10n!;
     final labels = {
       'Beginner': l10n.beginner,
       'Balanced': l10n.balanced,
@@ -418,7 +426,7 @@ class _BudgetRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
+    final l10n = context.l10n!;
     final customAmountLabel = state.customBudget == null
         ? l10n.onboardingSingleCustom
         : '\$${state.customBudget!.toStringAsFixed(0)}';
@@ -562,7 +570,7 @@ class _CookingTimeSegmented extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
+    final l10n = context.l10n!;
     final isFlexible = state.cookingTime == 'Flexible';
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -614,7 +622,7 @@ class _DietaryChips extends StatelessWidget {
       children: _dietaryOptions.map((option) {
         final selected = state.dietaryPreferences.contains(option.key);
         return PpChip(
-          label: option.labelKey(context.l10n),
+          label: option.labelKey(context.l10n!),
           variant: PpChipVariant.filter,
           selected: selected,
           onPressed: () =>
@@ -640,7 +648,7 @@ class _GoalChips extends StatelessWidget {
       children: _goalOptions.map((goal) {
         final selected = state.goals.contains(goal.key);
         return PpChip(
-          label: goal.labelBuilder(context.l10n),
+          label: goal.labelBuilder(context.l10n!),
           variant: PpChipVariant.filter,
           selected: selected,
           icon: _iconFor(goal.key),
@@ -669,7 +677,7 @@ class _LivePreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
+    final l10n = context.l10n!;
     final isDark = PremiumTheme.isDark(context);
     final hasHousehold = state.householdSize != null;
     final recipesPerWeek = _estimateRecipes(state);
@@ -845,7 +853,7 @@ class _BottomCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
+    final l10n = context.l10n!;
     return Container(
       padding: const EdgeInsets.fromLTRB(
         DsSpacing.lg,

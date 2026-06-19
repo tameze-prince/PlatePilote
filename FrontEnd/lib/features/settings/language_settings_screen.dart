@@ -5,7 +5,6 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 import '../../core/widgets/modern_components.dart';
-import '../../core/widgets/floating_components.dart';
 import '../localization/locale_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/plate_scaffold.dart';
@@ -18,7 +17,7 @@ class LanguageSettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentLocale = ref.watch(localeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return PlateScaffold(
       title: l10n.settingsLanguage,

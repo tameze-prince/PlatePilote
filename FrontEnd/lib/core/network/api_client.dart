@@ -3,15 +3,41 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/secure_storage_service.dart';
 
+/// Résout l'URL de base de l'API au démarrage de l'application.
+///
+/// Priorité : `--dart-define=PLATEPILOT_API_BASE_URL=...`, sinon fichier
+/// `.env` (via `flutter_dotenv`), sinon chaîne vide. Si vide au moment de
+/// l'initialisation, une [StateError] est levée pour éviter les requêtes
+/// silencieuses vers `localhost` en production.
+String resolveApiBaseUrl() {
+  const fromBuild = String.fromEnvironment(
+    'PLATEPILOT_API_BASE_URL',
+    defaultValue: '',
+  );
+  if (fromBuild.isNotEmpty) return fromBuild;
+  return '';
+}
+
+/// Vérifie que la configuration est présente et lève une erreur explicite
+/// sinon. Appelée une seule fois à l'init (provider).
+void assertApiConfigured() {
+  final url = resolveApiBaseUrl();
+  if (url.isEmpty) {
+    throw StateError(
+      'PLATEPILOT_API_BASE_URL non configurée. '
+      'Lancez l\u2019app avec `--dart-define=PLATEPILOT_API_BASE_URL=<url>` '
+      'ou renseignez-la dans FrontEnd/.env.',
+    );
+  }
+}
+
 /// Fournit une instance [Dio] configurée avec l'URL de base, les timeouts,
 /// les en-têtes par défaut et les intercepteurs d'authentification et d'erreur.
 final dioProvider = Provider<Dio>((ref) {
+  assertApiConfigured();
   final dio = Dio(
     BaseOptions(
-      baseUrl: const String.fromEnvironment(
-              'PLATEPILOT_API_BASE_URL',
-              defaultValue: 'http://localhost:8081/api/v1',
-            ),
+      baseUrl: resolveApiBaseUrl(),
       connectTimeout: const Duration(seconds: 60),
       receiveTimeout: const Duration(seconds: 60),
       headers: const {'Accept': 'application/json'},
@@ -55,10 +81,7 @@ class _AuthTokenInterceptor extends Interceptor {
 
   final Dio _refreshDio = Dio(
     BaseOptions(
-      baseUrl: const String.fromEnvironment(
-              'PLATEPILOT_API_BASE_URL',
-              defaultValue: 'http://localhost:8081/api/v1',
-            ),
+      baseUrl: resolveApiBaseUrl(),
       connectTimeout: const Duration(seconds: 60),
       receiveTimeout: const Duration(seconds: 60),
       headers: const {'Accept': 'application/json'},
@@ -89,12 +112,12 @@ class _AuthTokenInterceptor extends Interceptor {
     }
 
     try {
-      final response = await _refreshDio.post(
+      final response = await _refreshDio.post<Map<String, dynamic>>(
         '/auth/refresh',
         queryParameters: {'refreshToken': refreshToken},
       );
 
-      final data = response.data['data'] as Map<String, dynamic>;
+      final data = (response.data?['data'] as Map<String, dynamic>?) ?? const <String, dynamic>{};
       final newAccessToken = data['accessToken'] as String;
       final newRefreshToken = data['refreshToken'] as String;
 
@@ -112,7 +135,7 @@ class _AuthTokenInterceptor extends Interceptor {
         contentType: err.requestOptions.contentType,
       ));
       
-      final retryResponse = await dio.fetch(err.requestOptions);
+      final retryResponse = await dio.fetch<Map<String, dynamic>>(err.requestOptions);
       handler.resolve(retryResponse);
     } catch (_) {
       await onRefreshFailed();

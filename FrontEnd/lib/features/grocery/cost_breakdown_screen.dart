@@ -163,7 +163,7 @@ class _GroceryCostBreakdownScreenState
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${_categories.fold<int>(0, (sum, cat) => sum + cat['items'] as int)} items',
+                        '${_categories.fold<num>(0, (sum, cat) => sum + (cat['items'] as int))} items',
                         style: context.text.bodySmall?.copyWith(
                           color: AppColors.onSurfaceVariant,
                         ),

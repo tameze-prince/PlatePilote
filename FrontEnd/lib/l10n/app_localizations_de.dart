@@ -172,8 +172,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get quickMealMode => 'Schnellgericht-Modus';
 
   @override
-  String pantryWarning(Object items) {
-    return '$items sollten diese Woche verwendet werden.';
+  String pantryWarning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Artikel sollten diese Woche verwendet werden.',
+      one: '1 Artikel sollte diese Woche verwendet werden.',
+      zero: 'Keine Artikel diese Woche zu verwenden',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -212,8 +219,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get yourWeek => 'Deine Woche';
 
   @override
-  String mealsSelected(Object count) {
-    return '$count ausgewogene Mahlzeiten für deinen Haushalt ausgewählt.';
+  String mealsSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ausgewogene Mahlzeiten für deinen Haushalt ausgewählt.',
+      one: '1 ausgewogene Mahlzeit für deinen Haushalt ausgewählt.',
+      zero: 'Keine Mahlzeiten ausgewählt',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -232,8 +246,26 @@ class AppLocalizationsDe extends AppLocalizations {
   String get estimatedBudget => 'Geschätztes Budget';
 
   @override
-  String budgetDetail(Object items, Object pantry, Object total) {
-    return '$total für $items Einkaufsartikel, einschließlich $pantry Vorratskammer-Zutaten.';
+  String budgetDetail(String total, int items, int pantry) {
+    String _temp0 = intl.Intl.pluralLogic(
+      items,
+      locale: localeName,
+      other: '$items Einkaufsartikel',
+      one: '1 Einkaufsartikel',
+    );
+    return '$total für $_temp0, einschließlich $pantry Vorratskammer-Zutaten.';
+  }
+
+  @override
+  String itemsToBuy(int count, String pantry) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Artikel zu kaufen - $pantry Artikel in der Vorratskammer',
+      one: '1 Artikel zu kaufen - $pantry Artikel in der Vorratskammer',
+      zero: 'Keine Artikel zu kaufen',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -247,11 +279,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get withinBudget => 'Innerhalb des Budgets';
-
-  @override
-  String itemsToBuy(Object count, Object pantry) {
-    return '$count Artikel zu kaufen - $pantry Artikel in der Vorratskammer';
-  }
 
   @override
   String get items => 'Artikel';
@@ -416,8 +443,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noResults => 'Keine Ergebnisse gefunden';
 
   @override
-  String premiumTrialDays(Object days) {
-    return 'Premium-Testversion - $days Tage übrig';
+  String premiumTrialDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Premium-Testversion - $days Tage übrig',
+      one: 'Premium-Testversion - 1 Tag übrig',
+      zero: 'Premium-Testversion beendet',
+    );
+    return '$_temp0';
   }
 
   @override

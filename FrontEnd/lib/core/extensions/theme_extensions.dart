@@ -16,6 +16,27 @@ extension ThemeContext on BuildContext {
   /// Vrai si le thème actuel est sombre.
   bool get isDark => theme.brightness == Brightness.dark;
 
-  /// Raccourci vers les localisations de l'application.
-  AppLocalizations get l10n => AppLocalizations.of(this)!;
+  /// Raccourci vers les localisations de l'application (peut être null si la
+  /// locale n'est pas chargée, ex. tests sans `LocalizationsDelegate`).
+  AppLocalizations? get l10n => AppLocalizations.of(this);
+
+  /// Variante non-null qui lève une erreur explicite si les localisations
+  /// ne sont pas disponibles. Utile pour les BuildContext qui ne sont pas
+  /// sous un `LocalizationsScope` (par ex. certains tests).
+  AppLocalizations get l10nOrThrow {
+    // ignore: unnecessary_null_comparison
+    final loc = AppLocalizations.of(this);
+    // ignore: dead_code
+    if (loc == null) {
+      throw StateError(
+        'AppLocalizations indisponible: BuildContext hors LocalizationsScope.',
+      );
+    }
+    return loc;
+  }
+
+  /// Variante sécurisée qui retourne les localisations ou `null`.
+  /// À utiliser quand le caller ne peut pas garantir que le `BuildContext`
+  /// est sous un `LocalizationsScope` (tests, contextes ambigus).
+  AppLocalizations? get l10nOrFallback => AppLocalizations.of(this);
 }

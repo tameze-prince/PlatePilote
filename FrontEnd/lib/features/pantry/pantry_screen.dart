@@ -90,7 +90,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
     );
     final unitController = TextEditingController(text: item.unit ?? 'unit');
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Edit Quantity'),
@@ -162,7 +162,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
 
   /// Affiche une confirmation avant de supprimer un article.
   void _deleteItem(int index, PantryItem item) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Remove Item'),
@@ -428,7 +428,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
 
   /// Construit l'état vide lorsque le garde-manger est vide.
   Widget _buildEmptyState() {
-    final l10n = context.l10n;
+    final l10n = context.l10n!;
     return PpEmptyState(
       icon: Icons.kitchen_outlined,
       title: l10n.emptyPantryTitle,

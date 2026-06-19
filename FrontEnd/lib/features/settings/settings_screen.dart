@@ -23,7 +23,7 @@ class SettingsScreen extends ConsumerWidget {
     final isDark = theme.brightness == Brightness.dark;
     final themeMode = ref.watch(themeModeProvider);
     final isSystem = themeMode == ThemeMode.system;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     String themeLabel;
     if (isSystem) {

@@ -11,6 +11,7 @@ import '../../core/widgets/meal_card.dart';
 import '../../shared/models/demo_data.dart';
 import '../../shared/widgets/shimmer_glass_skeleton.dart';
 import '../grocery/grocery_provider.dart';
+import 'meal_mode_labels.dart';
 import 'meal_plan_provider.dart';
 import 'meal_plan_repository.dart';
 
@@ -112,40 +113,85 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     );
   }
 
-  static const List<Map<String, String>> _modes = [
-    {'key': 'STANDARD', 'label': 'Standard', 'icon': '⚖️'},
-    {'key': 'WASTELESS', 'label': 'Waste Less', 'icon': '♻️'},
-    {'key': 'ENDOFMONTH', 'label': 'End of Month', 'icon': '💰'},
-    {'key': 'BUSYWEEK', 'label': 'Busy Week', 'icon': '⚡'},
-    {'key': 'FAMILY', 'label': 'Family', 'icon': '👨‍👩‍👧‍👧'},
+  /// Backend mode codes ordered for the expert mode selector.
+  /// Labels & icons live in `kMealModeMeta` (see meal_mode_labels.dart).
+  static const List<String> _modeOrder = [
+    'STANDARD',
+    'WASTELESS',
+    'ENDOFMONTH',
+    'BUSYWEEK',
+    'FAMILY',
   ];
 
-  /// Construit le sélecteur de mode de génération du plan.
+  /// Construit le sélecteur complet : Quick Filters PRD-aligned (Faster /
+  /// Healthier / Cheaper) au-dessus, mode selector expert en dessous.
   Widget _buildModeSelector(BuildContext context, WidgetRef ref, MealPlanState state) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildQuickFilters(context, ref, state),
+        const SizedBox(height: AppSpacing.sm),
+        _buildExpertModeSelector(context, ref, state),
+      ],
+    );
+  }
+
+  /// Quick filters PRD-aligned (Faster / Healthier / Cheaper).
+  /// Chaque chip déclenche la génération d'un nouveau plan avec le mode
+  /// backend mappé (voir `kQuickFilters` dans meal_mode_labels.dart).
+  Widget _buildQuickFilters(
+      BuildContext context, WidgetRef ref, MealPlanState state) {
+    final isBusy = state.isGenerating;
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (final filter in kQuickFilters) ...[
+            _QuickFilterChip(
+              label: filter.label,
+              icon: filter.icon,
+              enabled: !isBusy,
+              isLoading: isBusy,
+              onTap: () async {
+                await ref.read(mealPlanProvider.notifier)
+                    .generateNewPlan(mode: filter.backendMode);
+              },
+            ),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Mode selector expert (5 modes backend) — conservé pour power users.
+  Widget _buildExpertModeSelector(
+      BuildContext context, WidgetRef ref, MealPlanState state) {
     final currentMode = state.currentPlan?.mode ?? 'STANDARD';
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: _modes.map((m) {
-          final isActive = currentMode == m['key'];
+        children: _modeOrder.map((modeKey) {
+          final meta = kMealModeMeta[modeKey]!;
+          final isActive = currentMode == modeKey;
           return Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
-            child:             GestureDetector(
+            child: GestureDetector(
               onTap: () async {
                 if (isActive) return;
                 final planId = state.currentPlan?.id;
                 if (planId != null) {
                   try {
                     final repo = ref.read(mealPlanRepositoryProvider);
-                    await repo.setMode(planId, m['key']!);
+                    await repo.setMode(planId, modeKey);
                     await ref.read(mealPlanProvider.notifier).refresh();
                   } catch (_) {
                     await ref.read(mealPlanProvider.notifier)
-                        .generateNewPlan(mode: m['key']!);
+                        .generateNewPlan(mode: modeKey);
                   }
                 } else {
                   await ref.read(mealPlanProvider.notifier)
-                      .generateNewPlan(mode: m['key']!);
+                      .generateNewPlan(mode: modeKey);
                 }
               },
               child: GlassContainer(
@@ -157,10 +203,10 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(m['icon']!, style: const TextStyle(fontSize: 14)),
+                    Text(meta.icon, style: const TextStyle(fontSize: 14)),
                     const SizedBox(width: 6),
                     Text(
-                      m['label']!,
+                      meta.label,
                       style: AppTypography.labelSmall.copyWith(
                         color: isActive
                             ? AppColors.primaryAccentGreen
@@ -608,6 +654,73 @@ class _WeekArrow extends StatelessWidget {
           padding: const EdgeInsets.all(6),
           borderRadius: AppRadius.full,
           child: Icon(icon, size: 18, color: PremiumTheme.textPrimary(context)),
+        ),
+      ),
+    );
+  }
+}
+
+/// Chip PRD-aligned "Faster / Healthier / Cheaper".
+/// Déclenche `generateNewPlan(mode: …)` avec mapping backend via
+/// `kQuickFilters`. Pendant la génération, affiche spinner + désactive.
+class _QuickFilterChip extends StatelessWidget {
+  const _QuickFilterChip({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    required this.enabled,
+    required this.isLoading,
+  });
+
+  final String label;
+  final String icon;
+  final VoidCallback onTap;
+  final bool enabled;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: enabled ? 1.0 : 0.5,
+      child: GestureDetector(
+        onTap: enabled ? onTap : null,
+        child: GlassContainer(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md, vertical: AppSpacing.sm,
+          ),
+          borderRadius: AppRadius.full,
+          borderColor: isLoading
+              ? AppColors.primaryAccentGreen
+              : AppColors.primaryAccentGreen.withValues(alpha: 0.35),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(icon, style: const TextStyle(fontSize: 14)),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: AppTypography.labelSmall.copyWith(
+                  color: isLoading
+                      ? AppColors.primaryAccentGreen
+                      : PremiumTheme.textPrimary(context),
+                  fontWeight: isLoading ? FontWeight.w800 : FontWeight.w700,
+                ),
+              ),
+              if (isLoading) ...[
+                const SizedBox(width: 6),
+                const SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    valueColor: AlwaysStoppedAnimation(
+                      AppColors.primaryAccentGreen,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

@@ -95,7 +95,8 @@ class OAuth2Repository {
         },
       );
 
-      final data = response.data['data'] as Map<String, dynamic>;
+      final body = response.data as Map<String, dynamic>;
+      final data = body['data'] as Map<String, dynamic>;
       final accessToken = data['accessToken'] as String;
       final refreshToken = data['refreshToken'] as String;
 

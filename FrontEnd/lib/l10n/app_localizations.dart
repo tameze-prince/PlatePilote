@@ -8,6 +8,8 @@ import 'package:intl/intl.dart' as intl;
 import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_fr.dart';
+import 'app_localizations_it.dart';
+import 'app_localizations_pt.dart';
 
 // ignore_for_file: type=lint
 
@@ -98,6 +100,8 @@ abstract class AppLocalizations {
     Locale('de'),
     Locale('en'),
     Locale('fr'),
+    Locale('it'),
+    Locale('pt'),
   ];
 
   /// No description provided for @appName.
@@ -403,8 +407,8 @@ abstract class AppLocalizations {
   /// No description provided for @pantryWarning.
   ///
   /// In en, this message translates to:
-  /// **'{items} should be used this week.'**
-  String pantryWarning(Object items);
+  /// **'{count, plural, =0{No items expiring this week} =1{1 item should be used this week.} other{{count} items should be used this week.}}'**
+  String pantryWarning(int count);
 
   /// No description provided for @welcomeBack.
   ///
@@ -475,8 +479,8 @@ abstract class AppLocalizations {
   /// No description provided for @mealsSelected.
   ///
   /// In en, this message translates to:
-  /// **'{count} balanced meals selected for your household.'**
-  String mealsSelected(Object count);
+  /// **'{count, plural, =0{No meals selected yet} =1{1 balanced meal selected for your household.} other{{count} balanced meals selected for your household.}}'**
+  String mealsSelected(int count);
 
   /// No description provided for @quickMeal.
   ///
@@ -508,11 +512,17 @@ abstract class AppLocalizations {
   /// **'Estimated Budget'**
   String get estimatedBudget;
 
-  /// No description provided for @budgetDetail.
+  /// Estimated budget detail for grocery list
   ///
   /// In en, this message translates to:
-  /// **'{total} for {items} grocery items, including {pantry} pantry ingredients already on hand.'**
-  String budgetDetail(Object items, Object pantry, Object total);
+  /// **'{total} for {items, plural, =1{1 grocery item} other{{items} grocery items}}, including {pantry} pantry ingredients already on hand.'**
+  String budgetDetail(String total, int items, int pantry);
+
+  /// Items to buy breakdown
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No items to buy} =1{1 item to buy - {pantry} items in pantry} other{{count} items to buy - {pantry} items in pantry}}'**
+  String itemsToBuy(int count, String pantry);
 
   /// No description provided for @replace.
   ///
@@ -537,12 +547,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Within Budget'**
   String get withinBudget;
-
-  /// No description provided for @itemsToBuy.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} items to buy - {pantry} items in pantry'**
-  String itemsToBuy(Object count, Object pantry);
 
   /// No description provided for @items.
   ///
@@ -847,8 +851,8 @@ abstract class AppLocalizations {
   /// No description provided for @premiumTrialDays.
   ///
   /// In en, this message translates to:
-  /// **'Premium trial - {days} days left'**
-  String premiumTrialDays(Object days);
+  /// **'{days, plural, =0{Premium trial ended} =1{Premium trial - 1 day left} other{Premium trial - {days} days left}}'**
+  String premiumTrialDays(int days);
 
   /// No description provided for @followsSystem.
   ///
@@ -1498,7 +1502,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['de', 'en', 'fr'].contains(locale.languageCode);
+      <String>['de', 'en', 'fr', 'it', 'pt'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1513,6 +1517,10 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsEn();
     case 'fr':
       return AppLocalizationsFr();
+    case 'it':
+      return AppLocalizationsIt();
+    case 'pt':
+      return AppLocalizationsPt();
   }
 
   throw FlutterError(

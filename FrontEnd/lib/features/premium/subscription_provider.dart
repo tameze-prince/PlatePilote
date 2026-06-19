@@ -65,7 +65,8 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
     try {
       final apiClient = ref.read(apiClientProvider);
       final response = await apiClient.get('/subscription');
-      final data = response.data['data'] as Map<String, dynamic>;
+      final body = response.data as Map<String, dynamic>;
+    final data = body['data'] as Map<String, dynamic>;
 
       final planType = data['planType'] as String? ?? 'FREE';
       state = SubscriptionState(
@@ -87,9 +88,10 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
       final apiClient = ref.read(apiClientProvider);
       final response = await apiClient.post(
         '/billing/stripe/checkout-session',
-        data: {'plan': 'PREMIUM_MONTHLY'},
+        data: {'plan': 'MONTHLY'},
       );
-      final data = response.data['data'] as Map<String, dynamic>;
+      final body = response.data as Map<String, dynamic>;
+      final data = body['data'] as Map<String, dynamic>;
       return data['url'] as String?;
     } on DioException {
       return null;
@@ -101,7 +103,8 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
     try {
       final apiClient = ref.read(apiClientProvider);
       final response = await apiClient.post('/billing/stripe/customer-portal');
-      final data = response.data['data'] as Map<String, dynamic>;
+      final body = response.data as Map<String, dynamic>;
+      final data = body['data'] as Map<String, dynamic>;
       return data['url'] as String?;
     } on DioException {
       return null;

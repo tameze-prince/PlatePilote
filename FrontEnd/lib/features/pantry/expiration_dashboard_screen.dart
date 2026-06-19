@@ -39,7 +39,7 @@ class _PantryExpirationScreenState
   /// Charge les données d'expiration (simulées pour l'instant).
   Future<void> _loadExpirationData() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
+    await Future<void>.delayed(const Duration(seconds: 1));
     setState(() {
       _expiringItems = [
         const PantryItem(

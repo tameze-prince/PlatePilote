@@ -284,7 +284,7 @@ class _ProfileCompleteness extends ConsumerWidget {
       missing.add('Health Goals');
     }
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Optimize Recommendations'),
@@ -581,7 +581,7 @@ class _ProfileInfoCard extends ConsumerWidget {
     ValueChanged<String> onSave,
   ) {
     final controller = TextEditingController(text: current);
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('Edit $field'),
@@ -614,7 +614,7 @@ class _ProfileInfoCard extends ConsumerWidget {
     final controller = TextEditingController(
       text: current?.toStringAsFixed(0) ?? '',
     );
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('Edit $field'),
@@ -661,7 +661,7 @@ class _ProfileInfoCard extends ConsumerWidget {
     String? current,
     ValueChanged<String> onSave,
   ) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => SimpleDialog(
         title: Text(title),
@@ -1038,7 +1038,7 @@ class _DangerZone extends ConsumerWidget {
 
   /// Affiche la confirmation de suppression de compte.
   void _showDeleteConfirmation(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Account'),

@@ -95,7 +95,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
               : _favorites.isEmpty
                   ? Builder(
                       builder: (context) {
-                        final l10n = context.l10n;
+                        final l10n = context.l10n!;
                         return PpEmptyState(
                           icon: Icons.favorite_border,
                           title: l10n.emptyFavoritesTitle,

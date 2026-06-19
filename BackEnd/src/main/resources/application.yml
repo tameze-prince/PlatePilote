@@ -158,9 +158,11 @@ app:
       bucket: ${R2_BUCKET:platepilote-images}
       public-url-template: ${R2_PUBLIC_URL_TEMPLATE:https://pub-{hash}.r2.dev}
   jwt:
-    # Secret key for signing JWT tokens (Base64 encoded)
-    # CHANGE THIS IN PRODUCTION to a long random string!
-    secret: ${JWT_SECRET:Y2hhbmdlLXRoaXMtdG8tYS1sb25nLXNlY3VyZS1rZXktaW4tcHJvZHVjdGlvbi1lbnZpcm9ubWVudC1wbGVhc2U=}
+    # Secret key for signing JWT tokens (Base64 encoded).
+    # MUST be supplied via the JWT_SECRET environment variable.
+    # The app fails to start if JWT_SECRET is missing (Spring @Value required).
+    # Generate with: openssl rand -base64 64
+    secret: ${JWT_SECRET}
     expiration: ${JWT_EXPIRATION:3600000}       # Access token: 1 hour
     refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # Refresh token: 7 days
   oauth2:
@@ -209,8 +211,8 @@ management:
 # ==========================================
 # LOGGING
 # ==========================================
+# Level configuration lives in logback-spring.xml (per-profile).
+# Keep this section empty so logback-spring.xml is the single source of truth.
 logging:
   level:
-    com.platepilote: DEBUG
-    org.springframework.security: DEBUG
-    org.hibernate.SQL: DEBUG
+    root: INFO

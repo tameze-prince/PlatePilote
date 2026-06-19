@@ -244,7 +244,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       children: [
                         Builder(
                           builder: (innerContext) {
-                            final l10n = innerContext.l10n;
+                            final l10n = innerContext.l10n!;
                             return PpEmptyState(
                               icon: Icons.error_outline,
                               title: l10n.error,
@@ -261,7 +261,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   else if (query.isEmpty)
                     Builder(
                       builder: (innerContext) {
-                        final l10n = innerContext.l10n;
+                        final l10n = innerContext.l10n!;
                         return PpEmptyState(
                           icon: Icons.search,
                           title: l10n.search,
@@ -272,7 +272,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   else if (_results.isEmpty)
                     Builder(
                       builder: (innerContext) {
-                        final l10n = innerContext.l10n;
+                        final l10n = innerContext.l10n!;
                         return PpEmptyState(
                           icon: Icons.search_off,
                           title: l10n.emptySearchTitle(query),

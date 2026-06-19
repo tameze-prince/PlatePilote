@@ -47,7 +47,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     final notesCtrl = TextEditingController();
     String? selectedCategory;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
@@ -183,7 +183,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
     );
     final unitController = TextEditingController(text: item.unit ?? 'unit');
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Edit Quantity'),
@@ -255,7 +255,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
 
   /// Affiche une confirmation avant de supprimer un article.
   void _deleteItem(int index, GroceryItem item) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Remove Item'),
@@ -688,7 +688,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
 
   /// Construit la vue lorsque la liste est vide.
   Widget _buildEmptyView(BuildContext context) {
-    final l10n = context.l10n;
+    final l10n = context.l10n!;
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.md),
       children: [
