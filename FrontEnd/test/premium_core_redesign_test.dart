@@ -6,6 +6,7 @@ import 'package:plate_pilote/core/providers/theme_provider.dart';
 import 'package:plate_pilote/core/widgets/floating_components.dart';
 import 'package:plate_pilote/features/auth/login_screen.dart';
 import 'package:plate_pilote/features/onboarding/onboarding_single_screen.dart';
+import 'package:plate_pilote/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -45,15 +46,22 @@ void main() {
   testWidgets('onboarding single screen renders the new headline', (
     tester,
   ) async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'locale': 'en'});
     final preferences = await SharedPreferences.getInstance();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
-        child: const MaterialApp(home: OnboardingSingleScreen()),
+        child: MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const OnboardingSingleScreen(),
+        ),
       ),
     );
+
+    await tester.pumpAndSettle();
 
     expect(find.text('Welcome to PlatePilot'), findsOneWidget);
     expect(find.text('Tell us about your household'), findsOneWidget);

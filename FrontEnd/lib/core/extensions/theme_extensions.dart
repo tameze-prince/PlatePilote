@@ -26,12 +26,6 @@ extension ThemeContext on BuildContext {
   AppLocalizations get l10nOrThrow {
     // ignore: unnecessary_null_comparison
     final loc = AppLocalizations.of(this);
-    // ignore: dead_code
-    if (loc == null) {
-      throw StateError(
-        'AppLocalizations indisponible: BuildContext hors LocalizationsScope.',
-      );
-    }
     return loc;
   }
 
