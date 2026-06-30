@@ -6,6 +6,9 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_typography.dart';
+import '../../core/analytics/analytics_events.dart';
+import '../../core/analytics/analytics_service.dart';
+import '../../core/analytics/event_payload.dart';
 import '../../core/premium_components.dart';
 import '../../shared/models/demo_data.dart';
 import '../../shared/models/meal_plan.dart';
@@ -140,6 +143,17 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
         final repo = ref.read(mealPlanRepositoryProvider);
         await repo.applySwap(widget.currentEntry!.id!, _selectedMeal!.recipeId!);
         await ref.read(mealPlanProvider.notifier).refresh();
+        ref.read(analyticsServiceProvider).trackPayload(
+          PlateEvents.mealSwapped,
+          payload: EventPayload(
+            source: 'manual',
+            meta: <String, Object>{
+              'mealType': widget.mealType,
+              'fromRecipeId': widget.currentEntry?.recipeId ?? '',
+              'toRecipeId': _selectedMeal!.recipeId ?? '',
+            },
+          ),
+        );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

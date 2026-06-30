@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/analytics/analytics_events.dart';
+import '../../core/analytics/analytics_service.dart';
 import '../../app/theme/app_animations.dart';
 import '../../app/theme/app_colors.dart';
 import '../../core/design_system/components/pp_card.dart';
@@ -46,6 +48,14 @@ class OnboardingSingleScreen extends ConsumerStatefulWidget {
 
 class _OnboardingSingleScreenState
     extends ConsumerState<OnboardingSingleScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(analyticsServiceProvider).track(PlateEvents.onboardingStarted);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(onboardingProvider);
@@ -122,6 +132,9 @@ class _OnboardingSingleScreenState
     await notifier.flush();
     await ref.read(appSessionProvider.notifier).completeOnboarding();
     await notifier.clearDraft();
+    ref
+        .read(analyticsServiceProvider)
+        .track(PlateEvents.onboardingCompleted);
     if (!mounted) return;
     await OnboardingCompletion.commitAndGeneratePlan(
       ref: ref,

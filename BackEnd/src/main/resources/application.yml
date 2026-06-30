@@ -68,11 +68,11 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+    repair-on-migrate: true  # clears failed rows before retry; safe here
 
   # ==========================================
-  # REDIS CONFIGURATION (Cache)
+  # REDIS CONFIGURATION (Cache) — optional, fallback to in-memory if absent
   # ==========================================
-  # Laragon default: localhost:6379, no password
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -81,6 +81,8 @@ spring:
       timeout: 6000ms
 
   cache:
+    # type "none" → use Spring's default in-memory ConcurrentHashMap.
+    # type "redis" → requires running Redis; explicit opt-in.
     type: ${CACHE_TYPE:none}
     redis:
       time-to-live: 600000  # Cache expires after 10 minutes

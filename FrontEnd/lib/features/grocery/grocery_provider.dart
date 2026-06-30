@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/analytics/analytics_events.dart';
+import '../../core/analytics/analytics_service.dart';
+import '../../core/analytics/event_payload.dart';
 import '../../core/repositories/base_repository.dart';
 import '../../shared/models/demo_data.dart' as demo;
 import '../../shared/models/grocery_list.dart';
@@ -120,6 +123,16 @@ class GroceryNotifier extends Notifier<GroceryListState> {
       final repo = ref.read(groceryRepositoryProvider);
       final list = await repo.generateFromMealPlan(mealPlanId);
       state = GroceryListState(currentList: list, items: list.items);
+      ref.read(analyticsServiceProvider).trackPayload(
+        PlateEvents.groceryListGenerated,
+        payload: EventPayload(
+          source: 'auto_gen',
+          meta: <String, Object>{
+            'mealPlanId': mealPlanId,
+            'itemCount': list.items.length,
+          },
+        ),
+      );
     } on ApiException catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
     }

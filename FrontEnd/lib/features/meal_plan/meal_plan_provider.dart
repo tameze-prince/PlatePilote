@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/analytics/analytics_events.dart';
+import '../../core/analytics/analytics_service.dart';
+import '../../core/analytics/event_payload.dart';
 import '../../core/repositories/recipe_repository.dart';
 import '../../shared/models/demo_data.dart';
 import '../../shared/models/meal_plan.dart';
@@ -229,6 +232,27 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
         meals: meals,
         availablePlans: updatedPlans,
       );
+      final isRegeneration = state.availablePlans.length > 1;
+      final analytics = ref.read(analyticsServiceProvider);
+      final payload = EventPayload(
+        planMode: mode ?? '',
+        source: mode != null ? 'filter' : 'auto_gen',
+        meta: <String, Object>{
+          'planId': plan.id,
+          'entryCount': plan.entries.length,
+        },
+      );
+      if (isRegeneration) {
+        analytics.trackPayload(
+          PlateEvents.planRegenerated,
+          payload: payload,
+        );
+      } else {
+        analytics.trackPayload(
+          PlateEvents.planGenerated,
+          payload: payload,
+        );
+      }
     } on ApiException catch (e) {
       state = state.copyWith(
         isGenerating: false,
