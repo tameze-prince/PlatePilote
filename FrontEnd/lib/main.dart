@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,6 +12,11 @@ import 'firebase_options.dart';
 /// Point d'entrée de l'application PlatePilot.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (_) {
+    // .env optionnel — on utilise --dart-define à la place
+  }
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,

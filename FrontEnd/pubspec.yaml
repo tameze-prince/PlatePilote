@@ -93,6 +93,7 @@ flutter:
 
   # Assets — PlatePilote image system (Sprint 1)
   assets:
+    - .env
     - assets/images/recipes/
     - assets/images/pantry/
     - assets/images/illustrations/

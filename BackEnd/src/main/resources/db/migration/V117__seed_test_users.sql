@@ -191,7 +191,7 @@ SET country_code = EXCLUDED.country_code,
 -- 5. PREFERENCES — dietary + cuisine + allergy per persona.
 -- =====================================================================
 -- Sarah u1: no diet, no allergy
-INSERT INTO dietary_preferences (user_id, preference_type)
+INSERT INTO dietary_preferences (user_id, diet_type)
 SELECT '11111111-1111-1111-1111-111111111111', 'NONE'
 WHERE NOT EXISTS (
     SELECT 1 FROM dietary_preferences WHERE user_id = '11111111-1111-1111-1111-111111111111'
@@ -205,17 +205,17 @@ WHERE NOT EXISTS (
 );
 
 -- Alex u3: vegetarian
-INSERT INTO dietary_preferences (user_id, preference_type)
+INSERT INTO dietary_preferences (user_id, diet_type)
 SELECT '33333333-3333-3333-3333-333333333333', 'VEGETARIAN'
 WHERE NOT EXISTS (
-    SELECT 1 FROM dietary_preferences WHERE user_id = '33333333-3333-3333-3333-333333333333' AND preference_type = 'VEGETARIAN'
+    SELECT 1 FROM dietary_preferences WHERE user_id = '33333333-3333-3333-3333-333333333333' AND diet_type = 'VEGETARIAN'
 );
 
 -- Emily u4: vegetarian + nuts/gluten allergies
-INSERT INTO dietary_preferences (user_id, preference_type)
+INSERT INTO dietary_preferences (user_id, diet_type)
 SELECT '44444444-4444-4444-4444-444444444444', 'VEGETARIAN'
 WHERE NOT EXISTS (
-    SELECT 1 FROM dietary_preferences WHERE user_id = '44444444-4444-4444-4444-444444444444' AND preference_type = 'VEGETARIAN'
+    SELECT 1 FROM dietary_preferences WHERE user_id = '44444444-4444-4444-4444-444444444444' AND diet_type = 'VEGETARIAN'
 );
 INSERT INTO allergies (user_id, allergen, severity)
 SELECT '44444444-4444-4444-4444-444444444444', 'nuts', 'severe'
@@ -307,11 +307,11 @@ ON CONFLICT DO NOTHING;
 INSERT INTO meal_plans (id, user_id, name, start_date, end_date, status, mode, created_at, updated_at)
 SELECT v.id, v.user_id, v.name, v.start_date, v.end_date, v.status, v.mode, NOW(), NOW()
 FROM (VALUES
-    ('aa000001-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'Sarah — Week of Test', CURRENT_DATE, CURRENT_DATE + 6, 'ACTIVE',   'STANDARD',  '2026-07-01'::date, '2026-07-07'::date),
-    ('aa000002-0000-0000-0000-000000000002', '22222222-2222-2222-2222-222222222222', 'Family — Week of Test',CURRENT_DATE, CURRENT_DATE + 6, 'ACTIVE',   'FAMILY',    '2026-07-01'::date, '2026-07-07'::date),
-    ('aa000003-0000-0000-0000-000000000003', '33333333-3333-3333-3333-333333333333', 'Alex — Week of Test',  CURRENT_DATE, CURRENT_DATE + 6, 'ACTIVE',   'WASTELESS', '2026-07-01'::date, '2026-07-07'::date),
-    ('aa000004-0000-0000-0000-000000000004', '44444444-4444-4444-4444-444444444444', 'Emily — Week of Test', CURRENT_DATE, CURRENT_DATE + 6, 'ACTIVE',   'ENDOFMONTH','2026-07-01'::date, '2026-07-07'::date),
-    ('aa000005-0000-0000-0000-000000000005', '55555555-5555-5555-5555-555555555555', 'Admin — Test Plan',    CURRENT_DATE, CURRENT_DATE + 6, 'DRAFT',    'STANDARD',  '2026-07-01'::date, '2026-07-07'::date)
+    ('aa000001-0000-0000-0000-000000000001'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, 'Sarah — Week of Test', CURRENT_DATE, CURRENT_DATE + 6, 'ACTIVE',   'STANDARD'),
+    ('aa000002-0000-0000-0000-000000000002'::uuid, '22222222-2222-2222-2222-222222222222'::uuid, 'Family — Week of Test',CURRENT_DATE, CURRENT_DATE + 6, 'ACTIVE',   'FAMILY'),
+    ('aa000003-0000-0000-0000-000000000003'::uuid, '33333333-3333-3333-3333-333333333333'::uuid, 'Alex — Week of Test',  CURRENT_DATE, CURRENT_DATE + 6, 'ACTIVE',   'WASTELESS'),
+    ('aa000004-0000-0000-0000-000000000004'::uuid, '44444444-4444-4444-4444-444444444444'::uuid, 'Emily — Week of Test', CURRENT_DATE, CURRENT_DATE + 6, 'ACTIVE',   'ENDOFMONTH'),
+    ('aa000005-0000-0000-0000-000000000005'::uuid, '55555555-5555-5555-5555-555555555555'::uuid, 'Admin — Test Plan',    CURRENT_DATE, CURRENT_DATE + 6, 'DRAFT',    'STANDARD')
 ) AS v(id, user_id, name, start_date, end_date, status, mode)
 ON CONFLICT (id) DO NOTHING;
 
@@ -325,7 +325,7 @@ WITH RECURSIVE week_seed AS (
 ),
 day_assn AS (
     SELECT plan.id AS plan_id, plan.user_id, plan.start_date, ws.id AS recipe_id,
-           ((ws.idx - 1) % 7) AS day_offset,
+           ((ws.idx - 1) % 7)::int AS day_offset,
            CASE ((ws.idx - 1) / 7)
                WHEN 0 THEN 'BREAKFAST'
                WHEN 1 THEN 'LUNCH'

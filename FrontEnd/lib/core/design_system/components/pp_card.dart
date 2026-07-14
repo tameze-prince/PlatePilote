@@ -56,8 +56,6 @@ class _PpCardState extends State<PpCard> {
     Widget card;
     if (widget.variant == PpCardVariant.glass) {
       card = GlassContainer(
-        padding:
-            widget.padding ?? const EdgeInsets.all(DsSpacing.md),
         margin: widget.margin,
         borderRadius: DsRadius.xl,
         elevated: true,

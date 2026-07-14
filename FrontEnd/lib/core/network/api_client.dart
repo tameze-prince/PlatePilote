@@ -1,12 +1,13 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/secure_storage_service.dart';
 
 /// Résout l'URL de base de l'API au démarrage de l'application.
 ///
-/// Priorité : `--dart-define=PLATEPILOT_API_BASE_URL=...`, sinon fichier
-/// `.env` (via `flutter_dotenv`), sinon chaîne vide. Si vide au moment de
+/// Priorité : `--dart-define=PLATEPILOT_API_BASE_URL=...`, sinon `.env` (via
+/// `flutter_dotenv`), sinon chaîne vide. Si vide au moment de
 /// l'initialisation, une [StateError] est levée pour éviter les requêtes
 /// silencieuses vers `localhost` en production.
 String resolveApiBaseUrl() {
@@ -15,6 +16,8 @@ String resolveApiBaseUrl() {
     defaultValue: '',
   );
   if (fromBuild.isNotEmpty) return fromBuild;
+  final fromEnv = dotenv.env['PLATEPILOT_API_BASE_URL'];
+  if (fromEnv != null && fromEnv.isNotEmpty) return fromEnv;
   return '';
 }
 

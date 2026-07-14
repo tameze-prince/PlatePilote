@@ -125,6 +125,7 @@ class AuthNotifier extends Notifier<AuthState> {
       await ref.read(appSessionProvider.notifier).signIn();
 
       await _syncOnboardingPreferences();
+      await ref.read(appSessionProvider.notifier).completeOnboarding();
 
       return true;
     }

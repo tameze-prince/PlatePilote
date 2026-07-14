@@ -151,7 +151,7 @@ class _OnboardingSingleScreenState
     HapticFeedback.selectionClick();
     await notifier.flush();
     if (!mounted) return;
-    context.go('/onboarding?after=signup');
+    context.go('/signup');
   }
 
   Future<void> _customizeLater() async {
