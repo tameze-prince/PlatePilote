@@ -1,5 +1,7 @@
 # Politique de Confidentialité — PlatePilote
 
+> Brouillon de référence uniquement. La version canonique à implémenter et publier est `docs/legal/Privacy_Policy_FR.md`.
+
 **Dernière mise à jour** : 28 juin 2026  
 **Responsable** : Prince ZEUFACK TAMEZE — zeufacktameze@gmail.com
 

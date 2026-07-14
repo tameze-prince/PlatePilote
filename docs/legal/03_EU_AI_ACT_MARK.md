@@ -1,5 +1,7 @@
 # EU AI Act — Mark & Conformité (M2c)
 
+> Draft reference only. Canonical implementation stance is `docs/legal/EU_AI_Act_Compliance.md`: Limited Risk transparency for deterministic recommendation scoring.
+
 **Statut** : Draft v1  
 **Classification** : Système algorithmique de catégorie « Recommandation basée sur règles métier » → **EXEMPTÉ** Art. 6(3) IA Act
 

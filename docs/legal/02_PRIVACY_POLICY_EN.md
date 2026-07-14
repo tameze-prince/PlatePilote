@@ -1,5 +1,7 @@
 # Privacy Policy — PlatePilot
 
+> Draft reference only. Canonical legal copy for implementation and publication is `docs/legal/Privacy_Policy_EN.md`.
+
 **Last updated** : June 28, 2026  
 **Data Controller** : Prince ZEUFACK TAMEZE — zeufacktameze@gmail.com
 

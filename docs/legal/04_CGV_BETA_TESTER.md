@@ -1,5 +1,7 @@
 # Conditions Générales — Beta Test PlatePilote (M2d)
 
+> Brouillon de référence uniquement. La version canonique à implémenter et publier est `docs/legal/Beta_Tester_Terms.md`.
+
 **Version** : v1 — 28 juin 2026  
 **Applicable** à tout beta testeur invité via Firebase App Distribution ou TestFlight
 
