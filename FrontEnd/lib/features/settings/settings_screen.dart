@@ -1,16 +1,21 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_typography.dart';
 import '../../core/providers/theme_provider.dart';
+import '../../core/providers/app_session_provider.dart';
 import '../../core/widgets/modern_components.dart';
 import '../../core/widgets/modern_animations.dart';
 import '../../core/widgets/floating_components.dart';
 import '../../core/premium_components.dart';
+import '../legal/data_rights_repository.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Écran des paramètres de l'application.
@@ -393,7 +398,10 @@ class SettingsScreen extends ConsumerWidget {
                       title: 'Privacy Policy',
                       description: 'How we handle your data',
                       trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () {},
+                      onTap: () => _openUrl(
+                        context,
+                        'https://platepilote.com/privacy.html',
+                      ),
                     ),
                   ),
 
@@ -406,14 +414,60 @@ class SettingsScreen extends ConsumerWidget {
                       title: 'Terms of Service',
                       description: 'Legal terms and conditions',
                       trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () {},
+                      onTap: () => _openUrl(
+                        context,
+                        'https://platepilote.com/cgv.html',
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: AppSpacing.xs),
+
+                  AnimatedListItem(
+                    delay: 11,
+                    child: InfoCard(
+                      icon: Icons.psychology_alt_outlined,
+                      title: 'Algorithmic Recommendations',
+                      description:
+                          'Limited Risk EU AI Act transparency notice',
+                      trailing: const Icon(Icons.info_outline, size: 20),
+                      onTap: () => _showAlgorithmicNotice(context),
+                    ),
+                  ),
+
+                  const SizedBox(height: AppSpacing.xs),
+
+                  AnimatedListItem(
+                    delay: 12,
+                    child: InfoCard(
+                      icon: Icons.folder_copy_outlined,
+                      title: 'My Data',
+                      description: 'Export, restrict, or delete your account',
+                      trailing: const Icon(Icons.chevron_right, size: 20),
+                      onTap: () => _showDataRightsSheet(context, ref),
+                    ),
+                  ),
+
+                  const SizedBox(height: AppSpacing.xs),
+
+                  AnimatedListItem(
+                    delay: 13,
+                    child: InfoCard(
+                      icon: Icons.analytics_outlined,
+                      title: 'Analytics Consent',
+                      description:
+                          ref.watch(appSessionProvider).hasAcceptedBetaAnalytics
+                              ? 'Beta analytics enabled'
+                              : 'Beta analytics disabled',
+                      trailing: const Icon(Icons.tune, size: 20),
+                      onTap: () => _showAnalyticsConsentDialog(context, ref),
                     ),
                   ),
 
                   const SizedBox(height: AppSpacing.xl),
 
                   AnimatedListItem(
-                    delay: 11,
+                    delay: 14,
                     child: TextButton.icon(
                       onPressed: () {
                         // Logout logic
@@ -455,5 +509,236 @@ class SettingsScreen extends ConsumerWidget {
         fontWeight: FontWeight.w600,
       ),
     );
+  }
+
+  Future<void> _openUrl(BuildContext context, String url) async {
+    final uri = Uri.parse(url);
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open $url')),
+      );
+    }
+  }
+
+  void _showAlgorithmicNotice(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Algorithmic Recommendations'),
+        content: const Text(
+          'PlatePilot uses deterministic recommendation scoring for meal suggestions. It does not currently use a generative LLM for recipes. Suggestions are limited-risk, explainable, and always remain under your final choice.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAnalyticsConsentDialog(BuildContext context, WidgetRef ref) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Analytics Consent'),
+        content: const Text(
+          'Beta analytics help us find crashes and broken journeys. Revoking consent disables analytics locally and you will be asked to accept again before continuing beta use.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final router = GoRouter.of(context);
+              final navigator = Navigator.of(context);
+              try {
+                await ref.read(dataRightsRepositoryProvider).optOutAnalytics();
+              } catch (_) {
+                // Local revocation still matters even if backend is offline.
+              }
+              await ref
+                  .read(appSessionProvider.notifier)
+                  .revokeAnalyticsConsent();
+              navigator.pop();
+              messenger.showSnackBar(
+                const SnackBar(content: Text('Analytics consent revoked')),
+              );
+              router.go('/consent');
+            },
+            child: const Text('Revoke analytics'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDataRightsSheet(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'My Data',
+                style: AppTypography.titleLarge.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              FilledButton.icon(
+                onPressed: () => _exportData(context, ref),
+                icon: const Icon(Icons.download_outlined),
+                label: const Text('Export my data'),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              OutlinedButton.icon(
+                onPressed: () => _restrictProcessing(context, ref),
+                icon: const Icon(Icons.pause_circle_outline),
+                label: const Text('Restrict processing'),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              TextButton.icon(
+                onPressed: () => _confirmDeleteAccount(context, ref),
+                icon: const Icon(Icons.delete_forever_outlined),
+                label: const Text('Delete account'),
+                style: TextButton.styleFrom(foregroundColor: AppColors.error),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _exportData(BuildContext context, WidgetRef ref) async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final data = await ref.read(dataRightsRepositoryProvider).exportData();
+      if (!context.mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Data export'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: SelectableText(
+                const JsonEncoder.withIndent('  ').convert(data),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      );
+    } catch (error) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Data export failed: $error')),
+      );
+    } finally {
+      if (navigator.canPop()) navigator.pop();
+    }
+  }
+
+  Future<void> _restrictProcessing(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(dataRightsRepositoryProvider).restrictProcessing();
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Processing restriction requested')),
+      );
+    } catch (error) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Restriction request failed: $error')),
+      );
+    }
+  }
+
+  void _confirmDeleteAccount(BuildContext context, WidgetRef ref) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete account?'),
+        content: const Text(
+          'This starts a 30-day soft-delete period before permanent purge. Type DELETE on the next confirmation to continue.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _confirmDeleteAccountText(context, ref);
+            },
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteAccountText(BuildContext context, WidgetRef ref) {
+    final controller = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm deletion'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Type DELETE'),
+          textCapitalization: TextCapitalization.characters,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final navigator = Navigator.of(context);
+              final goRouter = GoRouter.of(context);
+              if (controller.text.trim() != 'DELETE') {
+                messenger.showSnackBar(
+                  const SnackBar(content: Text('Confirmation did not match')),
+                );
+                return;
+              }
+              try {
+                await ref.read(dataRightsRepositoryProvider).deleteAccount();
+                await ref.read(appSessionProvider.notifier).signOut();
+                navigator.pop();
+                goRouter.go('/login');
+              } catch (error) {
+                messenger.showSnackBar(
+                  SnackBar(content: Text('Delete request failed: $error')),
+                );
+              }
+            },
+            child: const Text('Delete account'),
+          ),
+        ],
+      ),
+    ).whenComplete(controller.dispose);
   }
 }

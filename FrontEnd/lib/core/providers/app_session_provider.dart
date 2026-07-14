@@ -8,6 +8,8 @@ class AppSessionState {
   const AppSessionState({
     required this.hasSeenOnboarding,
     required this.isAuthenticated,
+    required this.hasAcceptedBetaAnalytics,
+    required this.hasAcceptedPush,
   });
 
   /// Indique si l'utilisateur a déjà vu l'onboarding.
@@ -16,11 +18,25 @@ class AppSessionState {
   /// Indique si l'utilisateur est authentifié.
   final bool isAuthenticated;
 
+  /// Indique si l'utilisateur a accepté l'analytics obligatoire de la beta.
+  final bool hasAcceptedBetaAnalytics;
+
+  /// Indique si l'utilisateur a accepté les notifications push côté app.
+  final bool hasAcceptedPush;
+
   /// Crée une copie avec des champs optionnellement modifiés.
-  AppSessionState copyWith({bool? hasSeenOnboarding, bool? isAuthenticated}) {
+  AppSessionState copyWith({
+    bool? hasSeenOnboarding,
+    bool? isAuthenticated,
+    bool? hasAcceptedBetaAnalytics,
+    bool? hasAcceptedPush,
+  }) {
     return AppSessionState(
       hasSeenOnboarding: hasSeenOnboarding ?? this.hasSeenOnboarding,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
+      hasAcceptedBetaAnalytics:
+          hasAcceptedBetaAnalytics ?? this.hasAcceptedBetaAnalytics,
+      hasAcceptedPush: hasAcceptedPush ?? this.hasAcceptedPush,
     );
   }
 }
@@ -29,6 +45,8 @@ class AppSessionState {
 class AppSessionNotifier extends Notifier<AppSessionState> {
   static const _hasSeenOnboardingKey = 'hasSeenOnboarding';
   static const _isAuthenticatedKey = 'isAuthenticated';
+  static const analyticsConsentKey = 'analytics_consent_granted';
+  static const pushConsentKey = 'push_consent_granted';
 
   @override
   AppSessionState build() {
@@ -36,6 +54,9 @@ class AppSessionNotifier extends Notifier<AppSessionState> {
     return AppSessionState(
       hasSeenOnboarding: preferences.getBool(_hasSeenOnboardingKey) ?? false,
       isAuthenticated: preferences.getBool(_isAuthenticatedKey) ?? false,
+      hasAcceptedBetaAnalytics:
+          preferences.getBool(analyticsConsentKey) ?? false,
+      hasAcceptedPush: preferences.getBool(pushConsentKey) ?? false,
     );
   }
 
@@ -61,6 +82,25 @@ class AppSessionNotifier extends Notifier<AppSessionState> {
     await ref
         .read(sharedPreferencesProvider)
         .setBool(_isAuthenticatedKey, false);
+  }
+
+  /// Persiste les consentements beta.
+  Future<void> acceptBetaConsent({required bool pushConsent}) async {
+    state = state.copyWith(
+      hasAcceptedBetaAnalytics: true,
+      hasAcceptedPush: pushConsent,
+    );
+    final preferences = ref.read(sharedPreferencesProvider);
+    await preferences.setBool(analyticsConsentKey, true);
+    await preferences.setBool(pushConsentKey, pushConsent);
+  }
+
+  /// Révoque les statistiques d'usage et bloque à nouveau l'accès beta.
+  Future<void> revokeAnalyticsConsent() async {
+    state = state.copyWith(hasAcceptedBetaAnalytics: false);
+    await ref
+        .read(sharedPreferencesProvider)
+        .setBool(analyticsConsentKey, false);
   }
 }
 

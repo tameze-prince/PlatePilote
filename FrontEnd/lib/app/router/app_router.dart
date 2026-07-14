@@ -17,6 +17,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final location = state.matchedLocation;
       final isPublicRoute = location == '/splash' ||
           location == '/onboarding' ||
+          location == '/consent' ||
           location == '/signup' ||
           location == '/login' ||
           location.startsWith('/verify-email') ||
@@ -28,6 +29,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           if (after == 'signup') return null;
           return session.isAuthenticated ? '/home' : '/login';
         }
+        if (location == '/consent') {
+          if (!session.hasSeenOnboarding) return '/onboarding';
+          if (!session.isAuthenticated) return '/login';
+          if (session.hasAcceptedBetaAnalytics) return '/home';
+        }
         return null;
       }
 
@@ -37,6 +43,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       if (!session.isAuthenticated) {
         return '/login';
+      }
+
+      if (!session.hasAcceptedBetaAnalytics) {
+        return '/consent';
       }
 
       return null;
@@ -75,6 +85,7 @@ enum AppRoute {
   search,
   favorites,
   offline,
+  consent,
   notifications,
   notificationPreferences,
   language,

@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../../../features/splash/splash_screen.dart';
+import '../../../features/consent/consent_screen.dart';
 import '../../../features/support/offline_screen.dart';
 import '../app_router.dart' show AppRoute;
 
@@ -15,6 +16,11 @@ List<RouteBase> supportRoutes() {
       path: '/offline',
       name: AppRoute.offline.name,
       builder: (context, state) => const OfflineScreen(),
+    ),
+    GoRoute(
+      path: '/consent',
+      name: AppRoute.consent.name,
+      builder: (context, state) => const ConsentScreen(),
     ),
   ];
 }
