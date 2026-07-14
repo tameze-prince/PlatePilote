@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +42,8 @@ public class RecipeResponse {
     private String cuisineType;
     /** Type de repas. */
     private String mealType;
+    /** Coût estimé en devise locale. */
+    private BigDecimal estimatedCost;
     /** URL de l'image. */
     private String imageUrl;
     /** Source de la recette. */
