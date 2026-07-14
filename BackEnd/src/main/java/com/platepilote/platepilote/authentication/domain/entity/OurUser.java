@@ -73,6 +73,14 @@ public class OurUser extends BaseEntity {
     @Column(nullable = false)
     private Boolean enabled = true;
 
+    /** Indique si l'utilisateur s'est opposé aux analytics. */
+    @Column(name = "analytics_opt_out", nullable = false)
+    private Boolean analyticsOptOut = false;
+
+    /** Indique si l'utilisateur a demandé une limitation du traitement. */
+    @Column(name = "processing_restricted", nullable = false)
+    private Boolean processingRestricted = false;
+
     /** Rôles de l'utilisateur (relation ManyToMany avec {@link Role}). */
     @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
