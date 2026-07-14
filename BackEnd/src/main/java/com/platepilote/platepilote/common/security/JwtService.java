@@ -12,6 +12,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,28 @@ public class JwtService {
     /** Durée de validité du jeton de rafraîchissement en millisecondes (défaut : 7 jours). */
     @Value("${app.jwt.refresh-expiration}")
     private long refreshExpiration;
+
+    /**
+     * Refuse de démarrer si {@code JWT_SECRET} est absent ou trop court. La
+     * pose d'un secret de développement comme valeur par défaut a été retirée
+     * : un environnement mal configuré doit échouer bruyamment, pas signer
+     * des jetons avec une chaîne vide.
+     */
+    @PostConstruct
+    void requireJwtSecret() {
+        if (secretKey == null || secretKey.isBlank()) {
+            throw new IllegalStateException(
+                    "app.jwt.secret is missing. Set JWT_SECRET (Base64, min 32 bytes) " +
+                            "in the environment before starting the backend.");
+        }
+        if (secretKey.length() < 64) {
+            // ~48 bytes of entropy after Base64 decoding is the minimum recommended
+            // for HS256. Refuse any well-formed-but-short value at boot time.
+            throw new IllegalStateException(
+                    "app.jwt.secret is suspiciously short (" + secretKey.length() +
+                            " chars). Refresh JWT_SECRET with at least 64 Base64 chars.");
+        }
+    }
 
     /**
      * Extrait le nom d'utilisateur (email) du jeton JWT.
