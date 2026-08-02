@@ -80,11 +80,11 @@ class GroceryRepository extends BaseRepository {
         '/grocery-lists/$listId/items',
         data: {
           'name': name,
-          'category': ?category,
+          if (category != null) 'category': category,
           'quantity': quantity,
           'unit': unit,
-          'estimatedPrice': ?estimatedPrice,
-          'notes': ?notes,
+          if (estimatedPrice != null) 'estimatedPrice': estimatedPrice,
+          if (notes != null) 'notes': notes,
           'sortOrder': sortOrder,
         },
       );
@@ -142,7 +142,7 @@ class GroceryRepository extends BaseRepository {
         '/grocery-lists/$listId/checkout',
         data: {
           'checkedItemIds': checkedUuids,
-          'actualPrices': ?actualPrices,
+          if (actualPrices != null) 'actualPrices': actualPrices,
         },
       );
     } on DioException catch (e) {

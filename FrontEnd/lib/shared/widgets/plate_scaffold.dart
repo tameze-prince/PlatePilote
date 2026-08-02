@@ -43,7 +43,7 @@ class PlateScaffold extends StatelessWidget {
                       )
                     : null,
                 actions: [
-                  ?trailing,
+                  if (trailing != null) trailing!,
                   IconButton(
                     tooltip: 'Rechercher',
                     onPressed: () => context.push('/search'),

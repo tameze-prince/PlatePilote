@@ -106,7 +106,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
             decoration: const InputDecoration(labelText: 'Cooking time'),
           ),
           DropdownButtonFormField<String>(
-            initialValue: _difficulty,
+            value: _difficulty,
             items: const [
               'Easy',
               'Medium',

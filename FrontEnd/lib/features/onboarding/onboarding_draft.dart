@@ -15,13 +15,13 @@ sealed class OnboardingDraft with _$OnboardingDraft {
     @Default(0) int currentStep,
     @Default(<String>[]) List<String> completedSteps,
     String? householdSize,
-    @JsonKey(name: 'cooking_profile') String? cookingProfile,
+    String? cookingProfile,
     String? weeklyBudget,
     double? customBudget,
-    @JsonKey(name: 'cooking_time') String? cookingTime,
+    String? cookingTime,
     @Default(<String>[]) List<String> dietaryPreferences,
     @Default(<String>[]) List<String> goals,
-    @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    DateTime? updatedAt,
   }) = _OnboardingDraft;
 
   /// Construit un brouillon à partir d'un JSON.

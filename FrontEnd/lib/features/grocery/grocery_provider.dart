@@ -143,7 +143,6 @@ class GroceryNotifier extends Notifier<GroceryListState> {
     final items = [...state.items];
     if (index >= items.length) return;
     final item = items[index];
-    if (item.id == null) return;
     items[index] = item.copyWith(checked: !item.checked);
     state = state.copyWith(items: items);
     try {

@@ -308,7 +308,7 @@ class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
                       onChanged: (value) {
                         setState(() => _isChecked = value);
                       },
-                      activeThumbColor: AppColors.primaryLight,
+                      activeColor: AppColors.primaryLight,
                     ),
                   ],
                 ),
