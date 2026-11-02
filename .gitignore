@@ -18,3 +18,5 @@ generate-visuals.js
 
 PlatePilote_Campagne
 tools
+BackEnd/backend-run.*
+BackEnd/session-*.md
