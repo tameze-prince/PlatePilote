@@ -1,0 +1,2 @@
+*.sql linguist-detectable=false
+food_dataset_v2/** linguist-vendored
