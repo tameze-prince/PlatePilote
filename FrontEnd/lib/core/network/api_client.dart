@@ -91,6 +91,31 @@ class _AuthTokenInterceptor extends Interceptor {
     ),
   );
 
+  Future<_RefreshedTokens>? _refreshInFlight;
+
+  Future<_RefreshedTokens> _refreshTokens(String refreshToken) {
+    return _refreshInFlight ??= _performRefresh(refreshToken).whenComplete(() {
+      _refreshInFlight = null;
+    });
+  }
+
+  Future<_RefreshedTokens> _performRefresh(String refreshToken) async {
+    final response = await _refreshDio.post<Map<String, dynamic>>(
+      '/auth/refresh',
+      queryParameters: {'refreshToken': refreshToken},
+    );
+    final data = (response.data?['data'] as Map<String, dynamic>?) ??
+        const <String, dynamic>{};
+    final accessToken = data['accessToken'] as String?;
+    final rotatedRefreshToken = data['refreshToken'] as String?;
+    if (accessToken == null || accessToken.isEmpty ||
+        rotatedRefreshToken == null || rotatedRefreshToken.isEmpty) {
+      throw const FormatException('Refresh response is missing token fields');
+    }
+    await onTokensRefreshed(accessToken, rotatedRefreshToken);
+    return _RefreshedTokens(accessToken, rotatedRefreshToken);
+  }
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     final token = await tokenGetter();
@@ -115,19 +140,12 @@ class _AuthTokenInterceptor extends Interceptor {
     }
 
     try {
-      final response = await _refreshDio.post<Map<String, dynamic>>(
-        '/auth/refresh',
-        queryParameters: {'refreshToken': refreshToken},
-      );
-
-      final data = (response.data?['data'] as Map<String, dynamic>?) ?? const <String, dynamic>{};
-      final newAccessToken = data['accessToken'] as String;
-      final newRefreshToken = data['refreshToken'] as String;
-
-      await onTokensRefreshed(newAccessToken, newRefreshToken);
+      // All requests that receive 401 together share one refresh operation.
+      // This prevents rotating refresh tokens from racing each other.
+      final refreshed = await _refreshTokens(refreshToken);
 
       // Retry the original request with the new token using the original Dio
-      err.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
+      err.requestOptions.headers['Authorization'] = 'Bearer ${refreshed.accessToken}';
       
       // Use the Dio from the request options to retry
       final dio = Dio(BaseOptions(
@@ -147,11 +165,19 @@ class _AuthTokenInterceptor extends Interceptor {
   }
 }
 
+class _RefreshedTokens {
+  const _RefreshedTokens(this.accessToken, this.refreshToken);
+
+  final String accessToken;
+  final String refreshToken;
+}
+
 class _ErrorLogInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     // ignore: avoid_print
-    print('[API Error] ${err.requestOptions.uri} - ${err.message}');
+    print('[API Error] ${err.requestOptions.method} ${err.requestOptions.path} '
+        'status=${err.response?.statusCode ?? "network"} type=${err.type.name}');
     handler.next(err);
   }
 }
