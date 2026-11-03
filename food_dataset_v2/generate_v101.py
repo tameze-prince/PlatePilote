@@ -290,7 +290,8 @@ def main():
     print(f"  Recipes: {len(recipe_sql_parts)}")
     print(f"  Ingredients: {len(ingredient_sql_parts)}")
     print(f"  Steps: {len(step_sql_parts)}")
-    print(f"  Recipes with external HTTPS images: {sum(1 for item in mapping if item[\"image_url\"])}")
+    images_linked = sum(1 for item in mapping if item["image_url"])
+    print(f"  Recipes with external HTTPS images: {images_linked}")
 
 if __name__ == "__main__":
     main()
