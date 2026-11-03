@@ -52,7 +52,7 @@ public class RecipeService {
      */
     @Transactional(readOnly = true)
     public PagedResponse<RecipeResponse> getPublicRecipes(Pageable pageable) {
-        Page<Recipe> page = recipeRepository.findByIsPublicTrueAndDeletedAtIsNull(pageable);
+        Page<Recipe> page = recipeRepository.findByIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(pageable);
         return toPagedResponse(page, false);
     }
 
@@ -81,7 +81,8 @@ public class RecipeService {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", recipeId.toString()));
 
-        if (recipe.isDeleted() || !Boolean.TRUE.equals(recipe.getIsPublic())) {
+        if (recipe.isDeleted() || !Boolean.TRUE.equals(recipe.getEnabled())
+                || !Boolean.TRUE.equals(recipe.getIsPublic())) {
             throw new ResourceNotFoundException("Recipe", "id", recipeId.toString());
         }
 
@@ -123,7 +124,7 @@ public class RecipeService {
      */
     @Transactional(readOnly = true)
     public PagedResponse<RecipeResponse> getByCuisineType(String cuisineType, Pageable pageable) {
-        Page<Recipe> page = recipeRepository.findByCuisineTypeAndIsPublicTrueAndDeletedAtIsNull(cuisineType, pageable);
+        Page<Recipe> page = recipeRepository.findByCuisineTypeAndIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(cuisineType, pageable);
         return toPagedResponse(page, false);
     }
 
@@ -136,7 +137,7 @@ public class RecipeService {
      */
     @Transactional(readOnly = true)
     public PagedResponse<RecipeResponse> getByMealType(String mealType, Pageable pageable) {
-        Page<Recipe> page = recipeRepository.findByMealTypeAndIsPublicTrueAndDeletedAtIsNull(mealType, pageable);
+        Page<Recipe> page = recipeRepository.findByMealTypeAndIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(mealType, pageable);
         return toPagedResponse(page, false);
     }
 
