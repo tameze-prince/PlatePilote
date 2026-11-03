@@ -26,8 +26,10 @@ class RecipeDetailsScreen extends ConsumerStatefulWidget {
 class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
   /// Recette chargée depuis l'API.
   RecipeDetail? _recipe;
+
   /// Indique si le chargement est en cours.
   bool _isLoading = true;
+
   /// Message d'erreur éventuel.
   String? _error;
 
@@ -72,8 +74,8 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
           child: _isLoading
               ? _buildLoading()
               : _error != null
-                  ? _buildError()
-                  : _buildContent(),
+              ? _buildError()
+              : _buildContent(),
         ),
       ),
     );
@@ -99,10 +101,7 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          FilledButton(
-            onPressed: _loadRecipe,
-            child: const Text('Retry'),
-          ),
+          FilledButton(onPressed: _loadRecipe, child: const Text('Retry')),
         ],
       ),
     );
@@ -124,7 +123,10 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(
-                AppSpacing.md, 0, AppSpacing.md, 0,
+                AppSpacing.md,
+                0,
+                AppSpacing.md,
+                0,
               ),
               child: heroTag == null
                   ? heroChild
@@ -152,7 +154,10 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md, 0, AppSpacing.md, AppSpacing.xl,
+              AppSpacing.md,
+              0,
+              AppSpacing.md,
+              AppSpacing.xl,
             ),
             children: [
               Text(
@@ -187,7 +192,8 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
                   ],
                 ],
               ),
-              if (recipe.description != null && recipe.description!.isNotEmpty) ...[
+              if (recipe.description != null &&
+                  recipe.description!.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   recipe.description!,
@@ -199,7 +205,8 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
               _buildNutritionInfo(recipe),
               _buildAllergenInfo(recipe),
               const SizedBox(height: AppSpacing.lg),
-              Text('Ingredients',
+              Text(
+                'Ingredients',
                 style: AppTypography.titleLarge.copyWith(
                   color: PremiumTheme.textPrimary(context),
                   fontWeight: FontWeight.w700,
@@ -267,7 +274,8 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
                   ),
                 ),
               const SizedBox(height: AppSpacing.lg),
-              Text('Steps',
+              Text(
+                'Steps',
                 style: AppTypography.titleLarge.copyWith(
                   color: PremiumTheme.textPrimary(context),
                   fontWeight: FontWeight.w700,
@@ -320,7 +328,6 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
                     ),
                   ),
                 ),
-
             ],
           ),
         ),
@@ -329,7 +336,8 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
   }
 
   Widget _buildNutritionInfo(RecipeDetail recipe) {
-    final hasNutrition = recipe.caloriesPerServing != null ||
+    final hasNutrition =
+        recipe.caloriesPerServing != null ||
         recipe.proteinPerServing != null ||
         recipe.carbsPerServing != null ||
         recipe.fatPerServing != null ||
@@ -426,9 +434,7 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
         decoration: BoxDecoration(
           color: PremiumTheme.glass(context, elevated: true),
           borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(
-            color: Colors.orange.withValues(alpha: 0.35),
-          ),
+          border: Border.all(color: Colors.orange.withValues(alpha: 0.35)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -502,6 +508,7 @@ class _InfoChip extends StatelessWidget {
 
   /// Icône de la pastille.
   final IconData icon;
+
   /// Libellé de la pastille.
   final String label;
 
