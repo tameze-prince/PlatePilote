@@ -154,6 +154,20 @@
             <groupId>org.ehcache</groupId>
             <artifactId>ehcache</artifactId>
             <classifier>jakarta</classifier>
+            <exclusions>
+                <!-- The Ehcache POM pulls an obsolete JAXB 2.x release hosted on
+                     legacy HTTP-only repositories. Use the Jakarta-compatible
+                     JAXB runtime from Maven Central instead. -->
+                <exclusion>
+                    <groupId>org.glassfish.jaxb</groupId>
+                    <artifactId>jaxb-runtime</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>3.0.2</version>
         </dependency>
 
         <!-- Test -->
