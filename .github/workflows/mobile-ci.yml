@@ -50,7 +50,6 @@ jobs:
           if [ "${#dart_files[@]}" -eq 0 ]; then
             echo "No changed Dart files to format-check."
           else
-            dart format --output=show "${dart_files[@]}"
             dart format --output=none --set-exit-if-changed "${dart_files[@]}"
           fi
 
