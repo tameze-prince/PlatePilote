@@ -75,9 +75,12 @@ class FoodDatasetGeneratorTest(unittest.TestCase):
             self.assertIn("INSERT INTO recipe_ingredients", sql)
             self.assertIn("INSERT INTO recipe_steps", sql)
             self.assertNotIn("cloudflare_url", sql)
-            self.assertNotIn("Prepare all ingredients", sql)
+            self.assertNotIn("Cook according to", sql)
+            self.assertNotIn("Adjust seasoning and serve warm", sql)
             self.assertIn("UNREVIEWED", sql)
             self.assertIn("Recipes: 2000", result.stdout)
+            self.assertIn("Enabled recipes: 1899", result.stdout)
+            self.assertIn("Disabled incomplete recipes: 101", result.stdout)
 
 
 if __name__ == "__main__":
