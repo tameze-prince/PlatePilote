@@ -25,7 +25,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      * @param pageable les paramètres de pagination
      * @return une page de recettes publiques
      */
-    Page<Recipe> findByIsPublicTrueAndDeletedAtIsNull(Pageable pageable);
+    Page<Recipe> findByIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(Pageable pageable);
 
     /**
      * Récupère les recettes pour le tableau de bord (filtrées et triées par pertinence).
@@ -55,7 +55,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      * @param pageable    les paramètres de pagination
      * @return une page de recettes correspondant au type de cuisine
      */
-    Page<Recipe> findByCuisineTypeAndIsPublicTrueAndDeletedAtIsNull(String cuisineType, Pageable pageable);
+    Page<Recipe> findByCuisineTypeAndIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(String cuisineType, Pageable pageable);
 
     /**
      * Filtre les recettes publiques par type de repas (ex: "Petit-déjeuner", "Dîner").
@@ -64,7 +64,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      * @param pageable les paramètres de pagination
      * @return une page de recettes correspondant au type de repas
      */
-    Page<Recipe> findByMealTypeAndIsPublicTrueAndDeletedAtIsNull(String mealType, Pageable pageable);
+    Page<Recipe> findByMealTypeAndIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(String mealType, Pageable pageable);
 
     /**
      * Recherche les recettes publiques par nom ou description (insensible à la casse).
@@ -73,9 +73,9 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      * @param pageable les paramètres de pagination
      * @return une page de recettes correspondant à la recherche
      */
-    @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.deletedAt IS NULL AND " +
+    @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.enabled = true AND r.deletedAt IS NULL AND (" +
            "LOWER(r.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(r.description) LIKE LOWER(CONCAT('%', :query, '%'))")
+           "LOWER(r.description) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<Recipe> searchPublicRecipes(@Param("query") String query, Pageable pageable);
 
     /**
