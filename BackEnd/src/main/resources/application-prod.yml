@@ -10,7 +10,8 @@ spring:
     hibernate:
       ddl-auto: validate
   flyway:
-    ignore-migration-patterns: versioned:117:ignored
+    ignore-migration-patterns:
+      - "versioned:117:ignored"
     placeholders:
       environment: production
   datasource:
