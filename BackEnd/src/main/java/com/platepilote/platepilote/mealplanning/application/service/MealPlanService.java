@@ -339,6 +339,7 @@ public class MealPlanService {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", recipeId.toString()));
         if (recipe.isDeleted()
+                || !Boolean.TRUE.equals(recipe.getEnabled())
                 || (!Boolean.TRUE.equals(recipe.getIsPublic()) && !userId.equals(recipe.getUserId()))) {
             throw new ResourceNotFoundException("Recipe", "id", recipeId.toString());
         }
