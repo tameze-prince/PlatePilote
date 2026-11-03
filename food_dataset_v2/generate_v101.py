@@ -202,41 +202,6 @@ def main():
             categories={"seafood"},
             pattern=r"\b(shellfish|shrimp|prawn|crab|lobster|scallop|oyster|mussel|clam)\b",
         )
-
-        local_img = r.get("local_image", "").strip()
-        candidate_image_url = r.get("image_url", "").strip()
-        image_url = candidate_image_url if candidate_image_url.startswith("https://") else ""
-
-        source = r.get("external_source", "").strip() or "PlatePilot dataset; source not verified"
-        source_esc = esc(source)
-        source_url = r.get("source_url", "").strip() or "NULL"
-
-        name_esc = esc(name)
-        desc_esc = esc(desc)
-        src_url = "NULL" if source_url == "NULL" else f"'{esc(source_url)}'"
-        recipe_sql_parts.append(f"('{recipe_uuid}', '{name_esc}', '{desc_esc}', {prep_time}, {cook_time}, {total_time}, {servings}, '{difficulty}', '{cuisine}', '{meal_type}', '{image_url}', '{source_esc}', TRUE, NULL, {calories}, {protein}, {carbs}, {fat}, {fiber}, {b(contains_gluten)}, {b(contains_lactose)}, {b(contains_nuts)}, {b(contains_soy)}, {b(contains_eggs)}, {b(contains_fish)}, {b(contains_shellfish)}, {b(vegan)}, {b(vegetarian)}, {b(halal)}, {b(kosher)}, {b(low_carb)}, {b(keto)}, {estimated_cost}, {src_url}, 'Ingredient category/name heuristic; verify labels', 'Carbs/fat/fiber estimated from cuisine averages', FALSE, 'UNREVIEWED', 0.350)")
-
-        for ri in ri_list:
-            ing = ingredients.get(ri["ingredient_id"], {})
-            ing_name = ing.get("name", "unknown") if ing else "unknown"
-            ing_name_esc = esc(ing_name)
-            ing_uuid = str(uuid.uuid5(uuid.UUID(recipe_uuid), f"ing_{ri['ingredient_id']}_{ri.get('quantity', '0')}"))
-            qty = ri.get("quantity", "0").strip() or "0"
-            try:
-                qty_num = round(float(qty), 2)
-            except ValueError:
-                qty_num = 0
-            unit = ri.get("unit", "").strip() or "piece"
-            notes = f"canonical ingredient: {ing_name_esc}"
-            sort_order = ri.get("sort_order", "1") if "sort_order" in ri else "1"
-            ingredient_sql_parts.append(f"('{ing_uuid}', '{recipe_uuid}', '{ing_name_esc}', {qty_num}, '{unit}', '{notes}', {sort_order})")
-
-        instructions_raw = r.get("instructions", "").strip()
-        if instructions_raw:
-            steps = [s.strip().lstrip("|").strip() for s in instructions_raw.replace("\n", "|").split("|") if s.strip().lstrip("|").strip()]
-        else:
-            steps = [f"Prepare all ingredients for {name}.", f"Cook according to {cuisine} {meal_type.lower()} method.", "Adjust seasoning and serve warm."]
-
         for idx, step_text in enumerate(steps, 1):
             step_id = str(uuid.uuid5(uuid.UUID(recipe_uuid), f"step_{idx}"))
             step_text_esc = esc(step_text)
@@ -251,14 +216,14 @@ def main():
         f.write(f"-- {out_sql.name}\n")
         f.write(f"-- Generated from food_dataset_v2 ({len(recipes)} recipes)\n\n")
 
-        f.write("INSERT INTO recipes (id, name, description, prep_time_minutes, cook_time_minutes, total_time_minutes, servings, difficulty, cuisine_type, meal_type, image_url, source, is_public, user_id, calories_per_serving, protein_per_serving, carbs_per_serving, fat_per_serving, fiber_per_serving, contains_gluten, contains_lactose, contains_nuts, contains_soy, contains_eggs, contains_fish, contains_shellfish, vegan, vegetarian, halal_friendly, kosher_friendly, low_carb, keto_friendly, estimated_cost, source_url, allergen_source, nutrition_source, verified, verification_status, confidence_score) VALUES\n")
+        f.write("INSERT INTO recipes (id, name, description, prep_time_minutes, cook_time_minutes, total_time_minutes, servings, difficulty, cuisine_type, meal_type, image_url, source, is_public, enabled, user_id, calories_per_serving, protein_per_serving, carbs_per_serving, fat_per_serving, fiber_per_serving, contains_gluten, contains_lactose, contains_nuts, contains_soy, contains_eggs, contains_fish, contains_shellfish, vegan, vegetarian, halal_friendly, kosher_friendly, low_carb, keto_friendly, estimated_cost, source_url, allergen_source, nutrition_source, verified, verification_status, confidence_score) VALUES\n")
         for i, part in enumerate(recipe_sql_parts):
             f.write(part)
             if i < len(recipe_sql_parts) - 1:
                 f.write(",\n")
             else:
                 f.write("\n")
-        f.write("ON CONFLICT (id) DO UPDATE SET updated_at = NOW(), name = EXCLUDED.name, description = EXCLUDED.description, prep_time_minutes = EXCLUDED.prep_time_minutes, cook_time_minutes = EXCLUDED.cook_time_minutes, total_time_minutes = EXCLUDED.total_time_minutes, servings = EXCLUDED.servings, difficulty = EXCLUDED.difficulty, cuisine_type = EXCLUDED.cuisine_type, meal_type = EXCLUDED.meal_type, image_url = EXCLUDED.image_url, source = EXCLUDED.source, is_public = EXCLUDED.is_public, calories_per_serving = EXCLUDED.calories_per_serving, protein_per_serving = EXCLUDED.protein_per_serving, carbs_per_serving = EXCLUDED.carbs_per_serving, fat_per_serving = EXCLUDED.fat_per_serving, fiber_per_serving = EXCLUDED.fiber_per_serving, contains_gluten = EXCLUDED.contains_gluten, contains_lactose = EXCLUDED.contains_lactose, contains_nuts = EXCLUDED.contains_nuts, contains_soy = EXCLUDED.contains_soy, contains_eggs = EXCLUDED.contains_eggs, contains_fish = EXCLUDED.contains_fish, contains_shellfish = EXCLUDED.contains_shellfish, vegan = EXCLUDED.vegan, vegetarian = EXCLUDED.vegetarian, halal_friendly = EXCLUDED.halal_friendly, kosher_friendly = EXCLUDED.kosher_friendly, low_carb = EXCLUDED.low_carb, keto_friendly = EXCLUDED.keto_friendly, estimated_cost = EXCLUDED.estimated_cost, allergen_source = EXCLUDED.allergen_source, nutrition_source = EXCLUDED.nutrition_source, verified = EXCLUDED.verified, verification_status = EXCLUDED.verification_status, confidence_score = EXCLUDED.confidence_score;\n\n")
+        f.write("ON CONFLICT (id) DO UPDATE SET updated_at = NOW(), name = EXCLUDED.name, description = EXCLUDED.description, prep_time_minutes = EXCLUDED.prep_time_minutes, cook_time_minutes = EXCLUDED.cook_time_minutes, total_time_minutes = EXCLUDED.total_time_minutes, servings = EXCLUDED.servings, difficulty = EXCLUDED.difficulty, cuisine_type = EXCLUDED.cuisine_type, meal_type = EXCLUDED.meal_type, image_url = EXCLUDED.image_url, source = EXCLUDED.source, is_public = EXCLUDED.is_public, enabled = EXCLUDED.enabled, calories_per_serving = EXCLUDED.calories_per_serving, protein_per_serving = EXCLUDED.protein_per_serving, carbs_per_serving = EXCLUDED.carbs_per_serving, fat_per_serving = EXCLUDED.fat_per_serving, fiber_per_serving = EXCLUDED.fiber_per_serving, contains_gluten = EXCLUDED.contains_gluten, contains_lactose = EXCLUDED.contains_lactose, contains_nuts = EXCLUDED.contains_nuts, contains_soy = EXCLUDED.contains_soy, contains_eggs = EXCLUDED.contains_eggs, contains_fish = EXCLUDED.contains_fish, contains_shellfish = EXCLUDED.contains_shellfish, vegan = EXCLUDED.vegan, vegetarian = EXCLUDED.vegetarian, halal_friendly = EXCLUDED.halal_friendly, kosher_friendly = EXCLUDED.kosher_friendly, low_carb = EXCLUDED.low_carb, keto_friendly = EXCLUDED.keto_friendly, estimated_cost = EXCLUDED.estimated_cost, allergen_source = EXCLUDED.allergen_source, nutrition_source = EXCLUDED.nutrition_source, verified = EXCLUDED.verified, verification_status = EXCLUDED.verification_status, confidence_score = EXCLUDED.confidence_score;\n\n")
 
         f.write("INSERT INTO recipe_ingredients (id, recipe_id, name, quantity, unit, notes, sort_order) VALUES\n")
         for i, part in enumerate(ingredient_sql_parts):
