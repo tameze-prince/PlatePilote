@@ -328,7 +328,9 @@ public class RecipeService {
                 .nutritionSource(recipe.getNutritionSource())
                 .verified(recipe.getVerified())
                 .verificationStatus(recipe.getVerificationStatus())
-                .confidenceScore(recipe.getConfidenceScore())
+                .confidenceScore(recipe.getConfidenceScore() == null
+                        ? null
+                        : java.math.BigDecimal.valueOf(recipe.getConfidenceScore()))
                 .createdAt(recipe.getCreatedAt())
                 .updatedAt(recipe.getUpdatedAt())
                 .build();
@@ -390,7 +392,9 @@ public class RecipeService {
                 .nutritionSource(recipe.getNutritionSource())
                 .verified(recipe.getVerified())
                 .verificationStatus(recipe.getVerificationStatus())
-                .confidenceScore(recipe.getConfidenceScore())
+                .confidenceScore(recipe.getConfidenceScore() == null
+                        ? null
+                        : java.math.BigDecimal.valueOf(recipe.getConfidenceScore()))
                 .userId(recipe.getUserId())
                 .ingredients(ingredients)
                 .steps(steps)
