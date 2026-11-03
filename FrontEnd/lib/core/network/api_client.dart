@@ -111,7 +111,7 @@ class _AuthTokenInterceptor extends Interceptor {
   Future<_RefreshedTokens> _performRefresh(String refreshToken) async {
     final response = await _refreshDio.post<Map<String, dynamic>>(
       '/auth/refresh',
-      queryParameters: {'refreshToken': refreshToken},
+      data: {'refreshToken': refreshToken},
     );
     final data =
         (response.data?['data'] as Map<String, dynamic>?) ??
