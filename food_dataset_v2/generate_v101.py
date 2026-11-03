@@ -172,36 +172,36 @@ def main():
         ]
         contains_gluten = infer_allergen_flag(
             linked_ingredients,
-            pattern=r"\\b(wheat|barley|rye|semolina|couscous|pasta|noodle|bread|flour|bulgur|seitan|malt|spelt|farro|soy sauce)\\b",
+            pattern=r"\b(wheat|barley|rye|semolina|couscous|pasta|noodle|bread|flour|bulgur|seitan|malt|spelt|farro|soy sauce)\\b",
         )
         contains_lactose = infer_allergen_flag(
             linked_ingredients,
             categories={"dairy"},
-            pattern=r"\\b(milk|cheese|butter|yogurt|cream|whey|casein|ghee)\\b",
+            pattern=r"\b(milk|cheese|butter|yogurt|cream|whey|casein|ghee)\\b",
         )
         contains_nuts = infer_allergen_flag(
             linked_ingredients,
             categories={"nut"},
-            pattern=r"\\b(peanut|almond|cashew|walnut|pistachio|hazelnut|pecan|macadamia|sesame|coconut)\\b",
+            pattern=r"\b(peanut|almond|cashew|walnut|pistachio|hazelnut|pecan|macadamia|sesame|coconut)\\b",
         )
         contains_soy = infer_allergen_flag(
             linked_ingredients,
-            pattern=r"\\b(soy|soya|tofu|edamame|tempeh|miso)\\b",
+            pattern=r"\b(soy|soya|tofu|edamame|tempeh|miso)\\b",
         )
         contains_eggs = infer_allergen_flag(
             linked_ingredients,
             categories={"egg"},
-            pattern=r"\\b(egg|eggs|mayonnaise|meringue)\\b",
+            pattern=r"\b(egg|eggs|mayonnaise|meringue)\\b",
         )
         contains_fish = infer_allergen_flag(
             linked_ingredients,
             categories={"fish"},
-            pattern=r"\\b(salmon|tuna|cod|tilapia|sardine|anchovy)\\b",
+            pattern=r"\b(salmon|tuna|cod|tilapia|sardine|anchovy)\\b",
         )
         contains_shellfish = infer_allergen_flag(
             linked_ingredients,
             categories={"seafood"},
-            pattern=r"\\b(shellfish|shrimp|prawn|crab|lobster|scallop|oyster|mussel|clam)\\b",
+            pattern=r"\b(shellfish|shrimp|prawn|crab|lobster|scallop|oyster|mussel|clam)\\b",
         )
 
         local_img = r.get("local_image", "").strip()
