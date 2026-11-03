@@ -62,7 +62,7 @@ class AuthRepository {
     try {
       final response = await _apiClient.post(
         '/auth/refresh',
-        query: {'refreshToken': refreshToken},
+        data: {'refreshToken': refreshToken},
       );
       return _handleAuthResponse(response);
     } on DioException catch (e) {
