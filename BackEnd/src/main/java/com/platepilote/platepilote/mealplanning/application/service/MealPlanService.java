@@ -141,8 +141,7 @@ public class MealPlanService {
             throw new BusinessRuleViolationException("Meal date must be within the plan's date range");
         }
 
-        Recipe recipe = recipeRepository.findById(request.getRecipeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", request.getRecipeId().toString()));
+        Recipe recipe = requireAccessibleRecipe(userId, request.getRecipeId());
 
         MealPlanEntry entry = MealPlanEntry.builder()
                 .mealPlanId(mealPlanId)
@@ -286,8 +285,7 @@ public class MealPlanService {
 
         securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", entry.getMealPlanId().toString());
 
-        Recipe newRecipe = recipeRepository.findById(newRecipeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", newRecipeId.toString()));
+        Recipe newRecipe = requireAccessibleRecipe(userId, newRecipeId);
 
         entry.setRecipeId(newRecipeId);
         mealPlanEntryRepository.save(entry);
@@ -331,6 +329,20 @@ public class MealPlanService {
 
         mealPlan.softDelete();
         mealPlanRepository.save(mealPlan);
+    }
+
+    /**
+     * A meal plan may reference a public recipe or a non-deleted private recipe
+     * owned by the current user. This check is shared by add and swap operations.
+     */
+    private Recipe requireAccessibleRecipe(UUID userId, UUID recipeId) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", recipeId.toString()));
+        if (recipe.isDeleted()
+                || (!Boolean.TRUE.equals(recipe.getIsPublic()) && !userId.equals(recipe.getUserId()))) {
+            throw new ResourceNotFoundException("Recipe", "id", recipeId.toString());
+        }
+        return recipe;
     }
 
     /**
