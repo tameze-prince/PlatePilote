@@ -50,6 +50,20 @@ public class RecipeResponse {
     private String source;
     /** Visibilité publique. */
     private Boolean isPublic;
+    /** Allergens inferred from ingredient metadata; null means unknown. */
+    private Boolean containsGluten;
+    private Boolean containsLactose;
+    private Boolean containsNuts;
+    private Boolean containsSoy;
+    private Boolean containsEggs;
+    private Boolean containsFish;
+    private Boolean containsShellfish;
+    /** Provenance and review state for nutrition/allergen metadata. */
+    private String allergenSource;
+    private String nutritionSource;
+    private Boolean verified;
+    private String verificationStatus;
+    private BigDecimal confidenceScore;
     /** Identifiant du créateur (null pour les recettes système). */
     private UUID userId;
     /** Liste des ingrédients. */
