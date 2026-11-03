@@ -24,10 +24,7 @@ class AuthRepository {
       );
       return _handleAuthResponse(response);
     } on DioException catch (e) {
-      return AuthResult(
-        success: false,
-        message: _extractMessage(e.response),
-      );
+      return AuthResult(success: false, message: _extractMessage(e.response));
     }
   }
 
@@ -50,10 +47,7 @@ class AuthRepository {
       );
       return _handleAuthResponse(response);
     } on DioException catch (e) {
-      return AuthResult(
-        success: false,
-        message: _extractMessage(e.response),
-      );
+      return AuthResult(success: false, message: _extractMessage(e.response));
     }
   }
 
@@ -66,10 +60,7 @@ class AuthRepository {
       );
       return _handleAuthResponse(response);
     } on DioException catch (e) {
-      return AuthResult(
-        success: false,
-        message: _extractMessage(e.response),
-      );
+      return AuthResult(success: false, message: _extractMessage(e.response));
     }
   }
 
@@ -86,7 +77,10 @@ class AuthRepository {
   /// Renvoie l'email de vérification à l'adresse donnée.
   Future<bool> resendVerification(String email) async {
     try {
-      await _apiClient.post('/auth/resend-verification', data: {'email': email});
+      await _apiClient.post(
+        '/auth/resend-verification',
+        data: {'email': email},
+      );
       return true;
     } on DioException {
       return false;
@@ -96,7 +90,10 @@ class AuthRepository {
   /// Déconnecte l'utilisateur en invalidant le [refreshToken] côté serveur.
   Future<bool> logout({required String refreshToken}) async {
     try {
-      await _apiClient.post('/auth/logout', data: {'refreshToken': refreshToken});
+      await _apiClient.post(
+        '/auth/logout',
+        data: {'refreshToken': refreshToken},
+      );
       return true;
     } on DioException {
       return false;
@@ -110,10 +107,7 @@ class AuthRepository {
       await _apiClient.get('/profile');
       return AuthResult(success: true);
     } on DioException catch (e) {
-      return AuthResult(
-        success: false,
-        message: _extractMessage(e.response),
-      );
+      return AuthResult(success: false, message: _extractMessage(e.response));
     }
   }
 
@@ -227,7 +221,5 @@ class AuthUserData {
 
 /// Provider Riverpod pour [AuthRepository].
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository(
-    ref.watch(apiClientProvider),
-  );
+  return AuthRepository(ref.watch(apiClientProvider));
 });
