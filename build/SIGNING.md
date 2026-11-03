@@ -7,7 +7,7 @@
 
 ## 1. Pourquoi ce fichier
 
-Le projet est livré avec la config par défaut de Flutter (`signingConfigs.getByName("debug")`) qui **signe avec la clé debug** — inutilisable pour le Play Store. Pour publier :
+La configuration Gradle lit désormais `android/key.properties` et n'utilise plus la clé debug pour un build release. Sans keystore de release, le build public échoue volontairement. Pour publier :
 
 1. Générer un keystore privé (`upload-keystore.jks`).
 2. Stocker ses secrets dans `android/key.properties` (jamais commité).
@@ -52,7 +52,7 @@ Le fichier `key.properties` doit figurer dans `.gitignore` (à vérifier, déjà
 
 ## 4. Étape 3 — Brancher dans `android/app/build.gradle.kts`
 
-Le snippet ci-dessous lit `key.properties` et charge le keystore. **Aucune modification n'a été faite ici** pour ne pas casser le build debug ; à appliquer par Prince quand le keystore est prêt.
+Le snippet ci-dessous lit `key.properties` et charge le keystore. Cette configuration est maintenant implémentée dans `FrontEnd/android/app/build.gradle.kts`. Le build debug reste indépendant de la clé de release.
 
 **Ajouter AVANT le bloc `android {` :**
 
@@ -114,7 +114,7 @@ Google exige désormais **Play App Signing** :
 ```bash
 cd ~/Documents/PlatePilote/FrontEnd
 flutter build apk --release \
-  --dart-define=API_BASE_URL=https://api.platepilote.app
+  --dart-define=PLATEPILOT_API_BASE_URL=https://<your-deployed-api-host>/api/v1
 
 # Vérifier la signature
 $ANDROID_HOME/build-tools/<version>/apksigner verify --print-certs \
@@ -125,10 +125,19 @@ La sortie doit afficher ton certificat (CN=PlatePilote, O=PlatePilote, etc.) —
 
 ---
 
-## 7. Checklist Prince
+## 7. CI release workflow
+
+The workflow `.github/workflows/android-release.yml` builds signed APKs and an AAB on tags `v*` or manual dispatch. Configure these repository values in GitHub before running it:
+
+- Repository variable `PLATEPILOT_API_BASE_URL` (public HTTPS API base URL).
+- Secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_PASSWORD`, and `ANDROID_KEY_ALIAS`.
+
+The workflow creates `android/key.properties` and the keystore only inside the ephemeral runner, verifies APK signatures, and uploads artifacts with SHA-256 checksums. Never paste the keystore or passwords into a chat or commit them to Git.
+
+## 8. Checklist Prince
 
 - [ ] `keytool -genkey ...` exécuté, keystore sauvegardé dans un endroit sûr (gestionnaire de mots de passe + backup chiffré).
 - [ ] `android/key.properties` créé, ajouté au `.gitignore`.
-- [ ] Patch `android/app/build.gradle.kts` appliqué (sections ci-dessus).
+- [x] Patch `android/app/build.gradle.kts` appliqué; release signing has no debug fallback.
 - [ ] `play.keytool` upload fait dans Google Play Console.
 - [ ] Premier `flutter build appbundle --release` signé → upload en **internal testing** pour valider.
