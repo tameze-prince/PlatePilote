@@ -9,6 +9,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+  flyway:
+    ignore-migration-patterns: versioned:117:ignored
+    placeholders:
+      environment: production
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
