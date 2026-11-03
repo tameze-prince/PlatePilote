@@ -114,7 +114,6 @@ def main():
     recipe_sql_parts = []
     ingredient_sql_parts = []
     step_sql_parts = []
-    step_uuid_counter = [1]
 
     for r in recipes:
         rid = r["id"]
