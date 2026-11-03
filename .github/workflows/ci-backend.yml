@@ -35,6 +35,11 @@ jobs:
           cache: maven
           cache-dependency-path: BackEnd/pom.xml
 
+      - name: Validate food dataset generator
+        run: |
+          python -m py_compile ../food_dataset_v2/generate_v101.py
+          python -m unittest discover -s ../food_dataset_v2 -p 'test_*.py'
+
       - name: Validate Maven wrapper & POM
         run: ./mvnw -v
 
