@@ -187,7 +187,8 @@ class _AuthTokenInterceptor extends Interceptor {
     } catch (_) {
       handler.next(err);
     }
-  }}
+  }
+}
 
 class _RefreshedTokens {
   const _RefreshedTokens(this.accessToken);
