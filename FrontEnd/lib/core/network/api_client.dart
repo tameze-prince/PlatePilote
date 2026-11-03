@@ -113,12 +113,15 @@ class _AuthTokenInterceptor extends Interceptor {
       '/auth/refresh',
       queryParameters: {'refreshToken': refreshToken},
     );
-    final data = (response.data?['data'] as Map<String, dynamic>?) ??
+    final data =
+        (response.data?['data'] as Map<String, dynamic>?) ??
         const <String, dynamic>{};
     final accessToken = data['accessToken'] as String?;
     final rotatedRefreshToken = data['refreshToken'] as String?;
-    if (accessToken == null || accessToken.isEmpty ||
-        rotatedRefreshToken == null || rotatedRefreshToken.isEmpty) {
+    if (accessToken == null ||
+        accessToken.isEmpty ||
+        rotatedRefreshToken == null ||
+        rotatedRefreshToken.isEmpty) {
       throw const FormatException('Refresh response is missing token fields');
     }
     await onTokensRefreshed(accessToken, rotatedRefreshToken);
@@ -126,7 +129,10 @@ class _AuthTokenInterceptor extends Interceptor {
   }
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     final token = await tokenGetter();
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
@@ -146,7 +152,8 @@ class _AuthTokenInterceptor extends Interceptor {
     // now-revoked refresh token.
     final currentAccessToken = await tokenGetter();
     final authorization = err.requestOptions.headers['Authorization'];
-    final failedAccessToken = authorization is String && authorization.startsWith('Bearer ')
+    final failedAccessToken =
+        authorization is String && authorization.startsWith('Bearer ')
         ? authorization.substring(7)
         : null;
     if (currentAccessToken != null && currentAccessToken != failedAccessToken) {
@@ -180,16 +187,20 @@ class _AuthTokenInterceptor extends Interceptor {
     ErrorInterceptorHandler handler,
   ) async {
     err.requestOptions.headers['Authorization'] = 'Bearer $accessToken';
-    final dio = Dio(BaseOptions(
-      baseUrl: err.requestOptions.baseUrl,
-      connectTimeout: err.requestOptions.connectTimeout,
-      receiveTimeout: err.requestOptions.receiveTimeout,
-      headers: err.requestOptions.headers,
-      contentType: err.requestOptions.contentType,
-    ));
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: err.requestOptions.baseUrl,
+        connectTimeout: err.requestOptions.connectTimeout,
+        receiveTimeout: err.requestOptions.receiveTimeout,
+        headers: err.requestOptions.headers,
+        contentType: err.requestOptions.contentType,
+      ),
+    );
 
     try {
-      final retryResponse = await dio.fetch<Map<String, dynamic>>(err.requestOptions);
+      final retryResponse = await dio.fetch<Map<String, dynamic>>(
+        err.requestOptions,
+      );
       handler.resolve(retryResponse);
     } on DioException catch (retryError) {
       handler.next(retryError);
@@ -209,8 +220,10 @@ class _ErrorLogInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     // ignore: avoid_print
-    print('[API Error] ${err.requestOptions.method} ${err.requestOptions.path} '
-        'status=${err.response?.statusCode ?? "network"} type=${err.type.name}');
+    print(
+      '[API Error] ${err.requestOptions.method} ${err.requestOptions.path} '
+      'status=${err.response?.statusCode ?? "network"} type=${err.type.name}',
+    );
     handler.next(err);
   }
 }
@@ -229,17 +242,29 @@ class ApiClient {
   }
 
   /// Effectue une requête POST vers [path] avec un corps [data] et des paramètres [query] optionnels.
-  Future<Response<dynamic>> post(String path, {Object? data, Map<String, dynamic>? query}) {
+  Future<Response<dynamic>> post(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? query,
+  }) {
     return _dio.post(path, data: data, queryParameters: query);
   }
 
   /// Effectue une requête PUT vers [path] avec un corps [data] et des paramètres [query] optionnels.
-  Future<Response<dynamic>> put(String path, {Object? data, Map<String, dynamic>? query}) {
+  Future<Response<dynamic>> put(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? query,
+  }) {
     return _dio.put(path, data: data, queryParameters: query);
   }
 
   /// Effectue une requête PATCH vers [path] avec un corps [data] et des paramètres [query] optionnels.
-  Future<Response<dynamic>> patch(String path, {Object? data, Map<String, dynamic>? query}) {
+  Future<Response<dynamic>> patch(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? query,
+  }) {
     return _dio.patch(path, data: data, queryParameters: query);
   }
 
