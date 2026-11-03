@@ -114,6 +114,7 @@ def main():
     recipe_sql_parts = []
     ingredient_sql_parts = []
     step_sql_parts = []
+    enabled_recipe_count = 0
 
     for r in recipes:
         rid = r["id"]
@@ -213,6 +214,8 @@ def main():
             and bool(ri_list)
             and bool(steps)
         )
+        if recipe_enabled:
+            enabled_recipe_count += 1
         allergen_source = (
             "Ingredient category/name heuristic; verify labels"
             if linked_ingredients and all(item is not None for item in linked_ingredients)
@@ -334,6 +337,8 @@ def main():
     print(f"  Steps: {len(step_sql_parts)}")
     images_linked = sum(1 for item in mapping if item["image_url"])
     print(f"  Recipes with external HTTPS images: {images_linked}")
+    print(f"  Enabled recipes: {enabled_recipe_count}")
+    print(f"  Disabled incomplete recipes: {len(recipes) - enabled_recipe_count}")
 
 if __name__ == "__main__":
     main()
