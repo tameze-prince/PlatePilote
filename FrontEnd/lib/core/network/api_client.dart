@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,10 +16,18 @@ String resolveApiBaseUrl() {
     'PLATEPILOT_API_BASE_URL',
     defaultValue: '',
   );
-  if (fromBuild.isNotEmpty) return fromBuild;
   final fromEnv = dotenv.env['PLATEPILOT_API_BASE_URL'];
-  if (fromEnv != null && fromEnv.isNotEmpty) return fromEnv;
-  return '';
+  final configured = fromBuild.isNotEmpty ? fromBuild : (fromEnv ?? '');
+  if (configured.isEmpty) return '';
+
+  final uri = Uri.tryParse(configured);
+  if (uri == null || !uri.hasAuthority || uri.host.isEmpty) {
+    throw StateError('PLATEPILOT_API_BASE_URL must be an absolute URL');
+  }
+  if (kReleaseMode && uri.scheme != 'https') {
+    throw StateError('Release builds require an HTTPS API URL');
+  }
+  return configured;
 }
 
 /// Vérifie que la configuration est présente et lève une erreur explicite
