@@ -172,36 +172,36 @@ def main():
         ]
         contains_gluten = infer_allergen_flag(
             linked_ingredients,
-            pattern=r"\b(wheat|barley|rye|semolina|couscous|pasta|noodle|bread|flour|bulgur|seitan|malt|spelt|farro|soy sauce)\\b",
+            pattern=r"\b(wheat|barley|rye|semolina|couscous|pasta|noodle|bread|flour|bulgur|seitan|malt|spelt|farro|soy sauce)\b",
         )
         contains_lactose = infer_allergen_flag(
             linked_ingredients,
             categories={"dairy"},
-            pattern=r"\b(milk|cheese|butter|yogurt|cream|whey|casein|ghee)\\b",
+            pattern=r"\b(milk|cheese|butter|yogurt|cream|whey|casein|ghee)\b",
         )
         contains_nuts = infer_allergen_flag(
             linked_ingredients,
             categories={"nut"},
-            pattern=r"\b(peanut|almond|cashew|walnut|pistachio|hazelnut|pecan|macadamia|sesame|coconut)\\b",
+            pattern=r"\b(peanut|almond|cashew|walnut|pistachio|hazelnut|pecan|macadamia|sesame|coconut)\b",
         )
         contains_soy = infer_allergen_flag(
             linked_ingredients,
-            pattern=r"\b(soy|soya|tofu|edamame|tempeh|miso)\\b",
+            pattern=r"\b(soy|soya|tofu|edamame|tempeh|miso)\b",
         )
         contains_eggs = infer_allergen_flag(
             linked_ingredients,
             categories={"egg"},
-            pattern=r"\b(egg|eggs|mayonnaise|meringue)\\b",
+            pattern=r"\b(egg|eggs|mayonnaise|meringue)\b",
         )
         contains_fish = infer_allergen_flag(
             linked_ingredients,
             categories={"fish"},
-            pattern=r"\b(salmon|tuna|cod|tilapia|sardine|anchovy)\\b",
+            pattern=r"\b(salmon|tuna|cod|tilapia|sardine|anchovy)\b",
         )
         contains_shellfish = infer_allergen_flag(
             linked_ingredients,
             categories={"seafood"},
-            pattern=r"\b(shellfish|shrimp|prawn|crab|lobster|scallop|oyster|mussel|clam)\\b",
+            pattern=r"\b(shellfish|shrimp|prawn|crab|lobster|scallop|oyster|mussel|clam)\b",
         )
 
         local_img = r.get("local_image", "").strip()
@@ -249,8 +249,8 @@ def main():
 
     out_sql = next_migration_output()
     with open(out_sql, "w", encoding="utf-8") as f:
-        f.write(f"-- {out_sql.name}\\n")
-        f.write(f"-- Generated from food_dataset_v2 ({len(recipes)} recipes)\\n\\n")
+        f.write(f"-- {out_sql.name}\n")
+        f.write(f"-- Generated from food_dataset_v2 ({len(recipes)} recipes)\n\n")
 
         f.write("INSERT INTO recipes (id, name, description, prep_time_minutes, cook_time_minutes, total_time_minutes, servings, difficulty, cuisine_type, meal_type, image_url, source, is_public, user_id, calories_per_serving, protein_per_serving, carbs_per_serving, fat_per_serving, fiber_per_serving, contains_gluten, contains_lactose, contains_nuts, contains_soy, contains_eggs, contains_fish, contains_shellfish, vegan, vegetarian, halal_friendly, kosher_friendly, low_carb, keto_friendly, estimated_cost, source_url, allergen_source, nutrition_source, verified, verification_status, confidence_score) VALUES\n")
         for i, part in enumerate(recipe_sql_parts):
