@@ -83,8 +83,8 @@
 
 ### Phase 5 — CI, Distribution, And Deployment
 
-- [ ] Make mobile CI fail on `flutter analyze` issues.
-- [ ] Add signed Android release workflow using GitHub secrets.
+- [x] Make mobile CI fail on `flutter analyze` issues.
+- [x] Add signed Android release workflow using GitHub secrets.
 - [ ] Add Firebase App Distribution step guarded by secrets.
 - [ ] Verify Railway deployment config and env var checklist.
 - [ ] Sync landing legal pages and sitemap with canonical docs.
@@ -133,3 +133,25 @@ Phase 3 (PostHog + Crashlytics) requires:
   non-fatal reporting.
 
 Phase 4 / 5 must follow once secrets are reachable.
+
+
+---
+
+## Execution update — 2026-11-04 (release/production-readiness)
+
+The checklist above records historical work and verification captured on 2026-07-14. Those results are not treated as proof of the current branch's health.
+
+Implemented on the current release-readiness branch:
+- Flutter CI no longer suppresses analyzer failures and checks formatting on changed Dart files, avoiding an unrelated mass-format of legacy files.
+- A signed Android release workflow now builds split APKs and an AAB from a version tag or manual dispatch.
+- Release signing reads the local ignored key.properties file; there is no debug-signing fallback.
+- The release workflow requires the repository variable PLATEPILOT_API_BASE_URL and the four ANDROID_KEYSTORE_* / ANDROID_KEY_* secrets documented in build/SIGNING.md.
+- The Android build helper requires an explicit API base URL and requires a release keystore for prod builds.
+
+Not yet verified:
+- Current CI after the latest code changes.
+- A signed APK/AAB from a real owner-controlled keystore.
+- Runtime behavior against a deployed production HTTPS API.
+- Firebase/FCM, SMTP, R2, Stripe, and external AI integrations with real provider credentials.
+
+Do not distribute an artifact from the debug CI workflow as a public release. The public release artifact must come from android-release.yml after the owner has configured the signing and API secrets.
