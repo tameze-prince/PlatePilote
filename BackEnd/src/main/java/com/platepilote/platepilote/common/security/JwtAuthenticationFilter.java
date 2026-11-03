@@ -9,7 +9,6 @@ package com.platepilote.platepilote.common.security;
  *
  * <p>Flux : Requête cliente → {@code JwtAuthenticationFilter} → {@code SecurityConfig} → Contrôleur</p>
  */
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String userEmail;
         try {
             userEmail = jwtService.extractUsername(jwt);
-        } catch (JwtException | IllegalArgumentException exception) {
+        } catch (RuntimeException exception) {
             filterChain.doFilter(request, response);
             return;
         }
