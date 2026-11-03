@@ -209,12 +209,13 @@ def main():
         image_url = candidate_image_url if candidate_image_url.startswith("https://") else ""
 
         source = r.get("external_source", "").strip() or "PlatePilot dataset; source not verified"
+        source_esc = esc(source)
         source_url = r.get("source_url", "").strip() or "NULL"
 
         name_esc = esc(name)
         desc_esc = esc(desc)
         src_url = "NULL" if source_url == "NULL" else f"'{esc(source_url)}'"
-        recipe_sql_parts.append(f"('{recipe_uuid}', '{name_esc}', '{desc_esc}', {prep_time}, {cook_time}, {total_time}, {servings}, '{difficulty}', '{cuisine}', '{meal_type}', '{image_url}', '{source}', TRUE, NULL, {calories}, {protein}, {carbs}, {fat}, {fiber}, {b(contains_gluten)}, {b(contains_lactose)}, {b(contains_nuts)}, {b(contains_soy)}, {b(contains_eggs)}, {b(contains_fish)}, {b(contains_shellfish)}, {b(vegan)}, {b(vegetarian)}, {b(halal)}, {b(kosher)}, {b(low_carb)}, {b(keto)}, {estimated_cost}, {src_url}, 'Ingredient category/name heuristic; verify labels', 'Carbs/fat/fiber estimated from cuisine averages', FALSE, 'UNREVIEWED', 0.350)")
+        recipe_sql_parts.append(f"('{recipe_uuid}', '{name_esc}', '{desc_esc}', {prep_time}, {cook_time}, {total_time}, {servings}, '{difficulty}', '{cuisine}', '{meal_type}', '{image_url}', '{source_esc}', TRUE, NULL, {calories}, {protein}, {carbs}, {fat}, {fiber}, {b(contains_gluten)}, {b(contains_lactose)}, {b(contains_nuts)}, {b(contains_soy)}, {b(contains_eggs)}, {b(contains_fish)}, {b(contains_shellfish)}, {b(vegan)}, {b(vegetarian)}, {b(halal)}, {b(kosher)}, {b(low_carb)}, {b(keto)}, {estimated_cost}, {src_url}, 'Ingredient category/name heuristic; verify labels', 'Carbs/fat/fiber estimated from cuisine averages', FALSE, 'UNREVIEWED', 0.350)")
 
         for ri in ri_list:
             ing = ingredients.get(ri["ingredient_id"], {})
