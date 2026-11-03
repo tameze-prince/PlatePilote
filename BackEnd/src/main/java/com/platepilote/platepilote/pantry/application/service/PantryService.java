@@ -169,6 +169,10 @@ public class PantryService {
      * @param amount quantité consommée
      */
     public void consumeItem(UUID userId, UUID itemId, java.math.BigDecimal amount) {
+        if (amount == null || amount.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+            throw new BusinessRuleViolationException("Consumed amount must be greater than zero");
+        }
+
         PantryItem item = pantryItemRepository.findById(itemId)
                 .orElseThrow(() -> new ResourceNotFoundException("PantryItem", "id", itemId.toString()));
 
