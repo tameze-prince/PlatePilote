@@ -202,12 +202,89 @@ def main():
             categories={"seafood"},
             pattern=r"\b(shellfish|shrimp|prawn|crab|lobster|scallop|oyster|mussel|clam)\b",
         )
+        instructions_raw = r.get("instructions", "").strip()
+        steps = [
+            step.strip().lstrip("|").strip()
+            for step in instructions_raw.replace("\n", "|").split("|")
+            if step.strip().lstrip("|").strip()
+        ] if instructions_raw else []
+        recipe_enabled = (
+            r.get("enabled", "true").strip().lower() == "true"
+            and bool(ri_list)
+            and bool(steps)
+        )
+        allergen_source = (
+            "Ingredient category/name heuristic; verify labels"
+            if linked_ingredients and all(item is not None for item in linked_ingredients)
+            else "Incomplete ingredient data; unknown"
+        )
+
+        local_img = r.get("local_image", "").strip()
+        candidate_image_url = r.get("image_url", "").strip()
+        image_url = candidate_image_url if candidate_image_url.startswith("https://") else ""
+        image_url_esc = esc(image_url)
+
+        source = r.get("external_source", "").strip() or "PlatePilot dataset; source not verified"
+        source_esc = esc(source)
+        source_url = r.get("source_url", "").strip() or "NULL"
+        src_url = "NULL" if source_url == "NULL" else f"'{esc(source_url)}'"
+
+        name_esc = esc(name)
+        desc_esc = esc(desc)
+        allergen_source_esc = esc(allergen_source)
+        recipe_sql_parts.append(
+            f"('{recipe_uuid}', '{name_esc}', '{desc_esc}', {prep_time}, {cook_time}, "
+            f"{total_time}, {servings}, '{difficulty}', '{cuisine}', '{meal_type}', "
+            f"'{image_url_esc}', '{source_esc}', TRUE, {b(recipe_enabled)}, NULL, "
+            f"{calories}, {protein}, {carbs}, {fat}, {fiber}, "
+            f"{b(contains_gluten)}, {b(contains_lactose)}, {b(contains_nuts)}, "
+            f"{b(contains_soy)}, {b(contains_eggs)}, {b(contains_fish)}, "
+            f"{b(contains_shellfish)}, {b(vegan)}, {b(vegetarian)}, {b(halal)}, "
+            f"{b(kosher)}, {b(low_carb)}, {b(keto)}, {estimated_cost}, {src_url}, "
+            f"'{allergen_source_esc}', 'Mixed sourced/estimated values; verify before use', "
+            "FALSE, 'UNREVIEWED', 0.350)"
+        )
+
+        for ri in ri_list:
+            ing = ingredients.get(ri["ingredient_id"], {})
+            ing_name = ing.get("name", "unknown") if ing else "unknown"
+            ing_name_esc = esc(ing_name)
+            ing_uuid = str(
+                uuid.uuid5(
+                    uuid.UUID(recipe_uuid),
+                    f"ing_{ri['ingredient_id']}_{ri.get('quantity', '0')}",
+                )
+            )
+            qty = ri.get("quantity", "0").strip() or "0"
+            try:
+                qty_num = round(float(qty), 2)
+            except ValueError:
+                qty_num = 0
+            unit = esc(ri.get("unit", "").strip() or "piece")
+            notes = f"canonical ingredient: {ing_name_esc}"
+            try:
+                sort_order = int(ri.get("sort_order", "1") or "1")
+            except ValueError:
+                sort_order = 1
+            ingredient_sql_parts.append(
+                f"('{ing_uuid}', '{recipe_uuid}', '{ing_name_esc}', {qty_num}, "
+                f"'{unit}', '{notes}', {sort_order})"
+            )
+
         for idx, step_text in enumerate(steps, 1):
             step_id = str(uuid.uuid5(uuid.UUID(recipe_uuid), f"step_{idx}"))
             step_text_esc = esc(step_text)
-            step_sql_parts.append(f"('{step_id}', '{recipe_uuid}', {idx}, '{step_text_esc}', NULL)")
+            step_sql_parts.append(
+                f"('{step_id}', '{recipe_uuid}', {idx}, '{step_text_esc}', NULL)"
+            )
 
-        mapping.append({"recipe_id": rid, "uuid": recipe_uuid, "name": name, "local_image": local_img, "image_url": image_url})
+        mapping.append({
+            "recipe_id": rid,
+            "uuid": recipe_uuid,
+            "name": name,
+            "local_image": local_img,
+            "image_url": image_url,
+        })
 
     print("Writing SQL...")
 
