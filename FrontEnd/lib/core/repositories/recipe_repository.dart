@@ -143,6 +143,22 @@ class RecipeDetail {
     this.isPublic,
     this.userId,
     this.caloriesPerServing,
+    this.proteinPerServing,
+    this.carbsPerServing,
+    this.fatPerServing,
+    this.fiberPerServing,
+    this.containsGluten,
+    this.containsLactose,
+    this.containsNuts,
+    this.containsSoy,
+    this.containsEggs,
+    this.containsFish,
+    this.containsShellfish,
+    this.allergenSource,
+    this.nutritionSource,
+    this.verified,
+    this.verificationStatus,
+    this.confidenceScore,
     this.ingredients = const [],
     this.steps = const [],
     this.createdAt,
@@ -191,8 +207,26 @@ class RecipeDetail {
   /// Identifiant du créateur.
   final String? userId;
 
-  /// Calories par portion.
+  /// Nutrition values per serving.
   final int? caloriesPerServing;
+  final double? proteinPerServing;
+  final double? carbsPerServing;
+  final double? fatPerServing;
+  final double? fiberPerServing;
+
+  /// Nullable allergen flags; null means the data is unknown.
+  final bool? containsGluten;
+  final bool? containsLactose;
+  final bool? containsNuts;
+  final bool? containsSoy;
+  final bool? containsEggs;
+  final bool? containsFish;
+  final bool? containsShellfish;
+  final String? allergenSource;
+  final String? nutritionSource;
+  final bool? verified;
+  final String? verificationStatus;
+  final double? confidenceScore;
 
   /// Liste des ingrédients.
   final List<RecipeIngredient> ingredients;
@@ -222,7 +256,23 @@ class RecipeDetail {
       source: json['source'] as String?,
       isPublic: json['isPublic'] as bool?,
       userId: json['userId'] as String?,
-      caloriesPerServing: json['caloriesPerServing'] as int?,
+      caloriesPerServing: (json['caloriesPerServing'] as num?)?.round(),
+      proteinPerServing: (json['proteinPerServing'] as num?)?.toDouble(),
+      carbsPerServing: (json['carbsPerServing'] as num?)?.toDouble(),
+      fatPerServing: (json['fatPerServing'] as num?)?.toDouble(),
+      fiberPerServing: (json['fiberPerServing'] as num?)?.toDouble(),
+      containsGluten: json['containsGluten'] as bool?,
+      containsLactose: json['containsLactose'] as bool?,
+      containsNuts: json['containsNuts'] as bool?,
+      containsSoy: json['containsSoy'] as bool?,
+      containsEggs: json['containsEggs'] as bool?,
+      containsFish: json['containsFish'] as bool?,
+      containsShellfish: json['containsShellfish'] as bool?,
+      allergenSource: json['allergenSource'] as String?,
+      nutritionSource: json['nutritionSource'] as String?,
+      verified: json['verified'] as bool?,
+      verificationStatus: json['verificationStatus'] as String?,
+      confidenceScore: (json['confidenceScore'] as num?)?.toDouble(),
       ingredients: (json['ingredients'] as List?)
               ?.map((e) => RecipeIngredient.fromJson(e as Map<String, dynamic>))
               .toList() ??
