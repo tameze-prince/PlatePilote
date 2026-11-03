@@ -185,7 +185,7 @@ public class RecommendationEngine {
                 ? Math.max(30, Math.min(100, Math.max(1, limit) * 5))
                 : Math.max(20, Math.min(60, Math.max(1, limit) * 5));
         List<Recipe> candidates = maxTime == null
-                ? recipeRepository.findByIsPublicTrueAndDeletedAtIsNull(PageRequest.of(0, candidateLimit)).getContent()
+                ? recipeRepository.findByIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(PageRequest.of(0, candidateLimit)).getContent()
                 : recipeRepository.findQuickMeals(maxTime, PageRequest.of(0, candidateLimit)).getContent();
 
         if (candidates.isEmpty()) {
