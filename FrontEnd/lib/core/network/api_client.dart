@@ -113,7 +113,7 @@ class _AuthTokenInterceptor extends Interceptor {
       throw const FormatException('Refresh response is missing token fields');
     }
     await onTokensRefreshed(accessToken, rotatedRefreshToken);
-    return _RefreshedTokens(accessToken, rotatedRefreshToken);
+    return _RefreshedTokens(accessToken);
   }
 
   @override
@@ -132,6 +132,19 @@ class _AuthTokenInterceptor extends Interceptor {
       return;
     }
 
+    // A previous request may already have rotated the token while this 401
+    // was in flight. Retry with the latest access token instead of reusing a
+    // now-revoked refresh token.
+    final currentAccessToken = await tokenGetter();
+    final authorization = err.requestOptions.headers['Authorization'];
+    final failedAccessToken = authorization is String && authorization.startsWith('Bearer ')
+        ? authorization.substring(7)
+        : null;
+    if (currentAccessToken != null && currentAccessToken != failedAccessToken) {
+      await _retryWithAccessToken(err, currentAccessToken, handler);
+      return;
+    }
+
     final refreshToken = await refreshTokenGetter();
     if (refreshToken == null) {
       await onRefreshFailed();
@@ -139,37 +152,47 @@ class _AuthTokenInterceptor extends Interceptor {
       return;
     }
 
+    late final _RefreshedTokens refreshed;
     try {
-      // All requests that receive 401 together share one refresh operation.
-      // This prevents rotating refresh tokens from racing each other.
-      final refreshed = await _refreshTokens(refreshToken);
-
-      // Retry the original request with the new token using the original Dio
-      err.requestOptions.headers['Authorization'] = 'Bearer ${refreshed.accessToken}';
-      
-      // Use the Dio from the request options to retry
-      final dio = Dio(BaseOptions(
-        baseUrl: err.requestOptions.baseUrl,
-        connectTimeout: err.requestOptions.connectTimeout,
-        receiveTimeout: err.requestOptions.receiveTimeout,
-        headers: err.requestOptions.headers,
-        contentType: err.requestOptions.contentType,
-      ));
-      
-      final retryResponse = await dio.fetch<Map<String, dynamic>>(err.requestOptions);
-      handler.resolve(retryResponse);
+      // Concurrent 401 responses share a single refresh-token rotation.
+      refreshed = await _refreshTokens(refreshToken);
     } catch (_) {
       await onRefreshFailed();
       handler.next(err);
+      return;
     }
+
+    await _retryWithAccessToken(err, refreshed.accessToken, handler);
   }
-}
+
+  Future<void> _retryWithAccessToken(
+    DioException err,
+    String accessToken,
+    ErrorInterceptorHandler handler,
+  ) async {
+    err.requestOptions.headers['Authorization'] = 'Bearer $accessToken';
+    final dio = Dio(BaseOptions(
+      baseUrl: err.requestOptions.baseUrl,
+      connectTimeout: err.requestOptions.connectTimeout,
+      receiveTimeout: err.requestOptions.receiveTimeout,
+      headers: err.requestOptions.headers,
+      contentType: err.requestOptions.contentType,
+    ));
+
+    try {
+      final retryResponse = await dio.fetch<Map<String, dynamic>>(err.requestOptions);
+      handler.resolve(retryResponse);
+    } on DioException catch (retryError) {
+      handler.next(retryError);
+    } catch (_) {
+      handler.next(err);
+    }
+  }}
 
 class _RefreshedTokens {
-  const _RefreshedTokens(this.accessToken, this.refreshToken);
+  const _RefreshedTokens(this.accessToken);
 
   final String accessToken;
-  final String refreshToken;
 }
 
 class _ErrorLogInterceptor extends Interceptor {
