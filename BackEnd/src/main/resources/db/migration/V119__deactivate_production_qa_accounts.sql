@@ -7,7 +7,8 @@ BEGIN
     IF '${environment}' = 'production' THEN
         UPDATE our_user
         SET enabled = FALSE,
-            deleted_at = COALESCE(deleted_at, CURRENT_TIMESTAMP)
+            deleted_at = COALESCE(deleted_at, CURRENT_TIMESTAMP),
+            updated_at = CURRENT_TIMESTAMP
         WHERE email LIKE '%@platepilote.test';
     END IF;
 END $$;
