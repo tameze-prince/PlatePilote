@@ -16,7 +16,7 @@ def next_migration_output():
     """Choose the next free Flyway version instead of colliding with an existing migration."""
     versions = []
     for path in MIGRATION_DIR.glob("V*__*.sql"):
-        match = re.match(r"V(\\d+)__", path.name)
+        match = re.match(r"V(\d+)__", path.name)
         if match:
             versions.append(int(match.group(1)))
     next_version = max(versions, default=0) + 1
@@ -244,21 +244,21 @@ def main():
 
         mapping.append({"recipe_id": rid, "uuid": recipe_uuid, "name": name, "local_image": local_img, "image_url": image_url})
 
-    print(f"\nCopying images... {renamed} new, {len(recipes) - renamed} already existed")
     print("Writing SQL...")
 
-    with open(OUT_SQL, "w", encoding="utf-8") as f:
-        f.write("-- V101__merge_food_dataset.sql\n")
-        f.write("-- Generated from food_dataset_v2 (2000 recipes)\n\n")
+    out_sql = next_migration_output()
+    with open(out_sql, "w", encoding="utf-8") as f:
+        f.write(f"-- {out_sql.name}\\n")
+        f.write(f"-- Generated from food_dataset_v2 ({len(recipes)} recipes)\\n\\n")
 
-        f.write("INSERT INTO recipes (id, name, description, prep_time_minutes, cook_time_minutes, total_time_minutes, servings, difficulty, cuisine_type, meal_type, image_url, source, is_public, user_id, calories_per_serving, protein_per_serving, carbs_per_serving, fat_per_serving, fiber_per_serving, contains_gluten, contains_lactose, contains_nuts, contains_soy, contains_eggs, contains_fish, contains_shellfish, vegan, vegetarian, halal_friendly, kosher_friendly, low_carb, keto_friendly, estimated_cost, source_url) VALUES\n")
+        f.write("INSERT INTO recipes (id, name, description, prep_time_minutes, cook_time_minutes, total_time_minutes, servings, difficulty, cuisine_type, meal_type, image_url, source, is_public, user_id, calories_per_serving, protein_per_serving, carbs_per_serving, fat_per_serving, fiber_per_serving, contains_gluten, contains_lactose, contains_nuts, contains_soy, contains_eggs, contains_fish, contains_shellfish, vegan, vegetarian, halal_friendly, kosher_friendly, low_carb, keto_friendly, estimated_cost, source_url, allergen_source, nutrition_source, verified, verification_status, confidence_score) VALUES\n")
         for i, part in enumerate(recipe_sql_parts):
             f.write(part)
             if i < len(recipe_sql_parts) - 1:
                 f.write(",\n")
             else:
                 f.write("\n")
-        f.write("ON CONFLICT (id) DO UPDATE SET updated_at = NOW(), name = EXCLUDED.name, description = EXCLUDED.description, prep_time_minutes = EXCLUDED.prep_time_minutes, cook_time_minutes = EXCLUDED.cook_time_minutes, total_time_minutes = EXCLUDED.total_time_minutes, servings = EXCLUDED.servings, difficulty = EXCLUDED.difficulty, cuisine_type = EXCLUDED.cuisine_type, meal_type = EXCLUDED.meal_type, image_url = EXCLUDED.image_url, source = EXCLUDED.source, is_public = EXCLUDED.is_public, calories_per_serving = EXCLUDED.calories_per_serving, protein_per_serving = EXCLUDED.protein_per_serving, carbs_per_serving = EXCLUDED.carbs_per_serving, fat_per_serving = EXCLUDED.fat_per_serving, fiber_per_serving = EXCLUDED.fiber_per_serving, contains_gluten = EXCLUDED.contains_gluten, contains_lactose = EXCLUDED.contains_lactose, contains_nuts = EXCLUDED.contains_nuts, contains_soy = EXCLUDED.contains_soy, contains_eggs = EXCLUDED.contains_eggs, contains_fish = EXCLUDED.contains_fish, contains_shellfish = EXCLUDED.contains_shellfish, vegan = EXCLUDED.vegan, vegetarian = EXCLUDED.vegetarian, halal_friendly = EXCLUDED.halal_friendly, kosher_friendly = EXCLUDED.kosher_friendly, low_carb = EXCLUDED.low_carb, keto_friendly = EXCLUDED.keto_friendly, estimated_cost = EXCLUDED.estimated_cost;\n\n")
+        f.write("ON CONFLICT (id) DO UPDATE SET updated_at = NOW(), name = EXCLUDED.name, description = EXCLUDED.description, prep_time_minutes = EXCLUDED.prep_time_minutes, cook_time_minutes = EXCLUDED.cook_time_minutes, total_time_minutes = EXCLUDED.total_time_minutes, servings = EXCLUDED.servings, difficulty = EXCLUDED.difficulty, cuisine_type = EXCLUDED.cuisine_type, meal_type = EXCLUDED.meal_type, image_url = EXCLUDED.image_url, source = EXCLUDED.source, is_public = EXCLUDED.is_public, calories_per_serving = EXCLUDED.calories_per_serving, protein_per_serving = EXCLUDED.protein_per_serving, carbs_per_serving = EXCLUDED.carbs_per_serving, fat_per_serving = EXCLUDED.fat_per_serving, fiber_per_serving = EXCLUDED.fiber_per_serving, contains_gluten = EXCLUDED.contains_gluten, contains_lactose = EXCLUDED.contains_lactose, contains_nuts = EXCLUDED.contains_nuts, contains_soy = EXCLUDED.contains_soy, contains_eggs = EXCLUDED.contains_eggs, contains_fish = EXCLUDED.contains_fish, contains_shellfish = EXCLUDED.contains_shellfish, vegan = EXCLUDED.vegan, vegetarian = EXCLUDED.vegetarian, halal_friendly = EXCLUDED.halal_friendly, kosher_friendly = EXCLUDED.kosher_friendly, low_carb = EXCLUDED.low_carb, keto_friendly = EXCLUDED.keto_friendly, estimated_cost = EXCLUDED.estimated_cost, allergen_source = EXCLUDED.allergen_source, nutrition_source = EXCLUDED.nutrition_source, verified = EXCLUDED.verified, verification_status = EXCLUDED.verification_status, confidence_score = EXCLUDED.confidence_score;\n\n")
 
         f.write("INSERT INTO recipe_ingredients (id, recipe_id, name, quantity, unit, notes, sort_order) VALUES\n")
         for i, part in enumerate(ingredient_sql_parts):
