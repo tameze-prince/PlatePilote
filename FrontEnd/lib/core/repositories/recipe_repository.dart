@@ -273,11 +273,13 @@ class RecipeDetail {
       verified: json['verified'] as bool?,
       verificationStatus: json['verificationStatus'] as String?,
       confidenceScore: (json['confidenceScore'] as num?)?.toDouble(),
-      ingredients: (json['ingredients'] as List?)
+      ingredients:
+          (json['ingredients'] as List?)
               ?.map((e) => RecipeIngredient.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      steps: (json['steps'] as List?)
+      steps:
+          (json['steps'] as List?)
               ?.map((e) => RecipeStep.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
