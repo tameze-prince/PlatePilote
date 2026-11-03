@@ -132,7 +132,7 @@ public class RecipeController {
      */
     @GetMapping("/public/{recipeId}")
     public ResponseEntity<ApiResponse<RecipeResponse>> getPublicRecipe(@PathVariable UUID recipeId) {
-        RecipeResponse recipe = recipeService.getRecipeById(recipeId);
+        RecipeResponse recipe = recipeService.getPublicRecipeById(recipeId);
         return ResponseEntity.ok(ApiResponse.success(recipe));
     }
 
@@ -166,7 +166,8 @@ public class RecipeController {
     public ResponseEntity<ApiResponse<RecipeResponse>> getMyRecipe(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID recipeId) {
-        RecipeResponse recipe = recipeService.getRecipeById(recipeId);
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        RecipeResponse recipe = recipeService.getUserRecipeById(userId, recipeId);
         return ResponseEntity.ok(ApiResponse.success(recipe));
     }
 
