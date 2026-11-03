@@ -1,6 +1,7 @@
 package com.platepilote.platepilote.pantry.application.service;
 
 import com.platepilote.platepilote.common.dto.PagedResponse;
+import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
 import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.pantry.application.dto.PantryItemRequest;
