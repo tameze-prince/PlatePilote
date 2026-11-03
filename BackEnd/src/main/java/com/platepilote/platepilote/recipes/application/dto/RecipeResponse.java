@@ -58,6 +58,12 @@ public class RecipeResponse {
     private Boolean containsEggs;
     private Boolean containsFish;
     private Boolean containsShellfish;
+    /** Nutrition values per serving; source and confidence are exposed separately. */
+    private Integer caloriesPerServing;
+    private Double proteinPerServing;
+    private Double carbsPerServing;
+    private Double fatPerServing;
+    private Double fiberPerServing;
     /** Provenance and review state for nutrition/allergen metadata. */
     private String allergenSource;
     private String nutritionSource;
