@@ -11,6 +11,9 @@ import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_typography.dart';
 import '../../core/providers/theme_provider.dart';
 import '../../core/providers/app_session_provider.dart';
+import '../auth/providers/auth_provider.dart';
+import '../profile/providers/profile_provider.dart';
+import '../premium/subscription_provider.dart';
 import '../../core/widgets/modern_components.dart';
 import '../../core/widgets/modern_animations.dart';
 import '../../core/widgets/floating_components.dart';
@@ -29,6 +32,20 @@ class SettingsScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final isSystem = themeMode == ThemeMode.system;
     final l10n = AppLocalizations.of(context);
+    final authState = ref.watch(authProvider);
+    final profile = ref.watch(profileProvider);
+    final subscription = ref.watch(subscriptionProvider);
+    final accountName = profile.displayName.trim().isNotEmpty
+        ? profile.displayName
+        : (authState.name?.trim().isNotEmpty == true
+            ? authState.name!
+            : 'Your account');
+    final accountEmail = authState.email ?? profile.email;
+    final planLabel = subscription.isLoading
+        ? 'Loading plan…'
+        : subscription.isPremium
+            ? 'PlatePilote Premium'
+            : 'Free plan';
 
     String themeLabel;
     if (isSystem) {
@@ -104,7 +121,7 @@ class SettingsScreen extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Sarah Parker',
+                                  accountName,
                                   style: AppTypography.headlineSmall.copyWith(
                                     color: isDark
                                         ? AppColors.darkOnSurface
@@ -113,8 +130,17 @@ class SettingsScreen extends ConsumerWidget {
                                   ),
                                 ),
                                 const SizedBox(height: 2),
+                                if (accountEmail.isNotEmpty)
+                                  Text(
+                                    accountEmail,
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: isDark
+                                          ? AppColors.darkOnSurfaceVariant
+                                          : AppColors.onSurfaceVariant,
+                                    ),
+                                  ),
                                 Text(
-                                  'Premium trial - 6 days left',
+                                  planLabel,
                                   style: AppTypography.bodyMedium.copyWith(
                                     color: isDark
                                         ? AppColors.darkOnSurfaceVariant
@@ -385,7 +411,10 @@ class SettingsScreen extends ConsumerWidget {
                       title: 'Help & FAQ',
                       description: 'Get help and answers',
                       trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () {},
+                      onTap: () => _openUrl(
+                        context,
+                        'mailto:platepilote@gmail.com?subject=PlatePilote%20support%20request',
+                      ),
                     ),
                   ),
 
