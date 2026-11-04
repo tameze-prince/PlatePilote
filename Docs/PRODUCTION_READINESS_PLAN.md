@@ -229,6 +229,8 @@ The changes above are committed, but they are **not yet test-verified**.
 - Account deletion now writes or reuses a unique provider/subscription cancellation request in the same database transaction. It no longer calls Stripe synchronously.
 - Premium entitlements are revoked immediately; the local subscription enters `CANCELLATION_PENDING` until the provider confirms cancellation.
 - Added a scheduled worker that retries due requests with bounded exponential backoff. It marks successful requests `COMPLETED`; after 12 unsuccessful attempts it marks them `FAILED` and logs that manual action is required.
-- Added unit tests for enqueueing the request and for worker success/retry behavior.
+- Made Stripe cancellation retries idempotent when Stripe already reports the subscription as canceled.
+- Prevented late subscription webhooks from restoring Premium entitlements after an account-deletion cancellation request exists.
+- Added unit tests for enqueueing, worker success/retry behavior, and late-webhook protection.
 
 **Verification:** implementation and tests are committed, but no Maven or PostgreSQL test execution has been performed in this environment. The new migration, JPA mapping, pessimistic-lock behavior, Stripe idempotency under timeout, and recovery after worker restart still require integration verification.
