@@ -1,4 +1,4 @@
-name: One-time Dart formatter
+name: One-time Dart formatter (final branch pass)
 
 on:
   push:
