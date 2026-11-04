@@ -124,6 +124,11 @@ public class MeService {
     public DeleteAccountResponse deleteUserAccount(UUID userId) {
         OurUser user = loadUser(userId);
         Instant now = Instant.now();
+
+        // Stop billing and push delivery before disabling the account.
+        billingService.cancelForAccountDeletion(userId);
+        deviceRegistrationRepository.deactivateAllForUser(userId, now);
+
         user.setDeletedAt(now);
         user.setEnabled(false);
         userRepository.save(user);
@@ -134,7 +139,7 @@ public class MeService {
                 .deletionDateAt(now)
                 .scheduledPurgeAt(purgeAt)
                 .gracePeriodDays(GRACE_PERIOD_DAYS)
-                .message("Account soft-deleted. Hard-purge scheduled in 30 days.")
+                .message("Account disabled. Personal data is scheduled for anonymization in 30 days; legally required billing records may be retained.")
                 .build();
     }
 
