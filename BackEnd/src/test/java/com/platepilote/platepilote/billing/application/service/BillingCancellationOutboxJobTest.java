@@ -2,6 +2,7 @@ package com.platepilote.platepilote.billing.application.service;
 
 import com.platepilote.platepilote.billing.domain.entity.BillingCancellationRequest;
 import com.platepilote.platepilote.billing.domain.repository.BillingCancellationRequestRepository;
+import com.platepilote.platepilote.subscription.domain.entity.Subscription;
 import com.platepilote.platepilote.subscription.domain.repository.SubscriptionRepository;
 import org.junit.jupiter.api.Test;
 
