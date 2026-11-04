@@ -338,12 +338,16 @@ public class MealPlanService {
     private Recipe requireAccessibleRecipe(UUID userId, UUID recipeId) {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", recipeId.toString()));
-        if (recipe.isDeleted()
-                || !Boolean.TRUE.equals(recipe.getEnabled())
-                || (!Boolean.TRUE.equals(recipe.getIsPublic()) && !userId.equals(recipe.getUserId()))) {
+        if (!isRecipeVisibleToUser(recipe, userId)) {
             throw new ResourceNotFoundException("Recipe", "id", recipeId.toString());
         }
         return recipe;
+    }
+
+    private boolean isRecipeVisibleToUser(Recipe recipe, UUID userId) {
+        return !recipe.isDeleted()
+                && Boolean.TRUE.equals(recipe.getEnabled())
+                && (Boolean.TRUE.equals(recipe.getIsPublic()) || userId.equals(recipe.getUserId()));
     }
 
     /**
@@ -388,10 +392,13 @@ public class MealPlanService {
         List<MealPlanResponse.MealPlanEntryResponse> entryResponses = entries.stream()
                 .map(entry -> {
                     Recipe recipe = recipeMap.get(entry.getRecipeId());
+                    if (recipe != null && !isRecipeVisibleToUser(recipe, mealPlan.getUserId())) {
+                        recipe = null;
+                    }
                     return MealPlanResponse.MealPlanEntryResponse.builder()
                             .id(entry.getId())
                             .recipeId(entry.getRecipeId())
-                            .recipeName(recipe != null ? recipe.getName() : "Unknown")
+                            .recipeName(recipe != null ? recipe.getName() : "Unavailable recipe")
                             .mealDate(entry.getMealDate())
                             .mealType(entry.getMealType())
                             .servings(entry.getServings())
