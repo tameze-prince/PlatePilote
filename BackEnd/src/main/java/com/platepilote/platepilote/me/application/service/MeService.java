@@ -2,6 +2,7 @@ package com.platepilote.platepilote.me.application.service;
 
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
+import com.platepilote.platepilote.authentication.domain.repository.RefreshTokenRepository;
 import com.platepilote.platepilote.budget.domain.entity.Budget;
 import com.platepilote.platepilote.budget.domain.repository.BudgetRepository;
 import com.platepilote.platepilote.grocery.domain.entity.PurchaseRecord;
@@ -55,6 +56,7 @@ public class MeService {
     private static final Pageable EXPORT_LIMIT = Pageable.unpaged();
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final UserProfileService userProfileService;
     private final PreferencesService preferencesService;
     private final MealPlanRepository mealPlanRepository;
@@ -70,6 +72,7 @@ public class MeService {
     private final SubscriptionRepository subscriptionRepository;
 
     public MeService(UserRepository userRepository,
+                     RefreshTokenRepository refreshTokenRepository,
                      UserProfileService userProfileService,
                      PreferencesService preferencesService,
                      MealPlanRepository mealPlanRepository,
@@ -84,6 +87,7 @@ public class MeService {
                      PurchaseRecordRepository purchaseRecordRepository,
                      SubscriptionRepository subscriptionRepository) {
         this.userRepository = userRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.userProfileService = userProfileService;
         this.preferencesService = preferencesService;
         this.mealPlanRepository = mealPlanRepository;
@@ -169,6 +173,7 @@ public class MeService {
 
         // Stop billing and push delivery before disabling the account.
         billingService.cancelForAccountDeletion(userId);
+        refreshTokenRepository.revokeAllActiveForUser(userId);
         deviceRegistrationRepository.deactivateAllForUser(userId, now);
 
         user.setDeletedAt(now);
