@@ -95,7 +95,7 @@ public class RecipeService {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", recipeId.toString()));
 
-        if (recipe.isDeleted()) {
+        if (recipe.isDeleted() || !Boolean.TRUE.equals(recipe.getEnabled())) {
             throw new ResourceNotFoundException("Recipe", "id", recipeId.toString());
         }
         securityUtils.verifyOwnership(recipe.getUserId(), userId, "Recipe", recipeId.toString());
