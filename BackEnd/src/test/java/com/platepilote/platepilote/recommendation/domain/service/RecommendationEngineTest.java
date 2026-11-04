@@ -149,7 +149,7 @@ class RecommendationEngineTest {
                 .allergen("peanut")
                 .severity("severe")
                 .build()));
-        when(recipeRepository.findByIsPublicTrueAndDeletedAtIsNull(any(Pageable.class)))
+        when(recipeRepository.findByIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(unsafe, safe)));
         when(recipeIngredientRepository.findByRecipeIdIn(any(List.class)))
                 .thenReturn(List.of(ingredient(unsafe, "peanut butter"), ingredient(safe, "black beans")));
@@ -179,7 +179,7 @@ class RecommendationEngineTest {
         verify(recommendationEventRepository).save(eventCaptor.capture());
         assertThat(eventCaptor.getValue().getQuotaLimited()).isTrue();
         assertThat(eventCaptor.getValue().getResultCount()).isZero();
-        verify(recipeRepository, never()).findByIsPublicTrueAndDeletedAtIsNull(any(Pageable.class));
+        verify(recipeRepository, never()).findByIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(any(Pageable.class));
     }
 
     @Test
@@ -192,7 +192,7 @@ class RecommendationEngineTest {
         Recipe eligible = recipe("Trusted Bowl", false);
         eligible.setVerified(true);
         eligible.setConfidenceScore(0.9);
-        when(recipeRepository.findByIsPublicTrueAndDeletedAtIsNull(any(Pageable.class)))
+        when(recipeRepository.findByIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(disabled, rejected, eligible)));
 
         List<RecommendationEngine.RecommendationResult> results = engine.getRecommendations(userId, 10);
@@ -207,7 +207,7 @@ class RecommendationEngineTest {
         Recipe recipe = recipe("Estimated Bowl", false);
         recipe.setVerified(false);
         recipe.setConfidenceScore(0.4);
-        when(recipeRepository.findByIsPublicTrueAndDeletedAtIsNull(any(Pageable.class)))
+        when(recipeRepository.findByIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(recipe)));
 
         List<RecommendationEngine.RecommendationResult> results = engine.getRecommendations(userId, 10);
@@ -231,7 +231,7 @@ class RecommendationEngineTest {
                 .build();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(premiumUser));
-        lenient().when(recipeRepository.findByIsPublicTrueAndDeletedAtIsNull(any(Pageable.class)))
+        lenient().when(recipeRepository.findByIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(recipe)));
 
         List<RecommendationEngine.RecommendationResult> results = engine.getRecommendations(userId, 5);
