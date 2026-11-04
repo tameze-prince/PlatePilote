@@ -27,6 +27,11 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
+    private static final String TOKEN_USE_CLAIM = "token_use";
+    private static final String ACCESS_TOKEN_USE = "access";
+    private static final String REFRESH_TOKEN_USE = "refresh";
+    private static final String PASSWORD_RESET_TOKEN_USE = "password_reset";
+
     /** Clé secrète pour signer et vérifier les jetons JWT. */
     @Value("${app.jwt.secret}")
     private String secretKey;
@@ -102,7 +107,9 @@ public class JwtService {
      * @return jeton JWT d'accès
      */
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return buildToken(extraClaims, userDetails, jwtExpiration);
+        Map<String, Object> claims = new HashMap<>(extraClaims);
+        claims.put(TOKEN_USE_CLAIM, ACCESS_TOKEN_USE);
+        return buildToken(claims, userDetails, jwtExpiration);
     }
 
     /**
@@ -112,7 +119,7 @@ public class JwtService {
      * @return jeton JWT de rafraîchissement
      */
     public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, refreshExpiration);
+        return buildToken(Map.of(TOKEN_USE_CLAIM, REFRESH_TOKEN_USE), userDetails, refreshExpiration);
     }
 
     /**
@@ -142,7 +149,29 @@ public class JwtService {
      */
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    }
+
+    /** Only access tokens may authenticate protected HTTP requests. */
+    public boolean isAccessTokenValid(String token, UserDetails userDetails) {
+        return isTokenValidForPurpose(token, userDetails, ACCESS_TOKEN_USE);
+    }
+
+    /** Refresh tokens are accepted only by the refresh endpoint and after persistence checks. */
+    public boolean isRefreshTokenValid(String token, UserDetails userDetails) {
+        return isTokenValidForPurpose(token, userDetails, REFRESH_TOKEN_USE);
+    }
+
+    private boolean isTokenValidForPurpose(String token, UserDetails userDetails, String expectedUse) {
+        Claims claims = extractAllClaims(token);
+        String username = claims.getSubject();
+        String tokenUse = claims.get(TOKEN_USE_CLAIM, String.class);
+        Date expiration = claims.getExpiration();
+        return username != null
+                && username.equals(userDetails.getUsername())
+                && expectedUse.equals(tokenUse)
+                && expiration != null
+                && expiration.after(new Date());
     }
 
     /**
@@ -197,6 +226,7 @@ public class JwtService {
      */
     public String generateResetToken(String email) {
         return Jwts.builder()
+                .claim(TOKEN_USE_CLAIM, PASSWORD_RESET_TOKEN_USE)
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
@@ -213,7 +243,11 @@ public class JwtService {
      */
     public boolean isResetTokenValid(String token, String email) {
         try {
-            return extractUsername(token).equals(email) && !isTokenExpired(token);
+            Claims claims = extractAllClaims(token);
+            return email.equals(claims.getSubject())
+                    && PASSWORD_RESET_TOKEN_USE.equals(claims.get(TOKEN_USE_CLAIM, String.class))
+                    && claims.getExpiration() != null
+                    && claims.getExpiration().after(new Date());
         } catch (Exception e) {
             return false;
         }
