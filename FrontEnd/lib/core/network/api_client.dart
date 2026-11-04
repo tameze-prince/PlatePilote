@@ -88,8 +88,48 @@ class _AuthTokenInterceptor extends Interceptor {
       connectTimeout: const Duration(seconds: 60),
       receiveTimeout: const Duration(seconds: 60),
       headers: const {'Accept': 'application/json'},
+      contentType: 'application/json',
     ),
   );
+
+  Future<Map<String, String>>? _refreshInFlight;
+
+  Future<Map<String, String>> _refreshTokens(String refreshToken) {
+    final pending = _refreshInFlight;
+    if (pending != null) return pending;
+
+    final refresh = _performRefresh(refreshToken);
+    _refreshInFlight = refresh;
+    return refresh.whenComplete(() {
+      if (identical(_refreshInFlight, refresh)) {
+        _refreshInFlight = null;
+      }
+    });
+  }
+
+  Future<Map<String, String>> _performRefresh(String refreshToken) async {
+    final response = await _refreshDio.post<Map<String, dynamic>>(
+      '/auth/refresh',
+      data: {'refreshToken': refreshToken},
+    );
+
+    final payload = response.data?['data'];
+    if (payload is! Map<String, dynamic>) {
+      throw const FormatException('Invalid refresh response payload');
+    }
+
+    final accessToken = payload['accessToken'];
+    final rotatedRefreshToken = payload['refreshToken'];
+    if (accessToken is! String || rotatedRefreshToken is! String) {
+      throw const FormatException('Refresh response is missing tokens');
+    }
+
+    await onTokensRefreshed(accessToken, rotatedRefreshToken);
+    return {
+      'accessToken': accessToken,
+      'refreshToken': rotatedRefreshToken,
+    };
+  }
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
@@ -115,30 +155,21 @@ class _AuthTokenInterceptor extends Interceptor {
     }
 
     try {
-      final response = await _refreshDio.post<Map<String, dynamic>>(
-        '/auth/refresh',
-        queryParameters: {'refreshToken': refreshToken},
-      );
+      final tokens = await _refreshTokens(refreshToken);
+      final newAccessToken = tokens['accessToken']!;
 
-      final data = (response.data?['data'] as Map<String, dynamic>?) ?? const <String, dynamic>{};
-      final newAccessToken = data['accessToken'] as String;
-      final newRefreshToken = data['refreshToken'] as String;
-
-      await onTokensRefreshed(newAccessToken, newRefreshToken);
-
-      // Retry the original request with the new token using the original Dio
       err.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
-      
-      // Use the Dio from the request options to retry
-      final dio = Dio(BaseOptions(
+
+      // Retry without the auth interceptor so a second 401 cannot start a refresh loop.
+      final retryDio = Dio(BaseOptions(
         baseUrl: err.requestOptions.baseUrl,
         connectTimeout: err.requestOptions.connectTimeout,
         receiveTimeout: err.requestOptions.receiveTimeout,
+        sendTimeout: err.requestOptions.sendTimeout,
         headers: err.requestOptions.headers,
         contentType: err.requestOptions.contentType,
       ));
-      
-      final retryResponse = await dio.fetch<Map<String, dynamic>>(err.requestOptions);
+      final retryResponse = await retryDio.fetch<Map<String, dynamic>>(err.requestOptions);
       handler.resolve(retryResponse);
     } catch (_) {
       await onRefreshFailed();
@@ -151,7 +182,7 @@ class _ErrorLogInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     // ignore: avoid_print
-    print('[API Error] ${err.requestOptions.uri} - ${err.message}');
+    print('[API Error] ${err.requestOptions.method} ${err.requestOptions.path} - ${err.message}');
     handler.next(err);
   }
 }
