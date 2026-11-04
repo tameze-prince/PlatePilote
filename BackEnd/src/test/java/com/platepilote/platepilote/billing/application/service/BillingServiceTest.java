@@ -8,8 +8,10 @@ import com.platepilote.platepilote.billing.application.config.BillingProperties;
 import com.platepilote.platepilote.billing.application.service.BillingProviderModels.BillingCheckoutSession;
 import com.platepilote.platepilote.billing.application.service.BillingProviderModels.BillingPortalSession;
 import com.platepilote.platepilote.billing.application.service.BillingProviderModels.ProviderEvent;
+import com.platepilote.platepilote.billing.domain.entity.BillingCancellationRequest;
 import com.platepilote.platepilote.billing.domain.entity.BillingCustomer;
 import com.platepilote.platepilote.billing.domain.entity.BillingEvent;
+import com.platepilote.platepilote.billing.domain.repository.BillingCancellationRequestRepository;
 import com.platepilote.platepilote.billing.domain.repository.BillingCustomerRepository;
 import com.platepilote.platepilote.billing.domain.repository.BillingEventRepository;
 import com.platepilote.platepilote.subscription.application.service.EntitlementService;
@@ -39,6 +41,7 @@ class BillingServiceTest {
 
     @Mock private BillingProvider billingProvider;
     @Mock private BillingCustomerRepository billingCustomerRepository;
+    @Mock private BillingCancellationRequestRepository cancellationRequestRepository;
     @Mock private BillingEventRepository billingEventRepository;
     @Mock private UserRepository userRepository;
     @Mock private SubscriptionRepository subscriptionRepository;
@@ -59,7 +62,7 @@ class BillingServiceTest {
         properties.getStripe().setCancelUrl("https://example.com/cancel");
         properties.getStripe().setPortalReturnUrl("https://example.com/portal");
         billingService = new BillingService(billingProvider, properties, billingCustomerRepository,
-                billingEventRepository, userRepository, subscriptionRepository, userEntitlementRepository,
+                billingEventRepository, userRepository, subscriptionRepository, cancellationRequestRepository, userEntitlementRepository,
                 entitlementService, systemSettingRepository, auditLogService);
     }
 
@@ -95,13 +98,18 @@ class BillingServiceTest {
                 .build();
         subscription.setId(UUID.randomUUID());
         when(subscriptionRepository.findByUserId(userId)).thenReturn(Optional.of(subscription));
+        when(cancellationRequestRepository.findByProviderAndProviderSubscriptionId("STRIPE", "sub_123"))
+                .thenReturn(Optional.empty());
+        when(cancellationRequestRepository.save(any(BillingCancellationRequest.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         billingService.cancelForAccountDeletion(userId);
 
-        verify(billingProvider).cancelSubscription("sub_123");
+        verify(billingProvider, never()).cancelSubscription(any());
+        verify(cancellationRequestRepository).save(any(BillingCancellationRequest.class));
         verify(subscriptionRepository).save(subscription);
         verify(entitlementService).revokePremium(userId);
-        assertThat(subscription.getStatus()).isEqualTo("CANCELLED");
+        assertThat(subscription.getStatus()).isEqualTo("CANCELLATION_PENDING");
         assertThat(subscription.getCancelAtPeriodEnd()).isFalse();
         assertThat(subscription.getEndDate()).isNotNull();
     }
