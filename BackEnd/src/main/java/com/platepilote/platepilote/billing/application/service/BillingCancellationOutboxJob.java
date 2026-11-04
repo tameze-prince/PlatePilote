@@ -61,7 +61,7 @@ public class BillingCancellationOutboxJob {
             } catch (Exception exception) {
                 Instant now = Instant.now();
                 int nextAttempt = request.getAttemptCount() + 1;
-                long delayMinutes = Math.min(360L, 1L << Math.min(nextAttempt, 8));
+                long delayMinutes = Math.min(360L, 1L << Math.min(nextAttempt, 9));
                 request.markFailedAttempt(
                         exception.getMessage(),
                         now,
