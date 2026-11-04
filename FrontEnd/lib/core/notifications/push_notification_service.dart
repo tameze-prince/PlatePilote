@@ -17,6 +17,7 @@ class PushNotificationService {
   PushNotificationService(this._messaging);
 
   final FirebaseMessaging _messaging;
+  bool _listening = false;
 
   /// Requests notification permission and returns the FCM token, or `null`
   /// when the user denied the prompt.
@@ -41,7 +42,7 @@ class PushNotificationService {
     await apiClient.post(
       '/devices',
       data: {
-        'pushToken': token,
+        'deviceToken': token,
         'platform': Platform.operatingSystem,
       },
     );
@@ -51,6 +52,8 @@ class PushNotificationService {
   /// called once after the user authenticates and the FCM token has been
   /// resolved.
   void listenToMessages() {
+    if (_listening) return;
+    _listening = true;
     FirebaseMessaging.onMessage.listen(_handleForeground);
     FirebaseMessaging.onMessageOpenedApp.listen(_handleOpened);
   }
@@ -86,7 +89,10 @@ final pushNotificationServiceProvider = Provider<PushNotificationService>((
 /// attached across rebuilds.
 final pushSessionHookProvider = Provider<void>((ref) {
   ref.listen<AppSessionState>(appSessionProvider, (prev, next) async {
-    if (next.isAuthenticated && prev?.isAuthenticated != true) {
+    final hasNewPushConsent = next.hasAcceptedPush && prev?.hasAcceptedPush != true;
+    final hasNewAuthenticatedSession = next.isAuthenticated && prev?.isAuthenticated != true;
+    if (next.isAuthenticated && next.hasAcceptedPush &&
+        (hasNewAuthenticatedSession || hasNewPushConsent)) {
       await _registerPush(ref);
     }
   });
