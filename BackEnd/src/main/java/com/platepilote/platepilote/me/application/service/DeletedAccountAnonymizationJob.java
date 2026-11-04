@@ -42,7 +42,7 @@ public class DeletedAccountAnonymizationJob {
     @Transactional
     public void anonymizeExpiredAccounts() {
         Instant cutoff = Instant.now().minus(GRACE_PERIOD_DAYS, ChronoUnit.DAYS);
-        List<OurUser> expiredAccounts = userRepository.findAllByEnabledFalseAndDeletedAtBefore(cutoff);
+        List<OurUser> expiredAccounts = userRepository.findAllByEnabledFalseAndDeletedAtBeforeAndAnonymizedAtIsNull(cutoff);
 
         for (OurUser user : expiredAccounts) {
             if (user.getDeletedAt() == null || user.getDeletedAt().isAfter(cutoff)) {
@@ -113,6 +113,7 @@ public class DeletedAccountAnonymizationJob {
         user.setEnabled(false);
         user.setAnalyticsOptOut(true);
         user.setProcessingRestricted(true);
+        user.setAnonymizedAt(Instant.now());
         if (user.getRoles() != null) {
             user.getRoles().clear();
         }
