@@ -9,8 +9,10 @@ import com.platepilote.platepilote.billing.application.config.BillingProperties;
 import com.platepilote.platepilote.billing.application.dto.BillingDtos.CheckoutSessionResponse;
 import com.platepilote.platepilote.billing.application.dto.BillingDtos.CustomerPortalResponse;
 import com.platepilote.platepilote.billing.application.service.BillingProviderModels.ProviderEvent;
+import com.platepilote.platepilote.billing.domain.entity.BillingCancellationRequest;
 import com.platepilote.platepilote.billing.domain.entity.BillingCustomer;
 import com.platepilote.platepilote.billing.domain.entity.BillingEvent;
+import com.platepilote.platepilote.billing.domain.repository.BillingCancellationRequestRepository;
 import com.platepilote.platepilote.billing.domain.repository.BillingCustomerRepository;
 import com.platepilote.platepilote.billing.domain.repository.BillingEventRepository;
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
@@ -41,6 +43,7 @@ public class BillingService {
     private final BillingProvider billingProvider;
     private final BillingProperties billingProperties;
     private final BillingCustomerRepository billingCustomerRepository;
+    private final BillingCancellationRequestRepository cancellationRequestRepository;
     private final BillingEventRepository billingEventRepository;
     private final UserRepository userRepository;
     private final SubscriptionRepository subscriptionRepository;
@@ -50,29 +53,50 @@ public class BillingService {
     private final AuditLogService auditLogService;
 
     /**
-     * Annule l'abonnement distant et révoque les droits avant la suppression du compte.
-     * La suppression du compte échoue si Stripe ne confirme pas l'annulation.
+     * Enregistre la résiliation distante dans une outbox transactionnelle.
+     * La suppression du compte ne dépend donc pas de la disponibilité de Stripe.
      */
     public void cancelForAccountDeletion(UUID userId) {
         subscriptionRepository.findByUserId(userId).ifPresent(subscription -> {
-            if (STRIPE.equalsIgnoreCase(subscription.getProvider())
-                    && subscription.getProviderSubscriptionId() != null
-                    && !subscription.getProviderSubscriptionId().isBlank()
-                    && !"CANCELLED".equalsIgnoreCase(subscription.getStatus())) {
-                billingProvider.cancelSubscription(subscription.getProviderSubscriptionId());
+            String provider = subscription.getProvider();
+            String providerSubscriptionId = subscription.getProviderSubscriptionId();
+            boolean externalSubscription = STRIPE.equalsIgnoreCase(provider)
+                    && providerSubscriptionId != null
+                    && !providerSubscriptionId.isBlank()
+                    && !"CANCELLED".equalsIgnoreCase(subscription.getStatus());
+
+            if (externalSubscription) {
+                BillingCancellationRequest request = cancellationRequestRepository
+                        .findByProviderAndProviderSubscriptionId(provider, providerSubscriptionId)
+                        .orElseGet(() -> {
+                            BillingCancellationRequest created = new BillingCancellationRequest();
+                            created.setUserId(userId);
+                            created.setSubscriptionId(subscription.getId());
+                            created.setProvider(provider.toUpperCase());
+                            created.setProviderSubscriptionId(providerSubscriptionId);
+                            created.setStatus("PENDING");
+                            created.setAttemptCount(0);
+                            created.setNextAttemptAt(Instant.now());
+                            return created;
+                        });
+                cancellationRequestRepository.save(request);
+                subscription.setStatus("CANCELLATION_PENDING");
+            } else {
+                subscription.setStatus("CANCELLED");
             }
 
-            subscription.setStatus("CANCELLED");
             subscription.setCancelAtPeriodEnd(false);
             subscription.setEndDate(Instant.now());
             subscription.setExpiresAt(Instant.now());
             subscriptionRepository.save(subscription);
             auditLogService.log(
                     userId,
-                    "ACCOUNT_DELETION_SUBSCRIPTION_CANCELLED",
+                    externalSubscription ? "ACCOUNT_DELETION_SUBSCRIPTION_CANCELLATION_QUEUED"
+                            : "ACCOUNT_DELETION_SUBSCRIPTION_CANCELLED",
                     "SUBSCRIPTION",
                     subscription.getId().toString(),
-                    Map.of("provider", subscription.getProvider() == null ? "UNKNOWN" : subscription.getProvider())
+                    Map.of("provider", provider == null ? "UNKNOWN" : provider,
+                            "cancellationQueued", externalSubscription)
             );
         });
         entitlementService.revokePremium(userId);
