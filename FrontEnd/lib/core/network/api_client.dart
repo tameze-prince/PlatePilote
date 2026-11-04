@@ -1,24 +1,28 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/secure_storage_service.dart';
 
-/// Résout l'URL de base de l'API au démarrage de l'application.
+/// Resolves the API endpoint from a compile-time define.
 ///
-/// Priorité : `--dart-define=PLATEPILOT_API_BASE_URL=...`, sinon `.env` (via
-/// `flutter_dotenv`), sinon chaîne vide. Si vide au moment de
-/// l'initialisation, une [StateError] est levée pour éviter les requêtes
-/// silencieuses vers `localhost` en production.
+/// The endpoint is configuration, not a secret. Never put credentials or
+/// private API keys in this value. Release builds require HTTPS.
 String resolveApiBaseUrl() {
-  const fromBuild = String.fromEnvironment(
+  const configured = String.fromEnvironment(
     'PLATEPILOT_API_BASE_URL',
     defaultValue: '',
   );
-  if (fromBuild.isNotEmpty) return fromBuild;
-  final fromEnv = dotenv.env['PLATEPILOT_API_BASE_URL'];
-  if (fromEnv != null && fromEnv.isNotEmpty) return fromEnv;
-  return '';
+  if (configured.isEmpty) return '';
+
+  final uri = Uri.tryParse(configured);
+  if (uri == null || !uri.hasAuthority || uri.host.isEmpty) {
+    throw StateError('PLATEPILOT_API_BASE_URL must be an absolute URL');
+  }
+  if (kReleaseMode && uri.scheme != 'https') {
+    throw StateError('Release builds require an HTTPS API URL');
+  }
+  return configured;
 }
 
 /// Vérifie que la configuration est présente et lève une erreur explicite
@@ -29,7 +33,7 @@ void assertApiConfigured() {
     throw StateError(
       'PLATEPILOT_API_BASE_URL non configurée. '
       'Lancez l\u2019app avec `--dart-define=PLATEPILOT_API_BASE_URL=<url>` '
-      'ou renseignez-la dans FrontEnd/.env.',
+      'ou fournissez-la via --dart-define.',
     );
   }
 }
@@ -91,8 +95,39 @@ class _AuthTokenInterceptor extends Interceptor {
     ),
   );
 
+  Future<_RefreshedTokens>? _refreshInFlight;
+
+  Future<_RefreshedTokens> _refreshTokens(String refreshToken) {
+    return _refreshInFlight ??= _performRefresh(refreshToken).whenComplete(() {
+      _refreshInFlight = null;
+    });
+  }
+
+  Future<_RefreshedTokens> _performRefresh(String refreshToken) async {
+    final response = await _refreshDio.post<Map<String, dynamic>>(
+      '/auth/refresh',
+      data: {'refreshToken': refreshToken},
+    );
+    final data =
+        (response.data?['data'] as Map<String, dynamic>?) ??
+        const <String, dynamic>{};
+    final accessToken = data['accessToken'] as String?;
+    final rotatedRefreshToken = data['refreshToken'] as String?;
+    if (accessToken == null ||
+        accessToken.isEmpty ||
+        rotatedRefreshToken == null ||
+        rotatedRefreshToken.isEmpty) {
+      throw const FormatException('Refresh response is missing token fields');
+    }
+    await onTokensRefreshed(accessToken, rotatedRefreshToken);
+    return _RefreshedTokens(accessToken);
+  }
+
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     final token = await tokenGetter();
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
@@ -107,6 +142,20 @@ class _AuthTokenInterceptor extends Interceptor {
       return;
     }
 
+    // A previous request may already have rotated the token while this 401
+    // was in flight. Retry with the latest access token instead of reusing a
+    // now-revoked refresh token.
+    final currentAccessToken = await tokenGetter();
+    final authorization = err.requestOptions.headers['Authorization'];
+    final failedAccessToken =
+        authorization is String && authorization.startsWith('Bearer ')
+        ? authorization.substring(7)
+        : null;
+    if (currentAccessToken != null && currentAccessToken != failedAccessToken) {
+      await _retryWithAccessToken(err, currentAccessToken, handler);
+      return;
+    }
+
     final refreshToken = await refreshTokenGetter();
     if (refreshToken == null) {
       await onRefreshFailed();
@@ -114,44 +163,62 @@ class _AuthTokenInterceptor extends Interceptor {
       return;
     }
 
+    late final _RefreshedTokens refreshed;
     try {
-      final response = await _refreshDio.post<Map<String, dynamic>>(
-        '/auth/refresh',
-        queryParameters: {'refreshToken': refreshToken},
-      );
+      // Concurrent 401 responses share a single refresh-token rotation.
+      refreshed = await _refreshTokens(refreshToken);
+    } catch (_) {
+      await onRefreshFailed();
+      handler.next(err);
+      return;
+    }
 
-      final data = (response.data?['data'] as Map<String, dynamic>?) ?? const <String, dynamic>{};
-      final newAccessToken = data['accessToken'] as String;
-      final newRefreshToken = data['refreshToken'] as String;
+    await _retryWithAccessToken(err, refreshed.accessToken, handler);
+  }
 
-      await onTokensRefreshed(newAccessToken, newRefreshToken);
-
-      // Retry the original request with the new token using the original Dio
-      err.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
-      
-      // Use the Dio from the request options to retry
-      final dio = Dio(BaseOptions(
+  Future<void> _retryWithAccessToken(
+    DioException err,
+    String accessToken,
+    ErrorInterceptorHandler handler,
+  ) async {
+    err.requestOptions.headers['Authorization'] = 'Bearer $accessToken';
+    final dio = Dio(
+      BaseOptions(
         baseUrl: err.requestOptions.baseUrl,
         connectTimeout: err.requestOptions.connectTimeout,
         receiveTimeout: err.requestOptions.receiveTimeout,
         headers: err.requestOptions.headers,
         contentType: err.requestOptions.contentType,
-      ));
-      
-      final retryResponse = await dio.fetch<Map<String, dynamic>>(err.requestOptions);
+      ),
+    );
+
+    try {
+      final retryResponse = await dio.fetch<Map<String, dynamic>>(
+        err.requestOptions,
+      );
       handler.resolve(retryResponse);
+    } on DioException catch (retryError) {
+      handler.next(retryError);
     } catch (_) {
-      await onRefreshFailed();
       handler.next(err);
     }
   }
+}
+
+class _RefreshedTokens {
+  const _RefreshedTokens(this.accessToken);
+
+  final String accessToken;
 }
 
 class _ErrorLogInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     // ignore: avoid_print
-    print('[API Error] ${err.requestOptions.uri} - ${err.message}');
+    print(
+      '[API Error] ${err.requestOptions.method} ${err.requestOptions.path} '
+      'status=${err.response?.statusCode ?? "network"} type=${err.type.name}',
+    );
     handler.next(err);
   }
 }
@@ -170,17 +237,29 @@ class ApiClient {
   }
 
   /// Effectue une requête POST vers [path] avec un corps [data] et des paramètres [query] optionnels.
-  Future<Response<dynamic>> post(String path, {Object? data, Map<String, dynamic>? query}) {
+  Future<Response<dynamic>> post(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? query,
+  }) {
     return _dio.post(path, data: data, queryParameters: query);
   }
 
   /// Effectue une requête PUT vers [path] avec un corps [data] et des paramètres [query] optionnels.
-  Future<Response<dynamic>> put(String path, {Object? data, Map<String, dynamic>? query}) {
+  Future<Response<dynamic>> put(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? query,
+  }) {
     return _dio.put(path, data: data, queryParameters: query);
   }
 
   /// Effectue une requête PATCH vers [path] avec un corps [data] et des paramètres [query] optionnels.
-  Future<Response<dynamic>> patch(String path, {Object? data, Map<String, dynamic>? query}) {
+  Future<Response<dynamic>> patch(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? query,
+  }) {
     return _dio.patch(path, data: data, queryParameters: query);
   }
 

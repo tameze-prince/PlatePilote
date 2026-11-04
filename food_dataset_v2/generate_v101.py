@@ -1,8 +1,6 @@
 import csv
-import uuid
-import os
-import shutil
 import re
+import uuid
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
@@ -10,13 +8,19 @@ RECIPES_CSV = BASE_DIR / "recipes.csv"
 INGREDIENTS_CSV = BASE_DIR / "ingredients.csv"
 RECIPE_INGREDIENTS_CSV = BASE_DIR / "recipe_ingredients.csv"
 NUTRITION_CSV = BASE_DIR / "nutrition.csv"
-IMAGES_SRC = BASE_DIR / "recipe_images"
-IMAGES_DST = BASE_DIR / ".." / "BackEnd" / "src" / "main" / "resources" / "db" / "migration" / "recipe_images"
-
-OUT_SQL = BASE_DIR / ".." / "BackEnd" / "src" / "main" / "resources" / "db" / "migration" / "V101__merge_food_dataset.sql"
+MIGRATION_DIR = BASE_DIR / ".." / "BackEnd" / "src" / "main" / "resources" / "db" / "migration"
 MAPPING_CSV = BASE_DIR / "uuid_mapping.csv"
 
-os.makedirs(IMAGES_DST, exist_ok=True)
+
+def next_migration_output():
+    """Choose the next free Flyway version instead of colliding with an existing migration."""
+    versions = []
+    for path in MIGRATION_DIR.glob("V*__*.sql"):
+        match = re.match(r"V(\d+)__", path.name)
+        if match:
+            versions.append(int(match.group(1)))
+    next_version = max(versions, default=0) + 1
+    return MIGRATION_DIR / f"V{next_version}__merge_food_dataset.sql"
 
 CUISINE_NUTRITION = {
     "african": {"carbs_pct": 0.60, "fat_pct": 0.25, "fiber": 4.0, "cost": 5.50},
@@ -64,7 +68,22 @@ SQ = chr(39)
 def esc(s):
     return str(s).replace(SQ, SQ * 2)
 def b(v):
+    if v is None:
+        return "NULL"
     return "TRUE" if v else "FALSE"
+
+
+def infer_allergen_flag(ingredient_rows, categories=(), pattern=None):
+    """Return True/False only when every linked ingredient is available; otherwise unknown."""
+    if not ingredient_rows or any(ingredient is None for ingredient in ingredient_rows):
+        return None
+
+    for ingredient in ingredient_rows:
+        category = ingredient.get("category", "").strip().lower()
+        name = ingredient.get("name", "").strip().lower()
+        if category in categories or (pattern and re.search(pattern, name)):
+            return True
+    return False
 
 def main():
     print("Reading recipes...")
@@ -92,11 +111,10 @@ def main():
     print(f"  {len(nutrition_rows)} entries loaded")
 
     mapping = []
-    renamed = 0
     recipe_sql_parts = []
     ingredient_sql_parts = []
     step_sql_parts = []
-    step_uuid_counter = [1]
+    enabled_recipe_count = 0
 
     for r in recipes:
         rid = r["id"]
@@ -147,81 +165,145 @@ def main():
         low_carb = carbs < 20
         keto = carbs < 10 and fat > 30
 
-        contains_gluten = "gluten_free" not in tags
-        contains_lactose = "dairy_free" not in tags
-        contains_nuts = "nut_free" not in tags
-        contains_soy = False
-        contains_eggs = False
-        contains_fish = False
-        contains_shellfish = False
+        ri_list = ri_by_recipe.get(rid, [])
+        linked_ingredients = [
+            ingredients.get(link.get("ingredient_id", ""))
+            for link in ri_list
+        ]
+        contains_gluten = infer_allergen_flag(
+            linked_ingredients,
+            pattern=r"\b(wheat|barley|rye|semolina|couscous|pasta|noodle|bread|flour|bulgur|seitan|malt|spelt|farro|soy sauce)\b",
+        )
+        contains_lactose = infer_allergen_flag(
+            linked_ingredients,
+            categories={"dairy"},
+            pattern=r"\b(milk|cheese|butter|yogurt|cream|whey|casein|ghee)\b",
+        )
+        contains_nuts = infer_allergen_flag(
+            linked_ingredients,
+            categories={"nut"},
+            pattern=r"\b(peanut|almond|cashew|walnut|pistachio|hazelnut|pecan|macadamia|sesame|coconut)\b",
+        )
+        contains_soy = infer_allergen_flag(
+            linked_ingredients,
+            pattern=r"\b(soy|soya|tofu|edamame|tempeh|miso)\b",
+        )
+        contains_eggs = infer_allergen_flag(
+            linked_ingredients,
+            categories={"egg"},
+            pattern=r"\b(egg|eggs|mayonnaise|meringue)\b",
+        )
+        contains_fish = infer_allergen_flag(
+            linked_ingredients,
+            categories={"fish"},
+            pattern=r"\b(salmon|tuna|cod|tilapia|sardine|anchovy)\b",
+        )
+        contains_shellfish = infer_allergen_flag(
+            linked_ingredients,
+            categories={"seafood"},
+            pattern=r"\b(shellfish|shrimp|prawn|crab|lobster|scallop|oyster|mussel|clam)\b",
+        )
+        instructions_raw = r.get("instructions", "").strip()
+        steps = [
+            step.strip().lstrip("|").strip()
+            for step in instructions_raw.replace("\n", "|").split("|")
+            if step.strip().lstrip("|").strip()
+        ] if instructions_raw else []
+        recipe_enabled = (
+            r.get("enabled", "true").strip().lower() == "true"
+            and bool(ri_list)
+            and bool(steps)
+        )
+        if recipe_enabled:
+            enabled_recipe_count += 1
+        allergen_source = (
+            "Ingredient category/name heuristic; verify labels"
+            if linked_ingredients and all(item is not None for item in linked_ingredients)
+            else "Incomplete ingredient data; unknown"
+        )
 
         local_img = r.get("local_image", "").strip()
-        if local_img:
-            src_path = BASE_DIR.parent / local_img.replace("\\", "/")
-            if src_path.exists():
-                dst_name = f"{recipe_uuid}.jpg"
-                dst_path = IMAGES_DST / dst_name
-                if not dst_path.exists():
-                    shutil.copy2(src_path, dst_path)
-                    renamed += 1
-                image_url = f"cloudflare_url/recipe_images/{dst_name}"
-            else:
-                image_url = ""
-        else:
-            image_url = ""
+        candidate_image_url = r.get("image_url", "").strip()
+        image_url = candidate_image_url if candidate_image_url.startswith("https://") else ""
+        image_url_esc = esc(image_url)
 
-        source = "PlatePilot generated from public food references"
-        source_url = r.get("image_url", "").strip() or "NULL"
+        source = r.get("external_source", "").strip() or "PlatePilot dataset; source not verified"
+        source_esc = esc(source)
+        source_url = r.get("source_url", "").strip() or "NULL"
+        src_url = "NULL" if source_url == "NULL" else f"'{esc(source_url)}'"
 
         name_esc = esc(name)
         desc_esc = esc(desc)
-        src_url = "NULL" if source_url == "NULL" else f"'{esc(source_url)}'"
-        recipe_sql_parts.append(f"('{recipe_uuid}', '{name_esc}', '{desc_esc}', {prep_time}, {cook_time}, {total_time}, {servings}, '{difficulty}', '{cuisine}', '{meal_type}', '{image_url}', '{source}', TRUE, NULL, {calories}, {protein}, {carbs}, {fat}, {fiber}, {b(contains_gluten)}, {b(contains_lactose)}, {b(contains_nuts)}, {b(contains_soy)}, {b(contains_eggs)}, {b(contains_fish)}, {b(contains_shellfish)}, {b(vegan)}, {b(vegetarian)}, {b(halal)}, {b(kosher)}, {b(low_carb)}, {b(keto)}, {estimated_cost}, {src_url})")
+        allergen_source_esc = esc(allergen_source)
+        recipe_sql_parts.append(
+            f"('{recipe_uuid}', '{name_esc}', '{desc_esc}', {prep_time}, {cook_time}, "
+            f"{total_time}, {servings}, '{difficulty}', '{cuisine}', '{meal_type}', "
+            f"'{image_url_esc}', '{source_esc}', TRUE, {b(recipe_enabled)}, NULL, "
+            f"{calories}, {protein}, {carbs}, {fat}, {fiber}, "
+            f"{b(contains_gluten)}, {b(contains_lactose)}, {b(contains_nuts)}, "
+            f"{b(contains_soy)}, {b(contains_eggs)}, {b(contains_fish)}, "
+            f"{b(contains_shellfish)}, {b(vegan)}, {b(vegetarian)}, {b(halal)}, "
+            f"{b(kosher)}, {b(low_carb)}, {b(keto)}, {estimated_cost}, {src_url}, "
+            f"'{allergen_source_esc}', 'Mixed sourced/estimated values; verify before use', "
+            "FALSE, 'UNREVIEWED', 0.350)"
+        )
 
-        ri_list = ri_by_recipe.get(rid, [])
         for ri in ri_list:
             ing = ingredients.get(ri["ingredient_id"], {})
             ing_name = ing.get("name", "unknown") if ing else "unknown"
             ing_name_esc = esc(ing_name)
-            ing_uuid = str(uuid.uuid5(uuid.UUID(recipe_uuid), f"ing_{ri['ingredient_id']}_{ri.get('quantity', '0')}"))
+            ing_uuid = str(
+                uuid.uuid5(
+                    uuid.UUID(recipe_uuid),
+                    f"ing_{ri['ingredient_id']}_{ri.get('quantity', '0')}",
+                )
+            )
             qty = ri.get("quantity", "0").strip() or "0"
             try:
                 qty_num = round(float(qty), 2)
             except ValueError:
                 qty_num = 0
-            unit = ri.get("unit", "").strip() or "piece"
+            unit = esc(ri.get("unit", "").strip() or "piece")
             notes = f"canonical ingredient: {ing_name_esc}"
-            sort_order = ri.get("sort_order", "1") if "sort_order" in ri else "1"
-            ingredient_sql_parts.append(f"('{ing_uuid}', '{recipe_uuid}', '{ing_name_esc}', {qty_num}, '{unit}', '{notes}', {sort_order})")
-
-        instructions_raw = r.get("instructions", "").strip()
-        if instructions_raw:
-            steps = [s.strip().lstrip("|").strip() for s in instructions_raw.replace("\n", "|").split("|") if s.strip().lstrip("|").strip()]
-        else:
-            steps = [f"Prepare all ingredients for {name}.", f"Cook according to {cuisine} {meal_type.lower()} method.", "Adjust seasoning and serve warm."]
+            try:
+                sort_order = int(ri.get("sort_order", "1") or "1")
+            except ValueError:
+                sort_order = 1
+            ingredient_sql_parts.append(
+                f"('{ing_uuid}', '{recipe_uuid}', '{ing_name_esc}', {qty_num}, "
+                f"'{unit}', '{notes}', {sort_order})"
+            )
 
         for idx, step_text in enumerate(steps, 1):
             step_id = str(uuid.uuid5(uuid.UUID(recipe_uuid), f"step_{idx}"))
             step_text_esc = esc(step_text)
-            step_sql_parts.append(f"('{step_id}', '{recipe_uuid}', {idx}, '{step_text_esc}', NULL)")
+            step_sql_parts.append(
+                f"('{step_id}', '{recipe_uuid}', {idx}, '{step_text_esc}', NULL)"
+            )
 
-        mapping.append({"recipe_id": rid, "uuid": recipe_uuid, "name": name, "local_image": local_img, "image_url": image_url})
+        mapping.append({
+            "recipe_id": rid,
+            "uuid": recipe_uuid,
+            "name": name,
+            "local_image": local_img,
+            "image_url": image_url,
+        })
 
-    print(f"\nCopying images... {renamed} new, {len(recipes) - renamed} already existed")
     print("Writing SQL...")
 
-    with open(OUT_SQL, "w", encoding="utf-8") as f:
-        f.write("-- V101__merge_food_dataset.sql\n")
-        f.write("-- Generated from food_dataset_v2 (2000 recipes)\n\n")
+    out_sql = next_migration_output()
+    with open(out_sql, "w", encoding="utf-8") as f:
+        f.write(f"-- {out_sql.name}\n")
+        f.write(f"-- Generated from food_dataset_v2 ({len(recipes)} recipes)\n\n")
 
-        f.write("INSERT INTO recipes (id, name, description, prep_time_minutes, cook_time_minutes, total_time_minutes, servings, difficulty, cuisine_type, meal_type, image_url, source, is_public, user_id, calories_per_serving, protein_per_serving, carbs_per_serving, fat_per_serving, fiber_per_serving, contains_gluten, contains_lactose, contains_nuts, contains_soy, contains_eggs, contains_fish, contains_shellfish, vegan, vegetarian, halal_friendly, kosher_friendly, low_carb, keto_friendly, estimated_cost, source_url) VALUES\n")
+        f.write("INSERT INTO recipes (id, name, description, prep_time_minutes, cook_time_minutes, total_time_minutes, servings, difficulty, cuisine_type, meal_type, image_url, source, is_public, enabled, user_id, calories_per_serving, protein_per_serving, carbs_per_serving, fat_per_serving, fiber_per_serving, contains_gluten, contains_lactose, contains_nuts, contains_soy, contains_eggs, contains_fish, contains_shellfish, vegan, vegetarian, halal_friendly, kosher_friendly, low_carb, keto_friendly, estimated_cost, source_url, allergen_source, nutrition_source, verified, verification_status, confidence_score) VALUES\n")
         for i, part in enumerate(recipe_sql_parts):
             f.write(part)
             if i < len(recipe_sql_parts) - 1:
                 f.write(",\n")
             else:
                 f.write("\n")
-        f.write("ON CONFLICT (id) DO UPDATE SET updated_at = NOW(), name = EXCLUDED.name, description = EXCLUDED.description, prep_time_minutes = EXCLUDED.prep_time_minutes, cook_time_minutes = EXCLUDED.cook_time_minutes, total_time_minutes = EXCLUDED.total_time_minutes, servings = EXCLUDED.servings, difficulty = EXCLUDED.difficulty, cuisine_type = EXCLUDED.cuisine_type, meal_type = EXCLUDED.meal_type, image_url = EXCLUDED.image_url, source = EXCLUDED.source, is_public = EXCLUDED.is_public, calories_per_serving = EXCLUDED.calories_per_serving, protein_per_serving = EXCLUDED.protein_per_serving, carbs_per_serving = EXCLUDED.carbs_per_serving, fat_per_serving = EXCLUDED.fat_per_serving, fiber_per_serving = EXCLUDED.fiber_per_serving, contains_gluten = EXCLUDED.contains_gluten, contains_lactose = EXCLUDED.contains_lactose, contains_nuts = EXCLUDED.contains_nuts, contains_soy = EXCLUDED.contains_soy, contains_eggs = EXCLUDED.contains_eggs, contains_fish = EXCLUDED.contains_fish, contains_shellfish = EXCLUDED.contains_shellfish, vegan = EXCLUDED.vegan, vegetarian = EXCLUDED.vegetarian, halal_friendly = EXCLUDED.halal_friendly, kosher_friendly = EXCLUDED.kosher_friendly, low_carb = EXCLUDED.low_carb, keto_friendly = EXCLUDED.keto_friendly, estimated_cost = EXCLUDED.estimated_cost;\n\n")
+        f.write("ON CONFLICT (id) DO UPDATE SET updated_at = NOW(), name = EXCLUDED.name, description = EXCLUDED.description, prep_time_minutes = EXCLUDED.prep_time_minutes, cook_time_minutes = EXCLUDED.cook_time_minutes, total_time_minutes = EXCLUDED.total_time_minutes, servings = EXCLUDED.servings, difficulty = EXCLUDED.difficulty, cuisine_type = EXCLUDED.cuisine_type, meal_type = EXCLUDED.meal_type, image_url = EXCLUDED.image_url, source = EXCLUDED.source, is_public = EXCLUDED.is_public, enabled = EXCLUDED.enabled, calories_per_serving = EXCLUDED.calories_per_serving, protein_per_serving = EXCLUDED.protein_per_serving, carbs_per_serving = EXCLUDED.carbs_per_serving, fat_per_serving = EXCLUDED.fat_per_serving, fiber_per_serving = EXCLUDED.fiber_per_serving, contains_gluten = EXCLUDED.contains_gluten, contains_lactose = EXCLUDED.contains_lactose, contains_nuts = EXCLUDED.contains_nuts, contains_soy = EXCLUDED.contains_soy, contains_eggs = EXCLUDED.contains_eggs, contains_fish = EXCLUDED.contains_fish, contains_shellfish = EXCLUDED.contains_shellfish, vegan = EXCLUDED.vegan, vegetarian = EXCLUDED.vegetarian, halal_friendly = EXCLUDED.halal_friendly, kosher_friendly = EXCLUDED.kosher_friendly, low_carb = EXCLUDED.low_carb, keto_friendly = EXCLUDED.keto_friendly, estimated_cost = EXCLUDED.estimated_cost, allergen_source = EXCLUDED.allergen_source, nutrition_source = EXCLUDED.nutrition_source, verified = EXCLUDED.verified, verification_status = EXCLUDED.verification_status, confidence_score = EXCLUDED.confidence_score;\n\n")
 
         f.write("INSERT INTO recipe_ingredients (id, recipe_id, name, quantity, unit, notes, sort_order) VALUES\n")
         for i, part in enumerate(ingredient_sql_parts):
@@ -241,7 +323,7 @@ def main():
                 f.write("\n")
         f.write("ON CONFLICT (id) DO NOTHING;\n")
 
-    print(f"SQL written: {OUT_SQL}")
+    print(f"SQL written: {out_sql}")
 
     with open(MAPPING_CSV, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["recipe_id", "uuid", "name", "local_image", "image_url"])
@@ -253,7 +335,10 @@ def main():
     print(f"  Recipes: {len(recipe_sql_parts)}")
     print(f"  Ingredients: {len(ingredient_sql_parts)}")
     print(f"  Steps: {len(step_sql_parts)}")
-    print(f"  Images copied: {renamed}")
+    images_linked = sum(1 for item in mapping if item["image_url"])
+    print(f"  Recipes with external HTTPS images: {images_linked}")
+    print(f"  Enabled recipes: {enabled_recipe_count}")
+    print(f"  Disabled incomplete recipes: {len(recipes) - enabled_recipe_count}")
 
 if __name__ == "__main__":
     main()

@@ -85,7 +85,7 @@ public class SmartSwapService {
                 ? 30 : 60;
 
         List<Recipe> candidates = recipeRepository
-                .findByMealTypeAndIsPublicTrueAndDeletedAtIsNull(mealType,
+                .findByMealTypeAndIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(mealType,
                         org.springframework.data.domain.PageRequest.of(0, 50))
                 .getContent();
 

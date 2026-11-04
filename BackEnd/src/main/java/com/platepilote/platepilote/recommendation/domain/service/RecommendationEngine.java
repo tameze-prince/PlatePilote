@@ -185,7 +185,7 @@ public class RecommendationEngine {
                 ? Math.max(30, Math.min(100, Math.max(1, limit) * 5))
                 : Math.max(20, Math.min(60, Math.max(1, limit) * 5));
         List<Recipe> candidates = maxTime == null
-                ? recipeRepository.findByIsPublicTrueAndDeletedAtIsNull(PageRequest.of(0, candidateLimit)).getContent()
+                ? recipeRepository.findByIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(PageRequest.of(0, candidateLimit)).getContent()
                 : recipeRepository.findQuickMeals(maxTime, PageRequest.of(0, candidateLimit)).getContent();
 
         if (candidates.isEmpty()) {
@@ -390,15 +390,18 @@ public class RecommendationEngine {
                 && !"DISABLED".equalsIgnoreCase(status);
     }
 
-    private boolean matchesAllergenFlag(Recipe recipe, String allergen) {
+    static boolean matchesAllergenFlag(Recipe recipe, String allergen) {
+        // Unknown (NULL) allergen metadata must be treated conservatively for
+        // users who declared an allergy. Only an explicit FALSE is considered
+        // a negative result; users should still verify product packaging.
         return switch (allergen) {
-            case "gluten", "wheat", "barley" -> Boolean.TRUE.equals(recipe.getContainsGluten());
-            case "lactose", "dairy", "milk", "cheese" -> Boolean.TRUE.equals(recipe.getContainsLactose());
-            case "nut", "nuts", "peanut", "groundnut", "almond", "cashew", "walnut" -> Boolean.TRUE.equals(recipe.getContainsNuts());
-            case "soy", "soya" -> Boolean.TRUE.equals(recipe.getContainsSoy());
-            case "egg", "eggs" -> Boolean.TRUE.equals(recipe.getContainsEggs());
-            case "fish" -> Boolean.TRUE.equals(recipe.getContainsFish());
-            case "shellfish", "shrimp", "prawn", "crab" -> Boolean.TRUE.equals(recipe.getContainsShellfish());
+            case "gluten", "wheat", "barley" -> !Boolean.FALSE.equals(recipe.getContainsGluten());
+            case "lactose", "dairy", "milk", "cheese" -> !Boolean.FALSE.equals(recipe.getContainsLactose());
+            case "nut", "nuts", "peanut", "groundnut", "almond", "cashew", "walnut" -> !Boolean.FALSE.equals(recipe.getContainsNuts());
+            case "soy", "soya" -> !Boolean.FALSE.equals(recipe.getContainsSoy());
+            case "egg", "eggs" -> !Boolean.FALSE.equals(recipe.getContainsEggs());
+            case "fish" -> !Boolean.FALSE.equals(recipe.getContainsFish());
+            case "shellfish", "shrimp", "prawn", "crab" -> !Boolean.FALSE.equals(recipe.getContainsShellfish());
             default -> false;
         };
     }
@@ -414,13 +417,13 @@ public class RecommendationEngine {
                     if (Boolean.FALSE.equals(recipe.getVegan())) return true;
                 }
                 case "gluten free" -> {
-                    if (Boolean.TRUE.equals(recipe.getContainsGluten())) return true;
+                    if (!Boolean.FALSE.equals(recipe.getContainsGluten())) return true;
                 }
                 case "dairy free" -> {
-                    if (Boolean.TRUE.equals(recipe.getContainsLactose())) return true;
+                    if (!Boolean.FALSE.equals(recipe.getContainsLactose())) return true;
                 }
                 case "nut free" -> {
-                    if (Boolean.TRUE.equals(recipe.getContainsNuts())) return true;
+                    if (!Boolean.FALSE.equals(recipe.getContainsNuts())) return true;
                 }
                 case "keto", "ketogenic" -> {
                     if (Boolean.FALSE.equals(recipe.getKetoFriendly())) return true;
@@ -681,7 +684,7 @@ public class RecommendationEngine {
         return reasons;
     }
 
-    private List<String> buildWarnings(Recipe recipe) {
+    static List<String> buildWarnings(Recipe recipe) {
         List<String> warnings = new ArrayList<>();
         if (Boolean.TRUE.equals(recipe.getContainsGluten())) warnings.add("Contains gluten");
         if (Boolean.TRUE.equals(recipe.getContainsLactose())) warnings.add("Contains lactose/dairy");
@@ -690,6 +693,12 @@ public class RecommendationEngine {
         if (Boolean.TRUE.equals(recipe.getContainsEggs())) warnings.add("Contains eggs");
         if (Boolean.TRUE.equals(recipe.getContainsFish())) warnings.add("Contains fish");
         if (Boolean.TRUE.equals(recipe.getContainsShellfish())) warnings.add("Contains shellfish");
+        if (recipe.getContainsGluten() == null || recipe.getContainsLactose() == null
+                || recipe.getContainsNuts() == null || recipe.getContainsSoy() == null
+                || recipe.getContainsEggs() == null || recipe.getContainsFish() == null
+                || recipe.getContainsShellfish() == null) {
+            warnings.add("Allergen information is incomplete; verify ingredient labels before eating");
+        }
         if (!Boolean.TRUE.equals(recipe.getVerified())) warnings.add("Recipe has not been professionally verified");
         if (recipe.getConfidenceScore() != null && recipe.getConfidenceScore() < 0.7) {
             warnings.add("Nutrition and allergen details are estimates");

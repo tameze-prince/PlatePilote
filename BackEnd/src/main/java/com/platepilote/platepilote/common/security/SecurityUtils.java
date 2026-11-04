@@ -48,7 +48,7 @@ public class SecurityUtils {
      * @param resourceId        identifiant de la ressource
      */
     public void verifyOwnership(UUID resourceOwnerId, UUID requestingUserId, String resourceType, String resourceId) {
-        if (!resourceOwnerId.equals(requestingUserId)) {
+        if (resourceOwnerId == null || !resourceOwnerId.equals(requestingUserId)) {
             throw new ResourceNotFoundException(resourceType, "id", resourceId);
         }
     }

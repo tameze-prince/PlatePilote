@@ -26,8 +26,10 @@ class RecipeDetailsScreen extends ConsumerStatefulWidget {
 class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
   /// Recette chargée depuis l'API.
   RecipeDetail? _recipe;
+
   /// Indique si le chargement est en cours.
   bool _isLoading = true;
+
   /// Message d'erreur éventuel.
   String? _error;
 
@@ -72,8 +74,8 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
           child: _isLoading
               ? _buildLoading()
               : _error != null
-                  ? _buildError()
-                  : _buildContent(),
+              ? _buildError()
+              : _buildContent(),
         ),
       ),
     );
@@ -99,10 +101,7 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          FilledButton(
-            onPressed: _loadRecipe,
-            child: const Text('Retry'),
-          ),
+          FilledButton(onPressed: _loadRecipe, child: const Text('Retry')),
         ],
       ),
     );
@@ -124,7 +123,10 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(
-                AppSpacing.md, 0, AppSpacing.md, 0,
+                AppSpacing.md,
+                0,
+                AppSpacing.md,
+                0,
               ),
               child: heroTag == null
                   ? heroChild
@@ -152,7 +154,10 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md, 0, AppSpacing.md, AppSpacing.xl,
+              AppSpacing.md,
+              0,
+              AppSpacing.md,
+              AppSpacing.xl,
             ),
             children: [
               Text(
@@ -187,7 +192,8 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
                   ],
                 ],
               ),
-              if (recipe.description != null && recipe.description!.isNotEmpty) ...[
+              if (recipe.description != null &&
+                  recipe.description!.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   recipe.description!,
@@ -196,8 +202,11 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
                   ),
                 ),
               ],
+              _buildNutritionInfo(recipe),
+              _buildAllergenInfo(recipe),
               const SizedBox(height: AppSpacing.lg),
-              Text('Ingredients',
+              Text(
+                'Ingredients',
                 style: AppTypography.titleLarge.copyWith(
                   color: PremiumTheme.textPrimary(context),
                   fontWeight: FontWeight.w700,
@@ -265,7 +274,8 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
                   ),
                 ),
               const SizedBox(height: AppSpacing.lg),
-              Text('Steps',
+              Text(
+                'Steps',
                 style: AppTypography.titleLarge.copyWith(
                   color: PremiumTheme.textPrimary(context),
                   fontWeight: FontWeight.w700,
@@ -318,36 +328,176 @@ class _RecipeDetailsScreenState extends ConsumerState<RecipeDetailsScreen> {
                     ),
                   ),
                 ),
-              const SizedBox(height: AppSpacing.lg),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.swap_horiz, size: 18),
-                      label: const Text('Replace'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.restaurant, size: 18),
-                      label: const Text('Cook'),
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildNutritionInfo(RecipeDetail recipe) {
+    final hasNutrition =
+        recipe.caloriesPerServing != null ||
+        recipe.proteinPerServing != null ||
+        recipe.carbsPerServing != null ||
+        recipe.fatPerServing != null ||
+        recipe.fiberPerServing != null;
+    if (!hasNutrition) return const SizedBox.shrink();
+
+    String grams(double? value) =>
+        value == null ? '—' : '${value.toStringAsFixed(1)} g';
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.lg),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: PremiumTheme.glass(context, elevated: true),
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Nutrition per serving',
+              style: AppTypography.titleLarge.copyWith(
+                color: PremiumTheme.textPrimary(context),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              '${recipe.caloriesPerServing ?? '—'} kcal',
+              style: AppTypography.headlineMedium.copyWith(
+                color: PremiumTheme.textPrimary(context),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Protein ${grams(recipe.proteinPerServing)}  •  '
+              'Carbs ${grams(recipe.carbsPerServing)}  •  '
+              'Fat ${grams(recipe.fatPerServing)}  •  '
+              'Fiber ${grams(recipe.fiberPerServing)}',
+              style: AppTypography.bodySmall.copyWith(
+                color: PremiumTheme.textSecondary(context),
+              ),
+            ),
+            if (recipe.nutritionSource != null) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Source: ${recipe.nutritionSource}',
+                style: AppTypography.bodySmall.copyWith(
+                  color: PremiumTheme.textSecondary(context),
+                ),
+              ),
+            ],
+            if (recipe.confidenceScore == null ||
+                recipe.confidenceScore! < 0.7) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Nutrition values are estimates and have not been independently verified.',
+                style: AppTypography.bodySmall.copyWith(
+                  color: PremiumTheme.textSecondary(context),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAllergenInfo(RecipeDetail recipe) {
+    final statuses = <String, bool?>{
+      'Gluten': recipe.containsGluten,
+      'Dairy / lactose': recipe.containsLactose,
+      'Nuts': recipe.containsNuts,
+      'Soy': recipe.containsSoy,
+      'Eggs': recipe.containsEggs,
+      'Fish': recipe.containsFish,
+      'Shellfish': recipe.containsShellfish,
+    };
+    final present = statuses.entries
+        .where((entry) => entry.value == true)
+        .map((entry) => entry.key)
+        .toList();
+    final unknown = statuses.entries
+        .where((entry) => entry.value == null)
+        .map((entry) => entry.key)
+        .toList();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.lg),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: PremiumTheme.glass(context, elevated: true),
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(color: Colors.orange.withValues(alpha: 0.35)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Allergen information',
+                  style: AppTypography.titleLarge.copyWith(
+                    color: PremiumTheme.textPrimary(context),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            if (present.isNotEmpty)
+              Text(
+                'Ingredient data indicates: ${present.join(', ')}.',
+                style: AppTypography.bodyMedium.copyWith(
+                  color: PremiumTheme.textPrimary(context),
+                ),
+              ),
+            if (unknown.isNotEmpty)
+              Text(
+                'Unknown: ${unknown.join(', ')}.',
+                style: AppTypography.bodyMedium.copyWith(
+                  color: PremiumTheme.textPrimary(context),
+                ),
+              ),
+            if (present.isEmpty && unknown.isEmpty)
+              Text(
+                'No listed allergens were detected in the available ingredient metadata. This does not guarantee the recipe is allergen-free.',
+                style: AppTypography.bodyMedium.copyWith(
+                  color: PremiumTheme.textPrimary(context),
+                ),
+              ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Do not rely on this information for allergy safety. Check product packaging and confirm ingredients with the food provider.',
+              style: AppTypography.bodySmall.copyWith(
+                color: PremiumTheme.textSecondary(context),
+              ),
+            ),
+            if (recipe.verified != true)
+              Text(
+                'This recipe has not been professionally verified.',
+                style: AppTypography.bodySmall.copyWith(
+                  color: PremiumTheme.textSecondary(context),
+                ),
+              ),
+            if (recipe.allergenSource != null)
+              Text(
+                'Data source: ${recipe.allergenSource}',
+                style: AppTypography.bodySmall.copyWith(
+                  color: PremiumTheme.textSecondary(context),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -358,6 +508,7 @@ class _InfoChip extends StatelessWidget {
 
   /// Icône de la pastille.
   final IconData icon;
+
   /// Libellé de la pastille.
   final String label;
 

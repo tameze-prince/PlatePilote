@@ -141,8 +141,7 @@ public class MealPlanService {
             throw new BusinessRuleViolationException("Meal date must be within the plan's date range");
         }
 
-        Recipe recipe = recipeRepository.findById(request.getRecipeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", request.getRecipeId().toString()));
+        Recipe recipe = requireAccessibleRecipe(userId, request.getRecipeId());
 
         MealPlanEntry entry = MealPlanEntry.builder()
                 .mealPlanId(mealPlanId)
@@ -286,8 +285,7 @@ public class MealPlanService {
 
         securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", entry.getMealPlanId().toString());
 
-        Recipe newRecipe = recipeRepository.findById(newRecipeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", newRecipeId.toString()));
+        Recipe newRecipe = requireAccessibleRecipe(userId, newRecipeId);
 
         entry.setRecipeId(newRecipeId);
         mealPlanEntryRepository.save(entry);
@@ -334,6 +332,25 @@ public class MealPlanService {
     }
 
     /**
+     * A meal plan may reference a public recipe or a non-deleted private recipe
+     * owned by the current user. This check is shared by add and swap operations.
+     */
+    private Recipe requireAccessibleRecipe(UUID userId, UUID recipeId) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", recipeId.toString()));
+        if (!isRecipeVisibleToUser(recipe, userId)) {
+            throw new ResourceNotFoundException("Recipe", "id", recipeId.toString());
+        }
+        return recipe;
+    }
+
+    private boolean isRecipeVisibleToUser(Recipe recipe, UUID userId) {
+        return !recipe.isDeleted()
+                && Boolean.TRUE.equals(recipe.getEnabled())
+                && (Boolean.TRUE.equals(recipe.getIsPublic()) || userId.equals(recipe.getUserId()));
+    }
+
+    /**
      * Construit une réponse résumée à partir d'une entité MealPlan.
      *
      * @param mealPlan entité source
@@ -375,10 +392,13 @@ public class MealPlanService {
         List<MealPlanResponse.MealPlanEntryResponse> entryResponses = entries.stream()
                 .map(entry -> {
                     Recipe recipe = recipeMap.get(entry.getRecipeId());
+                    if (recipe != null && !isRecipeVisibleToUser(recipe, mealPlan.getUserId())) {
+                        recipe = null;
+                    }
                     return MealPlanResponse.MealPlanEntryResponse.builder()
                             .id(entry.getId())
                             .recipeId(entry.getRecipeId())
-                            .recipeName(recipe != null ? recipe.getName() : "Unknown")
+                            .recipeName(recipe != null ? recipe.getName() : "Unavailable recipe")
                             .mealDate(entry.getMealDate())
                             .mealType(entry.getMealType())
                             .servings(entry.getServings())

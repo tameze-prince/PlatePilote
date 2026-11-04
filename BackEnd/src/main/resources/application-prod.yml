@@ -6,6 +6,14 @@
 # ══════════════════════════════════════════════════════════════
 
 spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    ignore-migration-patterns:
+      - "versioned:117:ignored"
+    placeholders:
+      environment: production
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -63,6 +71,8 @@ app:
   rate-limit:
     max-requests: ${RATE_LIMIT_MAX_REQUESTS:100}
     window-seconds: ${RATE_LIMIT_WINDOW_SECONDS:60}
+    max-tracked-clients: ${RATE_LIMIT_MAX_TRACKED_CLIENTS:10000}
+    trusted-proxies: ${RATE_LIMIT_TRUSTED_PROXIES:}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}
     allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS

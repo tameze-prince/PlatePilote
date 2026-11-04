@@ -25,6 +25,13 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      * @param pageable les paramètres de pagination
      * @return une page de recettes publiques
      */
+    Page<Recipe> findByIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(Pageable pageable);
+
+    /**
+     * Compatibilité avec les consommateurs historiques du repository.
+     * La requête conserve les filtres d'activation et de suppression logique.
+     */
+    @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.enabled = true AND r.deletedAt IS NULL")
     Page<Recipe> findByIsPublicTrueAndDeletedAtIsNull(Pageable pageable);
 
     /**
@@ -55,7 +62,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      * @param pageable    les paramètres de pagination
      * @return une page de recettes correspondant au type de cuisine
      */
-    Page<Recipe> findByCuisineTypeAndIsPublicTrueAndDeletedAtIsNull(String cuisineType, Pageable pageable);
+    Page<Recipe> findByCuisineTypeAndIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(String cuisineType, Pageable pageable);
 
     /**
      * Filtre les recettes publiques par type de repas (ex: "Petit-déjeuner", "Dîner").
@@ -64,7 +71,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      * @param pageable les paramètres de pagination
      * @return une page de recettes correspondant au type de repas
      */
-    Page<Recipe> findByMealTypeAndIsPublicTrueAndDeletedAtIsNull(String mealType, Pageable pageable);
+    Page<Recipe> findByMealTypeAndIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(String mealType, Pageable pageable);
 
     /**
      * Recherche les recettes publiques par nom ou description (insensible à la casse).
@@ -73,9 +80,9 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      * @param pageable les paramètres de pagination
      * @return une page de recettes correspondant à la recherche
      */
-    @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.deletedAt IS NULL AND " +
+    @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.enabled = true AND r.deletedAt IS NULL AND (" +
            "LOWER(r.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(r.description) LIKE LOWER(CONCAT('%', :query, '%'))")
+           "LOWER(r.description) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<Recipe> searchPublicRecipes(@Param("query") String query, Pageable pageable);
 
     /**
@@ -85,7 +92,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      * @param ids la liste des identifiants de recettes
      * @return la liste des recettes correspondantes
      */
-    @Query("SELECT r FROM Recipe r WHERE r.id IN :ids AND r.deletedAt IS NULL")
+    @Query("SELECT r FROM Recipe r WHERE r.id IN :ids AND r.isPublic = true AND r.enabled = true AND r.deletedAt IS NULL")
     List<Recipe> findByIds(@Param("ids") List<UUID> ids);
 
     /**
@@ -95,7 +102,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      * @param pageable les paramètres de pagination
      * @return une page de recettes rapides
      */
-    @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.deletedAt IS NULL AND r.totalTimeMinutes <= :maxTime")
+    @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.enabled = true AND r.deletedAt IS NULL AND r.totalTimeMinutes <= :maxTime")
     Page<Recipe> findQuickMeals(@Param("maxTime") Integer maxTime, Pageable pageable);
 
     /**
@@ -106,7 +113,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      * @param pageable les paramètres de pagination
      * @return une liste de recettes correspondant aux filtres
      */
-    @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.deletedAt IS NULL AND " +
+    @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.enabled = true AND r.deletedAt IS NULL AND " +
            "(:cuisine IS NULL OR r.cuisineType = :cuisine) AND " +
            "(r.estimatedCost IS NULL OR r.estimatedCost <= :maxCost)")
     List<Recipe> findByFilters(@Param("cuisine") String cuisine, @Param("maxCost") java.math.BigDecimal maxCost, Pageable pageable);

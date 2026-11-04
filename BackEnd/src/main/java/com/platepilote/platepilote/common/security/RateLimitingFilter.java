@@ -14,8 +14,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Filtre de limitation de débit (rate limiting) pour protéger les endpoints sensibles.
@@ -39,8 +41,17 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     @Value("${app.rate-limit.window-seconds:60}")
     private int windowSeconds;
 
+    /** Exact remote addresses of reverse proxies allowed to supply forwarding headers. */
+    @Value("${app.rate-limit.trusted-proxies:}")
+    private String trustedProxies;
+
+    /** Upper bound for tracked client addresses to protect memory under address churn. */
+    @Value("${app.rate-limit.max-tracked-clients:10000}")
+    private int maxTrackedClients;
+
     /** Cache thread-safe des compteurs par IP. */
     private final ConcurrentHashMap<String, RateBucket> buckets = new ConcurrentHashMap<>();
+    private final AtomicLong requestCounter = new AtomicLong();
 
     /**
      * Intercepte chaque requête et applique le rate limiting sur les endpoints protégés.
@@ -83,15 +94,26 @@ public class RateLimitingFilter extends OncePerRequestFilter {
      */
     private boolean allowRequest(String clientIp) {
         long now = Instant.now().getEpochSecond();
+        if (requestCounter.incrementAndGet() % 256 == 0) {
+            buckets.entrySet().removeIf(entry ->
+                    now - entry.getValue().windowStart >= windowSeconds);
+        }
+
+        if (!buckets.containsKey(clientIp) && buckets.size() >= maxTrackedClients) {
+            buckets.entrySet().removeIf(entry ->
+                    now - entry.getValue().windowStart >= windowSeconds);
+            if (buckets.size() >= maxTrackedClients) {
+                return false;
+            }
+        }
+
         RateBucket bucket = buckets.compute(clientIp, (key, existing) -> {
             if (existing == null || now - existing.windowStart >= windowSeconds) {
-                // Nouvelle fenêtre: créer un nouveau bucket
                 return new RateBucket(now, new AtomicInteger(1));
             }
             existing.count.incrementAndGet();
             return existing;
         });
-
         return bucket.count.get() <= maxRequests;
     }
 
@@ -102,16 +124,36 @@ public class RateLimitingFilter extends OncePerRequestFilter {
      * @return adresse IP du client
      */
     private String resolveClientIp(HttpServletRequest request) {
+        String remoteAddress = request.getRemoteAddr();
+        if (!isTrustedProxy(remoteAddress)) {
+            // Client-supplied forwarding headers are untrusted by default.
+            return remoteAddress;
+        }
+
         String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            // Prend la première IP (celle du client original)
-            return xForwardedFor.split(",")[0].trim();
+        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
+            String[] addresses = xForwardedFor.split(",");
+            // A trusted proxy appends the peer address; use the right-most value
+            // so a client cannot spoof the left-most X-Forwarded-For entry.
+            String forwardedClient = addresses[addresses.length - 1].trim();
+            if (!forwardedClient.isEmpty()) {
+                return forwardedClient;
+            }
         }
         String xRealIp = request.getHeader("X-Real-IP");
-        if (xRealIp != null && !xRealIp.isEmpty()) {
+        if (xRealIp != null && !xRealIp.isBlank()) {
             return xRealIp.trim();
         }
-        return request.getRemoteAddr();
+        return remoteAddress;
+    }
+
+    private boolean isTrustedProxy(String remoteAddress) {
+        if (trustedProxies == null || trustedProxies.isBlank() || remoteAddress == null) {
+            return false;
+        }
+        return Arrays.stream(trustedProxies.split(","))
+                .map(String::trim)
+                .anyMatch(remoteAddress::equals);
     }
 
     /**

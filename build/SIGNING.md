@@ -1,134 +1,87 @@
-# PlatePilote — Signature Android (release / Play Store)
+# PlatePilote — Signature Android et livraison
 
-> **Statut :** template prêt. Le keystore réel (`upload-keystore.jks`) n'a PAS été créé ici — secret Prince.
-> **Cible :** build prod release + déploiement Google Play Console.
+**État :** la configuration Gradle et le workflow de release sont implémentés sur `release/production-readiness`.  
+**Non réalisé :** le keystore réel n'a pas été créé et aucun APK signé par la clé du propriétaire n'a encore été produit.
 
----
+## 1. Configuration Gradle déjà en place
 
-## 1. Pourquoi ce fichier
+`FrontEnd/android/app/build.gradle.kts` lit `FrontEnd/android/key.properties` et utilise le signing config `release`. Un build release ne retombe jamais sur la clé debug.
 
-Le projet est livré avec la config par défaut de Flutter (`signingConfigs.getByName("debug")`) qui **signe avec la clé debug** — inutilisable pour le Play Store. Pour publier :
+Le fichier local doit contenir :
 
-1. Générer un keystore privé (`upload-keystore.jks`).
-2. Stocker ses secrets dans `android/key.properties` (jamais commité).
-3. Lire ce fichier depuis `android/app/build.gradle.kts` pour signer `release`.
+```properties
+storeFile=../upload-keystore.jks
+storePassword=<STORE_PASSWORD>
+keyPassword=<KEY_PASSWORD>
+keyAlias=upload
+```
 
----
+Le chemin `storeFile` est résolu depuis le module Android `FrontEnd/android/app` et pointe donc vers `FrontEnd/android/upload-keystore.jks`.
 
-## 2. Étape 1 — Générer le keystore
+Les fichiers suivants sont ignorés par Git :
+- `FrontEnd/android/key.properties`
+- `FrontEnd/android/upload-keystore.jks`
 
-Utilise l'outil Java `keytool` (présent si JDK 17 installé — vérifié sur ton poste).
+## 2. Générer le keystore
+
+Depuis `FrontEnd/android`, avec un JDK installé :
 
 ```bash
-cd ~/Documents/PlatePilote/FrontEnd/android
-keytool -genkey -v \
+keytool -genkeypair -v \
   -keystore upload-keystore.jks \
   -keyalg RSA -keysize 2048 -validity 10000 \
   -alias upload \
-  -storepass 'TON_STORE_PASSWORD' \
-  -keypass 'TON_KEY_PASSWORD' \
-  -dname "CN=PlatePilote, OU=Mobile, O=PlatePilote, L=Paris, ST=IDF, C=FR"
+  -dname "CN=PlatePilote, OU=Mobile, O=PlatePilote, C=CM"
 ```
 
-- **`-validity 10000`** → ~27 ans (recommandé Google). Le Play Store exige une validité ≥ 25 ans.
-- **`-alias upload`** → convention Play App Signing.
-- **`-storepass` / `-keypass`** → garde-les secrets, ne les colle pas dans Slack/Discord.
+La commande demande les mots de passe de façon interactive. Ne les passe pas comme arguments de commande, ne les colle pas dans le chat et ne commite jamais le keystore.
 
-> ⚠️ **Perdre ce keystore = perdre ton app sur le Play Store.** Fais un backup chiffré hors-ligne avant de continuer.
+Conserve plusieurs sauvegardes chiffrées du keystore et des mots de passe dans un gestionnaire de secrets. Perdre la clé d'upload peut empêcher les mises à jour de l'application.
 
----
+Ensuite, crée `FrontEnd/android/key.properties` à partir de `key.properties.example` et renseigne les vraies valeurs localement.
 
-## 3. Étape 2 — Créer `android/key.properties`
+## 3. Build local
+
+L'URL doit être l'URL HTTPS réellement déployée, avec le préfixe API attendu (généralement `/api/v1`). Ne remplace pas le domaine par une URL supposée.
 
 ```bash
-cd ~/Documents/PlatePilote/FrontEnd/android
-cp key.properties.example key.properties
-# Édite key.properties et remplace les 3 valeurs REPLACE_WITH_* par tes vrais mots de passe.
+PLATEPILOT_API_BASE_URL="https://<deployed-api-host>/api/v1" \
+  ./deploy/scripts/build_android.sh prod
 ```
 
-Le fichier `key.properties` doit figurer dans `.gitignore` (à vérifier, déjà présent dans `.gitignore` racine Flutter standard).
+Le script produit :
+- APKs signés par ABI dans `FrontEnd/build/app/outputs/flutter-apk/`
+- AAB signé dans `FrontEnd/build/app/outputs/bundle/release/app-release.aab`
 
----
+Vérifie la signature avec `apksigner verify --print-certs` et conserve les SHA-256 des artefacts.
 
-## 4. Étape 3 — Brancher dans `android/app/build.gradle.kts`
+## 4. Workflow GitHub Actions
 
-Le snippet ci-dessous lit `key.properties` et charge le keystore. **Aucune modification n'a été faite ici** pour ne pas casser le build debug ; à appliquer par Prince quand le keystore est prêt.
+Le workflow `.github/workflows/android-release.yml` se lance sur un tag `v*` ou manuellement. Configure avant de l'exécuter :
 
-**Ajouter AVANT le bloc `android {` :**
+**Variable de dépôt**
+- `PLATEPILOT_API_BASE_URL` : URL HTTPS publique et opérationnelle de l'API.
 
-```kotlin
-import java.util.Properties
-import java.io.FileInputStream
+**Secrets de dépôt**
+- `ANDROID_KEYSTORE_BASE64` : contenu base64 du fichier `upload-keystore.jks`.
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_PASSWORD`
+- `ANDROID_KEY_ALIAS`
 
-val keystoreProperties = Properties().apply {
-    val file = rootProject.file("key.properties")
-    if (file.exists()) load(FileInputStream(file))
-}
-```
+Le workflow crée `key.properties` et le keystore uniquement dans le runner éphémère, construit les APKs/AAB, vérifie les signatures et téléverse les artefacts avec checksums. Ne stocke pas ces valeurs dans les fichiers suivis par Git.
 
-**Ajouter dans `android { ... }`** (avant `buildTypes`):
-
-```kotlin
-signingConfigs {
-    create("release") {
-        keyAlias = keystoreProperties["keyAlias"] as String?
-        keyPassword = keystoreProperties["keyPassword"] as String?
-        storeFile = keystoreProperties["storeFile"]?.let { file(it) }
-        storePassword = keystoreProperties["storePassword"] as String?
-    }
-}
-```
-
-**Modifier le bloc `buildTypes` :**
-
-```kotlin
-buildTypes {
-    release {
-        signingConfig = signingConfigs.getByName("release")
-        isMinifyEnabled = true       // R8 / ProGuard
-        isShrinkResources = true
-        proguardFiles(
-            getDefaultProguardFile("proguard-android-optimize.txt"),
-            "proguard-rules.pro"
-        )
-    }
-}
-```
-
----
-
-## 5. Étape 4 — Play App Signing (obligatoire depuis 2021)
-
-Google exige désormais **Play App Signing** :
-
-1. Upload ton `upload-keystore.jks` une seule fois dans Play Console (Setup → App signing).
-2. Google génère la **app signing key** (leur clé maître) qu'ils gardent.
-3. Tes APK/AAB par la suite sont signés seulement avec ton `upload key` ; Google les re-signe avec la app signing key avant distribution.
-
-→ Voir : https://support.google.com/googleplay/android-developer/answer/9842756
-
----
-
-## 6. Vérification locale après config
+Pour encoder le keystore localement avant de le placer directement dans le gestionnaire de secrets GitHub :
 
 ```bash
-cd ~/Documents/PlatePilote/FrontEnd
-flutter build apk --release \
-  --dart-define=API_BASE_URL=https://api.platepilote.app
-
-# Vérifier la signature
-$ANDROID_HOME/build-tools/<version>/apksigner verify --print-certs \
-  build/app/outputs/flutter-apk/app-release.apk
+base64 -w 0 FrontEnd/android/upload-keystore.jks
 ```
 
-La sortie doit afficher ton certificat (CN=PlatePilote, O=PlatePilote, etc.) — et non plus le certificat debug Android.
+Ne transmets pas le résultat dans une conversation. Colle-le uniquement dans le champ secret GitHub approprié.
 
----
+## 5. Limites actuelles
 
-## 7. Checklist Prince
-
-- [ ] `keytool -genkey ...` exécuté, keystore sauvegardé dans un endroit sûr (gestionnaire de mots de passe + backup chiffré).
-- [ ] `android/key.properties` créé, ajouté au `.gitignore`.
-- [ ] Patch `android/app/build.gradle.kts` appliqué (sections ci-dessus).
-- [ ] `play.keytool` upload fait dans Google Play Console.
-- [ ] Premier `flutter build appbundle --release` signé → upload en **internal testing** pour valider.
+- Aucun keystore du propriétaire n'a été fourni ou créé.
+- Aucun secret GitHub de signature n'est présumé configuré.
+- Aucun endpoint de production n'est présumé opérationnel.
+- Un APK debug ou un APK signé avec une clé CI temporaire ne doit pas être distribué au public.
+- La publication Play Store nécessite aussi la configuration Play App Signing et la validation de la fiche store.

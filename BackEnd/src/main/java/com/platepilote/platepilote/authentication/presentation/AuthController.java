@@ -90,8 +90,8 @@ public class AuthController {
      */
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<AuthenticationResponse>> refresh(
-            @RequestParam String refreshToken) {
-        AuthenticationResponse response = authService.refreshToken(refreshToken);
+            @Valid @RequestBody RefreshTokenRequest request) {
+        AuthenticationResponse response = authService.refreshToken(request.refreshToken());
         return ResponseEntity.ok(ApiResponse.success("Token refreshed", response));
     }
 
@@ -172,7 +172,7 @@ public class AuthController {
      *
      * @param refreshToken le token de rafraîchissement
      */
-    public record RefreshTokenRequest(String refreshToken) {}
+    public record RefreshTokenRequest(@jakarta.validation.constraints.NotBlank String refreshToken) {}
 
     /**
      * Requête de renvoi d'email de vérification.

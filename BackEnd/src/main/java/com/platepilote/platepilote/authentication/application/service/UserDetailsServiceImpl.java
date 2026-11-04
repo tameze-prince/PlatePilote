@@ -55,7 +55,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPasswordHash() == null ? "{noop}oauth2" : user.getPasswordHash(),
-                user.getEnabled(),
+                Boolean.TRUE.equals(user.getEnabled()) && !user.isDeleted(),
                 true, true, true,
                 authorities
         );

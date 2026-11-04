@@ -35,6 +35,11 @@ jobs:
           cache: maven
           cache-dependency-path: BackEnd/pom.xml
 
+      - name: Validate food dataset generator
+        run: |
+          python -m py_compile ../food_dataset_v2/generate_v101.py
+          python -m unittest discover -s ../food_dataset_v2 -p 'test_*.py'
+
       - name: Validate Maven wrapper & POM
         run: ./mvnw -v
 
@@ -71,7 +76,7 @@ jobs:
     name: Docker Build Smoke Test
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     # Ne push PAS l'image — juste vérifier que le Dockerfile build (Railway/Render rebuildent eux-mêmes)
     steps:
       - name: Checkout
