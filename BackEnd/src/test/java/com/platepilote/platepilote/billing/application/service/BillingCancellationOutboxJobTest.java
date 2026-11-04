@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,14 +25,20 @@ class BillingCancellationOutboxJobTest {
         BillingProvider provider = mock(BillingProvider.class);
         SubscriptionRepository subscriptions = mock(SubscriptionRepository.class);
         BillingCancellationRequest request = dueRequest();
+        UUID subscriptionId = UUID.randomUUID();
+        Subscription subscription = subscription(subscriptionId);
+        request.setSubscriptionId(subscriptionId);
         when(requests.findTop20ByStatusAndNextAttemptAtLessThanEqualOrderByCreatedAtAsc(
                 org.mockito.ArgumentMatchers.eq("PENDING"), any(Instant.class))).thenReturn(List.of(request));
+        when(subscriptions.findById(subscriptionId)).thenReturn(Optional.of(subscription));
 
         new BillingCancellationOutboxJob(requests, provider, subscriptions).processDueRequests();
 
         assertThat(request.getStatus()).isEqualTo("COMPLETED");
         assertThat(request.getLastError()).isNull();
+        assertThat(subscription.getStatus()).isEqualTo("CANCELLED");
         verify(provider).cancelSubscription("sub_123");
+        verify(subscriptions).save(subscription);
         verify(requests).save(request);
     }
 
@@ -53,6 +61,44 @@ class BillingCancellationOutboxJobTest {
         assertThat(request.getNextAttemptAt()).isAfter(Instant.now());
         verify(requests).save(request);
         verify(subscriptions, never()).save(any());
+    }
+
+    @Test
+    void exhaustedRetriesMarkRequestAndSubscriptionAsFailed() {
+        BillingCancellationRequestRepository requests = mock(BillingCancellationRequestRepository.class);
+        BillingProvider provider = mock(BillingProvider.class);
+        SubscriptionRepository subscriptions = mock(SubscriptionRepository.class);
+        BillingCancellationRequest request = dueRequest();
+        request.setAttemptCount(11);
+        UUID subscriptionId = UUID.randomUUID();
+        Subscription subscription = subscription(subscriptionId);
+        request.setSubscriptionId(subscriptionId);
+        when(requests.findTop20ByStatusAndNextAttemptAtLessThanEqualOrderByCreatedAtAsc(
+                org.mockito.ArgumentMatchers.eq("PENDING"), any(Instant.class))).thenReturn(List.of(request));
+        when(subscriptions.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+        org.mockito.Mockito.doThrow(new IllegalStateException("Stripe unavailable"))
+                .when(provider).cancelSubscription("sub_123");
+
+        new BillingCancellationOutboxJob(requests, provider, subscriptions).processDueRequests();
+
+        assertThat(request.getStatus()).isEqualTo("FAILED");
+        assertThat(request.getAttemptCount()).isEqualTo(12);
+        assertThat(subscription.getStatus()).isEqualTo("CANCELLATION_FAILED");
+        verify(subscriptions).save(subscription);
+        verify(requests).save(request);
+    }
+
+    private Subscription subscription(UUID id) {
+        Subscription subscription = Subscription.builder()
+                .userId(UUID.randomUUID())
+                .provider("STRIPE")
+                .providerSubscriptionId("sub_123")
+                .planType("PREMIUM_MONTHLY")
+                .status("CANCELLATION_PENDING")
+                .startDate(Instant.now().minusSeconds(60))
+                .build();
+        subscription.setId(id);
+        return subscription;
     }
 
     private BillingCancellationRequest dueRequest() {
