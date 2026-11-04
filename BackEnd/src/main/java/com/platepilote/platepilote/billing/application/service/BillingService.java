@@ -94,14 +94,18 @@ public class BillingService {
             subscription.setEndDate(Instant.now());
             subscription.setExpiresAt(Instant.now());
             subscriptionRepository.save(subscription);
+            String cancellationEvent = switch (subscription.getStatus()) {
+                case "CANCELLED" -> "ACCOUNT_DELETION_SUBSCRIPTION_CANCELLED";
+                case "CANCELLATION_FAILED" -> "ACCOUNT_DELETION_SUBSCRIPTION_CANCELLATION_FAILED";
+                default -> "ACCOUNT_DELETION_SUBSCRIPTION_CANCELLATION_QUEUED";
+            };
             auditLogService.log(
                     userId,
-                    externalSubscription ? "ACCOUNT_DELETION_SUBSCRIPTION_CANCELLATION_QUEUED"
-                            : "ACCOUNT_DELETION_SUBSCRIPTION_CANCELLED",
+                    cancellationEvent,
                     "SUBSCRIPTION",
                     subscription.getId().toString(),
                     Map.of("provider", provider == null ? "UNKNOWN" : provider,
-                            "cancellationQueued", externalSubscription)
+                            "cancellationQueued", "CANCELLATION_PENDING".equals(subscription.getStatus()))
             );
         });
         entitlementService.revokePremium(userId);
