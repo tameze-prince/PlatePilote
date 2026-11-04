@@ -104,8 +104,8 @@ public class MeService {
         OurUser user = loadUser(userId);
         log.info("Exporting user data for {}", userId);
 
-        UserProfileResponse profile = safe(() -> userProfileService.getProfileByUserId(userId), null);
-        UserPreferencesResponse preferences = safe(() -> preferencesService.getAllPreferences(userId), null);
+        UserProfileResponse profile = userProfileService.getProfileByUserId(userId);
+        UserPreferencesResponse preferences = preferencesService.getAllPreferences(userId);
 
         var plans = mealPlanRepository.findByUserIdAndDeletedAtIsNull(userId, EXPORT_LIMIT)
                 .map(this::toMealPlanExport)
