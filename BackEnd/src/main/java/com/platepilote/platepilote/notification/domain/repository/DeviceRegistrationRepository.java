@@ -2,6 +2,11 @@ package com.platepilote.platepilote.notification.domain.repository;
 
 import com.platepilote.platepilote.notification.domain.entity.DeviceRegistration;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,4 +33,15 @@ public interface DeviceRegistrationRepository extends JpaRepository<DeviceRegist
      * @return nombre d'appareils actifs
      */
     long countByUserIdAndIsActiveTrue(UUID userId);
+
+    @Modifying
+    @Query("""
+            UPDATE DeviceRegistration device
+            SET device.isActive = false, device.updatedAt = :updatedAt
+            WHERE device.userId = :userId
+            """)
+    int deactivateAllForUser(
+            @Param("userId") UUID userId,
+            @Param("updatedAt") Instant updatedAt
+    );
 }
