@@ -215,6 +215,62 @@ public class MeService {
                 .build();
     }
 
+    private BudgetExportDto toBudgetExport(Budget budget) {
+        return new BudgetExportDto(
+                budget.getId(),
+                budget.getAmount(),
+                budget.getCurrency(),
+                budget.getPeriod(),
+                budget.getStartDate(),
+                budget.getEndDate(),
+                budget.getSpent(),
+                budget.getCreatedAt(),
+                budget.getUpdatedAt()
+        );
+    }
+
+    private NotificationExportDto toNotificationExport(Notification notification) {
+        return new NotificationExportDto(
+                notification.getId(),
+                notification.getType(),
+                notification.getTitle(),
+                notification.getBody(),
+                notification.getData(),
+                notification.getRead(),
+                notification.getReadAt(),
+                notification.getCreatedAt()
+        );
+    }
+
+    private PurchaseRecordExportDto toPurchaseRecordExport(PurchaseRecord purchase) {
+        return new PurchaseRecordExportDto(
+                purchase.getId(),
+                purchase.getGroceryListId(),
+                purchase.getItemName(),
+                purchase.getCategory(),
+                purchase.getQuantity(),
+                purchase.getUnit(),
+                purchase.getUnitPrice(),
+                purchase.getTotalPrice(),
+                purchase.getIngredientId(),
+                purchase.getPurchasedAt()
+        );
+    }
+
+    private SubscriptionExportDto toSubscriptionExport(Subscription subscription) {
+        return new SubscriptionExportDto(
+                subscription.getPlanType(),
+                subscription.getStatus(),
+                subscription.getProvider(),
+                subscription.getStartDate(),
+                subscription.getEndDate(),
+                subscription.getTrialEndDate(),
+                subscription.getCancelAtPeriodEnd(),
+                subscription.getExpiresAt(),
+                subscription.getLastVerifiedAt()
+        );
+    }
+
     private MealPlanExportDto toMealPlanExport(MealPlan plan) {
         return MealPlanExportDto.builder()
                 .id(plan.getId())
