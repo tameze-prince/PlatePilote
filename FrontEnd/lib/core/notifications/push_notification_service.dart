@@ -41,10 +41,7 @@ class PushNotificationService {
   }) async {
     await apiClient.post(
       '/devices',
-      data: {
-        'deviceToken': token,
-        'platform': Platform.operatingSystem,
-      },
+      data: {'deviceToken': token, 'platform': Platform.operatingSystem},
     );
   }
 
@@ -56,10 +53,7 @@ class PushNotificationService {
     required String token,
     required ApiClient apiClient,
   }) async {
-    await apiClient.post(
-      '/devices/unregister',
-      data: {'deviceToken': token},
-    );
+    await apiClient.post('/devices/unregister', data: {'deviceToken': token});
   }
 
   /// Deletes the local FCM token after backend deactivation.
@@ -117,7 +111,8 @@ final pushSessionHookProvider = Provider<void>((ref) {
   }
 
   ref.listen<AppSessionState>(appSessionProvider, (prev, next) async {
-    final pushConsentRevoked = next.isAuthenticated &&
+    final pushConsentRevoked =
+        next.isAuthenticated &&
         prev?.hasAcceptedPush == true &&
         !next.hasAcceptedPush;
     if (pushConsentRevoked) {
@@ -125,9 +120,12 @@ final pushSessionHookProvider = Provider<void>((ref) {
       return;
     }
 
-    final hasNewPushConsent = next.hasAcceptedPush && prev?.hasAcceptedPush != true;
-    final hasNewAuthenticatedSession = next.isAuthenticated && prev?.isAuthenticated != true;
-    if (next.isAuthenticated && next.hasAcceptedPush &&
+    final hasNewPushConsent =
+        next.hasAcceptedPush && prev?.hasAcceptedPush != true;
+    final hasNewAuthenticatedSession =
+        next.isAuthenticated && prev?.isAuthenticated != true;
+    if (next.isAuthenticated &&
+        next.hasAcceptedPush &&
         (hasNewAuthenticatedSession || hasNewPushConsent)) {
       await _registerPush(ref);
     }
@@ -141,10 +139,7 @@ Future<void> _registerPush(Ref ref) async {
     push.listenToMessages();
     final token = await push.requestPermissionAndGetToken();
     if (token != null) {
-      await push.registerTokenWithBackend(
-        token: token,
-        apiClient: apiClient,
-      );
+      await push.registerTokenWithBackend(token: token, apiClient: apiClient);
     }
   } catch (e, st) {
     debugPrint('Push registration failed (non-blocking): $e\n$st');

@@ -35,10 +35,7 @@ class AuthNotifier extends Notifier<AuthState> {
 
     if (result.success) {
       final email = AuthRepository.extractEmailFromToken(accessToken);
-      state = AuthState(
-        isAuthenticated: true,
-        email: email,
-      );
+      state = AuthState(isAuthenticated: true, email: email);
       await ref.read(appSessionProvider.notifier).signIn();
     } else {
       final refreshToken = await secureStorage.getRefreshToken();
@@ -51,12 +48,10 @@ class AuthNotifier extends Notifier<AuthState> {
             accessToken: refreshResult.accessToken!,
             refreshToken: refreshResult.refreshToken!,
           );
-          final email =
-              AuthRepository.extractEmailFromToken(refreshResult.accessToken!);
-          state = AuthState(
-            isAuthenticated: true,
-            email: email,
+          final email = AuthRepository.extractEmailFromToken(
+            refreshResult.accessToken!,
           );
+          state = AuthState(isAuthenticated: true, email: email);
           await ref.read(appSessionProvider.notifier).signIn();
           return;
         }
@@ -76,16 +71,15 @@ class AuthNotifier extends Notifier<AuthState> {
     final secureStorage = ref.read(secureStorageProvider);
     final result = await repo.login(email: email, password: password);
 
-    if (result.success && result.accessToken != null && result.refreshToken != null) {
+    if (result.success &&
+        result.accessToken != null &&
+        result.refreshToken != null) {
       await secureStorage.saveTokens(
         accessToken: result.accessToken!,
         refreshToken: result.refreshToken!,
       );
 
-      state = AuthState(
-        isAuthenticated: true,
-        email: email,
-      );
+      state = AuthState(isAuthenticated: true, email: email);
       await ref.read(appSessionProvider.notifier).signIn();
       return true;
     }
@@ -113,7 +107,9 @@ class AuthNotifier extends Notifier<AuthState> {
       password: password,
     );
 
-    if (result.success && result.accessToken != null && result.refreshToken != null) {
+    if (result.success &&
+        result.accessToken != null &&
+        result.refreshToken != null) {
       await secureStorage.saveTokens(
         accessToken: result.accessToken!,
         refreshToken: result.refreshToken!,

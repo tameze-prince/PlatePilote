@@ -19,7 +19,9 @@ Future<void> main() async {
       debugPrint('Firebase init failed (non-blocking): $e\n$st');
     }
   } else {
-    debugPrint('Firebase is not configured; remote push notifications are disabled.');
+    debugPrint(
+      'Firebase is not configured; remote push notifications are disabled.',
+    );
   }
   final preferences = await SharedPreferences.getInstance();
   await NotificationService.instance.initialize();

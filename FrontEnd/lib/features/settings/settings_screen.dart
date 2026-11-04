@@ -38,14 +38,14 @@ class SettingsScreen extends ConsumerWidget {
     final accountName = profile.displayName.trim().isNotEmpty
         ? profile.displayName
         : (authState.name?.trim().isNotEmpty == true
-            ? authState.name!
-            : 'Your account');
+              ? authState.name!
+              : 'Your account');
     final accountEmail = authState.email ?? profile.email;
     final planLabel = subscription.isLoading
         ? 'Loading plan…'
         : subscription.isPremium
-            ? 'PlatePilote Premium'
-            : 'Free plan';
+        ? 'PlatePilote Premium'
+        : 'Free plan';
 
     String themeLabel;
     if (isSystem) {
@@ -62,460 +62,470 @@ class SettingsScreen extends ConsumerWidget {
         safeArea: false,
         child: CustomScrollView(
           slivers: [
-          SliverToBoxAdapter(
-            child: FloatingAppBar(
-              title: Text(
-                l10n.settings,
-                style: AppTypography.titleLarge.copyWith(
-                  color: isDark ? AppColors.primaryLight : AppColors.primary,
-                  fontWeight: FontWeight.w700,
+            SliverToBoxAdapter(
+              child: FloatingAppBar(
+                title: Text(
+                  l10n.settings,
+                  style: AppTypography.titleLarge.copyWith(
+                    color: isDark ? AppColors.primaryLight : AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
+                actions: [
+                  IconButton(
+                    tooltip: 'Notifications',
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () => context.push('/notifications'),
+                    color: isDark
+                        ? AppColors.darkOnSurfaceVariant
+                        : AppColors.onSurfaceVariant,
+                  ),
+                ],
               ),
-              actions: [
-                IconButton(
-                  tooltip: 'Notifications',
-                  icon: const Icon(Icons.notifications_outlined),
-                  onPressed: () => context.push('/notifications'),
-                  color: isDark
-                      ? AppColors.darkOnSurfaceVariant
-                      : AppColors.onSurfaceVariant,
-                ),
-              ],
             ),
-          ),
 
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                left: AppSpacing.md,
-                right: AppSpacing.md,
-                bottom: 100,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: AppSpacing.md),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: AppSpacing.md,
+                  right: AppSpacing.md,
+                  bottom: 100,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: AppSpacing.md),
 
-                  // Profile Card
-                  AnimatedListItem(
-                    child: ModernCard(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 28,
-                            backgroundColor: isDark
-                                ? AppColors.primaryContainer
-                                : AppColors.primaryContainer,
-                            child: Icon(
-                              Icons.person,
-                              color: isDark
-                                  ? AppColors.primaryLight
-                                  : AppColors.primary,
-                              size: 28,
+                    // Profile Card
+                    AnimatedListItem(
+                      child: ModernCard(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 28,
+                              backgroundColor: isDark
+                                  ? AppColors.primaryContainer
+                                  : AppColors.primaryContainer,
+                              child: Icon(
+                                Icons.person,
+                                color: isDark
+                                    ? AppColors.primaryLight
+                                    : AppColors.primary,
+                                size: 28,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  accountName,
-                                  style: AppTypography.headlineSmall.copyWith(
-                                    color: isDark
-                                        ? AppColors.darkOnSurface
-                                        : AppColors.onSurface,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                if (accountEmail.isNotEmpty)
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Text(
-                                    accountEmail,
-                                    style: AppTypography.bodySmall.copyWith(
+                                    accountName,
+                                    style: AppTypography.headlineSmall.copyWith(
+                                      color: isDark
+                                          ? AppColors.darkOnSurface
+                                          : AppColors.onSurface,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  if (accountEmail.isNotEmpty)
+                                    Text(
+                                      accountEmail,
+                                      style: AppTypography.bodySmall.copyWith(
+                                        color: isDark
+                                            ? AppColors.darkOnSurfaceVariant
+                                            : AppColors.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  Text(
+                                    planLabel,
+                                    style: AppTypography.bodyMedium.copyWith(
                                       color: isDark
                                           ? AppColors.darkOnSurfaceVariant
                                           : AppColors.onSurfaceVariant,
                                     ),
                                   ),
-                                Text(
-                                  planLabel,
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    color: isDark
-                                        ? AppColors.darkOnSurfaceVariant
-                                        : AppColors.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          IconButton(
-                            tooltip: 'Edit',
-                            icon: const Icon(Icons.edit_outlined),
-                            onPressed: () => context.push('/preferences'),
-                            color: isDark
-                                ? AppColors.darkOnSurfaceVariant
-                                : AppColors.onSurfaceVariant,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.lg),
-
-                  _buildSectionTitle(context, isDark, l10n.profilePrefs),
-                  const SizedBox(height: AppSpacing.sm),
-
-                  AnimatedListItem(
-                    delay: 1,
-                    child: InfoCard(
-                      icon: Icons.people_outline,
-                      title: l10n.profilePrefs,
-                      description: l10n.profilePrefsSub,
-                      trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () => context.push('/preferences'),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.xs),
-
-                  AnimatedListItem(
-                    delay: 2,
-                    child: InfoCard(
-                      icon: Icons.payments_outlined,
-                      title: l10n.budgetManagement,
-                      description:
-                          'Manage and track your weekly food budget.',
-                      trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () => context.push('/budget'),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.xs),
-
-                  AnimatedListItem(
-                    delay: 3,
-                    child: InfoCard(
-                      icon: Icons.language,
-                      title: l10n.language,
-                      description: l10n.languageSub,
-                      trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () => context.push('/language'),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.xs),
-
-                  AnimatedListItem(
-                    delay: 4,
-                    child: InfoCard(
-                      icon: Icons.notifications_outlined,
-                      title: l10n.notifications,
-                      description: l10n.notificationsSub,
-                      trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () => context.push('/notification-preferences'),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.xs),
-
-                  AnimatedListItem(
-                    delay: 5,
-                    child: InfoCard(
-                      icon: Icons.menu_book_outlined,
-                      title: l10n.customRecipes,
-                      description: l10n.customRecipesSub,
-                      trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () => context.push('/recipes/add'),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.lg),
-
-                  _buildSectionTitle(context, isDark, l10n.theme),
-                  const SizedBox(height: AppSpacing.sm),
-
-                  AnimatedListItem(
-                    delay: 6,
-                    child: ModernCard(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      child: Row(
-                        children: [
-                          Icon(
-                            themeMode == ThemeMode.dark
-                                ? Icons.dark_mode
-                                : Icons.light_mode,
-                            color: isDark
-                                ? AppColors.primaryLight
-                                : AppColors.primary,
-                            size: 24,
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.theme,
-                                  style: AppTypography.bodyLarge.copyWith(
-                                    color: isDark
-                                        ? AppColors.darkOnSurface
-                                        : AppColors.onSurface,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  themeLabel,
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    color: isDark
-                                        ? AppColors.darkOnSurfaceVariant
-                                        : AppColors.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
+                            IconButton(
+                              tooltip: 'Edit',
+                              icon: const Icon(Icons.edit_outlined),
+                              onPressed: () => context.push('/preferences'),
+                              color: isDark
+                                  ? AppColors.darkOnSurfaceVariant
+                                  : AppColors.onSurfaceVariant,
                             ),
-                          ),
-                          SegmentedButton<ThemeMode>(
-                            segments: const [
-                              ButtonSegment<ThemeMode>(
-                                value: ThemeMode.light,
-                                icon: Icon(Icons.light_mode, size: 18),
-                              ),
-                              ButtonSegment<ThemeMode>(
-                                value: ThemeMode.system,
-                                icon: Icon(Icons.auto_mode, size: 18),
-                              ),
-                              ButtonSegment<ThemeMode>(
-                                value: ThemeMode.dark,
-                                icon: Icon(Icons.dark_mode, size: 18),
-                              ),
-                            ],
-                            selected: {themeMode},
-                            onSelectionChanged: (Set<ThemeMode> selection) {
-                              ref
-                                  .read(themeModeProvider.notifier)
-                                  .set(selection.first);
-                            },
-                            showSelectedIcon: false,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.lg),
-
-                  _buildSectionTitle(context, isDark, 'Subscription'),
-                  const SizedBox(height: AppSpacing.sm),
-
-                  AnimatedListItem(
-                    delay: 7,
-                    child: ModernCard(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      color: isDark
-                          ? AppColors.primaryContainer
-                          : AppColors.primaryContainer,
-                      borderColor: isDark
-                          ? AppColors.primaryLight.withValues(alpha: 0.3)
-                          : AppColors.primary.withValues(alpha: 0.3),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(AppSpacing.xs),
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? AppColors.primaryLight.withValues(alpha: 0.2)
-                                      : AppColors.primary.withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(
-                                    AppRadius.sm,
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.workspace_premium,
-                                  color: isDark
-                                      ? AppColors.primaryLight
-                                      : AppColors.primary,
-                                  size: 24,
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.md),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Premium Plan',
-                                      style: AppTypography.titleMedium.copyWith(
-                                        color: isDark
-                                            ? AppColors.primaryLight
-                                            : AppColors.primary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Unlock advanced features',
-                                      style: AppTypography.bodySmall.copyWith(
-                                        color: isDark
-                                            ? AppColors.primaryLight
-                                                .withValues(alpha: 0.7)
-                                            : AppColors.primary.withValues(alpha: 0.7),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          AnimatedButton(
-                            onPressed: () => context.push('/premium'),
-                            backgroundColor: isDark
-                                ? AppColors.primaryLight
-                                : AppColors.primary,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.arrow_forward, size: 18),
-                                const SizedBox(width: AppSpacing.sm),
-                                Text(
-                                  l10n.upgradeToPremium,
-                                  style: AppTypography.labelLarge.copyWith(
-                                    color: isDark
-                                        ? AppColors.darkBackground
-                                        : Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.lg),
-
-                  _buildSectionTitle(context, isDark, 'Support'),
-                  const SizedBox(height: AppSpacing.sm),
-
-                  AnimatedListItem(
-                    delay: 8,
-                    child: InfoCard(
-                      icon: Icons.help_outline,
-                      title: 'Help & FAQ',
-                      description: 'Get help and answers',
-                      trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () => _openUrl(
-                        context,
-                        'mailto:platepilote@gmail.com?subject=PlatePilote%20support%20request',
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.xs),
-
-                  AnimatedListItem(
-                    delay: 9,
-                    child: InfoCard(
-                      icon: Icons.privacy_tip_outlined,
-                      title: 'Privacy Policy',
-                      description: 'How we handle your data',
-                      trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () => _openUrl(
-                        context,
-                        'https://platepilote.com/privacy.html',
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.xs),
-
-                  AnimatedListItem(
-                    delay: 10,
-                    child: InfoCard(
-                      icon: Icons.description_outlined,
-                      title: 'Terms of Service',
-                      description: 'Legal terms and conditions',
-                      trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () => _openUrl(
-                        context,
-                        'https://platepilote.com/cgv.html',
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.xs),
-
-                  AnimatedListItem(
-                    delay: 11,
-                    child: InfoCard(
-                      icon: Icons.psychology_alt_outlined,
-                      title: 'Algorithmic Recommendations',
-                      description:
-                          'Limited Risk EU AI Act transparency notice',
-                      trailing: const Icon(Icons.info_outline, size: 20),
-                      onTap: () => _showAlgorithmicNotice(context),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.xs),
-
-                  AnimatedListItem(
-                    delay: 12,
-                    child: InfoCard(
-                      icon: Icons.folder_copy_outlined,
-                      title: 'My Data',
-                      description: 'Export, restrict, or delete your account',
-                      trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () => _showDataRightsSheet(context, ref),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.xs),
-
-                  AnimatedListItem(
-                    delay: 13,
-                    child: InfoCard(
-                      icon: Icons.analytics_outlined,
-                      title: 'Analytics Consent',
-                      description:
-                          ref.watch(appSessionProvider).hasAcceptedBetaAnalytics
-                              ? 'Beta analytics enabled'
-                              : 'Beta analytics disabled',
-                      trailing: const Icon(Icons.tune, size: 20),
-                      onTap: () => _showAnalyticsConsentDialog(context, ref),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.xl),
-
-                  AnimatedListItem(
-                    delay: 14,
-                    child: TextButton.icon(
-                      onPressed: () {
-                        // Logout logic
-                      },
-                      icon: const Icon(Icons.logout, size: 18),
-                      label: const Text('Logout'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.error,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md,
-                          vertical: AppSpacing.sm,
+                          ],
                         ),
                       ),
                     ),
-                  ),
-                ],
+
+                    const SizedBox(height: AppSpacing.lg),
+
+                    _buildSectionTitle(context, isDark, l10n.profilePrefs),
+                    const SizedBox(height: AppSpacing.sm),
+
+                    AnimatedListItem(
+                      delay: 1,
+                      child: InfoCard(
+                        icon: Icons.people_outline,
+                        title: l10n.profilePrefs,
+                        description: l10n.profilePrefsSub,
+                        trailing: const Icon(Icons.chevron_right, size: 20),
+                        onTap: () => context.push('/preferences'),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.xs),
+
+                    AnimatedListItem(
+                      delay: 2,
+                      child: InfoCard(
+                        icon: Icons.payments_outlined,
+                        title: l10n.budgetManagement,
+                        description:
+                            'Manage and track your weekly food budget.',
+                        trailing: const Icon(Icons.chevron_right, size: 20),
+                        onTap: () => context.push('/budget'),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.xs),
+
+                    AnimatedListItem(
+                      delay: 3,
+                      child: InfoCard(
+                        icon: Icons.language,
+                        title: l10n.language,
+                        description: l10n.languageSub,
+                        trailing: const Icon(Icons.chevron_right, size: 20),
+                        onTap: () => context.push('/language'),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.xs),
+
+                    AnimatedListItem(
+                      delay: 4,
+                      child: InfoCard(
+                        icon: Icons.notifications_outlined,
+                        title: l10n.notifications,
+                        description: l10n.notificationsSub,
+                        trailing: const Icon(Icons.chevron_right, size: 20),
+                        onTap: () => context.push('/notification-preferences'),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.xs),
+
+                    AnimatedListItem(
+                      delay: 5,
+                      child: InfoCard(
+                        icon: Icons.menu_book_outlined,
+                        title: l10n.customRecipes,
+                        description: l10n.customRecipesSub,
+                        trailing: const Icon(Icons.chevron_right, size: 20),
+                        onTap: () => context.push('/recipes/add'),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.lg),
+
+                    _buildSectionTitle(context, isDark, l10n.theme),
+                    const SizedBox(height: AppSpacing.sm),
+
+                    AnimatedListItem(
+                      delay: 6,
+                      child: ModernCard(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        child: Row(
+                          children: [
+                            Icon(
+                              themeMode == ThemeMode.dark
+                                  ? Icons.dark_mode
+                                  : Icons.light_mode,
+                              color: isDark
+                                  ? AppColors.primaryLight
+                                  : AppColors.primary,
+                              size: 24,
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n.theme,
+                                    style: AppTypography.bodyLarge.copyWith(
+                                      color: isDark
+                                          ? AppColors.darkOnSurface
+                                          : AppColors.onSurface,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    themeLabel,
+                                    style: AppTypography.bodyMedium.copyWith(
+                                      color: isDark
+                                          ? AppColors.darkOnSurfaceVariant
+                                          : AppColors.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SegmentedButton<ThemeMode>(
+                              segments: const [
+                                ButtonSegment<ThemeMode>(
+                                  value: ThemeMode.light,
+                                  icon: Icon(Icons.light_mode, size: 18),
+                                ),
+                                ButtonSegment<ThemeMode>(
+                                  value: ThemeMode.system,
+                                  icon: Icon(Icons.auto_mode, size: 18),
+                                ),
+                                ButtonSegment<ThemeMode>(
+                                  value: ThemeMode.dark,
+                                  icon: Icon(Icons.dark_mode, size: 18),
+                                ),
+                              ],
+                              selected: {themeMode},
+                              onSelectionChanged: (Set<ThemeMode> selection) {
+                                ref
+                                    .read(themeModeProvider.notifier)
+                                    .set(selection.first);
+                              },
+                              showSelectedIcon: false,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.lg),
+
+                    _buildSectionTitle(context, isDark, 'Subscription'),
+                    const SizedBox(height: AppSpacing.sm),
+
+                    AnimatedListItem(
+                      delay: 7,
+                      child: ModernCard(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        color: isDark
+                            ? AppColors.primaryContainer
+                            : AppColors.primaryContainer,
+                        borderColor: isDark
+                            ? AppColors.primaryLight.withValues(alpha: 0.3)
+                            : AppColors.primary.withValues(alpha: 0.3),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(AppSpacing.xs),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? AppColors.primaryLight.withValues(
+                                            alpha: 0.2,
+                                          )
+                                        : AppColors.primary.withValues(
+                                            alpha: 0.2,
+                                          ),
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.sm,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.workspace_premium,
+                                    color: isDark
+                                        ? AppColors.primaryLight
+                                        : AppColors.primary,
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.md),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Premium Plan',
+                                        style: AppTypography.titleMedium
+                                            .copyWith(
+                                              color: isDark
+                                                  ? AppColors.primaryLight
+                                                  : AppColors.primary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      Text(
+                                        'Unlock advanced features',
+                                        style: AppTypography.bodySmall.copyWith(
+                                          color: isDark
+                                              ? AppColors.primaryLight
+                                                    .withValues(alpha: 0.7)
+                                              : AppColors.primary.withValues(
+                                                  alpha: 0.7,
+                                                ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            AnimatedButton(
+                              onPressed: () => context.push('/premium'),
+                              backgroundColor: isDark
+                                  ? AppColors.primaryLight
+                                  : AppColors.primary,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.arrow_forward, size: 18),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  Text(
+                                    l10n.upgradeToPremium,
+                                    style: AppTypography.labelLarge.copyWith(
+                                      color: isDark
+                                          ? AppColors.darkBackground
+                                          : Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.lg),
+
+                    _buildSectionTitle(context, isDark, 'Support'),
+                    const SizedBox(height: AppSpacing.sm),
+
+                    AnimatedListItem(
+                      delay: 8,
+                      child: InfoCard(
+                        icon: Icons.help_outline,
+                        title: 'Help & FAQ',
+                        description: 'Get help and answers',
+                        trailing: const Icon(Icons.chevron_right, size: 20),
+                        onTap: () => _openUrl(
+                          context,
+                          'mailto:platepilote@gmail.com?subject=PlatePilote%20support%20request',
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.xs),
+
+                    AnimatedListItem(
+                      delay: 9,
+                      child: InfoCard(
+                        icon: Icons.privacy_tip_outlined,
+                        title: 'Privacy Policy',
+                        description: 'How we handle your data',
+                        trailing: const Icon(Icons.chevron_right, size: 20),
+                        onTap: () => _openUrl(
+                          context,
+                          'https://platepilote.com/privacy.html',
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.xs),
+
+                    AnimatedListItem(
+                      delay: 10,
+                      child: InfoCard(
+                        icon: Icons.description_outlined,
+                        title: 'Terms of Service',
+                        description: 'Legal terms and conditions',
+                        trailing: const Icon(Icons.chevron_right, size: 20),
+                        onTap: () => _openUrl(
+                          context,
+                          'https://platepilote.com/cgv.html',
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.xs),
+
+                    AnimatedListItem(
+                      delay: 11,
+                      child: InfoCard(
+                        icon: Icons.psychology_alt_outlined,
+                        title: 'Algorithmic Recommendations',
+                        description:
+                            'Limited Risk EU AI Act transparency notice',
+                        trailing: const Icon(Icons.info_outline, size: 20),
+                        onTap: () => _showAlgorithmicNotice(context),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.xs),
+
+                    AnimatedListItem(
+                      delay: 12,
+                      child: InfoCard(
+                        icon: Icons.folder_copy_outlined,
+                        title: 'My Data',
+                        description: 'Export, restrict, or delete your account',
+                        trailing: const Icon(Icons.chevron_right, size: 20),
+                        onTap: () => _showDataRightsSheet(context, ref),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.xs),
+
+                    AnimatedListItem(
+                      delay: 13,
+                      child: InfoCard(
+                        icon: Icons.analytics_outlined,
+                        title: 'Analytics Consent',
+                        description:
+                            ref
+                                .watch(appSessionProvider)
+                                .hasAcceptedBetaAnalytics
+                            ? 'Beta analytics enabled'
+                            : 'Beta analytics disabled',
+                        trailing: const Icon(Icons.tune, size: 20),
+                        onTap: () => _showAnalyticsConsentDialog(context, ref),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.xl),
+
+                    AnimatedListItem(
+                      delay: 14,
+                      child: TextButton.icon(
+                        onPressed: () {
+                          // Logout logic
+                        },
+                        icon: const Icon(Icons.logout, size: 18),
+                        label: const Text('Logout'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.error,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: AppSpacing.sm,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
           ],
         ),
       ),
@@ -524,11 +534,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   /// Construit un titre de section.
-  Widget _buildSectionTitle(
-    BuildContext context,
-    bool isDark,
-    String title,
-  ) {
+  Widget _buildSectionTitle(BuildContext context, bool isDark, String title) {
     return Text(
       title,
       style: AppTypography.titleMedium.copyWith(
@@ -544,9 +550,8 @@ class SettingsScreen extends ConsumerWidget {
     final uri = Uri.parse(url);
     final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!opened && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not open $url')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Could not open $url')));
     }
   }
 
