@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,6 +15,7 @@ class NotificationPreferencesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final preferences = ref.watch(notificationPreferencesProvider);
     final session = ref.watch(appSessionProvider);
+    final pushAvailable = Firebase.apps.isNotEmpty;
     final notifier = ref.read(notificationPreferencesProvider.notifier);
 
     return PlateScaffold(
@@ -23,11 +25,15 @@ class NotificationPreferencesScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(AppSpacing.md),
         children: [
           SwitchListTile(
-            value: session.hasAcceptedPush,
-            onChanged: ref.read(appSessionProvider.notifier).setPushConsent,
+            value: pushAvailable && session.hasAcceptedPush,
+            onChanged: pushAvailable
+                ? ref.read(appSessionProvider.notifier).setPushConsent
+                : null,
             title: const Text('Push notifications'),
-            subtitle: const Text(
-              'Receive device notifications. You can withdraw this consent at any time.',
+            subtitle: Text(
+              pushAvailable
+                  ? 'Receive device notifications. You can withdraw this consent at any time.'
+                  : 'Remote notifications are not configured in this build.',
             ),
           ),
           SwitchListTile(
