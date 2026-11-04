@@ -1,6 +1,7 @@
 package com.platepilote.platepilote.me.application.dto;
 
 import com.platepilote.platepilote.pantry.application.dto.PantryItemResponse;
+import java.util.UUID;
 import com.platepilote.platepilote.preferences.application.dto.UserPreferencesResponse;
 import com.platepilote.platepilote.recipes.application.dto.RecipeResponse;
 import com.platepilote.platepilote.userprofile.application.dto.UserProfileResponse;
@@ -11,7 +12,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Builder
@@ -33,4 +33,8 @@ public class DataExportResponse {
     private List<PantryItemResponse> pantryItems;
     private List<RecipeResponse> recipeFavorites;
     private List<RecipeResponse> personalRecipes;
+    private List<BudgetExportDto> budgets;
+    private List<NotificationExportDto> notifications;
+    private List<PurchaseRecordExportDto> purchaseRecords;
+    private SubscriptionExportDto subscription;
 }
