@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../core/providers/app_session_provider.dart';
 import '../core/providers/theme_provider.dart';
+import '../core/notifications/push_notification_service.dart';
 import '../features/localization/locale_provider.dart';
 import '../l10n/app_localizations.dart';
 import 'router/app_router.dart';
@@ -18,6 +19,7 @@ class PlatePilotApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(localeProvider);
     final router = ref.watch(appRouterProvider);
+    ref.watch(pushSessionHookProvider);
 
     ref.listen(appSessionProvider, (prev, next) {
       if (prev == null) return;
