@@ -48,6 +48,23 @@ class PushNotificationService {
     );
   }
 
+  /// Returns the current FCM token, if Firebase is configured.
+  Future<String?> currentToken() => _messaging.getToken();
+
+  /// Deactivates this token on the backend after push consent is withdrawn.
+  Future<void> unregisterTokenWithBackend({
+    required String token,
+    required ApiClient apiClient,
+  }) async {
+    await apiClient.post(
+      '/devices/unregister',
+      data: {'deviceToken': token},
+    );
+  }
+
+  /// Deletes the local FCM token after backend deactivation.
+  Future<void> deleteLocalToken() => _messaging.deleteToken();
+
   /// Subscribes to foreground and tap-opened push events. Intended to be
   /// called once after the user authenticates and the FCM token has been
   /// resolved.
@@ -89,6 +106,14 @@ final pushNotificationServiceProvider = Provider<PushNotificationService>((
 /// attached across rebuilds.
 final pushSessionHookProvider = Provider<void>((ref) {
   ref.listen<AppSessionState>(appSessionProvider, (prev, next) async {
+    final pushConsentRevoked = next.isAuthenticated &&
+        prev?.hasAcceptedPush == true &&
+        !next.hasAcceptedPush;
+    if (pushConsentRevoked) {
+      await _unregisterPush(ref);
+      return;
+    }
+
     final hasNewPushConsent = next.hasAcceptedPush && prev?.hasAcceptedPush != true;
     final hasNewAuthenticatedSession = next.isAuthenticated && prev?.isAuthenticated != true;
     if (next.isAuthenticated && next.hasAcceptedPush &&
@@ -112,5 +137,19 @@ Future<void> _registerPush(Ref ref) async {
     }
   } catch (e, st) {
     debugPrint('Push registration failed (non-blocking): $e\n$st');
+  }
+}
+
+Future<void> _unregisterPush(Ref ref) async {
+  try {
+    final push = ref.read(pushNotificationServiceProvider);
+    final apiClient = ref.read(apiClientProvider);
+    final token = await push.currentToken();
+    if (token != null) {
+      await push.unregisterTokenWithBackend(token: token, apiClient: apiClient);
+    }
+    await push.deleteLocalToken();
+  } catch (e, st) {
+    debugPrint('Push unregistration failed (non-blocking): $e\n$st');
   }
 }
