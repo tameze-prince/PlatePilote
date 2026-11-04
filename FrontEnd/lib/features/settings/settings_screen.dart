@@ -760,7 +760,7 @@ class SettingsScreen extends ConsumerWidget {
               }
               try {
                 await ref.read(dataRightsRepositoryProvider).deleteAccount();
-                await ref.read(appSessionProvider.notifier).signOut();
+                await ref.read(authProvider.notifier).logout();
                 navigator.pop();
                 goRouter.go('/login');
               } catch (error) {
