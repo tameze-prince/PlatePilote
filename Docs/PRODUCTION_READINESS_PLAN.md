@@ -214,7 +214,7 @@ The changes above are committed, but they are **not yet test-verified**.
 
 ### Remaining release blockers discovered during implementation
 
-1. `BillingService.cancelForAccountDeletion` currently propagates provider cancellation failures. Because account deletion is transactional, a Stripe outage can prevent the account-deletion request from completing. Design and test a durable cancellation-pending/retry flow before public launch.
+1. Exercise the new billing cancellation outbox against PostgreSQL and Stripe test mode, including provider timeouts, duplicate delivery, retry exhaustion, and recovery after restart.
 2. Verify the full V1–V123 migration chain against both a clean PostgreSQL database and a representative upgraded database. In particular, validate V117/V119 behavior with the actual production profile and Flyway version.
 3. Verify the anonymization job against PostgreSQL foreign keys and every table introduced after V1; the current unit test is not a substitute for this integration test.
 4. Configure production secrets and external services outside the repository: database, Redis, JWT, SMTP, storage, CORS, AI provider/service, Stripe (if billing is enabled), and the public HTTPS API URL.
@@ -222,3 +222,13 @@ The changes above are committed, but they are **not yet test-verified**.
 6. Complete privacy/support/legal content, backup/restore verification, monitoring, and a real-device end-to-end test.
 
 **Release decision:** keep PR #3 in draft. Do not merge or publish until the test and external-service gates above have evidence.
+
+### Execution log — billing cancellation outbox — 2026-11-04
+
+- Added migration V124 and a durable `billing_cancellation_requests` table. The request intentionally has no foreign key to the user so it survives account anonymization.
+- Account deletion now writes or reuses a unique provider/subscription cancellation request in the same database transaction. It no longer calls Stripe synchronously.
+- Premium entitlements are revoked immediately; the local subscription enters `CANCELLATION_PENDING` until the provider confirms cancellation.
+- Added a scheduled worker that retries due requests with bounded exponential backoff. It marks successful requests `COMPLETED`; after 12 unsuccessful attempts it marks them `FAILED` and logs that manual action is required.
+- Added unit tests for enqueueing the request and for worker success/retry behavior.
+
+**Verification:** implementation and tests are committed, but no Maven or PostgreSQL test execution has been performed in this environment. The new migration, JPA mapping, pessimistic-lock behavior, Stripe idempotency under timeout, and recovery after worker restart still require integration verification.
