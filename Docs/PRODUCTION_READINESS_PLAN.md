@@ -234,3 +234,25 @@ The changes above are committed, but they are **not yet test-verified**.
 - Added unit tests for enqueueing, worker success/retry behavior, and late-webhook protection.
 
 **Verification:** implementation and tests are committed, but no Maven or PostgreSQL test execution has been performed in this environment. The new migration, JPA mapping, pessimistic-lock behavior, Stripe idempotency under timeout, and recovery after worker restart still require integration verification.
+
+### Validation review — 2026-11-04
+
+#### Existing GitHub Actions evidence
+
+The most recent backend/mobile PR runs visible during this review were executed against an earlier PR revision (`a9934acd4b4c697fe16aa9eb87a50f34dbd5e04e`), not the current branch head:
+
+- Backend run [41815761523](https://github.com/tameze-prince/PlatePilote/actions/runs/41815761523): Maven reached the test phase; 92 tests were reported, with 4 errors in `RecommendationEngineTest`. The failure was a missing mock result for `findByIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(Pageable)`. The current branch now stubs that repository method in the test setup, but this fix has not yet been re-executed in CI.
+- Mobile run [41815761516](https://github.com/tameze-prince/PlatePilote/actions/runs/41815761516): dependency installation succeeded, then Dart formatting failed on `settings_screen.dart`; analysis, Flutter tests and APK build were skipped. A later formatter run [41818279913](https://github.com/tameze-prince/PlatePilote/actions/runs/41818279913) completed successfully and formatted the settings screen (1 of 9 files changed). The full mobile CI has not been rerun against the current head.
+
+#### Additional database validation coverage added
+
+- Added `BillingCancellationOutboxPostgresTest`, a Surefire-discoverable test class extending the existing PostgreSQL/Testcontainers integration harness.
+- It exercises the real Flyway migration chain through V124, validates the JPA mapping and due-request pessimistic-lock query, proves the outbox can store a user UUID without a user FK, and checks the provider/subscription uniqueness constraint.
+- Expanded outbox unit tests to cover successful subscription state transition, retry scheduling, and the terminal 12th-attempt failure transition.
+- Normalized provider keys before lookup so existing lowercase/mixed-case Stripe provider values reuse the canonical outbox identity.
+
+#### Current validation status
+
+No GitHub Actions run has been observed for the current branch head after the latest outbox and PostgreSQL-test commits. This environment cannot clone the repository or run Maven/Flutter locally because outbound GitHub DNS resolution is unavailable. The new PostgreSQL test and all newly added unit tests therefore remain **unexecuted**.
+
+The backend workflow already supports `workflow_dispatch` on the default branch. To validate the current branch, manually run **Actions → Backend CI → Run workflow**, selecting `release/production-readiness`. The mobile workflow must be rerun from a new PR synchronization after the frontend formatting fix, or by a maintainer with an enabled manual trigger. Do not mark the release checks as passed until the run results are green.
