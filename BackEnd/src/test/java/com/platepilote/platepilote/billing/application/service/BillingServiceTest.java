@@ -86,7 +86,7 @@ class BillingServiceTest {
     }
 
     @Test
-    void accountDeletionCancelsStripeSubscriptionAndRevokesPremium() {
+    void accountDeletionQueuesStripeCancellationAndRevokesPremium() {
         UUID userId = UUID.randomUUID();
         Subscription subscription = Subscription.builder()
                 .userId(userId)
