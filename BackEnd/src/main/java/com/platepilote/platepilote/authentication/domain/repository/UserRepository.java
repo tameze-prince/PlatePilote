@@ -29,7 +29,7 @@ public interface UserRepository extends JpaRepository<OurUser, UUID> {
     /**
      * Comptes désactivés dont la demande de suppression a dépassé le délai de grâce.
      */
-    List<OurUser> findAllByEnabledFalseAndDeletedAtBefore(Instant cutoff);
+    List<OurUser> findAllByEnabledFalseAndDeletedAtBeforeAndAnonymizedAtIsNull(Instant cutoff);
 
     /**
      * Recherche un utilisateur par son fournisseur OAuth et son identifiant chez le fournisseur
