@@ -207,7 +207,7 @@ public class AuthService {
         boolean expired = persistedToken.getExpiresAt().isBefore(Instant.now());
         boolean wrongUser = !persistedToken.getUserId().equals(user.getId());
 
-        if (revoked || expired || wrongUser || !jwtService.isTokenValid(refreshToken, userDetails)) {
+        if (revoked || expired || wrongUser || !jwtService.isRefreshTokenValid(refreshToken, userDetails)) {
             throw new BusinessRuleViolationException("Invalid refresh token");
         }
 
