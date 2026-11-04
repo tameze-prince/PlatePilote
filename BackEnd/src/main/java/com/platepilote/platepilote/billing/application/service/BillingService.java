@@ -50,6 +50,34 @@ public class BillingService {
     private final AuditLogService auditLogService;
 
     /**
+     * Annule l'abonnement distant et révoque les droits avant la suppression du compte.
+     * La suppression du compte échoue si Stripe ne confirme pas l'annulation.
+     */
+    public void cancelForAccountDeletion(UUID userId) {
+        subscriptionRepository.findByUserId(userId).ifPresent(subscription -> {
+            if (STRIPE.equalsIgnoreCase(subscription.getProvider())
+                    && subscription.getProviderSubscriptionId() != null
+                    && !subscription.getProviderSubscriptionId().isBlank()) {
+                billingProvider.cancelSubscription(subscription.getProviderSubscriptionId());
+            }
+
+            subscription.setStatus("CANCELLED");
+            subscription.setCancelAtPeriodEnd(false);
+            subscription.setEndDate(Instant.now());
+            subscription.setExpiresAt(Instant.now());
+            subscriptionRepository.save(subscription);
+            entitlementService.revokePremium(userId);
+            auditLogService.log(
+                    userId,
+                    "ACCOUNT_DELETION_SUBSCRIPTION_CANCELLED",
+                    "SUBSCRIPTION",
+                    subscription.getId().toString(),
+                    Map.of("provider", subscription.getProvider() == null ? "UNKNOWN" : subscription.getProvider())
+            );
+        });
+    }
+
+    /**
      * Crée une session de paiement Stripe pour un utilisateur.
      *
      * @param userId identifiant de l'utilisateur
