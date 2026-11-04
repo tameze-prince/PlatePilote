@@ -47,6 +47,13 @@ public interface BillingProvider {
     BillingPortalSession createPortalSession(String customerId, String returnUrl);
 
     /**
+     * Annule immédiatement un abonnement distant avant la suppression d'un compte.
+     *
+     * @param providerSubscriptionId identifiant de l'abonnement chez le fournisseur
+     */
+    void cancelSubscription(String providerSubscriptionId);
+
+    /**
      * Vérifie et désérialise un webhook provenant du fournisseur.
      *
      * @param rawPayload      corps brut de la requête
