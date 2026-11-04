@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,21 +53,19 @@ public class DeviceController {
             @Valid @RequestBody RegisterDeviceRequest request) {
         UUID userId = securityUtils.getCurrentUserId(userDetails);
 
-        // Deactivate old token if exists
-        deviceRepository.findByDeviceToken(request.deviceToken())
-                .ifPresent(device -> {
-                    device.setIsActive(false);
-                    deviceRepository.save(device);
-                });
+        Instant now = Instant.now();
+        DeviceRegistration device = deviceRepository.findByDeviceToken(request.deviceToken())
+                .orElseGet(DeviceRegistration::new);
 
-        DeviceRegistration device = DeviceRegistration.builder()
-                .userId(userId)
-                .deviceToken(request.deviceToken())
-                .platform(request.platform())
-                .isActive(true)
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .build();
+        // Reassign an existing physical device when the user switches accounts.
+        device.setUserId(userId);
+        device.setDeviceToken(request.deviceToken());
+        device.setPlatform(request.platform());
+        device.setIsActive(true);
+        if (device.getCreatedAt() == null) {
+            device.setCreatedAt(now);
+        }
+        device.setUpdatedAt(now);
         deviceRepository.save(device);
 
         return ResponseEntity.ok(ApiResponse.success("Device registered", null));
@@ -99,6 +98,6 @@ public class DeviceController {
      */
     public record RegisterDeviceRequest(
             @NotBlank String deviceToken,
-            @NotBlank String platform
+            @NotBlank @Pattern(regexp = "android|ios|web") String platform
     ) {}
 }
