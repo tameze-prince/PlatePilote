@@ -125,6 +125,19 @@ public class MeService {
         var personalRecipes = recipeRepository.findByUserIdAndDeletedAtIsNull(userId, EXPORT_LIMIT)
                 .map(this::toRecipeResponse)
                 .getContent();
+        var budgets = budgetRepository.findByUserIdAndDeletedAtIsNull(userId).stream()
+                .map(this::toBudgetExport)
+                .toList();
+        var notifications = notificationRepository.findByUserIdAndDeletedAtIsNull(userId, EXPORT_LIMIT)
+                .map(this::toNotificationExport)
+                .getContent();
+        var purchaseRecords = purchaseRecordRepository
+                .findByUserIdAndDeletedAtIsNullOrderByPurchasedAtDesc(userId, EXPORT_LIMIT)
+                .map(this::toPurchaseRecordExport)
+                .getContent();
+        var subscription = subscriptionRepository.findByUserId(userId)
+                .map(this::toSubscriptionExport)
+                .orElse(null);
 
         return DataExportResponse.builder()
                 .userId(user.getId())
@@ -142,6 +155,10 @@ public class MeService {
                 .pantryItems(pantryItems)
                 .recipeFavorites(favorites)
                 .personalRecipes(personalRecipes)
+                .budgets(budgets)
+                .notifications(notifications)
+                .purchaseRecords(purchaseRecords)
+                .subscription(subscription)
                 .build();
     }
 
