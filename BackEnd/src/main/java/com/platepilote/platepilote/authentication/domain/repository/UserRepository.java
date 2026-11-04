@@ -4,6 +4,8 @@ import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,6 +25,11 @@ public interface UserRepository extends JpaRepository<OurUser, UUID> {
      * @return l'utilisateur trouvé, ou vide si inexistant
      */
     Optional<OurUser> findByEmail(String email);
+
+    /**
+     * Comptes désactivés dont la demande de suppression a dépassé le délai de grâce.
+     */
+    List<OurUser> findAllByEnabledFalseAndDeletedAtBefore(Instant cutoff);
 
     /**
      * Recherche un utilisateur par son fournisseur OAuth et son identifiant chez le fournisseur
