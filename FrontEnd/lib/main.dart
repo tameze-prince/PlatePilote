@@ -11,12 +11,15 @@ import 'firebase_options.dart';
 /// Point d'entrée de l'application PlatePilot.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  } catch (e, st) {
-    debugPrint('Firebase init failed (non-blocking): $e\n$st');
+  final firebaseOptions = DefaultFirebaseOptions.currentPlatformOrNull;
+  if (firebaseOptions != null) {
+    try {
+      await Firebase.initializeApp(options: firebaseOptions);
+    } catch (e, st) {
+      debugPrint('Firebase init failed (non-blocking): $e\n$st');
+    }
+  } else {
+    debugPrint('Firebase is not configured; remote push notifications are disabled.');
   }
   final preferences = await SharedPreferences.getInstance();
   await NotificationService.instance.initialize();
