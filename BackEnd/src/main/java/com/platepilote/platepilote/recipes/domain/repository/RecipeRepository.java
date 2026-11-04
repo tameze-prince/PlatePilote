@@ -74,8 +74,8 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      * @return une page de recettes correspondant à la recherche
      */
     @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.deletedAt IS NULL AND " +
-           "LOWER(r.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(r.description) LIKE LOWER(CONCAT('%', :query, '%'))")
+           "(LOWER(r.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(r.description) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<Recipe> searchPublicRecipes(@Param("query") String query, Pageable pageable);
 
     /**
