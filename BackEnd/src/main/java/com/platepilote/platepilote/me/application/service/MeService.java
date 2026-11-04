@@ -180,6 +180,7 @@ public class MeService {
                 .userId(userId)
                 .deletionDateAt(now)
                 .scheduledPurgeAt(purgeAt)
+                .scheduledAnonymizationAt(purgeAt)
                 .gracePeriodDays(GRACE_PERIOD_DAYS)
                 .message("Account disabled. Personal data is scheduled for anonymization in 30 days; legally required billing records may be retained.")
                 .build();
