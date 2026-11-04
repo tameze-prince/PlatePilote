@@ -179,6 +179,10 @@ public class PantryService {
 
         securityUtils.verifyOwnership(item.getUserId(), userId, "PantryItem", itemId.toString());
 
+        if (amount.compareTo(item.getQuantity()) > 0) {
+            throw new BusinessRuleViolationException("Consumed amount cannot exceed available quantity");
+        }
+
         java.math.BigDecimal newQuantity = item.getQuantity().subtract(amount);
         if (newQuantity.compareTo(java.math.BigDecimal.ZERO) <= 0) {
             item.softDelete();
