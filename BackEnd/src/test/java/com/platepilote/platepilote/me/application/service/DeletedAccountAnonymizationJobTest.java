@@ -4,6 +4,7 @@ import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.mockito.InOrder;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -12,6 +13,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,8 +64,29 @@ class DeletedAccountAnonymizationJobTest {
         assertThat(user.getAnonymizedAt()).isNotNull();
         assertThat(user.getRoles()).isEmpty();
 
+        InOrder deletionOrder = inOrder(jdbcTemplate);
+        deletionOrder.verify(jdbcTemplate).update("DELETE FROM meal_plans WHERE user_id = ?", userId);
+        deletionOrder.verify(jdbcTemplate).update(
+                "DELETE FROM meal_plan_entries " +
+                        "WHERE recipe_id IN (SELECT id FROM recipes WHERE user_id = ? AND is_public = FALSE)",
+                userId
+        );
+        deletionOrder.verify(jdbcTemplate).update(
+                "DELETE FROM user_interactions " +
+                        "WHERE recipe_id IN (SELECT id FROM recipes WHERE user_id = ? AND is_public = FALSE)",
+                userId
+        );
+        deletionOrder.verify(jdbcTemplate).update(
+                "DELETE FROM recipes WHERE user_id = ? AND is_public = FALSE",
+                userId
+        );
+
         verify(jdbcTemplate).update(
-                "UPDATE billing_customers SET email = NULL WHERE user_id = ?",
+                "UPDATE billing_customers SET email = NULL, provider_customer_id = CONCAT('deleted_', user_id) WHERE user_id = ?",
+                userId
+        );
+        verify(jdbcTemplate).update(
+                "UPDATE subscriptions SET provider_subscription_id = NULL, purchase_token = NULL, original_transaction_id = NULL WHERE user_id = ?",
                 userId
         );
         verify(userRepository).save(user);
