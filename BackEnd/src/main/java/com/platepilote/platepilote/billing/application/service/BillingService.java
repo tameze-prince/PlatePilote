@@ -214,6 +214,24 @@ public class BillingService {
                                 .startDate(Instant.now())
                                 .build()));
 
+        Optional<BillingCancellationRequest> cancellationRequest =
+                cancellationRequestRepository.findByProviderAndProviderSubscriptionId(STRIPE, event.subscriptionId());
+        if (cancellationRequest.isPresent()) {
+            BillingCancellationRequest request = cancellationRequest.get();
+            Instant now = Instant.now();
+            boolean cancellationCompleted = "COMPLETED".equals(request.getStatus());
+            subscription.setProvider(STRIPE);
+            subscription.setProviderSubscriptionId(event.subscriptionId());
+            subscription.setStatus(cancellationCompleted ? "CANCELLED" : "CANCELLATION_PENDING");
+            subscription.setCancelAtPeriodEnd(false);
+            subscription.setEndDate(now);
+            subscription.setExpiresAt(now);
+            subscription.setLastVerifiedAt(now);
+            subscriptionRepository.save(subscription);
+            entitlementService.revokePremium(customer.getUserId());
+            return;
+        }
+
         String status = normalizeStripeStatus(event.status());
         subscription.setProvider(STRIPE);
         subscription.setProviderSubscriptionId(event.subscriptionId());
