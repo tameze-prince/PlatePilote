@@ -181,7 +181,7 @@ class AuthServiceTest {
         when(jwtService.extractUsername(oldRefresh)).thenReturn("alice@example.com");
         when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.of(user));
         when(refreshTokenRepository.findByToken(tokenHash)).thenReturn(Optional.of(persisted));
-        when(jwtService.isTokenValid(eq(oldRefresh), any())).thenReturn(true);
+        when(jwtService.isRefreshTokenValid(eq(oldRefresh), any())).thenReturn(true);
         when(jwtService.generateToken(anyMap(), any())).thenReturn("access.new");
         when(jwtService.generateRefreshToken(any())).thenReturn("refresh.new");
         when(jwtService.extractExpirationInstant("refresh.new"))
