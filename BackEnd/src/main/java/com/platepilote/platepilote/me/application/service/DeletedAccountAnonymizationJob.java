@@ -88,8 +88,16 @@ public class DeletedAccountAnonymizationJob {
         deleteByUserId("swap_tracking", userId);
         deleteByUserId("device_registrations", userId);
 
-        // Keep legally required financial records, but remove direct identifiers.
-        jdbcTemplate.update("UPDATE billing_customers SET email = NULL WHERE user_id = ?", userId);
+        // Keep legally required financial records, but remove direct identifiers
+        // and provider references that are no longer needed after cancellation.
+        jdbcTemplate.update(
+                "UPDATE billing_customers SET email = NULL, provider_customer_id = CONCAT('deleted_', user_id) WHERE user_id = ?",
+                userId
+        );
+        jdbcTemplate.update(
+                "UPDATE subscriptions SET provider_subscription_id = NULL, purchase_token = NULL, original_transaction_id = NULL WHERE user_id = ?",
+                userId
+        );
         jdbcTemplate.update(
                 "UPDATE audit_logs SET actor_user_id = NULL, actor_email = NULL WHERE actor_user_id = ?",
                 userId
