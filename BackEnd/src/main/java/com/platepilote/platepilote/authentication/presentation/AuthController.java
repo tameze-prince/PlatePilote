@@ -7,6 +7,7 @@ import com.platepilote.platepilote.authentication.application.dto.RegisterReques
 import com.platepilote.platepilote.authentication.application.service.AuthService;
 import com.platepilote.platepilote.authentication.application.service.EmailVerificationService;
 import com.platepilote.platepilote.common.dto.ApiResponse;
+import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.common.security.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -90,8 +91,15 @@ public class AuthController {
      */
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<AuthenticationResponse>> refresh(
-            @RequestParam String refreshToken) {
-        AuthenticationResponse response = authService.refreshToken(refreshToken);
+            @RequestBody(required = false) RefreshTokenRequest request,
+            @RequestParam(required = false) String refreshToken) {
+        // Body is preferred: tokens in query strings can leak into proxy/access logs.
+        // The query parameter remains temporarily supported for older installed clients.
+        String suppliedToken = request != null ? request.refreshToken() : refreshToken;
+        if (suppliedToken == null || suppliedToken.isBlank()) {
+            throw new BusinessRuleViolationException("Refresh token is required");
+        }
+        AuthenticationResponse response = authService.refreshToken(suppliedToken);
         return ResponseEntity.ok(ApiResponse.success("Token refreshed", response));
     }
 
