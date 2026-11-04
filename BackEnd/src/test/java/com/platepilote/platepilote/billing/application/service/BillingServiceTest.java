@@ -83,6 +83,30 @@ class BillingServiceTest {
     }
 
     @Test
+    void accountDeletionCancelsStripeSubscriptionAndRevokesPremium() {
+        UUID userId = UUID.randomUUID();
+        Subscription subscription = Subscription.builder()
+                .userId(userId)
+                .provider("STRIPE")
+                .providerSubscriptionId("sub_123")
+                .planType("PREMIUM_MONTHLY")
+                .status("ACTIVE")
+                .startDate(Instant.now().minusSeconds(3600))
+                .build();
+        subscription.setId(UUID.randomUUID());
+        when(subscriptionRepository.findByUserId(userId)).thenReturn(Optional.of(subscription));
+
+        billingService.cancelForAccountDeletion(userId);
+
+        verify(billingProvider).cancelSubscription("sub_123");
+        verify(subscriptionRepository).save(subscription);
+        verify(entitlementService).revokePremium(userId);
+        assertThat(subscription.getStatus()).isEqualTo("CANCELLED");
+        assertThat(subscription.getCancelAtPeriodEnd()).isFalse();
+        assertThat(subscription.getEndDate()).isNotNull();
+    }
+
+    @Test
     void duplicateWebhookIsIgnored() {
         ProviderEvent event = new ProviderEvent("evt_1", "customer.subscription.updated",
                 "cus_123", "sub_123", null, "active", "price_monthly",
