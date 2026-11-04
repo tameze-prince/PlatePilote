@@ -83,7 +83,8 @@ class PushNotificationService {
   Future<RemoteMessage?> getInitialMessage() => _messaging.getInitialMessage();
 
   void _handleForeground(RemoteMessage message) {
-    final title = message.notification?.title ?? message.data['title']?.toString();
+    final title =
+        message.notification?.title ?? message.data['title']?.toString();
     final body = message.notification?.body ?? message.data['body']?.toString();
     if (title == null || title.isEmpty || body == null || body.isEmpty) return;
 
@@ -100,9 +101,11 @@ class PushNotificationService {
             body: body,
             payload: payload,
           );
-    unawaited(display.catchError((Object error) {
-      debugPrint('Could not display foreground push notification: $error');
-    }));
+    unawaited(
+      display.catchError((Object error) {
+        debugPrint('Could not display foreground push notification: $error');
+      }),
+    );
   }
 
   void _handleOpened(
