@@ -224,7 +224,6 @@ public class BillingService {
         if (cancellationRequest.isPresent()) {
             BillingCancellationRequest request = cancellationRequest.get();
             Instant now = Instant.now();
-            boolean cancellationCompleted = "COMPLETED".equals(request.getStatus());
             subscription.setProvider(STRIPE);
             subscription.setProviderSubscriptionId(event.subscriptionId());
             subscription.setStatus(switch (request.getStatus()) {
