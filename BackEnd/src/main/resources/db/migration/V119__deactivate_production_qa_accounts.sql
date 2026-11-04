@@ -1,7 +1,8 @@
 -- V119__deactivate_production_qa_accounts.sql
--- V117 contains deterministic QA identities for local/dev environments.
--- Production skips a still-pending V117; this forward-only cleanup also
--- disables those identities on installations where V117 was already applied.
+-- V117 is part of the immutable historical migration chain and still executes
+-- on a fresh production database. This forward-only migration disables the
+-- QA identities before the application starts serving requests. It also
+-- cleans up installations where V117 was applied previously.
 DO $$
 BEGIN
     IF '${environment}' = 'production' THEN
