@@ -2,6 +2,19 @@ package com.platepilote.platepilote.me.application.service;
 
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
+import com.platepilote.platepilote.budget.domain.entity.Budget;
+import com.platepilote.platepilote.budget.domain.repository.BudgetRepository;
+import com.platepilote.platepilote.grocery.domain.entity.PurchaseRecord;
+import com.platepilote.platepilote.grocery.domain.repository.PurchaseRecordRepository;
+import com.platepilote.platepilote.notification.domain.entity.Notification;
+import com.platepilote.platepilote.notification.domain.repository.NotificationRepository;
+import com.platepilote.platepilote.subscription.domain.entity.Subscription;
+import com.platepilote.platepilote.subscription.domain.repository.SubscriptionRepository;
+import com.platepilote.platepilote.me.application.dto.BudgetExportDto;
+import com.platepilote.platepilote.me.application.dto.NotificationExportDto;
+import com.platepilote.platepilote.me.application.dto.PurchaseRecordExportDto;
+import com.platepilote.platepilote.me.application.dto.SubscriptionExportDto;
+
 import com.platepilote.platepilote.billing.application.service.BillingService;
 import com.platepilote.platepilote.notification.domain.repository.DeviceRegistrationRepository;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
@@ -51,6 +64,10 @@ public class MeService {
     private final RecipeRepository recipeRepository;
     private final BillingService billingService;
     private final DeviceRegistrationRepository deviceRegistrationRepository;
+    private final BudgetRepository budgetRepository;
+    private final NotificationRepository notificationRepository;
+    private final PurchaseRecordRepository purchaseRecordRepository;
+    private final SubscriptionRepository subscriptionRepository;
 
     public MeService(UserRepository userRepository,
                      UserProfileService userProfileService,
@@ -61,7 +78,11 @@ public class MeService {
                      RecipeFavoriteRepository recipeFavoriteRepository,
                      RecipeRepository recipeRepository,
                      BillingService billingService,
-                     DeviceRegistrationRepository deviceRegistrationRepository) {
+                     DeviceRegistrationRepository deviceRegistrationRepository,
+                     BudgetRepository budgetRepository,
+                     NotificationRepository notificationRepository,
+                     PurchaseRecordRepository purchaseRecordRepository,
+                     SubscriptionRepository subscriptionRepository) {
         this.userRepository = userRepository;
         this.userProfileService = userProfileService;
         this.preferencesService = preferencesService;
@@ -72,6 +93,10 @@ public class MeService {
         this.recipeRepository = recipeRepository;
         this.billingService = billingService;
         this.deviceRegistrationRepository = deviceRegistrationRepository;
+        this.budgetRepository = budgetRepository;
+        this.notificationRepository = notificationRepository;
+        this.purchaseRecordRepository = purchaseRecordRepository;
+        this.subscriptionRepository = subscriptionRepository;
     }
 
     @Transactional(readOnly = true)
