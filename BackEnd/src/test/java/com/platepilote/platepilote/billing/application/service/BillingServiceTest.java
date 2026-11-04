@@ -115,6 +115,41 @@ class BillingServiceTest {
     }
 
     @Test
+    void lateActiveWebhookCannotReactivateSubscriptionAfterDeletionCancellationWasQueued() {
+        UUID userId = UUID.randomUUID();
+        Subscription subscription = Subscription.builder()
+                .userId(userId)
+                .provider("STRIPE")
+                .providerSubscriptionId("sub_123")
+                .planType("PREMIUM_MONTHLY")
+                .status("CANCELLATION_PENDING")
+                .startDate(Instant.now().minusSeconds(3600))
+                .build();
+        BillingCancellationRequest cancellationRequest = new BillingCancellationRequest();
+        cancellationRequest.setStatus("PENDING");
+        ProviderEvent event = new ProviderEvent("evt_late", "customer.subscription.updated",
+                "cus_123", "sub_123", null, "active", "price_monthly",
+                Instant.now().plusSeconds(3600), Map.of());
+        when(billingProvider.verifyWebhook("{}", "sig")).thenReturn(event);
+        when(billingEventRepository.findByProviderAndEventId("STRIPE", "evt_late")).thenReturn(Optional.empty());
+        when(billingEventRepository.save(any(BillingEvent.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(billingCustomerRepository.findByProviderAndProviderCustomerId("STRIPE", "cus_123"))
+                .thenReturn(Optional.of(BillingCustomer.builder().userId(userId)
+                        .providerCustomerId("cus_123").provider("STRIPE").build()));
+        when(subscriptionRepository.findByProviderAndProviderSubscriptionId("STRIPE", "sub_123"))
+                .thenReturn(Optional.of(subscription));
+        when(cancellationRequestRepository.findByProviderAndProviderSubscriptionId("STRIPE", "sub_123"))
+                .thenReturn(Optional.of(cancellationRequest));
+        when(subscriptionRepository.save(any(Subscription.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        billingService.processStripeWebhook("{}", "sig");
+
+        assertThat(subscription.getStatus()).isEqualTo("CANCELLATION_PENDING");
+        verify(entitlementService).revokePremium(userId);
+        verify(entitlementService, never()).grantPremium(any(), any(), any());
+    }
+
+    @Test
     void duplicateWebhookIsIgnored() {
         ProviderEvent event = new ProviderEvent("evt_1", "customer.subscription.updated",
                 "cus_123", "sub_123", null, "active", "price_monthly",
