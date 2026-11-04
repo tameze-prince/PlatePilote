@@ -68,6 +68,12 @@ public class BillingCancellationOutboxJob {
                         now.plus(Duration.ofMinutes(delayMinutes)),
                         MAX_ATTEMPTS);
                 if ("FAILED".equals(request.getStatus())) {
+                    if (request.getSubscriptionId() != null) {
+                        subscriptionRepository.findById(request.getSubscriptionId()).ifPresent(subscription -> {
+                            subscription.setStatus("CANCELLATION_FAILED");
+                            subscriptionRepository.save(subscription);
+                        });
+                    }
                     log.error("Billing cancellation request {} exhausted retries; manual action required",
                             request.getId());
                 } else {
