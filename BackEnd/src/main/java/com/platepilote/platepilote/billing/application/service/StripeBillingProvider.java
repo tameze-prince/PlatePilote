@@ -159,7 +159,12 @@ public class StripeBillingProvider implements BillingProvider {
         requireConfigured(providerSubscriptionId, "Stripe subscription id");
         Stripe.apiKey = properties.getStripe().getSecretKey();
         try {
-            Subscription.retrieve(providerSubscriptionId).cancel();
+            Subscription subscription = Subscription.retrieve(providerSubscriptionId);
+            // Stripe may have completed a cancellation even if the caller timed out.
+            // Treat an already-canceled subscription as a successful idempotent retry.
+            if (!"canceled".equalsIgnoreCase(subscription.getStatus())) {
+                subscription.cancel();
+            }
         } catch (StripeException ex) {
             throw new BusinessRuleViolationException(
                     "Unable to cancel Stripe subscription: " + ex.getMessage()
