@@ -62,7 +62,7 @@ class BillingServiceTest {
         properties.getStripe().setCancelUrl("https://example.com/cancel");
         properties.getStripe().setPortalReturnUrl("https://example.com/portal");
         billingService = new BillingService(billingProvider, properties, billingCustomerRepository,
-                billingEventRepository, userRepository, subscriptionRepository, cancellationRequestRepository, userEntitlementRepository,
+                cancellationRequestRepository, billingEventRepository, userRepository, subscriptionRepository, userEntitlementRepository,
                 entitlementService, systemSettingRepository, auditLogService);
     }
 
