@@ -27,12 +27,6 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
      */
     Page<Recipe> findByIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(Pageable pageable);
 
-    /**
-     * Compatibilité avec les consommateurs historiques du repository.
-     * La requête conserve les filtres d'activation et de suppression logique.
-     */
-    @Query("SELECT r FROM Recipe r WHERE r.isPublic = true AND r.enabled = true AND r.deletedAt IS NULL")
-    Page<Recipe> findByIsPublicTrueAndDeletedAtIsNull(Pageable pageable);
 
     /**
      * Récupère les recettes pour le tableau de bord (filtrées et triées par pertinence).
