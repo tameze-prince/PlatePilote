@@ -54,27 +54,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String jwt = authHeader.substring(7);
-        final String userEmail;
         try {
-            userEmail = jwtService.extractUsername(jwt);
-        } catch (RuntimeException exception) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+            final String userEmail = jwtService.extractUsername(jwt);
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                boolean accountActive = userDetails.isEnabled()
+                        && userDetails.isAccountNonExpired()
+                        && userDetails.isAccountNonLocked()
+                        && userDetails.isCredentialsNonExpired();
 
-            if (userDetails.isEnabled() && jwtService.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                if (accountActive && jwtService.isTokenValid(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException
+                 | org.springframework.security.core.userdetails.UsernameNotFoundException exception) {
+            // Invalid, expired, wrong-purpose or orphaned JWTs are unauthenticated requests.
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
