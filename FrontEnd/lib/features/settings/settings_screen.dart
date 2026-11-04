@@ -187,7 +187,7 @@ class SettingsScreen extends ConsumerWidget {
                       icon: Icons.payments_outlined,
                       title: l10n.budgetManagement,
                       description:
-                          l10n.weeklyCap('\$400 ${l10n.weeklyCap('').split(' ').skip(1).join(' ')}'),
+                          'Manage and track your weekly food budget.',
                       trailing: const Icon(Icons.chevron_right, size: 20),
                       onTap: () => context.push('/budget'),
                     ),
