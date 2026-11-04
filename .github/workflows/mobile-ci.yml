@@ -41,7 +41,7 @@ jobs:
         run: dart format --output=none --set-exit-if-changed .
 
       - name: Static analysis
-        run: flutter analyze --no-fatal-warnings || true
+        run: flutter analyze
 
       - name: Run unit tests with coverage
         run: flutter test --no-pub --coverage
