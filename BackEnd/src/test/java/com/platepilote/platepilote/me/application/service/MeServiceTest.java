@@ -182,6 +182,8 @@ class MeServiceTest {
                 .isBetween(beforeCall.minusSeconds(1), afterCall.plusSeconds(1));
         assertThat(response.getScheduledPurgeAt())
                 .isEqualTo(response.getDeletionDateAt().plus(30, ChronoUnit.DAYS));
+        assertThat(response.getScheduledAnonymizationAt())
+                .isEqualTo(response.getScheduledPurgeAt());
         assertThat(response.getGracePeriodDays()).isEqualTo(30);
         assertThat(response.getMessage()).contains("anonymization");
         verify(billingService).cancelForAccountDeletion(user.getId());
