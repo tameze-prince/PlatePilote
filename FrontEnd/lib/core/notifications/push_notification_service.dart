@@ -1,11 +1,14 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/router/app_router.dart';
 import '../network/api_client.dart';
 import '../providers/app_session_provider.dart';
+import 'notification_service.dart';
 
 /// Shell service handling Firebase Cloud Messaging registration and routing.
 ///
@@ -59,31 +62,56 @@ class PushNotificationService {
   /// Deletes the local FCM token after backend deactivation.
   Future<void> deleteLocalToken() => _messaging.deleteToken();
 
-  /// Subscribes to foreground and tap-opened push events. Intended to be
-  /// called once after the user authenticates and the FCM token has been
-  /// resolved.
-  void listenToMessages() {
+  /// Subscribes once to foreground and opened-message events.
+  void listenToMessages({required void Function(String route) onRoute}) {
     if (_listening) return;
     _listening = true;
     FirebaseMessaging.onMessage.listen(_handleForeground);
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleOpened);
-  }
-
-  void _handleForeground(RemoteMessage message) {
-    // Sprint 7.2 placeholder: log + future hand-off to flutter_local_notifications
-    // so the banner shows even when the app is in the foreground.
-    // Full UI is delivered in Sprint 7.3.
-    debugPrint(
-      'Push foreground: ${message.notification?.title} / ${message.data}',
+    FirebaseMessaging.onMessageOpenedApp.listen(
+      (message) => _handleOpened(message, onRoute),
     );
   }
 
-  void _handleOpened(RemoteMessage message) {
+  Future<RemoteMessage?> getInitialMessage() => _messaging.getInitialMessage();
+
+  void _handleForeground(RemoteMessage message) {
+    final title = message.notification?.title ?? message.data['title']?.toString();
+    final body = message.notification?.body ?? message.data['body']?.toString();
+    if (title == null || title.isEmpty || body == null || body.isEmpty) return;
+
+    final category = message.data['category']?.toString().toLowerCase();
+    final payload = message.data['route']?.toString();
+    final display = category == 'pantry' || category == 'budget'
+        ? NotificationService.instance.showWarning(
+            title: title,
+            body: body,
+            payload: payload,
+          )
+        : NotificationService.instance.showReminder(
+            title: title,
+            body: body,
+            payload: payload,
+          );
+    unawaited(display.catchError((Object error) {
+      debugPrint('Could not display foreground push notification: $error');
+    }));
+  }
+
+  void _handleOpened(
+    RemoteMessage message,
+    void Function(String route) onRoute,
+  ) {
     final route = message.data['route'];
-    if (route is String && route.isNotEmpty) {
-      debugPrint('Push opened -> route=$route');
-      // Sprint 7.3: hand off to GoRouter.
+    if (_isSafeInternalRoute(route)) {
+      onRoute(route as String);
     }
+  }
+
+  static bool _isSafeInternalRoute(Object? value) {
+    if (value is! String || !value.startsWith('/') || value.startsWith('//')) {
+      return false;
+    }
+    return !value.contains('://');
   }
 }
 
@@ -136,7 +164,19 @@ Future<void> _registerPush(Ref ref) async {
   try {
     final push = ref.read(pushNotificationServiceProvider);
     final apiClient = ref.read(apiClientProvider);
-    push.listenToMessages();
+    final router = ref.read(appRouterProvider);
+    void navigateToSafeRoute(String route) => router.go(route);
+    push.listenToMessages(onRoute: navigateToSafeRoute);
+    final initialMessage = await push.getInitialMessage();
+    if (initialMessage != null) {
+      final route = initialMessage.data['route'];
+      if (route is String &&
+          route.startsWith('/') &&
+          !route.startsWith('//') &&
+          !route.contains('://')) {
+        navigateToSafeRoute(route);
+      }
+    }
     final token = await push.requestPermissionAndGetToken();
     if (token != null) {
       await push.registerTokenWithBackend(token: token, apiClient: apiClient);
