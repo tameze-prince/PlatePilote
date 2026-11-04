@@ -2,7 +2,7 @@
 
 > Planifie tes repas, gère ton garde-manger et génère ta liste de courses depuis une seule application mobile.
 
-[![CI](https://github.com/tameze-prince/PlatePilote/actions/workflows/ci.yml/badge.svg)](https://github.com/tameze-prince/PlatePilote/actions/workflows/ci.yml)
+[![Backend CI](https://github.com/tameze-prince/PlatePilote/actions/workflows/ci-backend.yml/badge.svg)](https://github.com/tameze-prince/PlatePilote/actions/workflows/ci-backend.yml) [![Mobile CI](https://github.com/tameze-prince/PlatePilote/actions/workflows/mobile-ci.yml/badge.svg)](https://github.com/tameze-prince/PlatePilote/actions/workflows/mobile-ci.yml)
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?logo=springboot&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?logo=postgresql&logoColor=white)
@@ -84,6 +84,7 @@ cd FrontEnd && flutter analyze && flutter test
 
 - [API (BackEnd/README.md)](BackEnd/README.md)
 - [Plan de release APK](docs/APK_RELEASE_PLAN.md)
+- [Plan d'exécution vers la version publique](docs/PUBLIC_RELEASE_EXECUTION_PLAN.md)
 - [Stratégie de sauvegarde](docs/BACKUP_STRATEGY.md)
 - [Configuration SSL](docs/SSL_SETUP.md)
 - [Historique du projet](docs/HISTORY.md)
