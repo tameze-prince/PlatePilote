@@ -2,6 +2,8 @@ package com.platepilote.platepilote.me.application.service;
 
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
+import com.platepilote.platepilote.billing.application.service.BillingService;
+import com.platepilote.platepilote.notification.domain.repository.DeviceRegistrationRepository;
 import com.platepilote.platepilote.grocery.domain.repository.GroceryListRepository;
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanRepository;
 import com.platepilote.platepilote.pantry.domain.repository.PantryItemRepository;
@@ -43,6 +45,8 @@ class MeServiceTest {
     private PantryItemRepository pantryItemRepository;
     private RecipeFavoriteRepository recipeFavoriteRepository;
     private RecipeRepository recipeRepository;
+    private BillingService billingService;
+    private DeviceRegistrationRepository deviceRegistrationRepository;
 
     private MeService service;
     private OurUser user;
@@ -57,6 +61,8 @@ class MeServiceTest {
         pantryItemRepository = mock(PantryItemRepository.class);
         recipeFavoriteRepository = mock(RecipeFavoriteRepository.class);
         recipeRepository = mock(RecipeRepository.class);
+        billingService = mock(BillingService.class);
+        deviceRegistrationRepository = mock(DeviceRegistrationRepository.class);
 
         when(mealPlanRepository.findByUserIdAndDeletedAtIsNull(any(UUID.class), any()))
                 .thenReturn(org.springframework.data.domain.Page.empty());
@@ -77,7 +83,9 @@ class MeServiceTest {
                 groceryListRepository,
                 pantryItemRepository,
                 recipeFavoriteRepository,
-                recipeRepository);
+                recipeRepository,
+                billingService,
+                deviceRegistrationRepository);
 
         user = ourUserStub(UUID.randomUUID(), "alpha@example.com", "Alpha", "User");
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
