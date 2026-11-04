@@ -2,6 +2,8 @@ package com.platepilote.platepilote.me.application.service;
 
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
+import com.platepilote.platepilote.billing.application.service.BillingService;
+import com.platepilote.platepilote.notification.domain.repository.DeviceRegistrationRepository;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
 import com.platepilote.platepilote.grocery.domain.entity.GroceryList;
 import com.platepilote.platepilote.grocery.domain.repository.GroceryListRepository;
@@ -25,7 +27,6 @@ import com.platepilote.platepilote.userprofile.application.dto.UserProfileRespon
 import com.platepilote.platepilote.userprofile.application.service.UserProfileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +39,7 @@ import java.util.UUID;
 public class MeService {
     private static final Logger log = LoggerFactory.getLogger(MeService.class);
     private static final int GRACE_PERIOD_DAYS = 30;
-    private static final Pageable EXPORT_LIMIT = PageRequest.of(0, 500);
+    private static final Pageable EXPORT_LIMIT = Pageable.unpaged();
 
     private final UserRepository userRepository;
     private final UserProfileService userProfileService;
@@ -48,6 +49,8 @@ public class MeService {
     private final PantryItemRepository pantryItemRepository;
     private final RecipeFavoriteRepository recipeFavoriteRepository;
     private final RecipeRepository recipeRepository;
+    private final BillingService billingService;
+    private final DeviceRegistrationRepository deviceRegistrationRepository;
 
     public MeService(UserRepository userRepository,
                      UserProfileService userProfileService,
@@ -56,7 +59,9 @@ public class MeService {
                      GroceryListRepository groceryListRepository,
                      PantryItemRepository pantryItemRepository,
                      RecipeFavoriteRepository recipeFavoriteRepository,
-                     RecipeRepository recipeRepository) {
+                     RecipeRepository recipeRepository,
+                     BillingService billingService,
+                     DeviceRegistrationRepository deviceRegistrationRepository) {
         this.userRepository = userRepository;
         this.userProfileService = userProfileService;
         this.preferencesService = preferencesService;
@@ -65,6 +70,8 @@ public class MeService {
         this.pantryItemRepository = pantryItemRepository;
         this.recipeFavoriteRepository = recipeFavoriteRepository;
         this.recipeRepository = recipeRepository;
+        this.billingService = billingService;
+        this.deviceRegistrationRepository = deviceRegistrationRepository;
     }
 
     @Transactional(readOnly = true)
