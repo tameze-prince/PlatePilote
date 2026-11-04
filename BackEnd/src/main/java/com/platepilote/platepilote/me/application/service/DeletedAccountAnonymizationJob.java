@@ -75,11 +75,32 @@ public class DeletedAccountAnonymizationJob {
         deleteByUserId("pantry_items", userId);
         deleteByUserId("recipe_ratings", userId);
         deleteByUserId("recipe_favorites", userId);
-        jdbcTemplate.update("DELETE FROM recipes WHERE user_id = ? AND is_public = FALSE", userId);
-        jdbcTemplate.update("UPDATE recipes SET user_id = NULL WHERE user_id = ? AND is_public = TRUE", userId);
-        deleteByUserId("meal_plans", userId);
-        deleteByUserId("grocery_lists", userId);
+
+        // Remove the account's own references before deleting its meal plans.
+        // meal_plan_entries has a non-cascading FK to recipes, so all remaining
+        // references to this account's private recipes must be removed first.
         deleteByUserId("user_interactions", userId);
+        deleteByUserId("meal_plans", userId);
+        jdbcTemplate.update(
+                "DELETE FROM meal_plan_entries " +
+                        "WHERE recipe_id IN (SELECT id FROM recipes WHERE user_id = ? AND is_public = FALSE)",
+                userId
+        );
+        jdbcTemplate.update(
+                "DELETE FROM user_interactions " +
+                        "WHERE recipe_id IN (SELECT id FROM recipes WHERE user_id = ? AND is_public = FALSE)",
+                userId
+        );
+        jdbcTemplate.update(
+                "DELETE FROM recipes WHERE user_id = ? AND is_public = FALSE",
+                userId
+        );
+        jdbcTemplate.update(
+                "UPDATE recipes SET user_id = NULL WHERE user_id = ? AND is_public = TRUE",
+                userId
+        );
+
+        deleteByUserId("grocery_lists", userId);
         deleteByUserId("recommendation_cache", userId);
         deleteByUserId("notifications", userId);
         deleteByUserId("notification_preferences", userId);
