@@ -8,7 +8,7 @@
 #
 
 # Chemin du keystore RELATIF à android/ (donc à la racine du package Flutter)
-storeFile=../upload-keystore.jks
+storeFile=upload-keystore.jks
 
 # Alias de la clé (à donner lors de la création avec -alias)
 storePassword=REPLACE_WITH_KEYSTORE_PASSWORD
