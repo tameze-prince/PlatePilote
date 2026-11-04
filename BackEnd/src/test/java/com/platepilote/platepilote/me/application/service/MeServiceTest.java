@@ -142,7 +142,7 @@ class MeServiceTest {
     }
 
     @Test
-    void deleteUserAccountSoftsDeletesAndSchedulesPurgeIn30Days() {
+    void deleteUserAccountDisablesBillingAndPushAndSchedulesAnonymization() {
         when(userRepository.save(any(OurUser.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Instant beforeCall = Instant.now();
@@ -158,7 +158,12 @@ class MeServiceTest {
         assertThat(response.getScheduledPurgeAt())
                 .isEqualTo(response.getDeletionDateAt().plus(30, ChronoUnit.DAYS));
         assertThat(response.getGracePeriodDays()).isEqualTo(30);
-        assertThat(response.getMessage()).contains("soft-deleted");
+        assertThat(response.getMessage()).contains("anonymization");
+        verify(billingService).cancelForAccountDeletion(user.getId());
+        verify(deviceRegistrationRepository).deactivateAllForUser(
+                user.getId(),
+                response.getDeletionDateAt()
+        );
     }
 
     private static OurUser ourUserStub(UUID id, String email, String first, String last) {
