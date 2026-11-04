@@ -34,6 +34,11 @@ class NotificationService {
   );
 
   bool _initialized = false;
+  void Function(String? payload)? _tapHandler;
+
+  void setTapHandler(void Function(String? payload) handler) {
+    _tapHandler = handler;
+  }
 
   /// Initialise le plugin de notifications et crée les canaux Android.
   Future<void> initialize() async {
@@ -222,7 +227,7 @@ class NotificationService {
   }
 
   void _handleNotificationTap(NotificationResponse response) {
-    debugPrint('Notification tapped: ${response.payload}');
+    _tapHandler?.call(response.payload);
   }
 
   int _idFromPayload(String value) {
