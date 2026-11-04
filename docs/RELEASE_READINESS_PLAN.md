@@ -140,3 +140,33 @@ Aucune URL ou intégration n'est considérée opérationnelle avant un test sur 
 - [ ] Sauvegardes, monitoring et rollback opérationnels.
 
 **État : en cours.** Les premières corrections et les workflows sont sur la branche de travail. Aucun APK signé avec un vrai keystore ni aucun test contre un backend de production n'est encore attesté. La publication reste bloquée jusqu'à validation de toutes les cases ci-dessus.
+
+
+## Journal d'exécution — 2026-11-04
+
+### Corrections et contrôles effectués sur `release/production-readiness`
+
+- Le premier contrôle backend a révélé un mock de test qui utilisait l'ancienne méthode de repository. Le test `RecommendationEngineTest` utilise maintenant la méthode filtrant les recettes publiques, actives et non supprimées.
+- Les quatre fichiers Dart signalés par le contrôle de formatage ont été formatés. Le workflow temporaire de formatage a été retiré après exécution.
+- L'asset `.env` absent a été retiré de la liste des assets Flutter. L'URL API est maintenant fournie par `--dart-define=PLATEPILOT_API_BASE_URL`.
+- Les anciennes valeurs Firebase fictives ont été supprimées. Firebase/FCM est optionnel et désactivé tant que les variables de configuration Android réelles ne sont pas fournies.
+- Le cycle push est relié à l'état de session et au consentement : enregistrement au démarrage si le consentement est présent, désinscription lors du retrait du consentement et à la déconnexion, affichage local des notifications au premier plan et navigation interne contrôlée lors d'un clic.
+- Le backend accepte maintenant la désinscription d'un token uniquement par son propriétaire et réutilise un enregistrement existant au lieu de créer un doublon.
+- **V121** crée la table `device_registrations`, absente des migrations précédentes alors que l'entité JPA existait.
+- **V122** recalcule les allergènes à partir de `recipe_ingredients.ingredient_id`, la relation canonique ajoutée par V101. Les valeurs restent inconnues (`NULL`) si les ingrédients ou métadonnées sont incomplets.
+- La suppression de compte annule l'abonnement Stripe lorsqu'il existe, désactive les appareils push et désactive immédiatement le compte.
+- Le job `DeletedAccountAnonymizationJob` anonymise les comptes après le délai de grâce de 30 jours, efface les données personnelles/métier et conserve les traces financières nécessaires avec les identifiants directs supprimés.
+- L'export des données n'est plus limité silencieusement à 500 éléments. Les données sont lues sans pagination pour éviter un export tronqué.
+
+### Vérifications encore requises
+
+- [ ] Nouvelle exécution complète de Backend CI après les corrections du test, du contrôleur appareil, de la facturation et du job d'anonymisation.
+- [ ] Nouvelle exécution complète de Mobile CI après les changements de notifications, Firebase, paramètres et configuration API.
+- [ ] Exécution de toutes les migrations V1–V122 sur une base PostgreSQL vide, puis sur une base représentative déjà migrée.
+- [ ] Vérifier l'exécution réelle de l'annulation Stripe avec un compte de test Stripe et un webhook de confirmation.
+- [ ] Vérifier l'anonymisation avec une base PostgreSQL réelle et vérifier les contraintes de clés étrangères.
+- [ ] Compléter l'export des données avec les données de facturation/achats et vérifier les catégories personnelles restantes.
+- [ ] Configurer les variables/secrets GitHub requis et produire un APK release signé ; vérifier son installation et sa mise à jour sur un appareil Android.
+- [ ] Valider les domaines de production, CORS, TLS, e-mail, stockage objet, service IA, sauvegardes/restauration et monitoring.
+
+**État de livraison :** non prêt à publier tant que les cases de vérification ci-dessus ne sont pas validées. Les commits de cette branche sont des changements de code, pas une preuve de build ou de fonctionnement en production.
