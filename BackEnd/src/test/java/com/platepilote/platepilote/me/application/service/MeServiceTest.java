@@ -2,6 +2,7 @@ package com.platepilote.platepilote.me.application.service;
 
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
+import com.platepilote.platepilote.authentication.domain.repository.RefreshTokenRepository;
 import com.platepilote.platepilote.budget.domain.repository.BudgetRepository;
 import com.platepilote.platepilote.grocery.domain.repository.PurchaseRecordRepository;
 import com.platepilote.platepilote.notification.domain.repository.NotificationRepository;
@@ -43,6 +44,7 @@ import static org.mockito.Mockito.when;
 class MeServiceTest {
 
     private UserRepository userRepository;
+    private RefreshTokenRepository refreshTokenRepository;
     private UserProfileService userProfileService;
     private PreferencesService preferencesService;
     private MealPlanRepository mealPlanRepository;
@@ -63,6 +65,7 @@ class MeServiceTest {
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
+        refreshTokenRepository = mock(RefreshTokenRepository.class);
         userProfileService = mock(UserProfileService.class);
         preferencesService = mock(PreferencesService.class);
         mealPlanRepository = mock(MealPlanRepository.class);
@@ -98,6 +101,7 @@ class MeServiceTest {
 
         service = new MeService(
                 userRepository,
+                refreshTokenRepository,
                 userProfileService,
                 preferencesService,
                 mealPlanRepository,
@@ -187,6 +191,7 @@ class MeServiceTest {
         assertThat(response.getGracePeriodDays()).isEqualTo(30);
         assertThat(response.getMessage()).contains("anonymization");
         verify(billingService).cancelForAccountDeletion(user.getId());
+        verify(refreshTokenRepository).revokeAllActiveForUser(user.getId());
         verify(deviceRegistrationRepository).deactivateAllForUser(
                 user.getId(),
                 response.getDeletionDateAt()
