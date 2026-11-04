@@ -43,7 +43,7 @@ class DeletedAccountAnonymizationJobTest {
         user.setId(userId);
         user.setDeletedAt(Instant.now().minus(31, ChronoUnit.DAYS));
 
-        when(userRepository.findAllByEnabledFalseAndDeletedAtBefore(any()))
+        when(userRepository.findAllByEnabledFalseAndDeletedAtBeforeAndAnonymizedAtIsNull(any()))
                 .thenReturn(List.of(user));
 
         job.anonymizeExpiredAccounts();
@@ -59,6 +59,7 @@ class DeletedAccountAnonymizationJobTest {
         assertThat(user.getEnabled()).isFalse();
         assertThat(user.getAnalyticsOptOut()).isTrue();
         assertThat(user.getProcessingRestricted()).isTrue();
+        assertThat(user.getAnonymizedAt()).isNotNull();
         assertThat(user.getRoles()).isEmpty();
 
         verify(jdbcTemplate).update(
