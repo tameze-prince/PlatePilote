@@ -81,6 +81,10 @@ public class OurUser extends BaseEntity {
     @Column(name = "processing_restricted", nullable = false)
     private Boolean processingRestricted = false;
 
+    /** Date de fin d'anonymisation des données personnelles. */
+    @Column(name = "anonymized_at")
+    private Instant anonymizedAt;
+
     /** Rôles de l'utilisateur (relation ManyToMany avec {@link Role}). */
     @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
