@@ -15,7 +15,12 @@ import java.util.UUID;
 public class DeleteAccountResponse {
     private UUID userId;
     private Instant deletionDateAt;
+    /**
+     * @deprecated Use scheduledAnonymizationAt; financial records may be retained.
+     */
+    @Deprecated
     private Instant scheduledPurgeAt;
+    private Instant scheduledAnonymizationAt;
     private Integer gracePeriodDays;
     private String message;
 }
