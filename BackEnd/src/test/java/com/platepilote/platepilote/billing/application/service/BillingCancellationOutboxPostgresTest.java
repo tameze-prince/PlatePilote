@@ -3,6 +3,7 @@ package com.platepilote.platepilote.billing.application.service;
 import com.platepilote.platepilote.billing.domain.entity.BillingCancellationRequest;
 import com.platepilote.platepilote.billing.domain.repository.BillingCancellationRequestRepository;
 import com.platepilote.platepilote.common.AbstractIntegrationTest;
+import com.platepilote.platepilote.common.RequiresDocker;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -19,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * locking query, and the uniqueness guarantee. This is deliberately named
  * *Test (not *IT) so Maven Surefire includes it in the regular verify lifecycle.
  */
+@RequiresDocker
 class BillingCancellationOutboxPostgresTest extends AbstractIntegrationTest {
 
     @Autowired
