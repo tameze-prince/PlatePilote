@@ -105,6 +105,17 @@ final pushNotificationServiceProvider = Provider<PushNotificationService>((
 /// the app root (or in `appInitializationProvider`) so the listener stays
 /// attached across rebuilds.
 final pushSessionHookProvider = Provider<void>((ref) {
+  final initialSession = ref.read(appSessionProvider);
+  if (initialSession.isAuthenticated) {
+    Future.microtask(() {
+      if (initialSession.hasAcceptedPush) {
+        _registerPush(ref);
+      } else {
+        _unregisterPush(ref);
+      }
+    });
+  }
+
   ref.listen<AppSessionState>(appSessionProvider, (prev, next) async {
     final pushConsentRevoked = next.isAuthenticated &&
         prev?.hasAcceptedPush == true &&
