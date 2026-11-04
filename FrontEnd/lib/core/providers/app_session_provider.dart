@@ -95,6 +95,12 @@ class AppSessionNotifier extends Notifier<AppSessionState> {
     await preferences.setBool(pushConsentKey, pushConsent);
   }
 
+  /// Met à jour le consentement aux notifications push.
+  Future<void> setPushConsent(bool enabled) async {
+    state = state.copyWith(hasAcceptedPush: enabled);
+    await ref.read(sharedPreferencesProvider).setBool(pushConsentKey, enabled);
+  }
+
   /// Révoque les statistiques d'usage et bloque à nouveau l'accès beta.
   Future<void> revokeAnalyticsConsent() async {
     state = state.copyWith(hasAcceptedBetaAnalytics: false);
