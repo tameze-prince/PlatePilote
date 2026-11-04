@@ -2,6 +2,11 @@ package com.platepilote.platepilote.me.application.service;
 
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
+import com.platepilote.platepilote.budget.domain.repository.BudgetRepository;
+import com.platepilote.platepilote.grocery.domain.repository.PurchaseRecordRepository;
+import com.platepilote.platepilote.notification.domain.repository.NotificationRepository;
+import com.platepilote.platepilote.subscription.domain.repository.SubscriptionRepository;
+
 import com.platepilote.platepilote.billing.application.service.BillingService;
 import com.platepilote.platepilote.notification.domain.repository.DeviceRegistrationRepository;
 import com.platepilote.platepilote.grocery.domain.repository.GroceryListRepository;
@@ -47,6 +52,10 @@ class MeServiceTest {
     private RecipeRepository recipeRepository;
     private BillingService billingService;
     private DeviceRegistrationRepository deviceRegistrationRepository;
+    private BudgetRepository budgetRepository;
+    private NotificationRepository notificationRepository;
+    private PurchaseRecordRepository purchaseRecordRepository;
+    private SubscriptionRepository subscriptionRepository;
 
     private MeService service;
     private OurUser user;
@@ -63,6 +72,10 @@ class MeServiceTest {
         recipeRepository = mock(RecipeRepository.class);
         billingService = mock(BillingService.class);
         deviceRegistrationRepository = mock(DeviceRegistrationRepository.class);
+        budgetRepository = mock(BudgetRepository.class);
+        notificationRepository = mock(NotificationRepository.class);
+        purchaseRecordRepository = mock(PurchaseRecordRepository.class);
+        subscriptionRepository = mock(SubscriptionRepository.class);
 
         when(mealPlanRepository.findByUserIdAndDeletedAtIsNull(any(UUID.class), any()))
                 .thenReturn(org.springframework.data.domain.Page.empty());
@@ -74,6 +87,14 @@ class MeServiceTest {
                 .thenReturn(org.springframework.data.domain.Page.empty());
         when(recipeRepository.findByUserIdAndDeletedAtIsNull(any(UUID.class), any()))
                 .thenReturn(org.springframework.data.domain.Page.empty());
+        when(budgetRepository.findByUserIdAndDeletedAtIsNull(any(UUID.class)))
+                .thenReturn(java.util.List.of());
+        when(notificationRepository.findByUserIdAndDeletedAtIsNull(any(UUID.class), any()))
+                .thenReturn(org.springframework.data.domain.Page.empty());
+        when(purchaseRecordRepository.findByUserIdAndDeletedAtIsNullOrderByPurchasedAtDesc(any(UUID.class), any()))
+                .thenReturn(org.springframework.data.domain.Page.empty());
+        when(subscriptionRepository.findByUserId(any(UUID.class)))
+                .thenReturn(Optional.empty());
 
         service = new MeService(
                 userRepository,
@@ -85,7 +106,11 @@ class MeServiceTest {
                 recipeFavoriteRepository,
                 recipeRepository,
                 billingService,
-                deviceRegistrationRepository);
+                deviceRegistrationRepository,
+                budgetRepository,
+                notificationRepository,
+                purchaseRecordRepository,
+                subscriptionRepository);
 
         user = ourUserStub(UUID.randomUUID(), "alpha@example.com", "Alpha", "User");
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
