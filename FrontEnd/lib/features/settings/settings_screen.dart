@@ -710,7 +710,7 @@ class SettingsScreen extends ConsumerWidget {
       builder: (context) => AlertDialog(
         title: const Text('Delete account?'),
         content: const Text(
-          'This starts a 30-day soft-delete period before permanent purge. Type DELETE on the next confirmation to continue.',
+          'Your account is disabled immediately. After 30 days, personal data is anonymized; legally required billing records may be retained. Type DELETE on the next confirmation to continue.',
         ),
         actions: [
           TextButton(
