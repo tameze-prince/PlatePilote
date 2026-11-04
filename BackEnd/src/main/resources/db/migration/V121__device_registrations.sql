@@ -12,6 +12,10 @@ CREATE TABLE IF NOT EXISTS device_registrations (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE device_registrations
+    ALTER COLUMN device_token TYPE VARCHAR(512),
+    ALTER COLUMN platform TYPE VARCHAR(20);
+
 -- Remove incomplete/duplicate rows before enforcing the production constraints.
 DELETE FROM device_registrations
 WHERE user_id IS NULL OR device_token IS NULL OR BTRIM(device_token) = '';
