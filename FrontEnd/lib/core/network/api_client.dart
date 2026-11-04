@@ -1,23 +1,18 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kReleaseMode;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/secure_storage_service.dart';
 
-/// Résout l'URL de base de l'API au démarrage de l'application.
+/// Resolves the API endpoint from a compile-time define.
 ///
-/// Priorité : `--dart-define=PLATEPILOT_API_BASE_URL=...`, sinon `.env` (via
-/// `flutter_dotenv`), sinon chaîne vide. Si vide au moment de
-/// l'initialisation, une [StateError] est levée pour éviter les requêtes
-/// silencieuses vers `localhost` en production.
+/// The endpoint is configuration, not a secret. Never put credentials or
+/// private API keys in this value. Release builds require HTTPS.
 String resolveApiBaseUrl() {
-  const fromBuild = String.fromEnvironment(
+  const configured = String.fromEnvironment(
     'PLATEPILOT_API_BASE_URL',
     defaultValue: '',
   );
-  final fromEnv = dotenv.env['PLATEPILOT_API_BASE_URL'];
-  final configured = fromBuild.isNotEmpty ? fromBuild : (fromEnv ?? '');
   if (configured.isEmpty) return '';
 
   final uri = Uri.tryParse(configured);
@@ -38,7 +33,7 @@ void assertApiConfigured() {
     throw StateError(
       'PLATEPILOT_API_BASE_URL non configurée. '
       'Lancez l\u2019app avec `--dart-define=PLATEPILOT_API_BASE_URL=<url>` '
-      'ou renseignez-la dans FrontEnd/.env.',
+      'ou fournissez-la via --dart-define.',
     );
   }
 }
