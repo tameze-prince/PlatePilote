@@ -119,7 +119,11 @@ jobs:
           flutter build appbundle --release \
             --build-name="${{ steps.version.outputs.name }}" \
             --build-number="${{ steps.version.outputs.code }}" \
-            --dart-define=PLATEPILOT_API_BASE_URL="$PLATEPILOT_API_BASE_URL"
+            --dart-define=PLATEPILOT_API_BASE_URL="$PLATEPILOT_API_BASE_URL" \
+            --dart-define=FIREBASE_ANDROID_API_KEY="$FIREBASE_ANDROID_API_KEY" \
+            --dart-define=FIREBASE_ANDROID_APP_ID="$FIREBASE_ANDROID_APP_ID" \
+            --dart-define=FIREBASE_MESSAGING_SENDER_ID="$FIREBASE_MESSAGING_SENDER_ID" \
+            --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID"
 
       - name: Verify signatures and generate checksums
         shell: bash
