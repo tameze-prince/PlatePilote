@@ -1,0 +1,144 @@
+name: Android Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build signed Android APK and AAB
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PLATEPILOT_API_BASE_URL: ${{ vars.PLATEPILOT_API_BASE_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: FrontEnd
+        run: flutter pub get
+
+      - name: Validate release configuration and install signing key
+        working-directory: FrontEnd
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$PLATEPILOT_API_BASE_URL" || {
+            echo "::error::Repository variable PLATEPILOT_API_BASE_URL is required."
+            exit 1
+          }
+          test -n "$ANDROID_KEYSTORE_BASE64" || {
+            echo "::error::Secret ANDROID_KEYSTORE_BASE64 is required."
+            exit 1
+          }
+          test -n "$ANDROID_KEY_ALIAS" || {
+            echo "::error::Secret ANDROID_KEY_ALIAS is required."
+            exit 1
+          }
+          test -n "$ANDROID_STORE_PASSWORD" || {
+            echo "::error::Secret ANDROID_STORE_PASSWORD is required."
+            exit 1
+          }
+          test -n "$ANDROID_KEY_PASSWORD" || {
+            echo "::error::Secret ANDROID_KEY_PASSWORD is required."
+            exit 1
+          }
+
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/upload-keystore.jks
+          cat > android/key.properties <<EOF
+          storeFile=upload-keystore.jks
+          storePassword=$ANDROID_STORE_PASSWORD
+          keyPassword=$ANDROID_KEY_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          EOF
+
+      - name: Verify formatting
+        working-directory: FrontEnd
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Static analysis
+        working-directory: FrontEnd
+        run: flutter analyze
+
+      - name: Unit and widget tests
+        working-directory: FrontEnd
+        run: flutter test --coverage
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            echo "name=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=1.0.0" >> "$GITHUB_OUTPUT"
+          fi
+          echo "code=${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+
+      - name: Build signed APK
+        working-directory: FrontEnd
+        run: >
+          flutter build apk --release
+          --build-name="${{ steps.version.outputs.name }}"
+          --build-number="${{ steps.version.outputs.code }}"
+          --dart-define=PLATEPILOT_API_BASE_URL=${{ vars.PLATEPILOT_API_BASE_URL }}
+
+      - name: Build signed App Bundle
+        working-directory: FrontEnd
+        run: >
+          flutter build appbundle --release
+          --build-name="${{ steps.version.outputs.name }}"
+          --build-number="${{ steps.version.outputs.code }}"
+          --dart-define=PLATEPILOT_API_BASE_URL=${{ vars.PLATEPILOT_API_BASE_URL }}
+
+      - name: Verify APK signature
+        working-directory: FrontEnd
+        run: |
+          APK="build/app/outputs/flutter-apk/app-release.apk"
+          test -s "$APK"
+          apksigner verify --verbose --print-certs "$APK"
+
+      - name: Generate checksums
+        working-directory: FrontEnd
+        run: |
+          cd build/app/outputs
+          sha256sum flutter-apk/app-release.apk bundle/release/app-release.aab > SHA256SUMS.txt
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: platepilote-android-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}
+          path: |
+            FrontEnd/build/app/outputs/flutter-apk/app-release.apk
+            FrontEnd/build/app/outputs/bundle/release/app-release.aab
+            FrontEnd/build/app/outputs/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
