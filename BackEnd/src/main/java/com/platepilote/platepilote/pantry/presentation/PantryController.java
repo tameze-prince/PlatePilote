@@ -7,6 +7,7 @@ import com.platepilote.platepilote.pantry.application.dto.PantryItemRequest;
 import com.platepilote.platepilote.pantry.application.dto.PantryItemResponse;
 import com.platepilote.platepilote.pantry.application.service.PantryService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMin;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -170,7 +171,7 @@ public class PantryController {
     public ResponseEntity<ApiResponse<Void>> consumeItem(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID itemId,
-            @RequestParam BigDecimal amount) {
+            @RequestParam @DecimalMin(value = "0.0", inclusive = false) BigDecimal amount) {
         UUID userId = securityUtils.getCurrentUserId(userDetails);
         pantryService.consumeItem(userId, itemId, amount);
         return ResponseEntity.ok(ApiResponse.success("Item consumed", null));
