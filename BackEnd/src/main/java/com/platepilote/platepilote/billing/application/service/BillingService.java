@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -60,20 +61,21 @@ public class BillingService {
     public void cancelForAccountDeletion(UUID userId) {
         subscriptionRepository.findByUserId(userId).ifPresent(subscription -> {
             String provider = subscription.getProvider();
+            String normalizedProvider = provider == null ? "UNKNOWN" : provider.trim().toUpperCase(Locale.ROOT);
             String providerSubscriptionId = subscription.getProviderSubscriptionId();
-            boolean externalSubscription = STRIPE.equalsIgnoreCase(provider)
+            boolean externalSubscription = STRIPE.equals(normalizedProvider)
                     && providerSubscriptionId != null
                     && !providerSubscriptionId.isBlank()
                     && !"CANCELLED".equalsIgnoreCase(subscription.getStatus());
 
             if (externalSubscription) {
                 BillingCancellationRequest request = cancellationRequestRepository
-                        .findByProviderAndProviderSubscriptionId(provider, providerSubscriptionId)
+                        .findByProviderAndProviderSubscriptionId(normalizedProvider, providerSubscriptionId)
                         .orElseGet(() -> {
                             BillingCancellationRequest created = new BillingCancellationRequest();
                             created.setUserId(userId);
                             created.setSubscriptionId(subscription.getId());
-                            created.setProvider(provider.toUpperCase());
+                            created.setProvider(normalizedProvider);
                             created.setProviderSubscriptionId(providerSubscriptionId);
                             created.setStatus("PENDING");
                             created.setAttemptCount(0);
