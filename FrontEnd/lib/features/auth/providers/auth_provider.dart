@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/app_session_provider.dart';
+import '../../../core/network/api_client.dart';
+import '../../../core/notifications/push_notification_service.dart';
 import '../../../core/repositories/auth_repository.dart';
 import '../../../core/repositories/oauth2_repository.dart';
 import '../../../core/repositories/preference_repository.dart';
@@ -234,6 +236,23 @@ class AuthNotifier extends Notifier<AuthState> {
   /// Déconnecte l'utilisateur et efface les tokens.
   Future<void> logout() async {
     final secureStorage = ref.read(secureStorageProvider);
+
+    // Deactivate the device token while the access token is still available.
+    try {
+      final push = ref.read(pushNotificationServiceProvider);
+      final apiClient = ref.read(apiClientProvider);
+      final deviceToken = await push.currentToken();
+      if (deviceToken != null) {
+        await push.unregisterTokenWithBackend(
+          token: deviceToken,
+          apiClient: apiClient,
+        );
+      }
+      await push.deleteLocalToken();
+    } catch (_) {
+      // Push may be unconfigured; logout must remain available.
+    }
+
     final refreshToken = await secureStorage.getRefreshToken();
     if (refreshToken != null) {
       final repo = ref.read(authRepositoryProvider);
