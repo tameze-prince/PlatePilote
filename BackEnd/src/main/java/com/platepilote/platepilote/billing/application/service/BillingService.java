@@ -57,7 +57,8 @@ public class BillingService {
         subscriptionRepository.findByUserId(userId).ifPresent(subscription -> {
             if (STRIPE.equalsIgnoreCase(subscription.getProvider())
                     && subscription.getProviderSubscriptionId() != null
-                    && !subscription.getProviderSubscriptionId().isBlank()) {
+                    && !subscription.getProviderSubscriptionId().isBlank()
+                    && !"CANCELLED".equalsIgnoreCase(subscription.getStatus())) {
                 billingProvider.cancelSubscription(subscription.getProviderSubscriptionId());
             }
 
@@ -66,7 +67,6 @@ public class BillingService {
             subscription.setEndDate(Instant.now());
             subscription.setExpiresAt(Instant.now());
             subscriptionRepository.save(subscription);
-            entitlementService.revokePremium(userId);
             auditLogService.log(
                     userId,
                     "ACCOUNT_DELETION_SUBSCRIPTION_CANCELLED",
@@ -75,6 +75,7 @@ public class BillingService {
                     Map.of("provider", subscription.getProvider() == null ? "UNKNOWN" : subscription.getProvider())
             );
         });
+        entitlementService.revokePremium(userId);
     }
 
     /**
