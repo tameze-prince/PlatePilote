@@ -23,6 +23,10 @@ jobs:
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      FIREBASE_ANDROID_API_KEY: ${{ vars.FIREBASE_ANDROID_API_KEY }}
+      FIREBASE_ANDROID_APP_ID: ${{ vars.FIREBASE_ANDROID_APP_ID }}
+      FIREBASE_MESSAGING_SENDER_ID: ${{ vars.FIREBASE_MESSAGING_SENDER_ID }}
+      FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
 
     steps:
       - name: Checkout
@@ -50,6 +54,21 @@ jobs:
           [[ -n "$ANDROID_KEYSTORE_PASSWORD" ]] || { echo "Missing secret ANDROID_KEYSTORE_PASSWORD"; exit 1; }
           [[ -n "$ANDROID_KEY_PASSWORD" ]] || { echo "Missing secret ANDROID_KEY_PASSWORD"; exit 1; }
           [[ -n "$ANDROID_KEY_ALIAS" ]] || { echo "Missing secret ANDROID_KEY_ALIAS"; exit 1; }
+
+          firebase_values=(
+            "$FIREBASE_ANDROID_API_KEY"
+            "$FIREBASE_ANDROID_APP_ID"
+            "$FIREBASE_MESSAGING_SENDER_ID"
+            "$FIREBASE_PROJECT_ID"
+          )
+          configured=0
+          for value in "${firebase_values[@]}"; do
+            [[ -n "$value" ]] && ((configured += 1)) || true
+          done
+          if [[ "$configured" -ne 0 && "$configured" -ne 4 ]]; then
+            echo "Firebase must be configured with all four repository variables or left entirely unset."
+            exit 1
+          fi
 
       - name: Install Flutter dependencies
         run: flutter pub get
@@ -89,7 +108,11 @@ jobs:
           flutter build apk --release --split-per-abi \
             --build-name="${{ steps.version.outputs.name }}" \
             --build-number="${{ steps.version.outputs.code }}" \
-            --dart-define=PLATEPILOT_API_BASE_URL="$PLATEPILOT_API_BASE_URL"
+            --dart-define=PLATEPILOT_API_BASE_URL="$PLATEPILOT_API_BASE_URL" \
+            --dart-define=FIREBASE_ANDROID_API_KEY="$FIREBASE_ANDROID_API_KEY" \
+            --dart-define=FIREBASE_ANDROID_APP_ID="$FIREBASE_ANDROID_APP_ID" \
+            --dart-define=FIREBASE_MESSAGING_SENDER_ID="$FIREBASE_MESSAGING_SENDER_ID" \
+            --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID"
 
       - name: Build signed Android App Bundle
         run: |
