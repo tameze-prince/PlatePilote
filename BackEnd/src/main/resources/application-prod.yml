@@ -6,6 +6,12 @@
 # ══════════════════════════════════════════════════════════════
 
 spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    validate-on-migrate: true
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
