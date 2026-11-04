@@ -81,7 +81,26 @@ public class RecipeService {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", recipeId.toString()));
 
-        if (recipe.getIsPublic() == false && recipe.getUserId() == null) {
+        if (recipe.getDeletedAt() != null
+                || !Boolean.TRUE.equals(recipe.getEnabled())
+                || !Boolean.TRUE.equals(recipe.getIsPublic())) {
+            throw new ResourceNotFoundException("Recipe", "id", recipeId.toString());
+        }
+
+        return toFullResponse(recipe);
+    }
+
+    /**
+     * Récupère une recette personnelle uniquement si elle appartient à l'utilisateur.
+     */
+    @Transactional(readOnly = true)
+    public RecipeResponse getUserRecipeById(UUID userId, UUID recipeId) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", recipeId.toString()));
+
+        if (recipe.getDeletedAt() != null
+                || !Boolean.TRUE.equals(recipe.getEnabled())
+                || !userId.equals(recipe.getUserId())) {
             throw new ResourceNotFoundException("Recipe", "id", recipeId.toString());
         }
 
