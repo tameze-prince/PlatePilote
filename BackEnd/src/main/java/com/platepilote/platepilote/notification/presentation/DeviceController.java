@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,7 +49,7 @@ public class DeviceController {
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> registerDevice(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody RegisterDeviceRequest request) {
+            @Valid @RequestBody RegisterDeviceRequest request) {
         UUID userId = securityUtils.getCurrentUserId(userDetails);
 
         // Deactivate old token if exists
@@ -71,13 +73,32 @@ public class DeviceController {
     }
 
     /**
+     * Désactive le token push de l'utilisateur courant après retrait du consentement.
+     * L'opération est idempotente et ne peut pas désactiver le token d'un autre compte.
+     */
+    @PostMapping("/unregister")
+    public ResponseEntity<ApiResponse<Void>> unregisterDevice(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody RegisterDeviceRequest request) {
+        UUID userId = securityUtils.getCurrentUserId(userDetails);
+        deviceRepository.findByDeviceToken(request.deviceToken())
+                .filter(device -> userId.equals(device.getUserId()))
+                .ifPresent(device -> {
+                    device.setIsActive(false);
+                    device.setUpdatedAt(Instant.now());
+                    deviceRepository.save(device);
+                });
+        return ResponseEntity.ok(ApiResponse.success("Device unregistered", null));
+    }
+
+    /**
      * Requête d'enregistrement d'appareil.
      *
      * @param deviceToken token FCM/APNS de l'appareil
      * @param platform    plateforme (android, ios, web)
      */
     public record RegisterDeviceRequest(
-            String deviceToken,
-            String platform
+            @NotBlank String deviceToken,
+            @NotBlank String platform
     ) {}
 }
