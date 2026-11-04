@@ -1,4 +1,4 @@
-name: One-time Dart formatter
+name: Temporary Dart format inspection
 
 on:
   push:
@@ -8,44 +8,18 @@ on:
       - .github/workflows/format-branch-once.yml
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  format:
+  inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout release branch
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: release/production-readiness
-          persist-credentials: true
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          cache: true
-
-      - name: Format final notification and settings changes
+      - name: Print formatted notification service
         working-directory: FrontEnd
-        run: |
-          dart format \
-            lib/core/notifications/notification_service.dart \
-            lib/core/notifications/push_notification_service.dart \
-            lib/features/settings/settings_screen.dart
-
-      - name: Commit formatting changes
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add FrontEnd/lib/core/notifications/notification_service.dart \
-            FrontEnd/lib/core/notifications/push_notification_service.dart \
-            FrontEnd/lib/features/settings/settings_screen.dart
-          if git diff --cached --quiet; then
-            echo "Final Dart sources are already formatted."
-            exit 0
-          fi
-          git commit -m "style(front): format notification and settings changes"
-          git push origin HEAD:release/production-readiness
+        run: dart format --output=show lib/core/notifications/notification_service.dart
