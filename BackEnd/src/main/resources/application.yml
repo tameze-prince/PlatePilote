@@ -68,7 +68,6 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
-    repair-on-migrate: true  # clears failed rows before retry; safe here
 
   # ==========================================
   # REDIS CONFIGURATION (Cache) — optional, fallback to in-memory if absent
