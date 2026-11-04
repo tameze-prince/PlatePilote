@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -21,6 +20,15 @@ class PushNotificationService {
 
   final FirebaseMessaging _messaging;
   bool _listening = false;
+
+  String get _currentPlatform {
+    if (kIsWeb) return 'web';
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => 'android',
+      TargetPlatform.iOS => 'ios',
+      _ => 'unknown',
+    };
+  }
 
   /// Requests notification permission and returns the FCM token, or `null`
   /// when the user denied the prompt.
@@ -44,7 +52,7 @@ class PushNotificationService {
   }) async {
     await apiClient.post(
       '/devices',
-      data: {'deviceToken': token, 'platform': Platform.operatingSystem},
+      data: {'deviceToken': token, 'platform': _currentPlatform},
     );
   }
 
