@@ -90,7 +90,7 @@ class BillingServiceTest {
         UUID userId = UUID.randomUUID();
         Subscription subscription = Subscription.builder()
                 .userId(userId)
-                .provider("STRIPE")
+                .provider("stripe")
                 .providerSubscriptionId("sub_123")
                 .planType("PREMIUM_MONTHLY")
                 .status("ACTIVE")
@@ -106,7 +106,10 @@ class BillingServiceTest {
         billingService.cancelForAccountDeletion(userId);
 
         verify(billingProvider, never()).cancelSubscription(any());
-        verify(cancellationRequestRepository).save(any(BillingCancellationRequest.class));
+        org.mockito.ArgumentCaptor<BillingCancellationRequest> requestCaptor =
+                org.mockito.ArgumentCaptor.forClass(BillingCancellationRequest.class);
+        verify(cancellationRequestRepository).save(requestCaptor.capture());
+        assertThat(requestCaptor.getValue().getProvider()).isEqualTo("STRIPE");
         verify(subscriptionRepository).save(subscription);
         verify(entitlementService).revokePremium(userId);
         assertThat(subscription.getStatus()).isEqualTo("CANCELLATION_PENDING");
