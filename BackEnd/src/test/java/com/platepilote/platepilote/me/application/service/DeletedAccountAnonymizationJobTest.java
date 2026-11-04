@@ -1,0 +1,70 @@
+package com.platepilote.platepilote.me.application.service;
+
+import com.platepilote.platepilote.authentication.domain.entity.OurUser;
+import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
+import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+class DeletedAccountAnonymizationJobTest {
+
+    @Test
+    void anonymizesExpiredAccountAndRemovesDirectIdentifiers() {
+        UserRepository userRepository = mock(UserRepository.class);
+        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+        DeletedAccountAnonymizationJob job =
+                new DeletedAccountAnonymizationJob(userRepository, jdbcTemplate);
+
+        UUID userId = UUID.randomUUID();
+        OurUser user = OurUser.builder()
+                .email("person@example.com")
+                .passwordHash("$2a$10$old-hash")
+                .firstName("Person")
+                .lastName("Example")
+                .phone("+000000000")
+                .avatarUrl("https://cdn.example.com/avatar.png")
+                .provider("google")
+                .providerId("oauth-user-id")
+                .emailVerified(true)
+                .enabled(false)
+                .analyticsOptOut(false)
+                .processingRestricted(false)
+                .build();
+        user.setId(userId);
+        user.setDeletedAt(Instant.now().minus(31, ChronoUnit.DAYS));
+
+        when(userRepository.findAllByEnabledFalseAndDeletedAtBefore(any()))
+                .thenReturn(List.of(user));
+
+        job.anonymizeExpiredAccounts();
+
+        assertThat(user.getEmail()).isEqualTo("deleted+" + userId + "@accounts.platepilote.invalid");
+        assertThat(user.getFirstName()).isEqualTo("Deleted");
+        assertThat(user.getLastName()).isEqualTo("Account");
+        assertThat(user.getPasswordHash()).isNull();
+        assertThat(user.getPhone()).isNull();
+        assertThat(user.getAvatarUrl()).isNull();
+        assertThat(user.getProviderId()).isNull();
+        assertThat(user.getEmailVerified()).isFalse();
+        assertThat(user.getEnabled()).isFalse();
+        assertThat(user.getAnalyticsOptOut()).isTrue();
+        assertThat(user.getProcessingRestricted()).isTrue();
+        assertThat(user.getRoles()).isEmpty();
+
+        verify(jdbcTemplate).update(
+                "UPDATE billing_customers SET email = NULL WHERE user_id = ?",
+                userId
+        );
+        verify(userRepository).save(user);
+    }
+}
