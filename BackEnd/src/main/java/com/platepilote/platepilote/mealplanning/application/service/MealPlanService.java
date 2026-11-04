@@ -377,6 +377,9 @@ public class MealPlanService {
         List<MealPlanResponse.MealPlanEntryResponse> entryResponses = entries.stream()
                 .map(entry -> {
                     Recipe recipe = recipeMap.get(entry.getRecipeId());
+                    if (recipe != null && !isRecipeVisibleToUser(recipe, mealPlan.getUserId())) {
+                        recipe = null;
+                    }
                     return MealPlanResponse.MealPlanEntryResponse.builder()
                             .id(entry.getId())
                             .recipeId(entry.getRecipeId())
@@ -426,13 +429,16 @@ public class MealPlanService {
     }
 
     private void assertRecipeAccessibleToUser(Recipe recipe, UUID userId) {
+        if (!isRecipeVisibleToUser(recipe, userId)) {
+            throw new ResourceNotFoundException("Recipe", "id", recipe.getId().toString());
+        }
+    }
+
+    private boolean isRecipeVisibleToUser(Recipe recipe, UUID userId) {
         boolean deleted = recipe.getDeletedAt() != null;
         boolean disabled = !Boolean.TRUE.equals(recipe.getEnabled());
         boolean privateToAnotherUser = !Boolean.TRUE.equals(recipe.getIsPublic())
                 && !userId.equals(recipe.getUserId());
-
-        if (deleted || disabled || privateToAnotherUser) {
-            throw new ResourceNotFoundException("Recipe", "id", recipe.getId().toString());
-        }
+        return !deleted && !disabled && !privateToAnotherUser;
     }
 }
