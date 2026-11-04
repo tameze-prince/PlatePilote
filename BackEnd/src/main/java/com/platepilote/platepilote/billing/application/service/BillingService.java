@@ -81,7 +81,11 @@ public class BillingService {
                             return created;
                         });
                 cancellationRequestRepository.save(request);
-                subscription.setStatus("CANCELLATION_PENDING");
+                subscription.setStatus(switch (request.getStatus()) {
+                    case "COMPLETED" -> "CANCELLED";
+                    case "FAILED" -> "CANCELLATION_FAILED";
+                    default -> "CANCELLATION_PENDING";
+                });
             } else {
                 subscription.setStatus("CANCELLED");
             }
@@ -223,7 +227,11 @@ public class BillingService {
             boolean cancellationCompleted = "COMPLETED".equals(request.getStatus());
             subscription.setProvider(STRIPE);
             subscription.setProviderSubscriptionId(event.subscriptionId());
-            subscription.setStatus(cancellationCompleted ? "CANCELLED" : "CANCELLATION_PENDING");
+            subscription.setStatus(switch (request.getStatus()) {
+                case "COMPLETED" -> "CANCELLED";
+                case "FAILED" -> "CANCELLATION_FAILED";
+                default -> "CANCELLATION_PENDING";
+            });
             subscription.setCancelAtPeriodEnd(false);
             subscription.setEndDate(now);
             subscription.setExpiresAt(now);
