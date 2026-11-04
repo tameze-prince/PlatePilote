@@ -187,3 +187,38 @@ The repository cannot supply these values. They must be configured by the owner 
 ## Execution policy
 
 Work in small, reviewable slices on release/production-readiness. Update this plan with evidence after each gate. Do not merge to main or publish a public release until the owner reviews the pull request and all release gates pass.
+
+## Execution log — 2026-11-04
+
+### Changes committed to `release/production-readiness`
+
+- Account anonymization now removes the account's meal plans and all remaining references to its private recipes before deleting those recipes. This avoids foreign-key failures from `meal_plan_entries` and `user_interactions`.
+- Added a service test asserting the required deletion order.
+- Account deletion now revokes active refresh-token sessions immediately.
+- Added a service test asserting refresh-token revocation during account deletion.
+- The refresh endpoint now accepts the refresh token only in the JSON request body; the legacy query-parameter fallback was removed to avoid putting bearer-equivalent credentials in URLs.
+- Removed the invalid production Flyway ignore pattern. Flyway ignore patterns use `type:status`; they do not support a migration-version segment.
+- Clarified that historical migration V117 remains in the immutable migration chain and V119 disables the QA identities on production before the application serves requests.
+
+### Verification status
+
+The changes above are committed, but they are **not yet test-verified**.
+
+- Backend Maven tests: not run in this environment.
+- Docker image build: not run.
+- Flutter analysis/tests: not run in this pass.
+- PostgreSQL migration tests (clean and upgrade fixtures): not run.
+- Android release APK/AAB: not built or signed.
+- Android device installation/update tests: not run.
+- The latest PR head has no GitHub Actions workflow runs visible through the connected GitHub status interface; the only reported commit status is the Vercel deployment status. Do not treat this as a passing CI result.
+
+### Remaining release blockers discovered during implementation
+
+1. `BillingService.cancelForAccountDeletion` currently propagates provider cancellation failures. Because account deletion is transactional, a Stripe outage can prevent the account-deletion request from completing. Design and test a durable cancellation-pending/retry flow before public launch.
+2. Verify the full V1–V123 migration chain against both a clean PostgreSQL database and a representative upgraded database. In particular, validate V117/V119 behavior with the actual production profile and Flyway version.
+3. Verify the anonymization job against PostgreSQL foreign keys and every table introduced after V1; the current unit test is not a substitute for this integration test.
+4. Configure production secrets and external services outside the repository: database, Redis, JWT, SMTP, storage, CORS, AI provider/service, Stripe (if billing is enabled), and the public HTTPS API URL.
+5. Configure the Android upload keystore through GitHub Actions secrets, then run the release workflow and verify the APK/AAB signatures and installation.
+6. Complete privacy/support/legal content, backup/restore verification, monitoring, and a real-device end-to-end test.
+
+**Release decision:** keep PR #3 in draft. Do not merge or publish until the test and external-service gates above have evidence.
