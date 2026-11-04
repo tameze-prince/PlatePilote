@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/app_spacing.dart';
+import '../../core/providers/app_session_provider.dart';
 import '../../shared/widgets/plate_scaffold.dart';
 import 'notifications_provider.dart';
 
@@ -12,6 +13,7 @@ class NotificationPreferencesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final preferences = ref.watch(notificationPreferencesProvider);
+    final session = ref.watch(appSessionProvider);
     final notifier = ref.read(notificationPreferencesProvider.notifier);
 
     return PlateScaffold(
@@ -20,6 +22,14 @@ class NotificationPreferencesScreen extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),
         children: [
+          SwitchListTile(
+            value: session.hasAcceptedPush,
+            onChanged: ref.read(appSessionProvider.notifier).setPushConsent,
+            title: const Text('Push notifications'),
+            subtitle: const Text(
+              'Receive device notifications. You can withdraw this consent at any time.',
+            ),
+          ),
           SwitchListTile(
             value: preferences.pantryAlerts,
             onChanged: notifier.setPantryAlerts,
