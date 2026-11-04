@@ -153,6 +153,20 @@ public class StripeBillingProvider implements BillingProvider {
         return providerEvent(event, object);
     }
 
+    @Override
+    public void cancelSubscription(String providerSubscriptionId) {
+        requireConfigured(properties.getStripe().getSecretKey(), "STRIPE_SECRET_KEY");
+        requireConfigured(providerSubscriptionId, "Stripe subscription id");
+        Stripe.apiKey = properties.getStripe().getSecretKey();
+        try {
+            Subscription.retrieve(providerSubscriptionId).cancel();
+        } catch (StripeException ex) {
+            throw new BusinessRuleViolationException(
+                    "Unable to cancel Stripe subscription: " + ex.getMessage()
+            );
+        }
+    }
+
     private StripeObject deserializeUnsafe(Event event) {
         try {
             return event.getDataObjectDeserializer().deserializeUnsafe();
