@@ -143,6 +143,7 @@ public class MealPlanService {
 
         Recipe recipe = recipeRepository.findById(request.getRecipeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", request.getRecipeId().toString()));
+        assertRecipeAccessibleToUser(recipe, userId);
 
         MealPlanEntry entry = MealPlanEntry.builder()
                 .mealPlanId(mealPlanId)
@@ -288,6 +289,7 @@ public class MealPlanService {
 
         Recipe newRecipe = recipeRepository.findById(newRecipeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", newRecipeId.toString()));
+        assertRecipeAccessibleToUser(newRecipe, userId);
 
         entry.setRecipeId(newRecipeId);
         mealPlanEntryRepository.save(entry);
@@ -421,5 +423,16 @@ public class MealPlanService {
                 .createdAt(mealPlan.getCreatedAt())
                 .updatedAt(mealPlan.getUpdatedAt())
                 .build();
+    }
+
+    private void assertRecipeAccessibleToUser(Recipe recipe, UUID userId) {
+        boolean deleted = recipe.getDeletedAt() != null;
+        boolean disabled = !Boolean.TRUE.equals(recipe.getEnabled());
+        boolean privateToAnotherUser = !Boolean.TRUE.equals(recipe.getIsPublic())
+                && !userId.equals(recipe.getUserId());
+
+        if (deleted || disabled || privateToAnotherUser) {
+            throw new ResourceNotFoundException("Recipe", "id", recipe.getId().toString());
+        }
     }
 }
