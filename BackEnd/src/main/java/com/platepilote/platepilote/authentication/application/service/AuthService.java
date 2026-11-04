@@ -12,6 +12,7 @@ import com.platepilote.platepilote.authentication.domain.repository.RoleReposito
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.common.security.JwtService;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -184,7 +185,12 @@ public class AuthService {
      */
     @Transactional
     public AuthenticationResponse refreshToken(String refreshToken) {
-        final String email = jwtService.extractUsername(refreshToken);
+        final String email;
+        try {
+            email = jwtService.extractUsername(refreshToken);
+        } catch (JwtException | IllegalArgumentException exception) {
+            throw new BusinessRuleViolationException("Invalid refresh token");
+        }
 
         if (email == null) {
             throw new BusinessRuleViolationException("Invalid refresh token");
@@ -280,7 +286,12 @@ public class AuthService {
      */
     @Transactional
     public void resetPassword(String token, String newPassword) {
-        String email = jwtService.extractUsername(token);
+        final String email;
+        try {
+            email = jwtService.extractUsername(token);
+        } catch (JwtException | IllegalArgumentException exception) {
+            throw new BusinessRuleViolationException("Invalid or expired reset token");
+        }
         if (email == null) {
             throw new BusinessRuleViolationException("Invalid or expired reset token");
         }
