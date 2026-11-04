@@ -74,6 +74,11 @@ class PushNotificationService {
   void listenToMessages({required void Function(String route) onRoute}) {
     if (_listening) return;
     _listening = true;
+    NotificationService.instance.setTapHandler((payload) {
+      if (_isSafeInternalRoute(payload)) {
+        onRoute(payload!);
+      }
+    });
     FirebaseMessaging.onMessage.listen(_handleForeground);
     FirebaseMessaging.onMessageOpenedApp.listen(
       (message) => _handleOpened(message, onRoute),
