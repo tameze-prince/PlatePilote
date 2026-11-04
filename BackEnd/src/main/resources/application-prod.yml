@@ -10,8 +10,8 @@ spring:
     hibernate:
       ddl-auto: validate
   flyway:
-    ignore-migration-patterns:
-      - "versioned:117:ignored"
+    # V117 is part of the historical migration chain and must not be rewritten:
+    # V119 disables its QA identities before the application starts serving traffic.
     placeholders:
       environment: production
   datasource:
@@ -46,6 +46,7 @@ spring:
           auth: true
           connectiontimeout: 5000
           timeout: 5000
+          writetimeout: 5000
           starttls:
             enabled: true
 
