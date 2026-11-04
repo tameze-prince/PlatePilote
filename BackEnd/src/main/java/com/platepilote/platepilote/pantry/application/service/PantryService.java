@@ -2,6 +2,7 @@ package com.platepilote.platepilote.pantry.application.service;
 
 import com.platepilote.platepilote.common.dto.PagedResponse;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
+import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.pantry.application.dto.PantryItemRequest;
 import com.platepilote.platepilote.pantry.application.dto.PantryItemResponse;
@@ -169,13 +170,21 @@ public class PantryService {
      * @param amount quantité consommée
      */
     public void consumeItem(UUID userId, UUID itemId, java.math.BigDecimal amount) {
+        if (amount == null || amount.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+            throw new BusinessRuleViolationException("Consumed amount must be greater than zero");
+        }
+
         PantryItem item = pantryItemRepository.findById(itemId)
                 .orElseThrow(() -> new ResourceNotFoundException("PantryItem", "id", itemId.toString()));
 
         securityUtils.verifyOwnership(item.getUserId(), userId, "PantryItem", itemId.toString());
 
+        if (amount.compareTo(item.getQuantity()) > 0) {
+            throw new BusinessRuleViolationException("Consumed amount cannot exceed available quantity");
+        }
+
         java.math.BigDecimal newQuantity = item.getQuantity().subtract(amount);
-        if (newQuantity.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+        if (newQuantity.compareTo(java.math.BigDecimal.ZERO) == 0) {
             item.softDelete();
         } else {
             item.setQuantity(newQuantity);
