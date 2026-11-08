@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 /**
  * Base class for full-stack integration tests backed by a Testcontainers PostgreSQL
- * instance. Use this when you need real Flyway migrations (V1..V116) + JPA persistence
+ * instance. Use this when you need real Flyway migrations + JPA persistence
  * + the Spring Security filter chain end-to-end.
  *
  * <p>The container is started ONCE per test class (static {@code @Container}). Schema
@@ -25,10 +25,9 @@ import org.springframework.test.web.servlet.MockMvc;
  * custom is required to repro the prod schema.
  *
  * <p><strong>Disabled in environments without Docker</strong>: the {@link RequiresDocker}
- * condition (applied via the inheritable {@code @RequiresDocker @EnabledIfSystemProperty}
- * pattern here) lets {@code mvn test} pass locally on dev machines without Docker,
- * while CI runners (with a Docker daemon) execute the full suite. In environments where
- * Docker is known to be absent, set {@code DOCKER_DISABLED=true}.
+ * condition lets {@code mvn test} pass locally on dev machines without Docker, while CI
+ * runners (with a Docker daemon) execute the full suite. In environments where Docker is
+ * known to be absent, set {@code DOCKER_DISABLED=true}.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -55,6 +54,9 @@ public abstract class AbstractIntegrationTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
         registry.add("spring.flyway.enabled", () -> "true");
         registry.add("spring.flyway.locations", () -> "classpath:db/migration");
+        // Test resources override application.yml and re-enable Flyway for PostgreSQL
+        // integration tests. V119 requires this placeholder even outside production.
+        registry.add("spring.flyway.placeholders.environment", () -> "test");
     }
 
     @Autowired protected MockMvc mockMvc;
