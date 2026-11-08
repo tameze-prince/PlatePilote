@@ -103,6 +103,7 @@ public class BillingService {
             };
             auditLogService.log(
                     userId,
+                    null,
                     cancellationEvent,
                     "SUBSCRIPTION",
                     subscription.getId().toString(),
