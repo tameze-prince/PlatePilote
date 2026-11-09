@@ -21,17 +21,18 @@ import java.util.UUID;
 @Builder
 public class BarcodeProduct extends BaseEntity {
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 50)
     private String barcode;
 
-    @Column(name = "product_name", nullable = false)
+    @Column(name = "product_name", nullable = false, length = 255)
     private String productName;
 
+    @Column(length = 255)
     private String brand;
 
     @Column(name = "ingredient_id")
     private UUID ingredientId;
 
-    @Column(name = "open_food_facts_code")
+    @Column(name = "open_food_facts_code", length = 100)
     private String openFoodFactsCode;
 }

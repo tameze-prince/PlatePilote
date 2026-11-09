@@ -31,11 +31,11 @@ public class Subscription extends BaseEntity {
     private UUID userId;
 
     /** Type de plan (FREE, PREMIUM_MONTHLY, PREMIUM_YEARLY). */
-    @Column(name = "plan_type", nullable = false)
+    @Column(name = "plan_type", nullable = false, length = 50)
     private String planType = "FREE";
 
     /** Statut (ACTIVE, CANCELLED, PAST_DUE, etc.). */
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String status = "ACTIVE";
 
     /** Date de début de l'abonnement. */
@@ -55,11 +55,11 @@ public class Subscription extends BaseEntity {
     private Boolean cancelAtPeriodEnd = false;
 
     /** Fournisseur de paiement (STRIPE, INTERNAL). */
-    @Column(name = "provider")
+    @Column(name = "provider", length = 40)
     private String provider = "INTERNAL";
 
     /** Identifiant de l'abonnement chez le fournisseur. */
-    @Column(name = "provider_subscription_id")
+    @Column(name = "provider_subscription_id", length = 255)
     private String providerSubscriptionId;
 
     /** Token d'achat (reçu de validation). */
@@ -67,7 +67,7 @@ public class Subscription extends BaseEntity {
     private String purchaseToken;
 
     /** Identifiant de transaction d'origine. */
-    @Column(name = "original_transaction_id")
+    @Column(name = "original_transaction_id", length = 255)
     private String originalTransactionId;
 
     /** Date d'expiration du plan. */

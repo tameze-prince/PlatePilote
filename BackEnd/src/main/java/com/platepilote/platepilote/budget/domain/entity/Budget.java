@@ -32,15 +32,15 @@ public class Budget extends BaseEntity {
     private UUID userId;
 
     /** Montant alloué au budget. */
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 
     /** Devise du budget (défaut USD). */
-    @Column(nullable = false)
+    @Column(nullable = false, length = 3)
     private String currency = "USD";
 
     /** Période du budget (mensuel, hebdomadaire, etc.). */
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String period;
 
     /** Date de début du budget. */
@@ -52,6 +52,6 @@ public class Budget extends BaseEntity {
     private LocalDate endDate;
 
     /** Montant dépensé sur ce budget. */
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal spent = BigDecimal.ZERO;
 }

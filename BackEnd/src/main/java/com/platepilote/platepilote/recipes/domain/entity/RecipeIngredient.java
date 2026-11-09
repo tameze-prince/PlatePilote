@@ -44,13 +44,13 @@ public class RecipeIngredient {
     @JoinColumn(name = "recipe_id", nullable = false)
     private Recipe recipe;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 200)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal quantity;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String unit;
 
     @Column(columnDefinition = "TEXT")

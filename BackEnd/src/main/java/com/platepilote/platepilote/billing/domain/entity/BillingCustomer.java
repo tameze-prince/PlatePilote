@@ -30,13 +30,14 @@ public class BillingCustomer extends BaseEntity {
     private UUID userId;
 
     /** Nom du fournisseur de paiement (ex. STRIPE). */
-    @Column(nullable = false)
+    @Column(nullable = false, length = 40)
     private String provider;
 
     /** Identifiant du client chez le fournisseur. */
-    @Column(name = "provider_customer_id", nullable = false)
+    @Column(name = "provider_customer_id", nullable = false, length = 255)
     private String providerCustomerId;
 
     /** Email du client. */
+    @Column(length = 255)
     private String email;
 }

@@ -41,19 +41,19 @@ public class UserProfile extends AuditableEntity {
     private LocalDate dateOfBirth;
 
     /** Genre (affecte les calculs de calories et nutriments). */
-    @Column(name = "gender")
+    @Column(name = "gender", length = 20)
     private String gender;
 
     /** Taille en centimètres. */
-    @Column(name = "height_cm")
+    @Column(name = "height_cm", precision = 5, scale = 2)
     private BigDecimal heightCm;
 
     /** Poids en kilogrammes. */
-    @Column(name = "weight_kg")
+    @Column(name = "weight_kg", precision = 5, scale = 2)
     private BigDecimal weightKg;
 
     /** Niveau d'activité physique : Sédentaire, Léger, Modéré, Actif, Très actif. */
-    @Column(name = "activity_level")
+    @Column(name = "activity_level", length = 50)
     private String activityLevel;
 
     /** Objectifs de santé (texte libre). */
@@ -73,10 +73,14 @@ public class UserProfile extends AuditableEntity {
     private String locale;
 
     /** Niveau de compétence culinaire (défaut: BEGINNER). */
-    @Column(name = "cooking_skill", length = 20)
+    @Column(name = "cooking_skill", length = 30)
     private String cookingSkill;
 
     /** Taille du foyer (défaut: 1). */
     @Column(name = "household_size")
     private Integer householdSize;
+
+    /** Budget hebdomadaire indicatif, conservé dans le profil utilisateur. */
+    @Column(name = "weekly_budget", precision = 10, scale = 2)
+    private BigDecimal weeklyBudget;
 }

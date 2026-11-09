@@ -2,8 +2,6 @@ package com.platepilote.platepilote.notification.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -40,17 +38,15 @@ public class DeviceRegistration {
     private String platform;
 
     /** Indique si l'appareil est actif pour les notifications. */
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_active")
     @Builder.Default
     private Boolean isActive = true;
 
     /** Date de création de l'enregistrement. */
-    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     /** Date de dernière mise à jour de l'enregistrement. */
-    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 }

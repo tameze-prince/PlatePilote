@@ -40,20 +40,22 @@ public class GroceryItem {
     private UUID groceryListId;
 
     @Column(nullable = false)
+    @Column(nullable = false, length = 200)
     private String name;
 
+    @Column(length = 100)
     private String category;  // Store section: "dairy", "produce", "meat", "bakery", etc.
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal quantity;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String unit;
 
-    @Column(name = "estimated_price")
+    @Column(name = "estimated_price", precision = 10, scale = 2)
     private BigDecimal estimatedPrice;  // Expected cost for budget tracking
 
-    @Column(name = "price_confidence")
+    @Column(name = "price_confidence", precision = 4, scale = 3)
     private BigDecimal priceConfidence;
 
     @Column(nullable = false)

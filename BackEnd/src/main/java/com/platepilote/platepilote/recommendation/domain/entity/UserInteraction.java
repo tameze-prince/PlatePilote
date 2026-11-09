@@ -51,7 +51,7 @@ public class UserInteraction {
     private String interactionType;
 
     /** Poids de l'interaction utilisé dans le calcul du score de feedback. */
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 3, scale = 2)
     private BigDecimal weight = BigDecimal.ONE;
 
     /** Date de création de l'interaction. */

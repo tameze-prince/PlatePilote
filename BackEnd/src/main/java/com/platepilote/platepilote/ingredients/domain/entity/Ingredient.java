@@ -46,7 +46,7 @@ public class Ingredient extends BaseEntity {
     private String description;
 
     /** Unité de mesure par défaut (ex : "g", "ml", "pièce"). */
-    @Column(name = "default_unit", nullable = false)
+    @Column(name = "default_unit", nullable = false, length = 50)
     private String defaultUnit;
 
     /** Calories pour 100 grammes. */
@@ -136,18 +136,18 @@ public class Ingredient extends BaseEntity {
     private BigDecimal averagePricePerKg;
 
     /** Identifiant USDA FDC (Food Data Central). */
-    @Column(name = "usda_fdc_id")
+    @Column(name = "usda_fdc_id", length = 100)
     private String usdaFdcId;
 
     /** Code Open Food Facts. */
-    @Column(name = "open_food_facts_code")
+    @Column(name = "open_food_facts_code", length = 100)
     private String openFoodFactsCode;
 
     /** Nom de la source des données (ex : "USDA", "Open Food Facts"). */
-    @Column(name = "source_name")
+    @Column(name = "source_name", length = 255)
     private String sourceName;
 
     /** URL de la source des données. */
-    @Column(name = "source_url")
+    @Column(name = "source_url", length = 500)
     private String sourceUrl;
 }

@@ -44,14 +44,15 @@ public class IngredientAllergen {
     private UUID ingredientId;
 
     /** Groupe d'allergènes (ex : "gluten", "lactose", "fruits à coque"). */
-    @Column(name = "allergen_group", nullable = false)
+    @Column(name = "allergen_group", nullable = false, length = 120)
     private String allergenGroup;
 
     /** Score de confiance de l'association (entre 0 et 1, défaut : 1). */
-    @Column(name = "confidence_score", nullable = false)
+    @Column(name = "confidence_score", nullable = false, precision = 4, scale = 3)
     private BigDecimal confidenceScore = BigDecimal.ONE;
 
     /** Source de l'information sur l'allergène. */
+    @Column(length = 120)
     private String source;
 
     /** Date de création de l'enregistrement (générée automatiquement). */

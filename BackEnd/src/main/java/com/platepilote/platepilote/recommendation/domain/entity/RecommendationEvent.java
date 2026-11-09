@@ -42,15 +42,15 @@ public class RecommendationEvent {
     private UUID userId;
 
     /** Type de requête (ex: STANDARD, QUICK_MEAL, WEEKLY_PLAN). */
-    @Column(name = "request_type", nullable = false)
+    @Column(name = "request_type", nullable = false, length = 50)
     private String requestType;
 
     /** Code pays ISO 3166-1 alpha-2 utilisé pour la régionalisation des résultats. */
-    @Column(name = "country_code")
+    @Column(name = "country_code", length = 2)
     private String countryCode;
 
     /** Code devise ISO 4217 utilisé pour l'affichage des prix estimés. */
-    @Column(name = "currency_code")
+    @Column(name = "currency_code", length = 4)
     private String currencyCode;
 
     /** Nombre de résultats retournés par la recommandation. */

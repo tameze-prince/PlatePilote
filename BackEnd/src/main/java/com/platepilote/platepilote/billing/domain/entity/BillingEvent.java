@@ -35,15 +35,15 @@ public class BillingEvent {
     private UUID id;
 
     /** Nom du fournisseur de paiement. */
-    @Column(nullable = false)
+    @Column(nullable = false, length = 40)
     private String provider;
 
     /** Identifiant de l'événement chez le fournisseur. */
-    @Column(name = "event_id", nullable = false)
+    @Column(name = "event_id", nullable = false, length = 255)
     private String eventId;
 
     /** Type d'événement (ex. checkout.session.completed). */
-    @Column(name = "event_type", nullable = false)
+    @Column(name = "event_type", nullable = false, length = 120)
     private String eventType;
 
     /** Indique si l'événement a été traité. */

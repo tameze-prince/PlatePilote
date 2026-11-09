@@ -35,16 +35,16 @@ public class IngredientPrice {
     @Column(name = "country_code", length = 2)
     private String countryCode;
 
-    @Column(name = "currency_code", length = 3, nullable = false)
+    @Column(name = "currency_code", length = 4, nullable = false)
     private String currencyCode;
 
     @Column(name = "average_price_per_unit", nullable = false, precision = 10, scale = 2)
     private BigDecimal averagePricePerUnit;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String unit;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String source;
 
     @Column(name = "effective_date", nullable = false)

@@ -37,7 +37,7 @@ public class Notification extends BaseEntity {
     private UUID userId;
 
     /** Type de notification (PANTRY_ALERT, MEAL_PLAN_REMINDER, etc.). */
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String type;
 
     /** Titre de la notification. */

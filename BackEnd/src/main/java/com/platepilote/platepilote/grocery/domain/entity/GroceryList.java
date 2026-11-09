@@ -36,10 +36,10 @@ public class GroceryList extends BaseEntity {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 200)
     private String name;  // e.g., "Weekly Shopping", "BBQ Party List"
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String status = "ACTIVE";  // "ACTIVE", "COMPLETED", "ARCHIVED"
 
     @Column(name = "meal_plan_id")

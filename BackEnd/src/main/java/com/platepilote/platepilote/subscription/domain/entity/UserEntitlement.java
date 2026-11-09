@@ -1,6 +1,9 @@
 package com.platepilote.platepilote.subscription.domain.entity;
 
 import com.platepilote.platepilote.common.kernel.BaseEntity;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -31,15 +34,15 @@ public class UserEntitlement extends BaseEntity {
     private UUID userId;
 
     /** Clé de l'entitlement (ex. premium). */
-    @Column(name = "entitlement_key", nullable = false)
+    @Column(name = "entitlement_key", nullable = false, length = 120)
     private String entitlementKey;
 
     /** Source de l'octroi (INTERNAL, STRIPE, etc.). */
-    @Column(nullable = false)
+    @Column(nullable = false, length = 40)
     private String source = "INTERNAL";
 
     /** Statut (ACTIVE, CANCELLED, EXPIRED). */
-    @Column(nullable = false)
+    @Column(nullable = false, length = 40)
     private String status = "ACTIVE";
 
     /** Date de début de validité. */
@@ -55,6 +58,7 @@ public class UserEntitlement extends BaseEntity {
     private Instant lastVerifiedAt;
 
     /** Métadonnées supplémentaires (JSON). */
-    @Column(columnDefinition = "TEXT")
-    private String metadata;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private JsonNode metadata;
 }

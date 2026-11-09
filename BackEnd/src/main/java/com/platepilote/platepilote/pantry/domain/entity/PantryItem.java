@@ -41,18 +41,19 @@ public class PantryItem extends BaseEntity {
     private UUID userId;
 
     /** Nom de l'article. */
-    @Column(nullable = false)
+    @Column(nullable = false, length = 200)
     private String name;
 
     /** Catégorie (ex. fruits, légumes, viande, produits laitiers). */
+    @Column(length = 100)
     private String category;
 
     /** Quantité de l'article. */
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal quantity;
 
     /** Unité de mesure (g, kg, ml, litre, pièce). */
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String unit;
 
     /** Date de péremption de l'article. */

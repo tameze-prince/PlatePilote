@@ -34,7 +34,7 @@ public class MealPlan extends BaseEntity {
     private UUID userId;
 
     /** Nom du plan (ex : "Semaine 3 Janvier", "Low Carb Week"). */
-    @Column(nullable = false)
+    @Column(nullable = false, length = 200)
     private String name;
 
     /** Date de début du plan de repas. */
@@ -46,11 +46,12 @@ public class MealPlan extends BaseEntity {
     private LocalDate endDate;
 
     /** Statut du plan : DRAFT, ACTIVE, COMPLETED, CANCELLED. */
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String status = "DRAFT";
 
     /** Mode de fonctionnement : STANDARD, WASTELESS, ENDOFMONTH, BUSYWEEK, FAMILY. */
     @Column(nullable = false)
+    @Column(length = 20)
     @Builder.Default
     private String mode = "STANDARD";
 }

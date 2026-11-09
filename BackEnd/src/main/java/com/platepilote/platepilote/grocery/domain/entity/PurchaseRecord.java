@@ -33,10 +33,11 @@ public class PurchaseRecord extends BaseEntity {
     private UUID groceryListId;
 
     /** Nom de l'article acheté. */
-    @Column(name = "item_name", nullable = false)
+    @Column(name = "item_name", nullable = false, length = 255)
     private String itemName;
 
     /** Catégorie de l'article. */
+    @Column(length = 100)
     private String category;
 
     /** Quantité achetée. */

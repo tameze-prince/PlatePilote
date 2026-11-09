@@ -50,7 +50,7 @@ public class MealPlanEntry {
     private LocalDate mealDate;
 
     /** Type de repas : Breakfast, Lunch, Dinner, Snack. */
-    @Column(name = "meal_type", nullable = false)
+    @Column(name = "meal_type", nullable = false, length = 50)
     private String mealType;
 
     /** Nombre de portions à préparer (défaut : 1). */

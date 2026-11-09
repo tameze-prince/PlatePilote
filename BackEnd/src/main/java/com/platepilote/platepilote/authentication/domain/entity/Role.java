@@ -42,9 +42,10 @@ public class Role {
     private UUID id;
 
     /** Nom du rôle (ex: {@code ROLE_USER}, {@code ROLE_ADMIN}). */
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 50)
     private String name;
 
     /** Description lisible du rôle. */
+    @Column(length = 255)
     private String description;
 }

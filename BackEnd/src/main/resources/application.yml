@@ -40,8 +40,8 @@ spring:
   jpa:
       database-platform: ${HIBERNATE_DIALECT:}
       hibernate:
-        # Flyway is the sole schema owner; Hibernate validates mappings only.
-        ddl-auto: validate
+        # update = Hibernate auto-adds missing columns/tables (Flyway manages initial schema)
+        ddl-auto: update
       show-sql: false
       open-in-view: false
       properties:
@@ -49,8 +49,6 @@ spring:
           format_sql: true
           use_sql_comments: true
           default_schema: public
-          jdbc:
-            time_zone: UTC
           cache:
             use_second_level_cache: true
             use_query_cache: true

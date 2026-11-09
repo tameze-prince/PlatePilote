@@ -53,17 +53,19 @@ public class Recipe extends BaseEntity {
     @Column(nullable = false)
     private Integer servings;
 
+    @Column(length = 20)
     private String difficulty;  // "Easy", "Medium", "Hard"
 
-    @Column(name = "cuisine_type")
+    @Column(name = "cuisine_type", length = 100)
     private String cuisineType;  // "Italian", "Mexican", "Japanese", etc.
 
-    @Column(name = "meal_type")
+    @Column(name = "meal_type", length = 50)
     private String mealType;  // "Breakfast", "Lunch", "Dinner", "Snack"
 
-    @Column(name = "image_url")
+    @Column(name = "image_url", length = 500)
     private String imageUrl;
 
+    @Column(length = 100)
     private String source;  // Where the recipe came from
 
     @Column(name = "is_public")
@@ -131,25 +133,25 @@ public class Recipe extends BaseEntity {
     @Column(name = "estimated_cost", precision = 10, scale = 2)
     private java.math.BigDecimal estimatedCost;
 
-    @Column(name = "source_url")
+    @Column(name = "source_url", length = 500)
     private String sourceUrl;
 
-    @Column(name = "enabled")
+    @Column(name = "enabled", nullable = false)
     @Builder.Default
     private Boolean enabled = true;
 
-    @Column(name = "verified")
+    @Column(name = "verified", nullable = false)
     @Builder.Default
     private Boolean verified = false;
 
-    @Column(name = "verification_status")
+    @Column(name = "verification_status", nullable = false, length = 40)
     @Builder.Default
     private String verificationStatus = "UNREVIEWED";
 
-    @Column(name = "nutrition_source")
+    @Column(name = "nutrition_source", length = 120)
     private String nutritionSource;
 
-    @Column(name = "allergen_source")
+    @Column(name = "allergen_source", length = 120)
     private String allergenSource;
 
     @Column(name = "confidence_score", nullable = false)

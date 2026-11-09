@@ -44,22 +44,23 @@ public class OurUser extends BaseEntity {
     private String passwordHash;
 
     /** Prénom de l'utilisateur. */
-    @Column(name = "first_name", nullable = false)
+    @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
 
     /** Nom de famille de l'utilisateur. */
-    @Column(name = "last_name", nullable = false)
+    @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
 
     /** Numéro de téléphone optionnel. */
+    @Column(length = 20)
     private String phone;
 
     /** URL de la photo de profil (stockée dans Cloudinary/R2). */
-    @Column(name = "avatar_url")
+    @Column(name = "avatar_url", length = 500)
     private String avatarUrl;
 
     /** Mode d'inscription ({@code "local"} = email/password, {@code "google"} = OAuth Google). */
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String provider = "local";
 
     /** Identifiant chez le fournisseur OAuth. */
