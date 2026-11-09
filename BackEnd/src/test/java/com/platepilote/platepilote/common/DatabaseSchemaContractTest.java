@@ -34,6 +34,9 @@ class DatabaseSchemaContractTest extends AbstractIntegrationTest {
         assertColumnNumeric("grocery_items", "price_confidence", 4, 3);
         assertColumnLength("ingredient_prices", "currency_code", 4);
         assertColumnLength("user_profiles", "locale", 20);
+        assertColumnLength("device_registrations", "platform", 20);
+        assertColumnLength("user_interactions", "interaction_type", 50);
+        assertColumnType("recipes", "confidence_score", "double precision");
     }
 
     @Test

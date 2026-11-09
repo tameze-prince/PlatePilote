@@ -36,7 +36,7 @@ public class DeviceRegistration {
     private String deviceToken;
 
     /** Plateforme de l'appareil (android, ios, web). */
-    @Column(name = "platform")
+    @Column(name = "platform", length = 20)
     private String platform;
 
     /** Indique si l'appareil est actif pour les notifications. */

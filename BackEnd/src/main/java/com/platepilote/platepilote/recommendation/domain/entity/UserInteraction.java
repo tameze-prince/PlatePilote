@@ -47,7 +47,7 @@ public class UserInteraction {
     private UUID recipeId;
 
     /** Type d'interaction : saved, cooked, rated, viewed, skipped, disliked. */
-    @Column(name = "interaction_type", nullable = false)
+    @Column(name = "interaction_type", nullable = false, length = 50)
     private String interactionType;
 
     /** Poids de l'interaction utilisé dans le calcul du score de feedback. */
