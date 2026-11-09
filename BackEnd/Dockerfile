@@ -3,20 +3,17 @@ FROM eclipse-temurin:21-jdk-alpine AS builder
 
 WORKDIR /app
 
-# Copy Maven wrapper and pom.xml for dependency caching
+# Copy Maven wrapper and project descriptor
 COPY pom.xml ./
 COPY .mvn .mvn/
 COPY mvnw ./
+RUN chmod +x mvnw
 
-# Download dependencies (cached if pom.xml unchanged)
-RUN chmod +x mvnw && ./mvnw dependency:go-offline -B
-
-# Copy source and build
+# Copy source and build the production artifact. The CI build job runs the full
+# test suite separately; skipping test compilation here also avoids resolving
+# test-only dependency trees during the image build.
 COPY src ./src
-COPY pom.xml ./
-
-# Build the JAR (Spring Boot repackages to platepilote-backend-0.0.1-SNAPSHOT.jar)
-RUN ./mvnw clean package -DskipTests -q
+RUN ./mvnw -B -Dmaven.test.skip=true clean package -q
 
 # ---- Runtime Stage ----
 FROM eclipse-temurin:21-jre-alpine AS runtime
