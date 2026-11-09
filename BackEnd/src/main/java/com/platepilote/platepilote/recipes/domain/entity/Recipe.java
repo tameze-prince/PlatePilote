@@ -152,7 +152,7 @@ public class Recipe extends BaseEntity {
     @Column(name = "allergen_source")
     private String allergenSource;
 
-    @Column(name = "confidence_score")
+    @Column(name = "confidence_score", nullable = false)
     @Builder.Default
     private Double confidenceScore = 0.5;
 }

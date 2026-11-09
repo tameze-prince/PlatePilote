@@ -8,6 +8,7 @@ package com.platepilote.platepilote.recipes.domain.entity;
  */
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -35,6 +36,7 @@ public class RecipeFavorite {
     private UUID userId;
 
     /** Date à laquelle le favori a été ajouté. */
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 }
