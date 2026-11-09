@@ -50,8 +50,7 @@ public class MealPlan extends BaseEntity {
     private String status = "DRAFT";
 
     /** Mode de fonctionnement : STANDARD, WASTELESS, ENDOFMONTH, BUSYWEEK, FAMILY. */
-    @Column(nullable = false)
-    @Column(length = 20)
+    @Column(nullable = false, length = 20)
     @Builder.Default
     private String mode = "STANDARD";
 }

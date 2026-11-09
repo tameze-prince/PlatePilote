@@ -39,7 +39,6 @@ public class GroceryItem {
     @Column(name = "grocery_list_id", nullable = false)
     private UUID groceryListId;
 
-    @Column(nullable = false)
     @Column(nullable = false, length = 200)
     private String name;
 
