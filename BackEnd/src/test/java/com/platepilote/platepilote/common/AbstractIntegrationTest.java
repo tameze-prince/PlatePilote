@@ -43,12 +43,13 @@ public abstract class AbstractIntegrationTest {
             .withUsername("test")
             .withPassword("test");
 
-    static {
-        POSTGRES.start();
-    }
-
     @DynamicPropertySource
-    static void registerDatasourceProperties(DynamicPropertyRegistry registry) {
+    static synchronized void registerDatasourceProperties(DynamicPropertyRegistry registry) {
+        // Start lazily when Spring builds an enabled test context. This keeps
+        // @RequiresDocker able to skip tests without triggering Docker startup.
+        if (!POSTGRES.isRunning()) {
+            POSTGRES.start();
+        }
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
