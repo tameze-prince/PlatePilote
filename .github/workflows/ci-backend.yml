@@ -76,7 +76,7 @@ jobs:
     name: Docker Build Smoke Test
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     # Ne push PAS l'image — juste vérifier que le Dockerfile build (Railway/Render rebuildent eux-mêmes)
     steps:
       - name: Checkout
