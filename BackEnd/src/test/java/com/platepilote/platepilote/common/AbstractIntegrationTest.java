@@ -6,8 +6,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.platepilote.platepilote.common.security.JwtService;
@@ -20,9 +18,13 @@ import org.springframework.test.web.servlet.MockMvc;
  * instance. Use this when you need real Flyway migrations + JPA persistence
  * + the Spring Security filter chain end-to-end.
  *
- * <p>The container is started ONCE per test class (static {@code @Container}). Schema
- * and seed data come from the production Flyway migrations on the classpath: nothing
- * custom is required to repro the prod schema.
+ * <p>The PostgreSQL container is shared by every integration-test class in this
+ * test JVM. This is intentional: Spring caches application contexts across test
+ * classes, so stopping a class-scoped container can leave a cached datasource
+ * pointing at a container that no longer exists.
+ *
+ * <p>Testcontainers/Ryuk owns cleanup when the test JVM exits. No reusable-container
+ * configuration is required, either locally or in CI.
  *
  * <p><strong>Disabled in environments without Docker</strong>: the {@link RequiresDocker}
  * condition lets {@code mvn test} pass locally on dev machines without Docker, while CI
@@ -31,18 +33,19 @@ import org.springframework.test.web.servlet.MockMvc;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Testcontainers
 @AutoConfigureMockMvc
 @RequiresDocker
 public abstract class AbstractIntegrationTest {
 
-    @Container
     @SuppressWarnings("resource")
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine")
             .withDatabaseName("platepilote_test")
             .withUsername("test")
-            .withPassword("test")
-            .withReuse(true);
+            .withPassword("test");
+
+    static {
+        POSTGRES.start();
+    }
 
     @DynamicPropertySource
     static void registerDatasourceProperties(DynamicPropertyRegistry registry) {
