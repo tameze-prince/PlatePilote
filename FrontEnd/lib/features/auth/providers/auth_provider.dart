@@ -22,28 +22,31 @@ class AuthNotifier extends Notifier<AuthState> {
   /// Vérifie la session existante et tente un refresh si les tokens sont expirés.
   Future<void> checkSession() async {
     final secureStorage = ref.read(secureStorageProvider);
-    final hasTokens = await secureStorage.hasTokens();
-    if (!hasTokens) return;
-
-    final accessToken = await secureStorage.getAccessToken();
-    if (accessToken == null) return;
-
     state = const AuthState(isLoading: true);
 
-    final repo = ref.read(authRepositoryProvider);
-    final result = await repo.validateSession();
-
-    if (result.success) {
-      final email = AuthRepository.extractEmailFromToken(accessToken);
-      state = AuthState(isAuthenticated: true, email: email);
-      await ref.read(appSessionProvider.notifier).signIn();
-    } else {
+    try {
+      final accessToken = await secureStorage.getAccessToken();
       final refreshToken = await secureStorage.getRefreshToken();
-      if (refreshToken != null) {
+      final repo = ref.read(authRepositoryProvider);
+
+      if (accessToken != null && accessToken.isNotEmpty) {
+        final validation = await repo.validateSession();
+        if (validation.success) {
+          final email = AuthRepository.extractEmailFromToken(accessToken);
+          state = AuthState(isAuthenticated: true, email: email);
+          await ref.read(appSessionProvider.notifier).signIn();
+          return;
+        }
+      }
+
+      // An access token may be absent while its refresh token is still valid.
+      if (refreshToken != null && refreshToken.isNotEmpty) {
         final refreshResult = await repo.refreshToken(refreshToken);
         if (refreshResult.success &&
             refreshResult.accessToken != null &&
-            refreshResult.refreshToken != null) {
+            refreshResult.accessToken!.isNotEmpty &&
+            refreshResult.refreshToken != null &&
+            refreshResult.refreshToken!.isNotEmpty) {
           await secureStorage.saveTokens(
             accessToken: refreshResult.accessToken!,
             refreshToken: refreshResult.refreshToken!,
@@ -56,9 +59,20 @@ class AuthNotifier extends Notifier<AuthState> {
           return;
         }
       }
+    } catch (_) {
+      // Never leave a stale authenticated flag after a failed startup check.
+    }
+
+    try {
       await secureStorage.clearTokens();
-      state = const AuthState();
+    } catch (_) {
+      // Continue invalidating the app-level session if storage is unavailable.
+    }
+    state = const AuthState();
+    try {
       await ref.read(appSessionProvider.notifier).signOut();
+    } catch (_) {
+      // The in-memory auth state is already unauthenticated.
     }
   }
 

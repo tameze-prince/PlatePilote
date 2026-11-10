@@ -1,9 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../providers/preferences_provider.dart';
 
 /// Interface abstraite pour le stockage sécurisé des tokens JWT.
 abstract class TokenStorage {
@@ -68,53 +65,46 @@ class NativeTokenStorage implements TokenStorage {
   }
 }
 
-/// Implémentation web de [TokenStorage] utilisant [SharedPreferences]
-/// (car FlutterSecureStorage n'est pas disponible sur le web).
+/// Implémentation web non persistante de [TokenStorage].
+///
+/// Les JWT ne sont jamais écrits dans localStorage / IndexedDB. Ils restent
+/// uniquement en mémoire pendant la durée de vie de la page. Une actualisation
+/// du navigateur ferme donc la session et impose une nouvelle authentification.
+/// Pour une session web persistante, utiliser des cookies HttpOnly/Secure côté
+/// serveur plutôt que de rendre un refresh token accessible au JavaScript.
 class WebTokenStorage implements TokenStorage {
-  WebTokenStorage(this._prefs);
+  final Map<String, String> _tokens = <String, String>{};
 
-  final SharedPreferences _prefs;
-
-  static const _accessTokenKey = 'web_access_token';
-  static const _refreshTokenKey = 'web_refresh_token';
+  static const _accessTokenKey = 'access_token';
+  static const _refreshTokenKey = 'refresh_token';
 
   @override
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
   }) async {
-    await Future.wait([
-      _prefs.setString(_accessTokenKey, accessToken),
-      _prefs.setString(_refreshTokenKey, refreshToken),
-    ]);
+    _tokens[_accessTokenKey] = accessToken;
+    _tokens[_refreshTokenKey] = refreshToken;
   }
 
   @override
-  Future<String?> getAccessToken() async => _prefs.getString(_accessTokenKey);
+  Future<String?> getAccessToken() async => _tokens[_accessTokenKey];
 
   @override
-  Future<String?> getRefreshToken() async => _prefs.getString(_refreshTokenKey);
+  Future<String?> getRefreshToken() async => _tokens[_refreshTokenKey];
 
   @override
-  Future<void> clearTokens() async {
-    await Future.wait([
-      _prefs.remove(_accessTokenKey),
-      _prefs.remove(_refreshTokenKey),
-    ]);
-  }
+  Future<void> clearTokens() async => _tokens.clear();
 
   @override
-  Future<bool> hasTokens() async {
-    return _prefs.containsKey(_accessTokenKey);
-  }
+  Future<bool> hasTokens() async => _tokens.containsKey(_accessTokenKey);
 }
 
 /// Provider Riverpod pour [TokenStorage].
-/// Utilise [NativeTokenStorage] sur mobile et [WebTokenStorage] sur le web.
+/// Les plateformes natives utilisent le stockage sécurisé du système ; le web
+/// utilise un stockage mémoire non persistant pour éviter les JWT persistants
+/// accessibles au JavaScript.
 final secureStorageProvider = Provider<TokenStorage>((ref) {
-  if (kIsWeb) {
-    final prefs = ref.watch(sharedPreferencesProvider);
-    return WebTokenStorage(prefs);
-  }
+  if (kIsWeb) return WebTokenStorage();
   return NativeTokenStorage(const FlutterSecureStorage());
 });

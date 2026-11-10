@@ -20,6 +20,7 @@ class PushNotificationService {
 
   final FirebaseMessaging _messaging;
   bool _listening = false;
+  StreamSubscription<String>? _tokenRefreshSubscription;
 
   String get _currentPlatform {
     if (kIsWeb) return 'web';
@@ -56,6 +57,30 @@ class PushNotificationService {
     );
   }
 
+  /// Re-registers refreshed FCM tokens with the backend.
+  void listenToTokenRefresh({
+    required Future<void> Function(String token) onTokenRefresh,
+  }) {
+    if (_tokenRefreshSubscription != null) return;
+    _tokenRefreshSubscription = _messaging.onTokenRefresh.listen(
+      (token) {
+        unawaited(
+          onTokenRefresh(token).catchError((Object error, StackTrace stack) {
+            debugPrint('FCM token refresh registration failed: $error');
+          }),
+        );
+      },
+      onError: (Object error) {
+        debugPrint('FCM token refresh stream failed: $error');
+      },
+    );
+  }
+
+  Future<void> dispose() async {
+    await _tokenRefreshSubscription?.cancel();
+    _tokenRefreshSubscription = null;
+  }
+
   /// Returns the current FCM token, if Firebase is configured.
   Future<String?> currentToken() => _messaging.getToken();
 
@@ -67,8 +92,13 @@ class PushNotificationService {
     await apiClient.post('/devices/unregister', data: {'deviceToken': token});
   }
 
-  /// Deletes the local FCM token after backend deactivation.
-  Future<void> deleteLocalToken() => _messaging.deleteToken();
+  /// Deletes the local FCM token after backend deactivation and stops
+  /// refresh callbacks so a signed-out device cannot re-register itself.
+  Future<void> deleteLocalToken() async {
+    await _tokenRefreshSubscription?.cancel();
+    _tokenRefreshSubscription = null;
+    await _messaging.deleteToken();
+  }
 
   /// Subscribes once to foreground and opened-message events.
   void listenToMessages({required void Function(String route) onRoute}) {
@@ -136,7 +166,11 @@ class PushNotificationService {
 final pushNotificationServiceProvider = Provider<PushNotificationService>((
   ref,
 ) {
-  return PushNotificationService(FirebaseMessaging.instance);
+  final service = PushNotificationService(FirebaseMessaging.instance);
+  ref.onDispose(() {
+    unawaited(service.dispose());
+  });
+  return service;
 });
 
 /// Triggers push registration on sign-in. Register this provider once at
@@ -193,6 +227,12 @@ Future<void> _registerPush(Ref ref) async {
         navigateToSafeRoute(route);
       }
     }
+    push.listenToTokenRefresh(
+      onTokenRefresh: (refreshedToken) => push.registerTokenWithBackend(
+        token: refreshedToken,
+        apiClient: apiClient,
+      ),
+    );
     final token = await push.requestPermissionAndGetToken();
     if (token != null) {
       await push.registerTokenWithBackend(token: token, apiClient: apiClient);

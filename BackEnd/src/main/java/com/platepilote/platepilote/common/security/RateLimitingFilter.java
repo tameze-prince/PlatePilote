@@ -15,6 +15,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -99,21 +101,39 @@ public class RateLimitingFilter extends OncePerRequestFilter {
                     now - entry.getValue().windowStart >= windowSeconds);
         }
 
-        if (!buckets.containsKey(clientIp) && buckets.size() >= maxTrackedClients) {
-            buckets.entrySet().removeIf(entry ->
-                    now - entry.getValue().windowStart >= windowSeconds);
-            if (buckets.size() >= maxTrackedClients) {
-                return false;
+        RateBucket bucket = buckets.get(clientIp);
+        if (bucket == null) {
+            // Serialize only first-time client admission. Existing clients keep
+            // the concurrent fast path below and are not globally bottlenecked.
+            synchronized (buckets) {
+                bucket = buckets.get(clientIp);
+                if (bucket == null) {
+                    if (buckets.size() >= maxTrackedClients) {
+                        buckets.entrySet().removeIf(entry ->
+                                now - entry.getValue().windowStart >= windowSeconds);
+                        if (buckets.size() >= maxTrackedClients) {
+                            // Keep the map bounded without denying every new client.
+                            Map.Entry<String, RateBucket> oldest = buckets.entrySet().stream()
+                                    .min(Comparator.comparingLong(entry -> entry.getValue().windowStart))
+                                    .orElse(null);
+                            if (oldest != null) {
+                                buckets.remove(oldest.getKey(), oldest.getValue());
+                            }
+                        }
+                    }
+                    bucket = new RateBucket(now, new AtomicInteger(1));
+                    buckets.put(clientIp, bucket);
+                }
             }
+        } else {
+            bucket = buckets.compute(clientIp, (key, current) -> {
+                if (current == null || now - current.windowStart >= windowSeconds) {
+                    return new RateBucket(now, new AtomicInteger(1));
+                }
+                current.count.incrementAndGet();
+                return current;
+            });
         }
-
-        RateBucket bucket = buckets.compute(clientIp, (key, existing) -> {
-            if (existing == null || now - existing.windowStart >= windowSeconds) {
-                return new RateBucket(now, new AtomicInteger(1));
-            }
-            existing.count.incrementAndGet();
-            return existing;
-        });
         return bucket.count.get() <= maxRequests;
     }
 

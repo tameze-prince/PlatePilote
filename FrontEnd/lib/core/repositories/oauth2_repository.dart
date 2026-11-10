@@ -18,7 +18,9 @@ class OAuth2Repository {
   /// Retourne `null` si l'utilisateur annule ou si une erreur se produit.
   Future<OAuth2SignInResult?> signInWithGoogle() async {
     final googleSignIn = GoogleSignIn(
-      serverClientId: _googleServerClientId,
+      serverClientId: _googleServerClientId.isEmpty
+          ? null
+          : _googleServerClientId,
       scopes: ['openid', 'email', 'profile'],
     );
 
@@ -40,7 +42,10 @@ class OAuth2Repository {
 
   /// ID client émis par le serveur pour l'application web OAuth2 du backend.
   /// Sur mobile, c'est le même ID client utilisé par le SDK Google Sign-In.
-  String? get _googleServerClientId => null; // Set via env var if needed
+  static const String _googleServerClientId = String.fromEnvironment(
+    'GOOGLE_OAUTH_SERVER_CLIENT_ID',
+    defaultValue: '',
+  );
 
   // ── Apple ───────────────────────────────────────────────
 

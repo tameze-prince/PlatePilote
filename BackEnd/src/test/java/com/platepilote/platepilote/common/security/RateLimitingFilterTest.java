@@ -41,11 +41,12 @@ class RateLimitingFilterTest {
     }
 
     @Test
-    void refusesNewTrackedClientsWhenConfiguredCapacityIsReached() {
+    void evictsOldestTrackedClientWhenConfiguredCapacityIsReached() {
         ReflectionTestUtils.setField(filter, "maxTrackedClients", 1);
 
         assertThat(allowRequest("198.51.100.1")).isTrue();
-        assertThat(allowRequest("198.51.100.2")).isFalse();
+        assertThat(allowRequest("198.51.100.2")).isTrue();
+        assertThat(allowRequest("198.51.100.1")).isTrue();
     }
 
     private String resolveClientIp(HttpServletRequest request) {

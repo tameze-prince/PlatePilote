@@ -27,6 +27,7 @@ jobs:
       FIREBASE_ANDROID_APP_ID: ${{ vars.FIREBASE_ANDROID_APP_ID }}
       FIREBASE_MESSAGING_SENDER_ID: ${{ vars.FIREBASE_MESSAGING_SENDER_ID }}
       FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+      GOOGLE_OAUTH_SERVER_CLIENT_ID: ${{ vars.GOOGLE_OAUTH_SERVER_CLIENT_ID }}
 
     steps:
       - name: Checkout
@@ -112,7 +113,8 @@ jobs:
             --dart-define=FIREBASE_ANDROID_API_KEY="$FIREBASE_ANDROID_API_KEY" \
             --dart-define=FIREBASE_ANDROID_APP_ID="$FIREBASE_ANDROID_APP_ID" \
             --dart-define=FIREBASE_MESSAGING_SENDER_ID="$FIREBASE_MESSAGING_SENDER_ID" \
-            --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID"
+            --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID" \
+            --dart-define=GOOGLE_OAUTH_SERVER_CLIENT_ID="$GOOGLE_OAUTH_SERVER_CLIENT_ID"
 
       - name: Build signed Android App Bundle
         run: |
@@ -123,7 +125,8 @@ jobs:
             --dart-define=FIREBASE_ANDROID_API_KEY="$FIREBASE_ANDROID_API_KEY" \
             --dart-define=FIREBASE_ANDROID_APP_ID="$FIREBASE_ANDROID_APP_ID" \
             --dart-define=FIREBASE_MESSAGING_SENDER_ID="$FIREBASE_MESSAGING_SENDER_ID" \
-            --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID"
+            --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID" \
+            --dart-define=GOOGLE_OAUTH_SERVER_CLIENT_ID="$GOOGLE_OAUTH_SERVER_CLIENT_ID"
 
       - name: Verify signatures and generate checksums
         shell: bash

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../providers/app_session_provider.dart';
 import '../services/secure_storage_service.dart';
 
 /// Resolves the API endpoint from a compile-time define.
@@ -60,7 +61,14 @@ final dioProvider = Provider<Dio>((ref) {
       refreshTokenGetter: () => secureStorage.getRefreshToken(),
       onTokensRefreshed: (access, refresh) =>
           secureStorage.saveTokens(accessToken: access, refreshToken: refresh),
-      onRefreshFailed: () => secureStorage.clearTokens(),
+      onRefreshFailed: () async {
+        try {
+          await secureStorage.clearTokens();
+        } catch (_) {
+          // Session state must still be invalidated if storage is unavailable.
+        }
+        await ref.read(appSessionProvider.notifier).signOut();
+      },
     ),
     _ErrorLogInterceptor(),
   ]);

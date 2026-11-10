@@ -108,6 +108,51 @@ void main() {
       expect(state.isLoading, false);
     });
 
+    test(
+      'clears a persisted authenticated flag when no tokens exist',
+      () async {
+        SharedPreferences.setMockInitialValues({'isAuthenticated': true});
+        final prefs = await SharedPreferences.getInstance();
+        final storage = MockTokenStorage();
+        final container = createContainer(
+          prefs: prefs,
+          tokenStorage: storage,
+        );
+
+        await container.read(authProvider.notifier).checkSession();
+
+        expect(container.read(authProvider).isAuthenticated, false);
+        expect(container.read(appSessionProvider).isAuthenticated, false);
+        expect(prefs.getBool('isAuthenticated'), false);
+      },
+    );
+
+    test(
+      'refreshes when access token is absent but refresh token exists',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+        final storage = MockTokenStorage();
+        storage.refreshToken = 'valid_refresh';
+        final authRepo = MockAuthRepository()
+          ..refreshSuccess = true
+          ..refreshedAccess = 'new_access'
+          ..refreshedRefresh = 'new_refresh';
+        final container = createContainer(
+          prefs: prefs,
+          tokenStorage: storage,
+          authRepo: authRepo,
+        );
+
+        await container.read(authProvider.notifier).checkSession();
+
+        expect(container.read(authProvider).isAuthenticated, true);
+        expect(storage.accessToken, 'new_access');
+        expect(storage.refreshToken, 'new_refresh');
+        expect(container.read(appSessionProvider).isAuthenticated, true);
+      },
+    );
+
     test('sets authenticated when tokens are valid', () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
