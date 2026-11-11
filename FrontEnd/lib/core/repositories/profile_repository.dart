@@ -12,7 +12,7 @@ class ProfileRepository extends BaseRepository {
   Future<Map<String, dynamic>> getProfile() async {
     try {
       final response = await apiClient.get('/profile');
-      return handleResponse(response, (data) => data);
+      return await handleResponse(response, (data) => data);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }

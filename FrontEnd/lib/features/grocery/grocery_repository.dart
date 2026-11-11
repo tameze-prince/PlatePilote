@@ -32,7 +32,7 @@ class GroceryRepository extends BaseRepository {
   Future<GroceryList> getGroceryList(String listId) async {
     try {
       final response = await apiClient.get('/grocery-lists/$listId');
-      return handleResponse(response, GroceryList.fromJson);
+      return await handleResponse(response, GroceryList.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }
@@ -45,7 +45,7 @@ class GroceryRepository extends BaseRepository {
         '/grocery-lists/generate',
         query: {'mealPlanId': mealPlanId},
       );
-      return handleResponse(response, GroceryList.fromJson);
+      return await handleResponse(response, GroceryList.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }
@@ -58,7 +58,7 @@ class GroceryRepository extends BaseRepository {
         '/grocery-lists',
         data: {'name': name},
       );
-      return handleResponse(response, GroceryList.fromJson);
+      return await handleResponse(response, GroceryList.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }
@@ -88,7 +88,7 @@ class GroceryRepository extends BaseRepository {
           'sortOrder': sortOrder,
         },
       );
-      return handleResponse(response, GroceryList.fromJson);
+      return await handleResponse(response, GroceryList.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }

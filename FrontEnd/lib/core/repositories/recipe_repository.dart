@@ -32,7 +32,7 @@ class RecipeRepository extends BaseRepository {
   Future<RecipeDetail> getRecipeDetail(String recipeId) async {
     try {
       final response = await apiClient.get('/recipes/public/$recipeId');
-      return handleResponse(response, RecipeDetail.fromJson);
+      return await handleResponse(response, RecipeDetail.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }

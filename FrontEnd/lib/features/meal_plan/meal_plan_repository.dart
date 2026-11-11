@@ -31,7 +31,7 @@ class MealPlanRepository extends BaseRepository {
   Future<MealPlan> getMealPlan(String id) async {
     try {
       final response = await apiClient.get('/meal-plans/$id');
-      return handleResponse(response, MealPlan.fromJson);
+      return await handleResponse(response, MealPlan.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }
@@ -49,7 +49,7 @@ class MealPlanRepository extends BaseRepository {
         'startDate': startDate,
         'endDate': endDate,
       });
-      return handleResponse(response, MealPlan.fromJson);
+      return await handleResponse(response, MealPlan.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }
@@ -62,7 +62,7 @@ class MealPlanRepository extends BaseRepository {
         '/meal-plans/generate',
         query: {'startDate': startDate},
       );
-      return handleResponse(response, MealPlan.fromJson);
+      return await handleResponse(response, MealPlan.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }
@@ -88,7 +88,7 @@ class MealPlanRepository extends BaseRepository {
           'notes': notes,
         },
       );
-      return handleResponse(response, MealPlan.fromJson);
+      return await handleResponse(response, MealPlan.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }
@@ -146,7 +146,7 @@ class MealPlanRepository extends BaseRepository {
         '/meal-plans/entries/$entryId/swap',
         query: {'newRecipeId': newRecipeId},
       );
-      return handleResponse(response, MealPlan.fromJson);
+      return await handleResponse(response, MealPlan.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }
@@ -159,7 +159,7 @@ class MealPlanRepository extends BaseRepository {
         '/meal-plans/$planId/mode',
         query: {'mode': mode},
       );
-      return handleResponse(response, MealPlan.fromJson);
+      return await handleResponse(response, MealPlan.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }
@@ -173,7 +173,7 @@ class MealPlanRepository extends BaseRepository {
         '/meal-plans/generate',
         query: {'startDate': startDate, 'mode': mode},
       );
-      return handleResponse(response, MealPlan.fromJson);
+      return await handleResponse(response, MealPlan.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }

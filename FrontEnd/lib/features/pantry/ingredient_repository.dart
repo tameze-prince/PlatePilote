@@ -42,7 +42,7 @@ class IngredientRepository extends BaseRepository {
   Future<Ingredient> getById(String id) async {
     try {
       final response = await apiClient.get('/ingredients/$id');
-      return handleResponse(response, Ingredient.fromJson);
+      return await handleResponse(response, Ingredient.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }

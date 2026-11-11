@@ -42,7 +42,7 @@ class BudgetRepository extends BaseRepository {
         'startDate': startDate,
         'endDate': endDate,
       });
-      return handleResponse(response, Budget.fromJson);
+      return await handleResponse(response, Budget.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }

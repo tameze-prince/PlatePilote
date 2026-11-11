@@ -79,7 +79,7 @@ class PantryRepository extends BaseRepository {
         'unit': unit,
         if (expirationDate != null) 'expirationDate': expirationDate,
       });
-      return handleResponse(response, PantryItem.fromJson);
+      return await handleResponse(response, PantryItem.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }
@@ -102,7 +102,7 @@ class PantryRepository extends BaseRepository {
         'unit': unit,
         if (expirationDate != null) 'expirationDate': expirationDate,
       });
-      return handleResponse(response, PantryItem.fromJson);
+      return await handleResponse(response, PantryItem.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }

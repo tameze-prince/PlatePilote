@@ -44,16 +44,31 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
-          if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
-            BASE_SHA="$(git rev-list --max-parents=0 HEAD)"
+          set -euo pipefail
+
+          if [ -z "${BASE_SHA:-}" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            git fetch origin main --no-tags
+            BASE_SHA="$(git merge-base origin/main HEAD)"
           fi
-          mapfile -t dart_files < <(git diff --name-only "$BASE_SHA...HEAD" -- '*.dart' | sed -n 's#^FrontEnd/##p')
+
+          if [ -z "$BASE_SHA" ] || ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            echo "::error::Unable to determine a valid base commit for the Dart formatting check."
+            exit 1
+          fi
+
+          changed_dart_files="$(git diff --name-only "$BASE_SHA...HEAD" -- '*.dart')"
+          dart_files=()
+          while IFS= read -r path; do
+            if [[ "$path" == FrontEnd/*.dart ]]; then
+              dart_files+=("${path#FrontEnd/}")
+            fi
+          done <<< "$changed_dart_files"
+
           if [ "${#dart_files[@]}" -eq 0 ]; then
             echo "No changed Dart files to format-check."
           else
             dart format --output=none --set-exit-if-changed "${dart_files[@]}"
           fi
-
       - name: Static analysis
         run: flutter analyze
 
