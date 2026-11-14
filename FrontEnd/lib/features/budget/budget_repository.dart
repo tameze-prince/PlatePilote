@@ -35,13 +35,16 @@ class BudgetRepository extends BaseRepository {
     String? endDate,
   }) async {
     try {
-      final response = await apiClient.post('/budgets', data: {
-        'amount': amount,
-        'currency': currency,
-        'period': period,
-        'startDate': startDate,
-        'endDate': endDate,
-      });
+      final response = await apiClient.post(
+        '/budgets',
+        data: {
+          'amount': amount,
+          'currency': currency,
+          'period': period,
+          'startDate': startDate,
+          'endDate': endDate,
+        },
+      );
       return await handleResponse(response, Budget.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);

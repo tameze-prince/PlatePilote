@@ -34,7 +34,10 @@ class OAuth2Repository {
       final idToken = auth.idToken;
       if (idToken == null) return null;
 
-      return await _verifyTokenWithBackend(provider: 'google', idToken: idToken);
+      return await _verifyTokenWithBackend(
+        provider: 'google',
+        idToken: idToken,
+      );
     } on Exception catch (e) {
       return OAuth2SignInResult(success: false, errorMessage: e.toString());
     }
@@ -94,10 +97,7 @@ class OAuth2Repository {
     try {
       final response = await _apiClient.post(
         '/auth/oauth2',
-        data: {
-          'provider': provider,
-          'idToken': idToken,
-        },
+        data: {'provider': provider, 'idToken': idToken},
       );
 
       final body = response.data as Map<String, dynamic>;

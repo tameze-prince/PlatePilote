@@ -44,11 +44,10 @@ class MealPlanRepository extends BaseRepository {
     required String endDate,
   }) async {
     try {
-      final response = await apiClient.post('/meal-plans', data: {
-        'name': name,
-        'startDate': startDate,
-        'endDate': endDate,
-      });
+      final response = await apiClient.post(
+        '/meal-plans',
+        data: {'name': name, 'startDate': startDate, 'endDate': endDate},
+      );
       return await handleResponse(response, MealPlan.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
@@ -123,7 +122,9 @@ class MealPlanRepository extends BaseRepository {
 
   /// Récupère les options d'échange pour une entrée de plan.
   Future<List<Map<String, dynamic>>> getSwapOptions(
-      String entryId, int limit) async {
+    String entryId,
+    int limit,
+  ) async {
     try {
       final response = await apiClient.get(
         '/meal-plans/entries/$entryId/swap-options',
@@ -166,8 +167,10 @@ class MealPlanRepository extends BaseRepository {
   }
 
   /// Génère un plan hebdomadaire avec un mode spécifique.
-  Future<MealPlan> generateWeeklyPlanWithMode(
-      {required String startDate, String mode = 'STANDARD'}) async {
+  Future<MealPlan> generateWeeklyPlanWithMode({
+    required String startDate,
+    String mode = 'STANDARD',
+  }) async {
     try {
       final response = await apiClient.post(
         '/meal-plans/generate',

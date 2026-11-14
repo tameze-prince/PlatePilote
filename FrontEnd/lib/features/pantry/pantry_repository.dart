@@ -72,13 +72,16 @@ class PantryRepository extends BaseRepository {
     String? expirationDate,
   }) async {
     try {
-      final response = await apiClient.post('/pantry', data: {
-        'name': name,
-        if (category != null) 'category': category,
-        'quantity': quantity,
-        'unit': unit,
-        if (expirationDate != null) 'expirationDate': expirationDate,
-      });
+      final response = await apiClient.post(
+        '/pantry',
+        data: {
+          'name': name,
+          if (category != null) 'category': category,
+          'quantity': quantity,
+          'unit': unit,
+          if (expirationDate != null) 'expirationDate': expirationDate,
+        },
+      );
       return await handleResponse(response, PantryItem.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
@@ -95,13 +98,16 @@ class PantryRepository extends BaseRepository {
     String? expirationDate,
   }) async {
     try {
-      final response = await apiClient.put('/pantry/$itemId', data: {
-        'name': name,
-        if (category != null) 'category': category,
-        'quantity': quantity,
-        'unit': unit,
-        if (expirationDate != null) 'expirationDate': expirationDate,
-      });
+      final response = await apiClient.put(
+        '/pantry/$itemId',
+        data: {
+          'name': name,
+          if (category != null) 'category': category,
+          'quantity': quantity,
+          'unit': unit,
+          if (expirationDate != null) 'expirationDate': expirationDate,
+        },
+      );
       return await handleResponse(response, PantryItem.fromJson);
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);

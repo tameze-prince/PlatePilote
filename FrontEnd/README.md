@@ -50,3 +50,66 @@ backend's mode codes. The mapping is fixed and lives next to the UI code:
   the triggering chip shows an inline spinner.
 - Expert mode selector retains the existing active-state styling
   (`elevated: true` + `primaryAccentGreen` label text).
+
+
+# PlatePilot UX/Design Audit Report
+
+**Date**: June 2026  
+**Auditor**: Carol Produit  
+**Scope**: Design System, Onboarding UX, Premium Conversion, Accessibility
+
+---
+
+## Executive Summary
+
+PlatePilote has a well-documented Design System v2.0 with Material 3 foundation and premium glassmorphism components. However, **incomplete migration** from the old system, **friction in the onboarding-to-activation funnel**, and **accessibility gaps** are likely costing conversions. 10 priority actions identified below.
+
+---
+
+## 1. Design System Audit
+
+### 1.1 Color Tokens
+
+| Token | File | Status |
+|-------|------|--------|
+| `AppColors` | `lib/app/theme/app_colors.dart` | ✅ Implemented |
+| `ColorTokens` (deprecated) | `lib/app/theme/color_tokens.dart` | ⚠️ Legacy wrapper still used |
+| Light theme colors | `lib/app/theme/light_theme.dart` | ✅ Aligned with spec |
+| Dark theme colors | `lib/app/theme/dark_theme.dart` | ✅ Aligned with spec |
+
+**Gap**: `premium_upgrade_screen.dart` uses deprecated `ColorTokens` instead of `AppColors`.
+
+```dart
+// PROBLEMATIC: premium_upgrade_screen.dart line 37
+color: ColorTokens.primaryGreen  // Should use AppColors.primaryAccentGreen
+```
+
+### 1.2 Theme Architecture Duality
+
+Two distinct visual systems exist:
+
+1. **Standard Material 3** (`light_theme.dart`, `dark_theme.dart`) - for generic screens
+2. **Premium Theme** (`premium_components.dart` with `PremiumTheme` class) - for onboarding, home
+
+The premium theme provides:
+- Glassmorphism (`GlassContainer`, `PremiumCard` variant=glass)
+- Ambient glow effects
+- Floating shadows with green tint
+
+**Gap**: These premium visual effects are NOT available in standard Material theme. Screens not using `PremiumBackground` look inconsistent.
+
+### 1.3 Typography
+
+Typography tokens in `app_typography.dart` follow the scale in DESIGN_SYSTEM.md. However:
+
+- **Inter font** documented as loaded via Google Fonts, but not verified in `main.dart`
+- `AppTypography` used in premium_components.dart and modern_components.dart
+- Inconsistent use of `context.text` extension mentioned in MIGRATION_GUIDE (not found in codebase)
+
+### 1.4 Spacing & Radius
+
+✅ Properly implemented in `app_spacing.dart` and `app_radius.dart` with semantic names.
+
+### 1.5 Animation Tokens
+
+`AppAnimations` defined in `app_animations.dart` but **NOT used consistently**:

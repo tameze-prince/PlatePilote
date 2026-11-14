@@ -14,7 +14,10 @@ class MockTokenStorage extends TokenStorage {
   String? refreshToken;
 
   @override
-  Future<void> saveTokens({required String accessToken, required String refreshToken}) async {
+  Future<void> saveTokens({
+    required String accessToken,
+    required String refreshToken,
+  }) async {
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
   }
@@ -62,7 +65,10 @@ class MockAuthRepository extends AuthRepository {
   }
 
   @override
-  Future<AuthResult> login({required String email, required String password}) async {
+  Future<AuthResult> login({
+    required String email,
+    required String password,
+  }) async {
     return AuthResult(
       success: loginSuccess,
       accessToken: loginAccess,
@@ -83,8 +89,7 @@ ProviderContainer createContainer({
     overrides: [
       if (tokenStorage != null)
         secureStorageProvider.overrideWithValue(tokenStorage),
-      if (authRepo != null)
-        authRepositoryProvider.overrideWithValue(authRepo),
+      if (authRepo != null) authRepositoryProvider.overrideWithValue(authRepo),
       sharedPreferencesProvider.overrideWithValue(prefs),
     ],
   );
@@ -96,10 +101,7 @@ void main() {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
       final storage = MockTokenStorage();
-      final container = createContainer(
-        prefs: prefs,
-        tokenStorage: storage,
-      );
+      final container = createContainer(prefs: prefs, tokenStorage: storage);
 
       await container.read(authProvider.notifier).checkSession();
 
@@ -114,10 +116,7 @@ void main() {
         SharedPreferences.setMockInitialValues({'isAuthenticated': true});
         final prefs = await SharedPreferences.getInstance();
         final storage = MockTokenStorage();
-        final container = createContainer(
-          prefs: prefs,
-          tokenStorage: storage,
-        );
+        final container = createContainer(prefs: prefs, tokenStorage: storage);
 
         await container.read(authProvider.notifier).checkSession();
 
@@ -158,7 +157,9 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       final storage = MockTokenStorage();
       await storage.saveTokens(
-        accessToken: 'valid_token', refreshToken: 'valid_refresh');
+        accessToken: 'valid_token',
+        refreshToken: 'valid_refresh',
+      );
       final authRepo = MockAuthRepository();
       authRepo.validateSuccess = true;
 
@@ -181,7 +182,9 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       final storage = MockTokenStorage();
       await storage.saveTokens(
-        accessToken: 'expired_token', refreshToken: 'expired_refresh');
+        accessToken: 'expired_token',
+        refreshToken: 'expired_refresh',
+      );
       final authRepo = MockAuthRepository();
       authRepo.validateSuccess = false;
       authRepo.refreshSuccess = false;
@@ -201,33 +204,38 @@ void main() {
       expect(session.isAuthenticated, false);
     });
 
-    test('saves new tokens and sets authenticated on refresh success', () async {
-      SharedPreferences.setMockInitialValues({});
-      final prefs = await SharedPreferences.getInstance();
-      final storage = MockTokenStorage();
-      await storage.saveTokens(
-        accessToken: 'expired', refreshToken: 'valid_refresh');
-      final authRepo = MockAuthRepository();
-      authRepo.validateSuccess = false;
-      authRepo.refreshSuccess = true;
-      authRepo.refreshedAccess = 'new_access';
-      authRepo.refreshedRefresh = 'new_refresh';
+    test(
+      'saves new tokens and sets authenticated on refresh success',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+        final storage = MockTokenStorage();
+        await storage.saveTokens(
+          accessToken: 'expired',
+          refreshToken: 'valid_refresh',
+        );
+        final authRepo = MockAuthRepository();
+        authRepo.validateSuccess = false;
+        authRepo.refreshSuccess = true;
+        authRepo.refreshedAccess = 'new_access';
+        authRepo.refreshedRefresh = 'new_refresh';
 
-      final container = createContainer(
-        prefs: prefs,
-        tokenStorage: storage,
-        authRepo: authRepo,
-      );
+        final container = createContainer(
+          prefs: prefs,
+          tokenStorage: storage,
+          authRepo: authRepo,
+        );
 
-      await container.read(authProvider.notifier).checkSession();
+        await container.read(authProvider.notifier).checkSession();
 
-      final authState = container.read(authProvider);
-      expect(authState.isAuthenticated, true);
-      expect(storage.accessToken, 'new_access');
-      expect(storage.refreshToken, 'new_refresh');
-      final session = container.read(appSessionProvider);
-      expect(session.isAuthenticated, true);
-    });
+        final authState = container.read(authProvider);
+        expect(authState.isAuthenticated, true);
+        expect(storage.accessToken, 'new_access');
+        expect(storage.refreshToken, 'new_refresh');
+        final session = container.read(appSessionProvider);
+        expect(session.isAuthenticated, true);
+      },
+    );
   });
 
   group('AuthNotifier.login', () {
@@ -246,10 +254,9 @@ void main() {
         authRepo: authRepo,
       );
 
-      final result = await container.read(authProvider.notifier).login(
-        email: 'test@test.com',
-        password: 'password',
-      );
+      final result = await container
+          .read(authProvider.notifier)
+          .login(email: 'test@test.com', password: 'password');
 
       expect(result, true);
       final authState = container.read(authProvider);
@@ -273,10 +280,9 @@ void main() {
         authRepo: authRepo,
       );
 
-      final result = await container.read(authProvider.notifier).login(
-        email: 'test@test.com',
-        password: 'wrong',
-      );
+      final result = await container
+          .read(authProvider.notifier)
+          .login(email: 'test@test.com', password: 'wrong');
 
       expect(result, false);
       final authState = container.read(authProvider);
@@ -286,13 +292,10 @@ void main() {
 
   group('AuthNotifier.logout', () {
     test('clears tokens, resets state, and signs out session', () async {
-      SharedPreferences.setMockInitialValues({
-        'isAuthenticated': true,
-      });
+      SharedPreferences.setMockInitialValues({'isAuthenticated': true});
       final prefs = await SharedPreferences.getInstance();
       final storage = MockTokenStorage();
-      await storage.saveTokens(
-        accessToken: 'token', refreshToken: 'refresh');
+      await storage.saveTokens(accessToken: 'token', refreshToken: 'refresh');
       final authRepo = MockAuthRepository();
 
       final container = createContainer(
