@@ -35,7 +35,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       curve: Curves.easeOutBack,
     );
     _controller.forward();
-    _checkSession();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _checkSession();
+    });
   }
 
   /// Vérifie la session utilisateur et redirige.
