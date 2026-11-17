@@ -57,7 +57,7 @@ dependencies:
   google_sign_in: ^6.2.2
   sign_in_with_apple: ^8.1.0
 dev_dependencies:
-  freezed: ^3.2.3
+  freezed: ^4.0.3
   flutter_test:
     sdk: flutter
   integration_test:
