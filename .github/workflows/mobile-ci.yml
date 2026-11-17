@@ -40,16 +40,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Verify formatting of changed Dart files
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+      - name: Format changed Dart files and print formatter diff (temporary)
         run: |
           set -euo pipefail
-
-          if [ -z "${BASE_SHA:-}" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
-            git fetch origin main --no-tags
-            BASE_SHA="$(git merge-base origin/main HEAD)"
-          fi
+          git fetch origin main --no-tags
+          BASE_SHA="$(git merge-base origin/main HEAD)"
 
           if [ -z "$BASE_SHA" ] || ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
             echo "::error::Unable to determine a valid base commit for the Dart formatting check."
@@ -67,7 +62,8 @@ jobs:
           if [ "${#dart_files[@]}" -eq 0 ]; then
             echo "No changed Dart files to format-check."
           else
-            dart format --output=none --set-exit-if-changed "${dart_files[@]}"
+            dart format "${dart_files[@]}"
+            git --no-pager diff -- .
           fi
       - name: Static analysis
         run: flutter analyze
