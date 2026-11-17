@@ -14,24 +14,25 @@ class _BlockingAuthNotifier extends AuthNotifier {
 }
 
 void main() {
-  testWidgets('SplashScreen renders while the startup session check is pending', (
-    WidgetTester tester,
-  ) async {
-    SharedPreferences.setMockInitialValues({});
-    final preferences = await SharedPreferences.getInstance();
+  testWidgets(
+    'SplashScreen renders while the startup session check is pending',
+    (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-          authProvider.overrideWith(_BlockingAuthNotifier.new),
-        ],
-        child: const MaterialApp(home: SplashScreen()),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(preferences),
+            authProvider.overrideWith(_BlockingAuthNotifier.new),
+          ],
+          child: const MaterialApp(home: SplashScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('PlatePilot'), findsOneWidget);
-    expect(find.text('Your smart meal co-pilot'), findsOneWidget);
-  });
+      expect(find.text('PlatePilot'), findsOneWidget);
+      expect(find.text('Your smart meal co-pilot'), findsOneWidget);
+    },
+  );
 }
