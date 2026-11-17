@@ -1,5 +1,6 @@
 package com.platepilote.platepilote.mealplanning.application.service;
 
+import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanEntry;
 import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanMode;
 import com.platepilote.platepilote.mealplanning.domain.entity.SwapTracking;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -71,13 +74,8 @@ public class SmartSwapService {
         MealPlanEntry entry = mealPlanEntryRepository.findById(entryId)
                 .orElseThrow(() -> new RuntimeException("Entry not found"));
 
-        boolean premium = entitlementService.hasActiveEntitlement(userId, "PREMIUM");
-        if (!premium) {
-            java.time.Instant weekAgo = java.time.Instant.now().minus(java.time.Duration.ofDays(7));
-            long swapCount = swapTrackingRepository.countByUserIdAndSwappedAtAfter(userId, weekAgo);
-            if (swapCount >= FREE_TIER_SWAP_LIMIT) {
-                return List.of();
-            }
+        if (!hasSwapAllowance(userId)) {
+            return List.of();
         }
 
         String mealType = entry.getMealType();
@@ -106,6 +104,29 @@ public class SmartSwapService {
                 .sorted(Comparator.comparingDouble(SwapOption::compatibility).reversed())
                 .limit(limit)
                 .toList();
+    }
+
+    /**
+     * Enforce the free-tier quota when a swap is actually applied, not only
+     * when suggestions are requested.
+     */
+    public void assertSwapAllowed(UUID userId) {
+        if (!hasSwapAllowance(userId)) {
+            throw new BusinessRuleViolationException(
+                    "Free plan users can perform at most " + FREE_TIER_SWAP_LIMIT
+                            + " swaps in a rolling 7-day period");
+        }
+    }
+
+    private boolean hasSwapAllowance(UUID userId) {
+        boolean premium = entitlementService.hasActiveEntitlement(
+                userId, EntitlementService.PREMIUM_ENTITLEMENT);
+        if (premium) {
+            return true;
+        }
+        Instant weekAgo = Instant.now().minus(Duration.ofDays(7));
+        long swapCount = swapTrackingRepository.countByUserIdAndSwappedAtAfter(userId, weekAgo);
+        return swapCount < FREE_TIER_SWAP_LIMIT;
     }
 
     /**
