@@ -43,6 +43,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Patch generated localization delegates for standalone Material UI
+        run: python3 tool/patch_generated_localizations.py
+
       - name: Regenerate Freezed and JSON serialization sources
         run: dart run build_runner build --delete-conflicting-outputs
 
