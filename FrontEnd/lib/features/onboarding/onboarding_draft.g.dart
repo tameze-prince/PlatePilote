@@ -6,11 +6,11 @@ part of 'onboarding_draft.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$OnboardingDraftImpl _$$OnboardingDraftImplFromJson(
-        Map<String, dynamic> json) =>
-    _$OnboardingDraftImpl(
+_OnboardingDraft _$OnboardingDraftFromJson(Map<String, dynamic> json) =>
+    _OnboardingDraft(
       currentStep: (json['currentStep'] as num?)?.toInt() ?? 0,
-      completedSteps: (json['completedSteps'] as List<dynamic>?)
+      completedSteps:
+          (json['completedSteps'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const <String>[],
@@ -19,20 +19,20 @@ _$OnboardingDraftImpl _$$OnboardingDraftImplFromJson(
       weeklyBudget: json['weeklyBudget'] as String?,
       customBudget: (json['customBudget'] as num?)?.toDouble(),
       cookingTime: json['cookingTime'] as String?,
-      dietaryPreferences: (json['dietaryPreferences'] as List<dynamic>?)
+      dietaryPreferences:
+          (json['dietaryPreferences'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const <String>[],
       goals:
           (json['goals'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-              const <String>[],
+          const <String>[],
       updatedAt: json['updatedAt'] == null
           ? null
           : DateTime.parse(json['updatedAt'] as String),
     );
 
-Map<String, dynamic> _$$OnboardingDraftImplToJson(
-        _$OnboardingDraftImpl instance) =>
+Map<String, dynamic> _$OnboardingDraftToJson(_OnboardingDraft instance) =>
     <String, dynamic>{
       'currentStep': instance.currentStep,
       'completedSteps': instance.completedSteps,
