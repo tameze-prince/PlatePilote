@@ -93,7 +93,7 @@ public class GroceryService {
      */
     @Transactional(readOnly = true)
     public GroceryListResponse getListById(UUID userId, UUID listId) {
-        GroceryList list = groceryListRepository.findById(listId)
+        GroceryList list = findActiveGroceryList(listId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", listId.toString()));
 
         if (!list.getUserId().equals(userId)) {
@@ -130,7 +130,7 @@ public class GroceryService {
      * @return la liste mise à jour avec ses articles
      */
     public GroceryListResponse addItem(UUID userId, UUID listId, GroceryItemRequest request) {
-        GroceryList list = groceryListRepository.findById(listId)
+        GroceryList list = findActiveGroceryList(listId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", listId.toString()));
 
         securityUtils.verifyOwnership(list.getUserId(), userId, "GroceryList", listId.toString());
@@ -161,7 +161,7 @@ public class GroceryService {
         GroceryItem item = groceryItemRepository.findById(itemId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryItem", "id", itemId.toString()));
 
-        GroceryList list = groceryListRepository.findById(item.getGroceryListId())
+        GroceryList list = findActiveGroceryList(item.getGroceryListId())
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", item.getGroceryListId().toString()));
 
         securityUtils.verifyOwnership(list.getUserId(), userId, "GroceryList", item.getGroceryListId().toString());
@@ -180,7 +180,7 @@ public class GroceryService {
         GroceryItem item = groceryItemRepository.findById(itemId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryItem", "id", itemId.toString()));
 
-        GroceryList list = groceryListRepository.findById(item.getGroceryListId())
+        GroceryList list = findActiveGroceryList(item.getGroceryListId())
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", item.getGroceryListId().toString()));
 
         securityUtils.verifyOwnership(list.getUserId(), userId, "GroceryList", item.getGroceryListId().toString());
@@ -195,7 +195,7 @@ public class GroceryService {
      * @param listId l'identifiant de la liste à compléter
      */
     public void completeList(UUID userId, UUID listId) {
-        GroceryList list = groceryListRepository.findById(listId)
+        GroceryList list = findActiveGroceryList(listId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", listId.toString()));
 
         securityUtils.verifyOwnership(list.getUserId(), userId, "GroceryList", listId.toString());
@@ -216,7 +216,7 @@ public class GroceryService {
      * @return la liste de courses générée avec ses articles
      */
     public GroceryListResponse generateFromMealPlan(UUID userId, UUID mealPlanId) {
-        MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
+        MealPlan mealPlan = findActiveMealPlan(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
         if (!mealPlan.getUserId().equals(userId)) {
             throw new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString());
@@ -309,13 +309,33 @@ public class GroceryService {
      */
     @Transactional
     public CheckoutResponse checkoutList(UUID userId, UUID listId, List<UUID> checkedItemIds, Map<UUID, BigDecimal> actualPrices) {
-        GroceryList list = groceryListRepository.findById(listId)
+        if (checkedItemIds == null || checkedItemIds.isEmpty()
+                || checkedItemIds.stream().anyMatch(java.util.Objects::isNull)) {
+            throw new BusinessRuleViolationException("At least one valid checked item ID is required");
+        }
+        Set<UUID> checkedIds = new HashSet<>(checkedItemIds);
+        if (checkedIds.size() != checkedItemIds.size()) {
+            throw new BusinessRuleViolationException("Duplicate checked item IDs are not allowed");
+        }
+        if (actualPrices != null && actualPrices.entrySet().stream().anyMatch(entry ->
+                entry.getKey() == null || entry.getValue() == null
+                        || entry.getValue().signum() < 0 || !checkedIds.contains(entry.getKey()))) {
+            throw new BusinessRuleViolationException(
+                    "Actual prices must be non-negative and belong to checked items");
+        }
+        GroceryList list = findActiveGroceryList(listId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", listId.toString()));
         securityUtils.verifyOwnership(list.getUserId(), userId, "GroceryList", listId.toString());
 
         List<GroceryItem> items = groceryItemRepository.findByGroceryListIdOrderBySortOrderAsc(listId);
+        Set<UUID> availableItemIds = items.stream()
+                .map(GroceryItem::getId)
+                .collect(Collectors.toSet());
+        if (!availableItemIds.containsAll(checkedIds)) {
+            throw new BusinessRuleViolationException("One or more checked items do not belong to this grocery list");
+        }
         List<GroceryItem> checkedItems = items.stream()
-                .filter(item -> checkedItemIds.contains(item.getId()))
+                .filter(item -> checkedIds.contains(item.getId()))
                 .toList();
 
         BigDecimal totalSpent = BigDecimal.ZERO;
@@ -379,7 +399,7 @@ public class GroceryService {
                     });
         }
 
-        boolean allChecked = items.stream().allMatch(item -> checkedItemIds.contains(item.getId()));
+        boolean allChecked = items.stream().allMatch(item -> checkedIds.contains(item.getId()));
         if (allChecked) {
             list.setStatus("COMPLETED");
             groceryListRepository.save(list);
@@ -443,7 +463,7 @@ public class GroceryService {
      * @param listId l'identifiant de la liste à supprimer
      */
     public void deleteList(UUID userId, UUID listId) {
-        GroceryList list = groceryListRepository.findById(listId)
+        GroceryList list = findActiveGroceryList(listId)
                 .orElseThrow(() -> new ResourceNotFoundException("GroceryList", "id", listId.toString()));
 
         securityUtils.verifyOwnership(list.getUserId(), userId, "GroceryList", listId.toString());
@@ -451,6 +471,14 @@ public class GroceryService {
         groceryItemRepository.deleteByGroceryListId(listId);
         list.softDelete();
         groceryListRepository.save(list);
+    }
+
+    private java.util.Optional<GroceryList> findActiveGroceryList(UUID listId) {
+        return groceryListRepository.findById(listId).filter(list -> !list.isDeleted());
+    }
+
+    private java.util.Optional<MealPlan> findActiveMealPlan(UUID mealPlanId) {
+        return mealPlanRepository.findById(mealPlanId).filter(mealPlan -> !mealPlan.isDeleted());
     }
 
     private GroceryListResponse toListResponse(GroceryList list) {
