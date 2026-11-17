@@ -2,6 +2,7 @@ package com.platepilote.platepilote.grocery.application.dto;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class GroceryItemRequest {
     private String category;
 
     /** Quantité à acheter (obligatoire, doit être > 0). */
+    @NotNull(message = "Quantity is required")
     @DecimalMin(value = "0.01", message = "Quantity must be greater than 0")
     private BigDecimal quantity;
 
@@ -37,6 +39,7 @@ public class GroceryItemRequest {
     private String unit;
 
     /** Prix estimé pour le suivi budgétaire. */
+    @DecimalMin(value = "0.00", message = "Estimated price cannot be negative")
     private BigDecimal estimatedPrice;
 
     /** Note optionnelle (ex: "Prendre la marque bio"). */
