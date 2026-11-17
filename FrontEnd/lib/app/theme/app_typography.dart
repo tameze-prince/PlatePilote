@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Définition des styles typographiques de l'application.
 abstract final class AppTypography {

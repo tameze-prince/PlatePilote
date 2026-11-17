@@ -1,6 +1,6 @@
 library;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../../core/premium_components.dart';
 import 'app_animations.dart';
 import 'app_colors.dart';
