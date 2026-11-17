@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../tokens/ds_colors.dart';
 import '../tokens/ds_radius.dart';
