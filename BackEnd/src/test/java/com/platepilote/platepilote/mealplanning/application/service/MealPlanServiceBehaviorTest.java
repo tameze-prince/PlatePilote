@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -149,6 +150,57 @@ class MealPlanServiceBehaviorTest {
         assertThat(plan.getMode()).isEqualTo("FAMILY");
         assertThat(response.getMode()).isEqualTo("FAMILY");
         verify(plans).save(plan);
+    }
+
+    @Test
+    void getMealPlanByIdReturnsAnOwnedFullPlan() {
+        UUID userId = UUID.randomUUID();
+        UUID planId = UUID.randomUUID();
+        when(plans.findById(planId)).thenReturn(Optional.of(plan(planId, userId)));
+        when(entries.findByMealPlanId(planId)).thenReturn(List.of());
+        when(recipes.findAllById(List.of())).thenReturn(List.of());
+
+        var response = service.getMealPlanById(userId, planId);
+
+        assertThat(response.getName()).isEqualTo("Test plan");
+        assertThat(response.getMealCount()).isZero();
+    }
+
+    @Test
+    void generateWeeklyPlanPersistsRecommendedMealsAndReturnsTheFullPlan() {
+        UUID userId = UUID.randomUUID();
+        UUID planId = UUID.randomUUID();
+        UUID recipeId = UUID.randomUUID();
+        LocalDate start = LocalDate.of(2026, 11, 16);
+        Recipe recipe = Recipe.builder()
+                .name("Generated recipe")
+                .servings(2)
+                .enabled(true)
+                .isPublic(true)
+                .build();
+        recipe.setId(recipeId);
+        RecommendationEngine.RecommendationResult recommendation =
+                new RecommendationEngine.RecommendationResult(
+                        recipe, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2,
+                        new BigDecimal("4.50"), "XAF", "CM", List.of(), List.of());
+
+        when(recommendations.generateWeeklyMealPlan(userId, MealPlanMode.FAMILY))
+                .thenReturn(List.of(List.of(recommendation)));
+        when(plans.save(any(MealPlan.class))).thenAnswer(invocation -> {
+            MealPlan saved = invocation.getArgument(0);
+            saved.setId(planId);
+            return saved;
+        });
+        when(entries.findByMealPlanId(planId))
+                .thenReturn(List.of(entry(UUID.randomUUID(), planId)));
+        when(recipes.findAllById(List.of(recipeId))).thenReturn(List.of(recipe));
+
+        var response = service.generateWeeklyPlan(userId, start, MealPlanMode.FAMILY);
+
+        assertThat(response.getStatus()).isEqualTo("ACTIVE");
+        assertThat(response.getMode()).isEqualTo("FAMILY");
+        assertThat(response.getMealCount()).isEqualTo(1);
+        verify(entries).save(any(MealPlanEntry.class));
     }
 
     private static MealPlan plan(UUID id, UUID userId) {
