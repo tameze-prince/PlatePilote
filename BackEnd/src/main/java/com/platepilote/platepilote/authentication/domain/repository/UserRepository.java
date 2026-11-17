@@ -1,7 +1,9 @@
 package com.platepilote.platepilote.authentication.domain.repository;
 
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.Instant;
@@ -17,6 +19,15 @@ import java.util.UUID;
  * </p>
  */
 public interface UserRepository extends JpaRepository<OurUser, UUID> {
+
+    /**
+     * Locks the account row while applying a per-user quota mutation. This
+     * serializes concurrent swaps so two requests cannot both pass the same
+     * remaining free-tier allowance.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM OurUser u WHERE u.id = :userId")
+    Optional<OurUser> findByIdForUpdate(@Param("userId") UUID userId);
 
     /**
      * Recherche un utilisateur par son email.

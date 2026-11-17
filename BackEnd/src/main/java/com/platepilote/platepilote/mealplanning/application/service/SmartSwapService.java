@@ -1,6 +1,8 @@
 package com.platepilote.platepilote.mealplanning.application.service;
 
+import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
+import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
 import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanEntry;
 import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanMode;
 import com.platepilote.platepilote.mealplanning.domain.entity.SwapTracking;
@@ -37,6 +39,7 @@ public class SmartSwapService {
     private final RecipeRepository recipeRepository;
     private final RecommendationEngine recommendationEngine;
     private final EntitlementService entitlementService;
+    private final UserRepository userRepository;
     private final SwapTrackingRepository swapTrackingRepository;
 
     /** Limite d'échanges hebdomadaires pour les utilisateurs du palier gratuit. */
@@ -111,6 +114,14 @@ public class SmartSwapService {
      * when suggestions are requested.
      */
     public void assertSwapAllowed(UUID userId) {
+        if (entitlementService.hasActiveEntitlement(
+                userId, EntitlementService.PREMIUM_ENTITLEMENT)) {
+            return;
+        }
+
+        userRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString()));
+
         if (!hasSwapAllowance(userId)) {
             throw new BusinessRuleViolationException(
                     "Free plan users can perform at most " + FREE_TIER_SWAP_LIMIT
