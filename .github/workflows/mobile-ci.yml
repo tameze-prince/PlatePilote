@@ -7,7 +7,7 @@ on:
       - 'FrontEnd/**'
       - '.github/workflows/mobile-ci.yml'
   push:
-    branches: [main]
+    branches: [main, release/production-readiness]
     paths:
       - 'FrontEnd/**'
       - '.github/workflows/mobile-ci.yml'
