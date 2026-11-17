@@ -19,6 +19,7 @@ jobs:
   build:
     name: Compile + Test (JDK 21)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: BackEnd
@@ -71,6 +72,15 @@ jobs:
           path: BackEnd/target/surefire-reports/TEST-*.xml
           reporter: java-junit
           fail-on-error: false
+
+      - name: Upload JaCoCo coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-${{ github.run_id }}
+          path: BackEnd/target/site/jacoco/
+          if-no-files-found: warn
+          retention-days: 14
 
   docker-smoke:
     name: Docker Build Smoke Test
