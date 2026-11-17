@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../core/design_system/components/pp_chip.dart';
 import '../../../core/design_system/tokens/ds_spacing.dart';
