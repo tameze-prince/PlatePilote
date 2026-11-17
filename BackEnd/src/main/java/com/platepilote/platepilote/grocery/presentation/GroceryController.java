@@ -10,6 +10,9 @@ import com.platepilote.platepilote.grocery.application.service.GroceryService.Ch
 import com.platepilote.platepilote.grocery.application.service.GroceryService.GroceryListResponse;
 import com.platepilote.platepilote.grocery.application.service.GroceryService.PurchaseRecordResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -200,7 +203,7 @@ public class GroceryController {
     public ResponseEntity<ApiResponse<CheckoutResponse>> checkoutList(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID listId,
-            @RequestBody CheckoutRequest request) {
+            @Valid @RequestBody CheckoutRequest request) {
         UUID userId = securityUtils.getCurrentUserId(userDetails);
         CheckoutResponse result = groceryService.checkoutList(
                 userId, listId, request.checkedItemIds(), request.actualPrices());
@@ -227,8 +230,10 @@ public class GroceryController {
     }
 
     public record CheckoutRequest(
-            List<UUID> checkedItemIds,
-            Map<UUID, BigDecimal> actualPrices
+            @NotEmpty(message = "At least one checked item is required")
+            List<@NotNull UUID> checkedItemIds,
+            Map<@NotNull UUID, @NotNull @DecimalMin(value = "0.00",
+                    message = "Actual prices cannot be negative") BigDecimal> actualPrices
     ) {}
 
     /**
