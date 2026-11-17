@@ -71,8 +71,8 @@ class GroceryServiceBehaviorTest {
         var response = service.createList(
                 userId, GroceryListRequest.builder().name("Weekly").build());
 
-        assertThat(response.getId()).isEqualTo(listId);
-        assertThat(response.getStatus()).isEqualTo("ACTIVE");
+        assertThat(response.id()).isEqualTo(listId);
+        assertThat(response.status()).isEqualTo("ACTIVE");
         verify(lists).save(any(GroceryList.class));
     }
 
@@ -90,7 +90,7 @@ class GroceryServiceBehaviorTest {
                 .unit("kg")
                 .build());
 
-        assertThat(response.getItems()).isEmpty();
+        assertThat(response.items()).isEmpty();
         verify(securityUtils).verifyOwnership(userId, userId, "GroceryList", listId.toString());
         verify(items).save(any(GroceryItem.class));
     }
