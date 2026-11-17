@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Saisons applicables pour la saisonnalité des produits (hémisphère nord par défaut).
 enum Season { winter, spring, summer, autumn }
