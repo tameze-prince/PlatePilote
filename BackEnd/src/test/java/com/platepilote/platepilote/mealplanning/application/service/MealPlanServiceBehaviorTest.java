@@ -10,6 +10,7 @@ import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanMode;
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanEntryRepository;
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanRepository;
 import com.platepilote.platepilote.mealplanning.domain.repository.SwapTrackingRepository;
+import com.platepilote.platepilote.recipes.domain.entity.Recipe;
 import com.platepilote.platepilote.recipes.domain.repository.RecipeRepository;
 import com.platepilote.platepilote.recommendation.domain.service.RecommendationEngine;
 import org.junit.jupiter.api.BeforeEach;
