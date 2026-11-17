@@ -114,10 +114,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         AppSpacing.md,
                         100,
                       ),
-                      child: HomeDashboard(
-                        state: homeState,
-                        isDark: isDark,
-                      ),
+                      child: HomeDashboard(state: homeState, isDark: isDark),
                     ),
             ),
           ],

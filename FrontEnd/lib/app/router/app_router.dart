@@ -15,7 +15,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final session = ref.read(appSessionProvider);
       final location = state.matchedLocation;
-      final isPublicRoute = location == '/splash' ||
+      final isPublicRoute =
+          location == '/splash' ||
           location == '/onboarding' ||
           location == '/consent' ||
           location == '/signup' ||

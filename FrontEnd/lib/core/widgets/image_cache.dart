@@ -38,8 +38,10 @@ class PpImage {
       memCacheWidth: memCacheWidth,
       memCacheHeight: memCacheHeight,
       maxWidthDiskCache: maxWidthDiskCache,
-      placeholder: (_, _) => _Placeholder(placeholder, width: width, height: height, fit: fit),
-      errorWidget: (_, _, _) => _Placeholder(placeholder, width: width, height: height, fit: fit),
+      placeholder: (_, _) =>
+          _Placeholder(placeholder, width: width, height: height, fit: fit),
+      errorWidget: (_, _, _) =>
+          _Placeholder(placeholder, width: width, height: height, fit: fit),
     );
   }
 
@@ -70,7 +72,11 @@ class PpImage {
   /// Compress a raw file (post-pick) down to <= 1080 px / ~250 KB.
   /// Returns null if compression fails — the caller falls back to the
   /// original file path.
-  static Future<XFile?> compress(XFile source, {int quality = 80, int maxWidth = 1080}) {
+  static Future<XFile?> compress(
+    XFile source, {
+    int quality = 80,
+    int maxWidth = 1080,
+  }) {
     return FlutterImageCompress.compressAndGetFile(
       source.path,
       '${source.path}_pp.jpg',

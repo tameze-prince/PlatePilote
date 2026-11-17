@@ -37,10 +37,8 @@ Future<double?> showCustomBudgetSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (sheetCtx) => _CustomBudgetSheet(
-      initial: initial ?? 120,
-      l10n: locale,
-    ),
+    builder: (sheetCtx) =>
+        _CustomBudgetSheet(initial: initial ?? 120, l10n: locale),
   );
 }
 

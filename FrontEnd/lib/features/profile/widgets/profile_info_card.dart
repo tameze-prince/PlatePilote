@@ -27,7 +27,9 @@ class ProfileInfoCard extends ConsumerWidget {
             value: profile.displayName.isNotEmpty ? profile.displayName : '—',
             icon: Icons.person_outline,
             onTap: () => _showEditDialog(
-              context, 'Display Name', profile.displayName,
+              context,
+              'Display Name',
+              profile.displayName,
               (v) => notifier.updateProfile(displayName: v),
             ),
           ),
@@ -51,7 +53,9 @@ class ProfileInfoCard extends ConsumerWidget {
             label: 'Gender',
             value: profile.gender ?? '—',
             icon: Icons.wc_outlined,
-            onTap: () => _showPicker(context, 'Gender',
+            onTap: () => _showPicker(
+              context,
+              'Gender',
               ['Male', 'Female', 'Non-binary', 'Prefer not to say'],
               profile.gender,
               (v) => notifier.updateProfile(gender: v),
@@ -60,20 +64,28 @@ class ProfileInfoCard extends ConsumerWidget {
           const Divider(height: 1, color: Colors.white10),
           ProfileEditableRow(
             label: 'Height',
-            value: profile.heightCm != null ? '${profile.heightCm!.toStringAsFixed(0)} cm' : '—',
+            value: profile.heightCm != null
+                ? '${profile.heightCm!.toStringAsFixed(0)} cm'
+                : '—',
             icon: Icons.straighten_outlined,
             onTap: () => _showNumberDialog(
-              context, 'Height (cm)', profile.heightCm,
+              context,
+              'Height (cm)',
+              profile.heightCm,
               (v) => notifier.updateProfile(heightCm: v),
             ),
           ),
           const Divider(height: 1, color: Colors.white10),
           ProfileEditableRow(
             label: 'Weight',
-            value: profile.weightKg != null ? '${profile.weightKg!.toStringAsFixed(0)} kg' : '—',
+            value: profile.weightKg != null
+                ? '${profile.weightKg!.toStringAsFixed(0)} kg'
+                : '—',
             icon: Icons.monitor_weight_outlined,
             onTap: () => _showNumberDialog(
-              context, 'Weight (kg)', profile.weightKg,
+              context,
+              'Weight (kg)',
+              profile.weightKg,
               (v) => notifier.updateProfile(weightKg: v),
             ),
           ),
@@ -82,8 +94,16 @@ class ProfileInfoCard extends ConsumerWidget {
             label: 'Activity Level',
             value: profile.activityLevel ?? '—',
             icon: Icons.directions_run_outlined,
-            onTap: () => _showPicker(context, 'Activity Level',
-              ['Sedentary', 'Lightly active', 'Moderately active', 'Very active', 'Extra active'],
+            onTap: () => _showPicker(
+              context,
+              'Activity Level',
+              [
+                'Sedentary',
+                'Lightly active',
+                'Moderately active',
+                'Very active',
+                'Extra active',
+              ],
               profile.activityLevel,
               (v) => notifier.updateProfile(activityLevel: v),
             ),
@@ -93,7 +113,9 @@ class ProfileInfoCard extends ConsumerWidget {
             label: 'Country',
             value: profile.countryCode,
             icon: Icons.public,
-            onTap: () => _showPicker(context, 'Country Code',
+            onTap: () => _showPicker(
+              context,
+              'Country Code',
               ['US', 'FR', 'GB', 'DE', 'JP', 'IN', 'CM', 'CN', 'MX', 'IT'],
               profile.countryCode,
               (v) => notifier.updateProfile(countryCode: v),
@@ -104,7 +126,9 @@ class ProfileInfoCard extends ConsumerWidget {
             label: 'Currency',
             value: profile.currencyCode,
             icon: Icons.attach_money_outlined,
-            onTap: () => _showPicker(context, 'Currency Code',
+            onTap: () => _showPicker(
+              context,
+              'Currency Code',
               ['USD', 'EUR', 'GBP', 'JPY', 'INR', 'XAF', 'CNY', 'MXN'],
               profile.currencyCode,
               (v) => notifier.updateProfile(currencyCode: v),
@@ -115,7 +139,9 @@ class ProfileInfoCard extends ConsumerWidget {
             label: 'Cooking Skill',
             value: profile.cookingSkill ?? '—',
             icon: Icons.kitchen_outlined,
-            onTap: () => _showPicker(context, 'Cooking Skill',
+            onTap: () => _showPicker(
+              context,
+              'Cooking Skill',
               ['BEGINNER', 'BALANCED', 'BATCH COOK', 'CHEF MODE'],
               profile.cookingSkill,
               (v) => notifier.updateProfile(cookingSkill: v),
@@ -124,20 +150,28 @@ class ProfileInfoCard extends ConsumerWidget {
           const Divider(height: 1, color: Colors.white10),
           ProfileEditableRow(
             label: 'Household Size',
-            value: profile.householdSize != null ? '${profile.householdSize}' : '—',
+            value: profile.householdSize != null
+                ? '${profile.householdSize}'
+                : '—',
             icon: Icons.people_outline,
             onTap: () => _showNumberDialog(
-              context, 'Household Size', profile.householdSize?.toDouble(),
+              context,
+              'Household Size',
+              profile.householdSize?.toDouble(),
               (v) => notifier.updateProfile(householdSize: v?.toInt()),
             ),
           ),
           const Divider(height: 1, color: Colors.white10),
           ProfileEditableRow(
             label: 'Health Goals',
-            value: profile.healthGoals?.isNotEmpty == true ? profile.healthGoals! : '—',
+            value: profile.healthGoals?.isNotEmpty == true
+                ? profile.healthGoals!
+                : '—',
             icon: Icons.flag_outlined,
             onTap: () => _showEditDialog(
-              context, 'Health Goals', profile.healthGoals ?? '',
+              context,
+              'Health Goals',
+              profile.healthGoals ?? '',
               (v) => notifier.updateProfile(healthGoals: v),
             ),
           ),
@@ -164,7 +198,10 @@ class ProfileInfoCard extends ConsumerWidget {
           decoration: InputDecoration(hintText: 'Enter $field'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () {
               onSave(controller.text.trim());
@@ -198,7 +235,10 @@ class ProfileInfoCard extends ConsumerWidget {
           decoration: InputDecoration(hintText: 'Enter $field'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () {
               final value = double.tryParse(controller.text.trim());
@@ -246,10 +286,9 @@ class ProfileInfoCard extends ConsumerWidget {
         },
         child: SimpleDialog(
           title: Text(title),
-          children: options.map((opt) => RadioListTile<String>(
-            title: Text(opt),
-            value: opt,
-          )).toList(),
+          children: options
+              .map((opt) => RadioListTile<String>(title: Text(opt), value: opt))
+              .toList(),
         ),
       ),
     );

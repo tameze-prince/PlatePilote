@@ -26,10 +26,7 @@ class WhatIfSubstitute {
 /// Résultat What-If pour une recette donnée.
 @immutable
 class WhatIfResult {
-  const WhatIfResult({
-    required this.originalCost,
-    required this.substitutes,
-  });
+  const WhatIfResult({required this.originalCost, required this.substitutes});
 
   final double originalCost;
   final List<WhatIfSubstitute> substitutes;
@@ -38,8 +35,8 @@ class WhatIfResult {
   double get bestCost => substitutes.isEmpty
       ? originalCost
       : substitutes
-          .map((s) => s.costPerServing)
-          .reduce((a, b) => a < b ? a : b);
+            .map((s) => s.costPerServing)
+            .reduce((a, b) => a < b ? a : b);
 
   /// % d'économies maximal (par rapport au coût original).
   int get maxSavingsPercent {

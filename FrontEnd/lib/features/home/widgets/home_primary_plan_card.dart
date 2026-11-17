@@ -45,10 +45,7 @@ class HomePrimaryPlanCard extends StatelessWidget {
                   .map(
                     (reco) => Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                      child: HomeRecommendationItem(
-                        isDark: isDark,
-                        reco: reco,
-                      ),
+                      child: HomeRecommendationItem(isDark: isDark, reco: reco),
                     ),
                   )
                   .toList()

@@ -1,6 +1,7 @@
 library;
 
 import 'package:material_ui/material_ui.dart';
+
 import '../../core/premium_components.dart';
 import 'app_animations.dart';
 import 'app_colors.dart';
@@ -121,10 +122,7 @@ abstract final class SignatureGradients {
   static const LinearGradient cardTopEdge = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [
-      SignatureColors.primarySunset,
-      SignatureColors.midnightSaffron,
-    ],
+    colors: [SignatureColors.primarySunset, SignatureColors.midnightSaffron],
     stops: [0.0, 1.0],
   );
 
@@ -250,9 +248,7 @@ class _SignatureHeroBackgroundState extends State<SignatureHeroBackground>
         fit: StackFit.expand,
         children: [
           // Base gradient
-          DecoratedBox(
-            decoration: BoxDecoration(gradient: widget.gradient),
-          ),
+          DecoratedBox(decoration: BoxDecoration(gradient: widget.gradient)),
           // Discret icon overlay (blurred)
           if (widget.enablePulse)
             AnimatedBuilder(

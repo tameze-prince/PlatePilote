@@ -53,7 +53,10 @@ class ProfileCompletenessCard extends ConsumerWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: PremiumTheme.textTertiary(context)),
+            Icon(
+              Icons.chevron_right,
+              color: PremiumTheme.textTertiary(context),
+            ),
           ],
         ),
       ),
@@ -88,16 +91,22 @@ class ProfileCompletenessCard extends ConsumerWidget {
               style: TextStyle(fontSize: 14),
             ),
             const SizedBox(height: AppSpacing.md),
-            ...missing.map((f) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                children: [
-                  Icon(Icons.fiber_manual_record, size: 8, color: AppColors.warning),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(f, style: const TextStyle(fontSize: 14)),
-                ],
+            ...missing.map(
+              (f) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.fiber_manual_record,
+                      size: 8,
+                      color: AppColors.warning,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(f, style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
               ),
-            )),
+            ),
           ],
         ),
         actions: [

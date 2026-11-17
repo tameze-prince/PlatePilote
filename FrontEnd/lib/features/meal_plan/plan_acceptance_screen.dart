@@ -65,7 +65,10 @@ class _PlanAcceptanceScreenState extends ConsumerState<PlanAcceptanceScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.sm, AppSpacing.sm, AppSpacing.md, 0,
+                  AppSpacing.sm,
+                  AppSpacing.sm,
+                  AppSpacing.md,
+                  0,
                 ),
                 child: Row(
                   children: [
@@ -112,19 +115,25 @@ class _PlanAcceptanceScreenState extends ConsumerState<PlanAcceptanceScreen> {
                                 const SizedBox(width: AppSpacing.md),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         '${meals.length} Meals Planned',
-                                        style: AppTypography.titleMedium.copyWith(
-                                          color: PremiumTheme.textPrimary(context),
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        style: AppTypography.titleMedium
+                                            .copyWith(
+                                              color: PremiumTheme.textPrimary(
+                                                context,
+                                              ),
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
                                       Text(
                                         'Personalized for your preferences',
                                         style: AppTypography.bodySmall.copyWith(
-                                          color: PremiumTheme.textSecondary(context),
+                                          color: PremiumTheme.textSecondary(
+                                            context,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -175,9 +184,9 @@ class _PlanAcceptanceScreenState extends ConsumerState<PlanAcceptanceScreen> {
                               ),
                             ),
                             const SizedBox(height: AppSpacing.md),
-                            ...meals.take(5).map(
-                              (entry) => _buildMealPreview(entry),
-                            ),
+                            ...meals
+                                .take(5)
+                                .map((entry) => _buildMealPreview(entry)),
                             if (meals.length > 5) ...[
                               const SizedBox(height: AppSpacing.sm),
                               Text(
@@ -232,7 +241,10 @@ class _PlanAcceptanceScreenState extends ConsumerState<PlanAcceptanceScreen> {
               ),
               Container(
                 padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.xxl,
+                  AppSpacing.md,
+                  AppSpacing.md,
+                  AppSpacing.md,
+                  AppSpacing.xxl,
                 ),
                 child: _isGenerating
                     ? const Column(
@@ -361,11 +373,7 @@ class _PlanAcceptanceScreenState extends ConsumerState<PlanAcceptanceScreen> {
             color: AppColors.primaryAccentGreen.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
-          child: Icon(
-            icon,
-            color: AppColors.primaryAccentGreen,
-            size: 18,
-          ),
+          child: Icon(icon, color: AppColors.primaryAccentGreen, size: 18),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(

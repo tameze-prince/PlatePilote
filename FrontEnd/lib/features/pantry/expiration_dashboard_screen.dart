@@ -105,114 +105,109 @@ class _PantryExpirationScreenState
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _expiringItems.isEmpty && _expiredItems.isEmpty
-              ? EmptyState(
-                  icon: Icons.check_circle_outline,
-                  title: 'All clear!',
-                  message: 'No items are expiring soon',
-                )
-              : ListView(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  children: [
-                    if (_expiredItems.isNotEmpty) ...[
-                      _buildSectionHeader(
-                        icon: Icons.error_outline,
-                        title: 'Expired',
-                        count: _expiredItems.length,
-                        color: AppColors.error,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      ..._expiredItems.map(
-                        (item) => _buildExpirationCard(
-                          item,
-                          isExpired: true,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                    ],
-                    if (_expiringItems.isNotEmpty) ...[
-                      _buildSectionHeader(
-                        icon: Icons.warning_amber_outlined,
-                        title: 'Expiring Soon',
-                        count: _expiringItems.length,
-                        color: AppColors.secondary,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      ..._expiringItems.map(
-                        (item) => _buildExpirationCard(
-                          item,
-                          isExpired: false,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: AppSpacing.md),
-                    AppCard(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: Column(
+          ? EmptyState(
+              icon: Icons.check_circle_outline,
+              title: 'All clear!',
+              message: 'No items are expiring soon',
+            )
+          : ListView(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              children: [
+                if (_expiredItems.isNotEmpty) ...[
+                  _buildSectionHeader(
+                    icon: Icons.error_outline,
+                    title: 'Expired',
+                    count: _expiredItems.length,
+                    color: AppColors.error,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  ..._expiredItems.map(
+                    (item) => _buildExpirationCard(item, isExpired: true),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                ],
+                if (_expiringItems.isNotEmpty) ...[
+                  _buildSectionHeader(
+                    icon: Icons.warning_amber_outlined,
+                    title: 'Expiring Soon',
+                    count: _expiringItems.length,
+                    color: AppColors.secondary,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  ..._expiringItems.map(
+                    (item) => _buildExpirationCard(item, isExpired: false),
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.md),
+                AppCard(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    children: [
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(AppSpacing.sm),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryLight.withValues(alpha: 
-                                    0.1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                    AppRadius.input,
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.eco,
-                                  color: AppColors.primaryLight,
-                                  size: 24,
-                                ),
+                          Container(
+                            padding: const EdgeInsets.all(AppSpacing.sm),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryLight.withValues(
+                                alpha: 0.1,
                               ),
-                              const SizedBox(width: AppSpacing.md),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Waste Prevention',
-                                      style: context.text.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Track and reduce food waste',
-                                      style: context.text.bodySmall?.copyWith(
-                                        color: AppColors.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.input,
                               ),
-                            ],
+                            ),
+                            child: const Icon(
+                              Icons.eco,
+                              color: AppColors.primaryLight,
+                              size: 24,
+                            ),
                           ),
-                          const SizedBox(height: AppSpacing.md),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildStatItem(
-                                  label: 'Items tracked',
-                                  value: '${_expiringItems.length + _expiredItems.length}',
-                                  color: AppColors.tertiary,
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Waste Prevention',
+                                  style: context.text.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                              Expanded(
-                                child: _buildStatItem(
-                                  label: 'Saved this month',
-                                  value: '\$24.50',
-                                  color: AppColors.primaryLight,
+                                Text(
+                                  'Track and reduce food waste',
+                                  style: context.text.bodySmall?.copyWith(
+                                    color: AppColors.onSurfaceVariant,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: AppSpacing.md),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatItem(
+                              label: 'Items tracked',
+                              value:
+                                  '${_expiringItems.length + _expiredItems.length}',
+                              color: AppColors.tertiary,
+                            ),
+                          ),
+                          Expanded(
+                            child: _buildStatItem(
+                              label: 'Saved this month',
+                              value: '\$24.50',
+                              color: AppColors.primaryLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
+              ],
+            ),
     );
   }
 
@@ -298,9 +293,7 @@ class _PantryExpirationScreenState
                   Text(
                     item.expires,
                     style: context.text.bodySmall?.copyWith(
-                      color: isExpired
-                          ? AppColors.error
-                          : AppColors.secondary,
+                      color: isExpired ? AppColors.error : AppColors.secondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -319,14 +312,8 @@ class _PantryExpirationScreenState
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'use',
-                  child: Text('Mark as used'),
-                ),
-                const PopupMenuItem(
-                  value: 'remove',
-                  child: Text('Remove'),
-                ),
+                const PopupMenuItem(value: 'use', child: Text('Mark as used')),
+                const PopupMenuItem(value: 'remove', child: Text('Remove')),
               ],
             ),
           ],

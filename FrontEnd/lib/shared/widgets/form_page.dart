@@ -15,10 +15,13 @@ class FormPage extends StatelessWidget {
 
   /// Clé globale pour la validation du formulaire.
   final GlobalKey<FormState> formKey;
+
   /// Enfants (champs de formulaire).
   final List<Widget> children;
+
   /// Texte du bouton de soumission.
   final String submitLabel;
+
   /// Fonction appelée lors de la soumission.
   final Future<void> Function() onSubmit;
 

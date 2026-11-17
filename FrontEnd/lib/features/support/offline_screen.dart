@@ -15,8 +15,7 @@ class OfflineScreen extends StatelessWidget {
       child: EmptyState(
         icon: Icons.wifi_off,
         title: 'You are offline',
-        message:
-            'PlatePilot will keep local data available and sync when the connection returns.',
+        message: 'PlatePilot will keep local data available and sync when the connection returns.',
       ),
     );
   }

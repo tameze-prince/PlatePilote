@@ -59,7 +59,7 @@ class PremiumGate extends ConsumerWidget {
                     0.2126, 0.7152, 0.0722, 0, 0, //
                     0.2126, 0.7152, 0.0722, 0, 0,
                     0.2126, 0.7152, 0.0722, 0, 0,
-                    0,      0,      0,      1, 0,
+                    0, 0, 0, 1, 0,
                   ]),
                   child: child,
                 ),
@@ -115,15 +115,15 @@ class PremiumGate extends ConsumerWidget {
                         Text(
                           message ?? 'Fonctionnalité Premium',
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Débloquez cette section avec PlatePilote Premium.\n7 jours gratuits, sans engagement.',
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
                                 color: isDark
                                     ? Colors.grey.shade400
                                     : Colors.grey.shade700,

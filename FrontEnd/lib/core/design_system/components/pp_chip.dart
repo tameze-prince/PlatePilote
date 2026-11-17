@@ -138,11 +138,7 @@ class PpChip extends StatelessWidget {
       );
     }
 
-    return Semantics(
-      label: label,
-      container: true,
-      child: container,
-    );
+    return Semantics(label: label, container: true, child: container);
   }
 
   _PpChipPalette _resolvePalette(
@@ -155,8 +151,7 @@ class PpChip extends StatelessWidget {
         if (isSelected) {
           return _PpChipPalette(
             background: DsColors.accent.withValues(alpha: 0.14),
-            foreground:
-                isDark ? DsColors.onSurfaceDark : DsColors.onSurface,
+            foreground: isDark ? DsColors.onSurfaceDark : DsColors.onSurface,
             border: DsColors.accent,
           );
         }
@@ -175,8 +170,7 @@ class PpChip extends StatelessWidget {
       case PpChipVariant.info:
         return _PpChipPalette(
           background: DsColors.info.withValues(alpha: 0.12),
-          foreground:
-              isDark ? DsColors.onSurfaceDark : DsColors.onSurface,
+          foreground: isDark ? DsColors.onSurfaceDark : DsColors.onSurface,
           border: DsColors.info.withValues(alpha: 0.40),
         );
 

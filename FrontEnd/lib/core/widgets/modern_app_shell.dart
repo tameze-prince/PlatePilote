@@ -54,14 +54,11 @@ class _ModernAppShellState extends State<ModernAppShell>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Scaffold(
       appBar: widget.appBar,
       drawer: widget.drawer,
-      body: FadeTransition(
-        opacity: _animation,
-        child: widget.navigationShell,
-      ),
+      body: FadeTransition(opacity: _animation, child: widget.navigationShell),
       floatingActionButton: widget.floatingActionButton,
       bottomNavigationBar: _buildBottomNavigationBar(context, isDark),
     );
@@ -139,8 +136,10 @@ class _ModernAppShellState extends State<ModernAppShell>
   }) {
     final color = isSelected
         ? (isDark ? AppColors.primaryLight : AppColors.primary)
-        : (isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant);
-    
+        : (isDark
+              ? AppColors.darkOnSurfaceVariant
+              : AppColors.onSurfaceVariant);
+
     return GestureDetector(
       onTap: () {
         // Navigation logic
@@ -148,11 +147,7 @@ class _ModernAppShellState extends State<ModernAppShell>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            isSelected ? selectedIcon : icon,
-            color: color,
-            size: 24,
-          ),
+          Icon(isSelected ? selectedIcon : icon, color: color, size: 24),
           const SizedBox(height: 4),
           Text(
             label,
@@ -199,24 +194,24 @@ class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return AppBar(
       backgroundColor: (isDark ? AppColors.darkSurface : AppColors.surface)
           .withValues(alpha: 0.95),
-      foregroundColor: isDark
-          ? AppColors.darkOnSurface
-          : AppColors.onSurface,
+      foregroundColor: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
       elevation: elevation ?? AppElevation.appBar,
       scrolledUnderElevation: AppElevation.appBar,
       centerTitle: false,
       leading: leading,
-      title: title ?? Text(
-        'PlatePilot',
-        style: AppTypography.titleLarge.copyWith(
-          color: isDark ? AppColors.primaryLight : AppColors.primary,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
+      title:
+          title ??
+          Text(
+            'PlatePilot',
+            style: AppTypography.titleLarge.copyWith(
+              color: isDark ? AppColors.primaryLight : AppColors.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
       actions: [
         if (showSearch)
           IconButton(
@@ -295,7 +290,7 @@ class ModernDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Drawer(
       backgroundColor: isDark ? AppColors.darkSurface : AppColors.surface,
       child: SafeArea(
@@ -421,9 +416,7 @@ class ModernDrawer extends StatelessWidget {
       title: Text(
         label,
         style: AppTypography.bodyMedium.copyWith(
-          color: isDark
-              ? AppColors.darkOnSurface
-              : AppColors.onSurface,
+          color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
         ),
       ),
       onTap: onTap,

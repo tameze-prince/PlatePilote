@@ -223,15 +223,13 @@ class _AddGroceryItemScreenState extends ConsumerState<AddGroceryItemScreen> {
       final count = _selectedIngredients.isNotEmpty
           ? _selectedIngredients.length
           : 1;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('$count item(s) added!')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('$count item(s) added!')));
       context.pop();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to add: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed to add: $e')));
     } finally {
       if (mounted) setState(() => _adding = false);
     }

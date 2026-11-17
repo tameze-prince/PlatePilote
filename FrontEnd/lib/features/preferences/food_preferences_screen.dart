@@ -18,8 +18,7 @@ class FoodPreferencesScreen extends ConsumerStatefulWidget {
       _FoodPreferencesScreenState();
 }
 
-class _FoodPreferencesScreenState
-    extends ConsumerState<FoodPreferencesScreen> {
+class _FoodPreferencesScreenState extends ConsumerState<FoodPreferencesScreen> {
   /// Indique si la sauvegarde est en cours.
   bool _saving = false;
 
@@ -35,9 +34,8 @@ class _FoodPreferencesScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save: $e')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Failed to save: $e')));
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -83,7 +81,10 @@ class _FoodPreferencesScreenState
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.md, 0, AppSpacing.md, AppSpacing.xl,
+                    AppSpacing.md,
+                    0,
+                    AppSpacing.md,
+                    AppSpacing.xl,
                   ),
                   children: [
                     const SizedBox(height: AppSpacing.md),
@@ -119,7 +120,8 @@ class _FoodPreferencesScreenState
                     _PreferenceSection(
                       title: 'Cooking',
                       icon: Icons.kitchen_outlined,
-                      description: 'Helps match recipe complexity to your skill',
+                      description:
+                          'Helps match recipe complexity to your skill',
                       children: [
                         _ChoiceGrid(
                           label: 'Cooking skill',
@@ -362,10 +364,13 @@ class _PreferenceSection extends StatelessWidget {
 
   /// Titre de la section.
   final String title;
+
   /// Icône de la section.
   final IconData icon;
+
   /// Description optionnelle.
   final String? description;
+
   /// Widgets enfants.
   final List<Widget> children;
 
@@ -386,7 +391,11 @@ class _PreferenceSection extends StatelessWidget {
                   color: AppColors.primaryAccentGreen.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
-                child: Icon(icon, color: AppColors.primaryAccentGreen, size: 20),
+                child: Icon(
+                  icon,
+                  color: AppColors.primaryAccentGreen,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
@@ -431,10 +440,13 @@ class _ChoiceGrid extends StatelessWidget {
 
   /// Libellé du groupe.
   final String label;
+
   /// Valeurs possibles.
   final List<String> values;
+
   /// Valeurs sélectionnées.
   final Set<String> selected;
+
   /// Callback de sélection.
   final ValueChanged<String> onSelected;
 
@@ -478,8 +490,10 @@ class _MultiChipGrid extends StatelessWidget {
 
   /// Valeurs possibles.
   final List<String> values;
+
   /// Valeurs sélectionnées.
   final Set<String> selected;
+
   /// Callback de sélection.
   final ValueChanged<String> onSelected;
 
@@ -512,10 +526,13 @@ class _Chip extends StatelessWidget {
 
   /// Texte du chip.
   final String label;
+
   /// Vrai si sélectionné.
   final bool selected;
+
   /// Vrai si le chip est en mode multi-sélection.
   final bool multiSelect;
+
   /// Callback au tap.
   final VoidCallback onTap;
 
@@ -561,8 +578,8 @@ class _Chip extends StatelessWidget {
               style: AppTypography.bodyMedium.copyWith(
                 color: selected
                     ? (PremiumTheme.isDark(context)
-                        ? AppColors.darkBackground
-                        : Colors.white)
+                          ? AppColors.darkBackground
+                          : Colors.white)
                     : PremiumTheme.textPrimary(context),
                 fontWeight: FontWeight.w600,
               ),

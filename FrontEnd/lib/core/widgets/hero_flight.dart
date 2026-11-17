@@ -30,11 +30,7 @@ import '../../app/theme/app_animations.dart';
 /// )
 /// ```
 class PlatePilotHero extends StatelessWidget {
-  const PlatePilotHero({
-    required this.tag,
-    required this.child,
-    super.key,
-  });
+  const PlatePilotHero({required this.tag, required this.child, super.key});
 
   /// Tag Hero partagé entre origin et destination.
   final String tag;

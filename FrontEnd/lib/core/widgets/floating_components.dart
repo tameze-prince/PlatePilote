@@ -73,8 +73,10 @@ class FloatingNavigationBar extends StatelessWidget {
   }) {
     final color = isSelected
         ? (isDark ? AppColors.primaryLight : AppColors.primary)
-        : (isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant);
-    
+        : (isDark
+              ? AppColors.darkOnSurfaceVariant
+              : AppColors.onSurfaceVariant);
+
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -86,14 +88,14 @@ class FloatingNavigationBar extends StatelessWidget {
             horizontal: AppSpacing.xs,
             vertical: AppSpacing.xxs,
           ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? (isDark
-                            ? AppColors.primary.withValues(alpha: 0.2)
-                            : AppColors.primary.withValues(alpha: 0.1))
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                  ),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? (isDark
+                      ? AppColors.primary.withValues(alpha: 0.2)
+                      : AppColors.primary.withValues(alpha: 0.1))
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -234,9 +236,10 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
-      margin: widget.margin ??
+      margin:
+          widget.margin ??
           const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
             vertical: AppSpacing.sm,
@@ -244,17 +247,20 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppRadius.full),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: widget.blurSigma, sigmaY: widget.blurSigma),
+          filter: ImageFilter.blur(
+            sigmaX: widget.blurSigma,
+            sigmaY: widget.blurSigma,
+          ),
           child: Container(
             decoration: BoxDecoration(
-              color: (widget.backgroundColor ??
-                      (isDark
-                          ? AppColors.darkSurface
-                          : AppColors.surface))
-                  .withValues(alpha: 0.85),
+              color:
+                  (widget.backgroundColor ??
+                          (isDark ? AppColors.darkSurface : AppColors.surface))
+                      .withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(AppRadius.full),
               border: Border.all(
-                color: widget.borderColor ??
+                color:
+                    widget.borderColor ??
                     (isDark
                         ? AppColors.darkOutline.withValues(alpha: 0.3)
                         : AppColors.outline.withValues(alpha: 0.3)),
@@ -282,7 +288,8 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
                       ? AppColors.darkOnSurfaceVariant.withValues(alpha: 0.6)
                       : AppColors.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
-                prefixIcon: widget.leading ??
+                prefixIcon:
+                    widget.leading ??
                     Icon(
                       Icons.search_outlined,
                       color: isDark
@@ -290,7 +297,8 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
                           : AppColors.onSurfaceVariant,
                       size: 20,
                     ),
-                suffixIcon: widget.trailing ??
+                suffixIcon:
+                    widget.trailing ??
                     (_controller.text.isNotEmpty
                         ? IconButton(
                             tooltip: 'Effacer',
@@ -313,9 +321,7 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
                 ),
               ),
               style: AppTypography.bodyMedium.copyWith(
-                color: isDark
-                    ? AppColors.darkOnSurface
-                    : AppColors.onSurface,
+                color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
               ),
             ),
           ),
@@ -371,21 +377,20 @@ class FloatingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
-      margin: margin ??
-          const EdgeInsets.only(
-            right: AppSpacing.md,
-            bottom: AppSpacing.md,
-          ),
+      margin:
+          margin ??
+          const EdgeInsets.only(right: AppSpacing.md, bottom: AppSpacing.md),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppRadius.full),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
           child: Material(
-            color: (backgroundColor ??
-                    (isDark ? AppColors.primaryLight : AppColors.primary))
-                .withValues(alpha: 0.9),
+            color:
+                (backgroundColor ??
+                        (isDark ? AppColors.primaryLight : AppColors.primary))
+                    .withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(AppRadius.full),
             elevation: elevation ?? AppElevation.fab,
             child: InkWell(
@@ -396,7 +401,8 @@ class FloatingButton extends StatelessWidget {
                 height: size,
                 child: IconTheme(
                   data: IconThemeData(
-                    color: foregroundColor ??
+                    color:
+                        foregroundColor ??
                         (isDark ? AppColors.darkBackground : Colors.white),
                     size: size * 0.45,
                   ),
@@ -456,9 +462,10 @@ class FloatingAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
-      margin: margin ??
+      margin:
+          margin ??
           const EdgeInsets.only(
             left: AppSpacing.md,
             right: AppSpacing.md,
@@ -470,14 +477,14 @@ class FloatingAppBar extends StatelessWidget implements PreferredSizeWidget {
           filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
           child: Container(
             decoration: BoxDecoration(
-              color: (backgroundColor ??
-                      (isDark
-                          ? AppColors.darkSurface
-                          : AppColors.surface))
-                  .withValues(alpha: 0.85),
+              color:
+                  (backgroundColor ??
+                          (isDark ? AppColors.darkSurface : AppColors.surface))
+                      .withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(AppRadius.xl),
               border: Border.all(
-                color: borderColor ??
+                color:
+                    borderColor ??
                     (isDark
                         ? AppColors.darkOutline.withValues(alpha: 0.3)
                         : AppColors.outline.withValues(alpha: 0.3)),
@@ -505,7 +512,8 @@ class FloatingAppBar extends StatelessWidget implements PreferredSizeWidget {
                   children: [
                     ?leading,
                     Expanded(
-                      child: title ??
+                      child:
+                          title ??
                           Text(
                             'PlatePilot',
                             style: AppTypography.titleLarge.copyWith(

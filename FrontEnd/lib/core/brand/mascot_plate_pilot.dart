@@ -37,10 +37,7 @@ class SpoonieMascot extends StatelessWidget {
     return SizedBox.square(
       dimension: size,
       child: CustomPaint(
-        painter: _SpooniePainter(
-          moodColor: moodColor,
-          smile: smile,
-        ),
+        painter: _SpooniePainter(moodColor: moodColor, smile: smile),
       ),
     );
   }
@@ -52,10 +49,7 @@ class SpoonieMascot extends StatelessWidget {
 /// - 1 gros oeil rond blanc + pupille noir centrée.
 /// - petit sourire arc (si `smile == true`).
 class _SpooniePainter extends CustomPainter {
-  _SpooniePainter({
-    required this.moodColor,
-    required this.smile,
-  });
+  _SpooniePainter({required this.moodColor, required this.smile});
 
   final Color? moodColor;
   final bool smile;
@@ -88,8 +82,10 @@ class _SpooniePainter extends CustomPainter {
     final highlightPath = Path()
       ..addOval(
         Rect.fromCenter(
-          center: Offset(bowlCenter.dx - bowlRadiusX * 0.55,
-              bowlCenter.dy - bowlRadiusY * 0.55),
+          center: Offset(
+            bowlCenter.dx - bowlRadiusX * 0.55,
+            bowlCenter.dy - bowlRadiusY * 0.55,
+          ),
           width: bowlRadiusX * 0.55,
           height: bowlRadiusY * 0.30,
         ),
@@ -144,10 +140,7 @@ class _SpooniePainter extends CustomPainter {
     final pupilOffsetX = moodColor == null
         ? 0.0
         : (moodColor == SignatureColors.primaryBakedApple ? -1.5 : 1.5);
-    final pupilCenter = Offset(
-      eyeCenter.dx + pupilOffsetX,
-      eyeCenter.dy,
-    );
+    final pupilCenter = Offset(eyeCenter.dx + pupilOffsetX, eyeCenter.dy);
     final pupilPaint = Paint()..color = const Color(0xFF1F2937);
     canvas.drawCircle(pupilCenter, eyeRadius * 0.45, pupilPaint);
 
@@ -178,13 +171,7 @@ class _SpooniePainter extends CustomPainter {
         width: bowlRadiusX * 0.85,
         height: bowlRadiusY * 0.55,
       );
-      canvas.drawArc(
-        smileRect,
-        0.25,
-        2.6,
-        false,
-        smilePaint,
-      );
+      canvas.drawArc(smileRect, 0.25, 2.6, false, smilePaint);
     }
   }
 

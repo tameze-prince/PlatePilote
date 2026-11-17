@@ -202,11 +202,12 @@ class _EditPantryItemScreenState extends ConsumerState<EditPantryItemScreen> {
                               ),
                             );
                             if (date != null) {
-                              final days = date.difference(DateTime.now()).inDays;
-                              _expiryController.text =
-                                  days <= 0
-                                      ? 'Expires today'
-                                      : 'Expires in $days days';
+                              final days = date
+                                  .difference(DateTime.now())
+                                  .inDays;
+                              _expiryController.text = days <= 0
+                                  ? 'Expires today'
+                                  : 'Expires in $days days';
                             }
                           },
                         ),
@@ -242,8 +243,8 @@ class _EditPantryItemScreenState extends ConsumerState<EditPantryItemScreen> {
                           onSelected: (selected) {
                             setState(() => _selectedCategory = category);
                           },
-                          selectedColor: AppColors.primaryLight.withValues(alpha: 
-                            0.2,
+                          selectedColor: AppColors.primaryLight.withValues(
+                            alpha: 0.2,
                           ),
                           checkmarkColor: AppColors.primaryLight,
                           labelStyle: TextStyle(

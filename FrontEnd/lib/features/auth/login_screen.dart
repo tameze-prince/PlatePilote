@@ -42,10 +42,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _onSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final success = await ref.read(authProvider.notifier).login(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
+    final success = await ref
+        .read(authProvider.notifier)
+        .login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
 
     if (success && mounted) {
       context.go('/home');
@@ -90,7 +92,8 @@ class PremiumSignupScreen extends ConsumerStatefulWidget {
   const PremiumSignupScreen({super.key});
 
   @override
-  ConsumerState<PremiumSignupScreen> createState() => _PremiumSignupScreenState();
+  ConsumerState<PremiumSignupScreen> createState() =>
+      _PremiumSignupScreenState();
 }
 
 class _PremiumSignupScreenState extends ConsumerState<PremiumSignupScreen> {
@@ -123,12 +126,14 @@ class _PremiumSignupScreenState extends ConsumerState<PremiumSignupScreen> {
     final firstName = parts.first;
     final lastName = parts.length > 1 ? parts.sublist(1).join(' ') : firstName;
 
-    final success = await ref.read(authProvider.notifier).register(
-      firstName: firstName,
-      lastName: lastName,
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
+    final success = await ref
+        .read(authProvider.notifier)
+        .register(
+          firstName: firstName,
+          lastName: lastName,
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
 
     if (success && mounted) {
       context.go('/verify-email');
@@ -320,7 +325,8 @@ class _PremiumAuthShellState extends State<_PremiumAuthShell> {
                               Align(
                                 alignment: Alignment.centerRight,
                                 child: TextButton(
-                                  onPressed: () => context.go('/forgot-password'),
+                                  onPressed: () =>
+                                      context.go('/forgot-password'),
                                   child: const Text('Forgot password?'),
                                 ),
                               ),
@@ -330,8 +336,12 @@ class _PremiumAuthShellState extends State<_PremiumAuthShell> {
                               label: widget.isLoading
                                   ? 'Please wait...'
                                   : (widget.isSignup ? 'Sign Up' : 'Continue'),
-                              icon: widget.isLoading ? null : Icons.arrow_forward,
-                              onPressed: widget.isLoading ? null : widget.onSubmit,
+                              icon: widget.isLoading
+                                  ? null
+                                  : Icons.arrow_forward,
+                              onPressed: widget.isLoading
+                                  ? null
+                                  : widget.onSubmit,
                             ),
                             const SizedBox(height: AppSpacing.md),
                             TextButton(
@@ -391,8 +401,9 @@ class _BrandMark extends StatelessWidget {
           ),
           child: Icon(
             Icons.restaurant_menu,
-            color:
-                PremiumTheme.isDark(context) ? AppColors.darkBackground : Colors.white,
+            color: PremiumTheme.isDark(context)
+                ? AppColors.darkBackground
+                : Colors.white,
             size: isCompact ? 28 : 34,
           ),
         ),

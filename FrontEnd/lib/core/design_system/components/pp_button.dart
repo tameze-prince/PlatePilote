@@ -91,10 +91,7 @@ class _PpButtonState extends State<PpButton> {
 
     if (!widget.expand) return button;
 
-    return SizedBox(
-      width: double.infinity,
-      child: button,
-    );
+    return SizedBox(width: double.infinity, child: button);
   }
 
   Widget _buildButton(BuildContext context, _PpButtonColors colors) {
@@ -176,11 +173,11 @@ class _PpButtonState extends State<PpButton> {
           : Colors.white.withValues(alpha: 0.85);
       return _PpButtonColors(
         background: glassFill,
-        foreground:
-            isDark ? DsColors.onSurfaceDark : DsColors.onSurface,
+        foreground: isDark ? DsColors.onSurfaceDark : DsColors.onSurface,
         border: border,
-        foregroundMuted:
-            isDark ? DsColors.onSurfaceVariantDark : DsColors.onSurfaceVariant,
+        foregroundMuted: isDark
+            ? DsColors.onSurfaceVariantDark
+            : DsColors.onSurfaceVariant,
       );
     }
 
@@ -207,8 +204,9 @@ class _PpButtonState extends State<PpButton> {
       background: Colors.transparent,
       foreground: isDark ? DsColors.onSurfaceDark : DsColors.onSurface,
       border: Colors.transparent,
-      foregroundMuted:
-          isDark ? DsColors.onSurfaceVariantDark : DsColors.onSurfaceVariant,
+      foregroundMuted: isDark
+          ? DsColors.onSurfaceVariantDark
+          : DsColors.onSurfaceVariant,
     );
   }
 }

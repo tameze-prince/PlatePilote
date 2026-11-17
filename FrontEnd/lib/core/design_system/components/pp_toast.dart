@@ -123,8 +123,7 @@ class _PpToastBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final foreground =
-        isDark ? DsColors.onSurfaceDark : DsColors.onSurface;
+    final foreground = isDark ? DsColors.onSurfaceDark : DsColors.onSurface;
 
     return Container(
       constraints: const BoxConstraints(minHeight: 48),

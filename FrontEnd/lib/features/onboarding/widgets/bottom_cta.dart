@@ -33,9 +33,7 @@ class OnboardingBottomCta extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: PremiumTheme.background(context),
-        border: Border(
-          top: BorderSide(color: PremiumTheme.border(context)),
-        ),
+        border: Border(top: BorderSide(color: PremiumTheme.border(context))),
       ),
       child: SafeArea(
         top: false,

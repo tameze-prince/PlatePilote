@@ -54,8 +54,12 @@ ThemeData buildDarkTheme() {
     textTheme: textTheme,
     primaryTextTheme: textTheme.copyWith(
       bodyLarge: textTheme.bodyLarge?.copyWith(color: AppColors.darkBackground),
-      bodyMedium: textTheme.bodyMedium?.copyWith(color: AppColors.darkBackground),
-      bodySmall: textTheme.bodySmall?.copyWith(color: AppColors.darkOnInverseSurface.withValues(alpha: 0.7)),
+      bodyMedium: textTheme.bodyMedium?.copyWith(
+        color: AppColors.darkBackground,
+      ),
+      bodySmall: textTheme.bodySmall?.copyWith(
+        color: AppColors.darkOnInverseSurface.withValues(alpha: 0.7),
+      ),
     ),
 
     // Scaffold
@@ -72,10 +76,7 @@ ThemeData buildDarkTheme() {
         color: AppColors.primaryLight,
         fontWeight: FontWeight.w700,
       ),
-      iconTheme: IconThemeData(
-        color: AppColors.darkOnSurface,
-        size: 24,
-      ),
+      iconTheme: IconThemeData(color: AppColors.darkOnSurface, size: 24),
       actionsIconTheme: IconThemeData(
         color: AppColors.darkOnSurfaceVariant,
         size: 24,
@@ -113,15 +114,9 @@ ThemeData buildDarkTheme() {
       }),
       iconTheme: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
-          return IconThemeData(
-            color: AppColors.primaryLight,
-            size: 24,
-          );
+          return IconThemeData(color: AppColors.primaryLight, size: 24);
         }
-        return IconThemeData(
-          color: AppColors.darkOnSurfaceVariant,
-          size: 24,
-        );
+        return IconThemeData(color: AppColors.darkOnSurfaceVariant, size: 24);
       }),
       elevation: AppElevation.navigationBar,
       height: 80,
@@ -191,10 +186,7 @@ ThemeData buildDarkTheme() {
         return AppColors.darkSurface;
       }),
       checkColor: WidgetStateProperty.all(AppColors.darkBackground),
-      side: BorderSide(
-        color: AppColors.darkOutline,
-        width: 2,
-      ),
+      side: BorderSide(color: AppColors.darkOutline, width: 2),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.xs),
       ),
@@ -280,38 +272,23 @@ ThemeData buildDarkTheme() {
       fillColor: AppColors.darkSurfaceContainerLow,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.input),
-        borderSide: BorderSide(
-          color: AppColors.darkOutline,
-          width: 1,
-        ),
+        borderSide: BorderSide(color: AppColors.darkOutline, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.input),
-        borderSide: BorderSide(
-          color: AppColors.darkOutline,
-          width: 1,
-        ),
+        borderSide: BorderSide(color: AppColors.darkOutline, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.input),
-        borderSide: BorderSide(
-          color: AppColors.primaryLight,
-          width: 2,
-        ),
+        borderSide: BorderSide(color: AppColors.primaryLight, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.input),
-        borderSide: BorderSide(
-          color: AppColors.error,
-          width: 1,
-        ),
+        borderSide: BorderSide(color: AppColors.error, width: 1),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.input),
-        borderSide: BorderSide(
-          color: AppColors.error,
-          width: 2,
-        ),
+        borderSide: BorderSide(color: AppColors.error, width: 2),
       ),
       disabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.input),
@@ -326,13 +303,8 @@ ThemeData buildDarkTheme() {
       hintStyle: textTheme.bodyMedium?.copyWith(
         color: AppColors.darkOnSurfaceVariant.withValues(alpha: 0.6),
       ),
-      errorStyle: textTheme.bodySmall?.copyWith(
-        color: AppColors.error,
-      ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 16,
-      ),
+      errorStyle: textTheme.bodySmall?.copyWith(color: AppColors.error),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     ),
 
     // Buttons
@@ -344,13 +316,8 @@ ThemeData buildDarkTheme() {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),
         ),
-        textStyle: textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 16,
-        ),
+        textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         minimumSize: const Size.fromHeight(54),
       ),
     ),
@@ -362,13 +329,8 @@ ThemeData buildDarkTheme() {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),
         ),
-        textStyle: textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 16,
-        ),
+        textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         minimumSize: const Size.fromHeight(54),
       ),
     ),
@@ -376,20 +338,12 @@ ThemeData buildDarkTheme() {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.primaryLight,
-        side: BorderSide(
-          color: AppColors.primaryLight,
-          width: 1.5,
-        ),
+        side: BorderSide(color: AppColors.primaryLight, width: 1.5),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),
         ),
-        textStyle: textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 16,
-        ),
+        textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         minimumSize: const Size.fromHeight(54),
       ),
     ),
@@ -400,13 +354,8 @@ ThemeData buildDarkTheme() {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),
         ),
-        textStyle: textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
+        textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
     ),
 
@@ -430,10 +379,7 @@ ThemeData buildDarkTheme() {
 
     // List tiles
     listTileTheme: ListTileThemeData(
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
@@ -458,10 +404,7 @@ ThemeData buildDarkTheme() {
       textStyle: textTheme.bodySmall?.copyWith(
         color: AppColors.darkOnInverseSurface,
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       margin: const EdgeInsets.all(8),
       waitDuration: AppAnimations.fast,
       showDuration: AppAnimations.normal,
@@ -483,13 +426,8 @@ ThemeData buildDarkTheme() {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
-        textStyle: textTheme.labelMedium?.copyWith(
-          fontWeight: FontWeight.w500,
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
+        textStyle: textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w500),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
     ),
 
@@ -504,19 +442,13 @@ ThemeData buildDarkTheme() {
         color: AppColors.darkBackground,
       ),
       trackHeight: 4,
-      thumbShape: const RoundSliderThumbShape(
-        enabledThumbRadius: 10,
-      ),
-      overlayShape: const RoundSliderOverlayShape(
-        overlayRadius: 20,
-      ),
+      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+      overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
     ),
 
     // Dropdown
     dropdownMenuTheme: DropdownMenuThemeData(
-      textStyle: textTheme.bodyMedium?.copyWith(
-        color: AppColors.darkOnSurface,
-      ),
+      textStyle: textTheme.bodyMedium?.copyWith(color: AppColors.darkOnSurface),
       menuStyle: MenuStyle(
         backgroundColor: WidgetStateProperty.all(AppColors.darkSurface),
         elevation: WidgetStateProperty.all(AppElevation.dialog),
@@ -554,9 +486,7 @@ ThemeData buildDarkTheme() {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
-      textStyle: textTheme.bodyMedium?.copyWith(
-        color: AppColors.darkOnSurface,
-      ),
+      textStyle: textTheme.bodyMedium?.copyWith(color: AppColors.darkOnSurface),
     ),
 
     // Tab bar
@@ -564,16 +494,11 @@ ThemeData buildDarkTheme() {
       indicatorColor: AppColors.primaryLight,
       labelColor: AppColors.primaryLight,
       unselectedLabelColor: AppColors.darkOnSurfaceVariant,
-      labelStyle: textTheme.labelLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
+      labelStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
       unselectedLabelStyle: textTheme.labelLarge,
       indicator: BoxDecoration(
         border: Border(
-          bottom: BorderSide(
-            color: AppColors.primaryLight,
-            width: 2,
-          ),
+          bottom: BorderSide(color: AppColors.primaryLight, width: 2),
         ),
       ),
       dividerColor: AppColors.darkOutline,
@@ -608,25 +533,17 @@ ThemeData buildDarkTheme() {
         color: Colors.white,
         fontWeight: FontWeight.w600,
       ),
-      headerHelpStyle: textTheme.bodyMedium?.copyWith(
-        color: Colors.white70,
-      ),
-      dayStyle: textTheme.bodyMedium?.copyWith(
-        color: AppColors.darkOnSurface,
-      ),
+      headerHelpStyle: textTheme.bodyMedium?.copyWith(color: Colors.white70),
+      dayStyle: textTheme.bodyMedium?.copyWith(color: AppColors.darkOnSurface),
       todayForegroundColor: WidgetStateProperty.all(AppColors.primaryLight),
-      todayBackgroundColor: WidgetStateProperty.all(
-        AppColors.primaryContainer,
-      ),
+      todayBackgroundColor: WidgetStateProperty.all(AppColors.primaryContainer),
       dayForegroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
           return AppColors.primaryLight;
         }
         return AppColors.darkOnSurface;
       }),
-      yearStyle: textTheme.bodyMedium?.copyWith(
-        color: AppColors.darkOnSurface,
-      ),
+      yearStyle: textTheme.bodyMedium?.copyWith(color: AppColors.darkOnSurface),
     ),
 
     // Time picker
@@ -658,7 +575,9 @@ ThemeData buildDarkTheme() {
 
     // Search bar
     searchBarTheme: SearchBarThemeData(
-      backgroundColor: WidgetStateProperty.all(AppColors.darkSurfaceContainerLow),
+      backgroundColor: WidgetStateProperty.all(
+        AppColors.darkSurfaceContainerLow,
+      ),
       elevation: WidgetStateProperty.all(AppElevation.card),
       shape: WidgetStateProperty.all(
         RoundedRectangleBorder(
@@ -666,14 +585,10 @@ ThemeData buildDarkTheme() {
         ),
       ),
       textStyle: WidgetStateProperty.all(
-        textTheme.bodyLarge?.copyWith(
-          color: AppColors.darkOnSurface,
-        ),
+        textTheme.bodyLarge?.copyWith(color: AppColors.darkOnSurface),
       ),
       hintStyle: WidgetStateProperty.all(
-        textTheme.bodyLarge?.copyWith(
-          color: AppColors.darkOnSurfaceVariant,
-        ),
+        textTheme.bodyLarge?.copyWith(color: AppColors.darkOnSurfaceVariant),
       ),
       padding: WidgetStateProperty.all(
         const EdgeInsets.symmetric(horizontal: 16),

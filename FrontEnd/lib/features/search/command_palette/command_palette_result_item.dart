@@ -47,15 +47,15 @@ class CommandPaletteResultItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final labelColor =
-        isDark ? AppColors.darkOnSurface : AppColors.onSurface;
-    final subtitleColor =
-        isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant;
+    final labelColor = isDark ? AppColors.darkOnSurface : AppColors.onSurface;
+    final subtitleColor = isDark
+        ? AppColors.darkOnSurfaceVariant
+        : AppColors.onSurfaceVariant;
 
     final background = highlighted
         ? (isDark
-            ? Colors.white.withValues(alpha: 0.06)
-            : Colors.black.withValues(alpha: 0.04))
+              ? Colors.white.withValues(alpha: 0.06)
+              : Colors.black.withValues(alpha: 0.04))
         : Colors.transparent;
 
     return Semantics(
@@ -108,11 +108,7 @@ class CommandPaletteResultItem extends StatelessWidget {
                   const SizedBox(width: AppSpacing.xs),
                   _CategoryPill(label: category, isDark: isDark),
                   const SizedBox(width: AppSpacing.xs),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 12,
-                    color: subtitleColor,
-                  ),
+                  Icon(Icons.arrow_forward_ios, size: 12, color: subtitleColor),
                 ],
               ),
             ),
@@ -158,8 +154,7 @@ class _CategoryPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tint =
-        isDark ? AppColors.primaryLight : AppColors.primary;
+    final tint = isDark ? AppColors.primaryLight : AppColors.primary;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xs + 2,

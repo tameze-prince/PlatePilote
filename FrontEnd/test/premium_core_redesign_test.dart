@@ -26,7 +26,9 @@ void main() {
     expect(preferences.getString('themeMode'), 'dark');
   });
 
-  testWidgets('premium auth screen renders glass login content', (tester) async {
+  testWidgets('premium auth screen renders glass login content', (
+    tester,
+  ) async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
 

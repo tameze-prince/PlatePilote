@@ -184,8 +184,7 @@ class CommandPaletteState {
   final bool pantryPending;
   final String? error;
 
-  bool get isEmpty =>
-      pages.isEmpty && recipes.isEmpty && pantry.isEmpty;
+  bool get isEmpty => pages.isEmpty && recipes.isEmpty && pantry.isEmpty;
 
   CommandPaletteState copyWith({
     String? query,
@@ -209,8 +208,11 @@ class CommandPaletteState {
   }
 
   /// Concatenated flatten used for keyboard navigation (arrow up/down).
-  List<CommandPaletteResult> get flattened
-      => <CommandPaletteResult>[...pages, ...recipes, ...pantry];
+  List<CommandPaletteResult> get flattened => <CommandPaletteResult>[
+    ...pages,
+    ...recipes,
+    ...pantry,
+  ];
 }
 
 /// Notifier backing the command palette state.
@@ -271,19 +273,14 @@ class CommandPaletteNotifier extends Notifier<CommandPaletteState> {
       state = state.copyWith(recipes: results, recipesPending: false);
     } catch (_) {
       if (seq != _requestSeq) return;
-      state = state.copyWith(
-        recipes: const [],
-        recipesPending: false,
-      );
+      state = state.copyWith(recipes: const [], recipesPending: false);
     }
   }
 
   Future<void> _fetchPantry(String query) async {
     final seq = _requestSeq;
     try {
-      final results = await ref
-          .read(pantryRepositoryProvider)
-          .search(query);
+      final results = await ref.read(pantryRepositoryProvider).search(query);
       if (seq != _requestSeq) return;
       final mapped = results
           .take(5)
@@ -292,10 +289,7 @@ class CommandPaletteNotifier extends Notifier<CommandPaletteState> {
       state = state.copyWith(pantry: mapped, pantryPending: false);
     } catch (_) {
       if (seq != _requestSeq) return;
-      state = state.copyWith(
-        pantry: const [],
-        pantryPending: false,
-      );
+      state = state.copyWith(pantry: const [], pantryPending: false);
     }
   }
 
@@ -367,5 +361,5 @@ class CommandPaletteNotifier extends Notifier<CommandPaletteState> {
 /// Riverpod provider exposing the command palette state.
 final commandPaletteProvider =
     NotifierProvider<CommandPaletteNotifier, CommandPaletteState>(
-  CommandPaletteNotifier.new,
-);
+      CommandPaletteNotifier.new,
+    );

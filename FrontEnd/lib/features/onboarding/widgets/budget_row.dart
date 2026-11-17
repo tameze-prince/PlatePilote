@@ -22,11 +22,7 @@ const List<(String, String)> _budgetPresets = [
 
 /// Ligne horizontale des budgets prédéfinis + option "Custom".
 class BudgetRow extends StatelessWidget {
-  const BudgetRow({
-    super.key,
-    required this.state,
-    required this.notifier,
-  });
+  const BudgetRow({super.key, required this.state, required this.notifier});
 
   final OnboardingState state;
   final OnboardingNotifier notifier;
@@ -38,8 +34,8 @@ class BudgetRow extends StatelessWidget {
         ? l10n.onboardingSingleCustom
         : '\$${state.customBudget!.toStringAsFixed(0)}';
     final selectedPreset = state.weeklyBudget;
-    final customActive = state.customBudget != null ||
-        selectedPreset == kCustomBudgetSentinel;
+    final customActive =
+        state.customBudget != null || selectedPreset == kCustomBudgetSentinel;
 
     return LayoutBuilder(
       builder: (context, constraints) {

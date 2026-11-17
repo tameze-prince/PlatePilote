@@ -58,11 +58,7 @@ class _PremiumFunnelScreenState extends ConsumerState<PremiumFunnelScreen> {
       body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
-        children: const [
-          ExplainStep(),
-          PickPlanStep(),
-          PaymentStep(),
-        ],
+        children: const [ExplainStep(), PickPlanStep(), PaymentStep()],
       ),
     );
   }

@@ -50,14 +50,18 @@ class MealPlanState {
   bool get hasNextPlan => selectedPlanIndex > 0;
 
   /// Temps total de préparation cumulé en minutes.
-  int get totalMinutes => currentPlan?.entries
-      .map((entry) => entry.totalTimeMinutes ?? 0)
-      .fold<int>(0, (sum, value) => sum + value) ?? 0;
+  int get totalMinutes =>
+      currentPlan?.entries
+          .map((entry) => entry.totalTimeMinutes ?? 0)
+          .fold<int>(0, (sum, value) => sum + value) ??
+      0;
 
   /// Coût total estimé du plan.
-  double get estimatedCost => currentPlan?.entries
-      .map((entry) => entry.estimatedCost ?? 0)
-      .fold<double>(0, (sum, value) => sum + value) ?? 0;
+  double get estimatedCost =>
+      currentPlan?.entries
+          .map((entry) => entry.estimatedCost ?? 0)
+          .fold<double>(0, (sum, value) => sum + value) ??
+      0;
 
   /// Crée une copie avec des champs mis à jour.
   MealPlanState copyWith({
@@ -95,7 +99,9 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
   String _nextMonday() {
     final now = DateTime.now();
     final daysUntilMonday = (DateTime.monday - now.weekday + 7) % 7;
-    final monday = now.add(Duration(days: daysUntilMonday == 0 ? 7 : daysUntilMonday));
+    final monday = now.add(
+      Duration(days: daysUntilMonday == 0 ? 7 : daysUntilMonday),
+    );
     return '${monday.year}-${monday.month.toString().padLeft(2, '0')}-${monday.day.toString().padLeft(2, '0')}';
   }
 
@@ -107,57 +113,66 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     final meals = <Meal>[];
     for (var i = 0; i < entries.length; i += concurrency) {
       final batch = entries.skip(i).take(concurrency);
-      final results = await Future.wait(batch.map((entry) async {
-        final date = entry.mealDate != null ? DateTime.tryParse(entry.mealDate!) : null;
-        final dayName = date != null ? dayNames[date.weekday - 1] : (entry.mealDate ?? '');
-        String title = entry.recipeName ?? 'Unknown Recipe';
-        int minutes = 25;
-        int kcal = 450;
-        String? imageUrl = entry.imageUrl;
-        IconData icon = Icons.restaurant;
-        Color tint = Colors.green;
-        if (entry.totalTimeMinutes != null || entry.caloriesPerServing != null) {
-          minutes = entry.totalTimeMinutes ?? minutes;
-          kcal = entry.caloriesPerServing ?? kcal;
-        } else if (entry.recipeId != null) {
-          try {
-            final detail = await repo.getRecipeDetail(entry.recipeId!);
-            title = detail.name ?? title;
-            minutes = detail.totalTimeMinutes ??
-                ((detail.prepTimeMinutes ?? 0) + (detail.cookTimeMinutes ?? 0));
-            imageUrl = detail.imageUrl;
-          } catch (_) {}
-        }
-        switch (entry.mealType?.toLowerCase()) {
-          case 'breakfast':
-            icon = Icons.wb_sunny;
-            tint = Colors.orange;
-            break;
-          case 'lunch':
-            icon = Icons.lunch_dining;
-            tint = Colors.amber;
-            break;
-          case 'dinner':
-            icon = Icons.dinner_dining;
-            tint = Colors.deepPurple;
-            break;
-          case 'snack':
-            icon = Icons.cookie;
-            tint = Colors.brown;
-            break;
-        }
-        return Meal(
-          day: dayName,
-          type: entry.mealType ?? 'Meal',
-          title: title,
-          minutes: minutes,
-          kcal: kcal,
-          icon: icon,
-          tint: tint,
-          imageUrl: imageUrl,
-          recipeId: entry.recipeId,
-        );
-      }));
+      final results = await Future.wait(
+        batch.map((entry) async {
+          final date = entry.mealDate != null
+              ? DateTime.tryParse(entry.mealDate!)
+              : null;
+          final dayName = date != null
+              ? dayNames[date.weekday - 1]
+              : (entry.mealDate ?? '');
+          String title = entry.recipeName ?? 'Unknown Recipe';
+          int minutes = 25;
+          int kcal = 450;
+          String? imageUrl = entry.imageUrl;
+          IconData icon = Icons.restaurant;
+          Color tint = Colors.green;
+          if (entry.totalTimeMinutes != null ||
+              entry.caloriesPerServing != null) {
+            minutes = entry.totalTimeMinutes ?? minutes;
+            kcal = entry.caloriesPerServing ?? kcal;
+          } else if (entry.recipeId != null) {
+            try {
+              final detail = await repo.getRecipeDetail(entry.recipeId!);
+              title = detail.name ?? title;
+              minutes =
+                  detail.totalTimeMinutes ??
+                  ((detail.prepTimeMinutes ?? 0) +
+                      (detail.cookTimeMinutes ?? 0));
+              imageUrl = detail.imageUrl;
+            } catch (_) {}
+          }
+          switch (entry.mealType?.toLowerCase()) {
+            case 'breakfast':
+              icon = Icons.wb_sunny;
+              tint = Colors.orange;
+              break;
+            case 'lunch':
+              icon = Icons.lunch_dining;
+              tint = Colors.amber;
+              break;
+            case 'dinner':
+              icon = Icons.dinner_dining;
+              tint = Colors.deepPurple;
+              break;
+            case 'snack':
+              icon = Icons.cookie;
+              tint = Colors.brown;
+              break;
+          }
+          return Meal(
+            day: dayName,
+            type: entry.mealType ?? 'Meal',
+            title: title,
+            minutes: minutes,
+            kcal: kcal,
+            icon: icon,
+            tint: tint,
+            imageUrl: imageUrl,
+            recipeId: entry.recipeId,
+          );
+        }),
+      );
       meals.addAll(results);
     }
     return meals;
@@ -223,7 +238,10 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     try {
       final repo = ref.read(mealPlanRepositoryProvider);
       final plan = mode != null
-          ? await repo.generateWeeklyPlanWithMode(startDate: _nextMonday(), mode: mode)
+          ? await repo.generateWeeklyPlanWithMode(
+              startDate: _nextMonday(),
+              mode: mode,
+            )
           : await repo.generateWeeklyPlan(startDate: _nextMonday());
       final meals = await _entriesToMeals(plan.entries);
       final updatedPlans = [plan, ...state.availablePlans];
@@ -243,26 +261,14 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
         },
       );
       if (isRegeneration) {
-        analytics.trackPayload(
-          PlateEvents.planRegenerated,
-          payload: payload,
-        );
+        analytics.trackPayload(PlateEvents.planRegenerated, payload: payload);
       } else {
-        analytics.trackPayload(
-          PlateEvents.planGenerated,
-          payload: payload,
-        );
+        analytics.trackPayload(PlateEvents.planGenerated, payload: payload);
       }
     } on ApiException catch (e) {
-      state = state.copyWith(
-        isGenerating: false,
-        error: e.message,
-      );
+      state = state.copyWith(isGenerating: false, error: e.message);
     } catch (e) {
-      state = state.copyWith(
-        isGenerating: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isGenerating: false, error: e.toString());
     }
   }
 
@@ -349,7 +355,9 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     try {
       final repo = ref.read(mealPlanRepositoryProvider);
       await repo.deleteMealPlan(plan.id);
-      final updatedPlans = state.availablePlans.where((p) => p.id != plan.id).toList();
+      final updatedPlans = state.availablePlans
+          .where((p) => p.id != plan.id)
+          .toList();
       state = updatedPlans.isNotEmpty
           ? MealPlanState(availablePlans: updatedPlans)
           : const MealPlanState();

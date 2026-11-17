@@ -187,9 +187,7 @@ class _ToggleChip extends StatelessWidget {
           label,
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            color: selected
-                ? Colors.white
-                : PremiumTheme.textPrimary(context),
+            color: selected ? Colors.white : PremiumTheme.textPrimary(context),
           ),
         ),
       ),
@@ -223,9 +221,7 @@ class _PlanCard extends StatelessWidget {
     final bgColor = selected
         ? accent
         : PremiumTheme.glass(context, elevated: true);
-    final fg = selected
-        ? Colors.white
-        : PremiumTheme.textPrimary(context);
+    final fg = selected ? Colors.white : PremiumTheme.textPrimary(context);
     final fgSub = selected
         ? Colors.white.withValues(alpha: 0.85)
         : PremiumTheme.textSecondary(context);
@@ -295,10 +291,7 @@ class _PlanCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                per,
-                style: TextStyle(fontSize: 11, color: fgSub),
-              ),
+              Text(per, style: TextStyle(fontSize: 11, color: fgSub)),
             ],
           ),
         ),
@@ -415,11 +408,7 @@ class _MiniTestimonial extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Icon(
-          Icons.format_quote,
-          size: 14,
-          color: Color(0xFF00C896),
-        ),
+        const Icon(Icons.format_quote, size: 14, color: Color(0xFF00C896)),
         const SizedBox(width: 4),
         Expanded(
           child: Text(

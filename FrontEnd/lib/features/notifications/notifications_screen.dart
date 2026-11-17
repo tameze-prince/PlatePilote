@@ -65,7 +65,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                         selected: filter == null,
                         onSelected: (_) => setState(() => filter = null),
                       ),
-                      for (final type in ['pantry', 'budget', 'mealPlan', 'grocery', 'premium'])
+                      for (final type in [
+                        'pantry',
+                        'budget',
+                        'mealPlan',
+                        'grocery',
+                        'premium',
+                      ])
                         ChoiceChip(
                           label: Text(_typeLabel(type)),
                           selected: filter == type,
@@ -108,9 +114,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              granted
-                                  ? 'Notifications enabled'
-                                  : 'Notifications are not available or were denied',
+                              granted ? 'Notifications enabled' : 'Notifications are not available or were denied',
                             ),
                           ),
                         );

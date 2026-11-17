@@ -32,9 +32,8 @@ class PrimaryButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),
         ),
-        textStyle: Theme.of(
-          context,
-        ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
+        textStyle: Theme.of(context).textTheme.bodyLarge
+            ?.copyWith(fontWeight: FontWeight.w700),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       ),
     );

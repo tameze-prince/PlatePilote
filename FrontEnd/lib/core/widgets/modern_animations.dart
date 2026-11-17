@@ -46,12 +46,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 0.95,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -64,7 +59,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTapDown: (_) => _controller.forward(),
       onTapUp: (_) {
@@ -75,13 +70,15 @@ class _AnimatedButtonState extends State<AnimatedButton>
       child: ScaleTransition(
         scale: _scaleAnimation,
         child: Container(
-          padding: widget.padding ??
+          padding:
+              widget.padding ??
               const EdgeInsets.symmetric(
                 horizontal: AppSpacing.lg,
                 vertical: AppSpacing.md,
               ),
           decoration: BoxDecoration(
-            color: widget.backgroundColor ??
+            color:
+                widget.backgroundColor ??
                 (isDark ? AppColors.primaryLight : AppColors.primary),
             borderRadius: BorderRadius.circular(
               widget.borderRadius ?? AppRadius.button,
@@ -98,7 +95,8 @@ class _AnimatedButtonState extends State<AnimatedButton>
           ),
           child: DefaultTextStyle(
             style: AppTypography.labelLarge.copyWith(
-              color: widget.foregroundColor ??
+              color:
+                  widget.foregroundColor ??
                   (isDark ? AppColors.darkBackground : Colors.white),
               fontWeight: FontWeight.w600,
             ),
@@ -151,21 +149,11 @@ class _AnimatedCardState extends State<AnimatedCard>
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 1.02,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _elevationAnimation = Tween<double>(
       begin: widget.elevation ?? 1.0,
       end: (widget.elevation ?? 1.0) + 2.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
   }
 
   @override
@@ -178,7 +166,7 @@ class _AnimatedCardState extends State<AnimatedCard>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTapDown: (_) => _controller.forward(),
       onTapUp: (_) => _controller.reverse(),
@@ -193,7 +181,8 @@ class _AnimatedCardState extends State<AnimatedCard>
               margin: widget.margin,
               padding: widget.padding ?? const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: widget.backgroundColor ??
+                color:
+                    widget.backgroundColor ??
                     (isDark ? AppColors.darkSurface : AppColors.surface),
                 borderRadius: BorderRadius.circular(
                   widget.borderRadius ?? AppRadius.card,
@@ -246,34 +235,24 @@ class _AnimatedListItemState extends State<AnimatedListItem>
       duration: AppAnimations.listItem,
       vsync: this,
     );
-    
+
     final offset = switch (widget.direction) {
       AxisDirection.up => const Offset(0, 0.2),
       AxisDirection.down => const Offset(0, -0.2),
       AxisDirection.left => const Offset(0.2, 0),
       AxisDirection.right => const Offset(-0.2, 0),
     };
-    
+
     _slideAnimation = Tween<Offset>(
       begin: offset,
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOut,
-      ),
-    );
-    
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOut,
-      ),
-    );
-    
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
     Future.delayed(Duration(milliseconds: widget.delay * 50), () {
       if (mounted) {
         _controller.forward();
@@ -291,10 +270,7 @@ class _AnimatedListItemState extends State<AnimatedListItem>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _fadeAnimation,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: widget.child,
-      ),
+      child: SlideTransition(position: _slideAnimation, child: widget.child),
     );
   }
 }
@@ -321,8 +297,7 @@ class AnimatedProgressIndicator extends StatefulWidget {
       _AnimatedProgressIndicatorState();
 }
 
-class _AnimatedProgressIndicatorState
-    extends State<AnimatedProgressIndicator>
+class _AnimatedProgressIndicatorState extends State<AnimatedProgressIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -337,12 +312,7 @@ class _AnimatedProgressIndicatorState
     _animation = Tween<double>(
       begin: 0.0,
       end: widget.value.clamp(0.0, 1.0),
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _controller.forward();
   }
 
@@ -353,12 +323,7 @@ class _AnimatedProgressIndicatorState
       _animation = Tween<double>(
         begin: oldWidget.value.clamp(0.0, 1.0),
         end: widget.value.clamp(0.0, 1.0),
-      ).animate(
-        CurvedAnimation(
-          parent: _controller,
-          curve: Curves.easeOut,
-        ),
-      );
+      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
       _controller.forward(from: 0.0);
     }
   }
@@ -373,14 +338,13 @@ class _AnimatedProgressIndicatorState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return ClipRRect(
-      borderRadius: BorderRadius.circular(
-        widget.borderRadius ?? AppRadius.xs,
-      ),
+      borderRadius: BorderRadius.circular(widget.borderRadius ?? AppRadius.xs),
       child: LinearProgressIndicator(
         value: _animation.value,
-        backgroundColor: widget.backgroundColor ??
+        backgroundColor:
+            widget.backgroundColor ??
             (isDark
                 ? AppColors.darkSurfaceContainerHigh
                 : AppColors.surfaceContainerHigh),
@@ -428,12 +392,7 @@ class _AnimatedCounterState extends State<AnimatedCounter>
     _animation = Tween<double>(
       begin: _previousValue,
       end: widget.value,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _controller.forward();
   }
 
@@ -445,12 +404,7 @@ class _AnimatedCounterState extends State<AnimatedCounter>
       _animation = Tween<double>(
         begin: _previousValue,
         end: widget.value,
-      ).animate(
-        CurvedAnimation(
-          parent: _controller,
-          curve: Curves.easeOut,
-        ),
-      );
+      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
       _controller.forward(from: 0.0);
     }
   }
@@ -466,10 +420,7 @@ class _AnimatedCounterState extends State<AnimatedCounter>
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
-        return Text(
-          _formatValue(_animation.value),
-          style: widget.style,
-        );
+        return Text(_formatValue(_animation.value), style: widget.style);
       },
     );
   }
@@ -521,21 +472,11 @@ class _AnimatedIconButtonState extends State<AnimatedIconButton>
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 0.8,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
     _rotationAnimation = Tween<double>(
       begin: 0.0,
       end: 0.1,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
   }
 
   @override
@@ -548,36 +489,37 @@ class _AnimatedIconButtonState extends State<AnimatedIconButton>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Semantics(
-        label: widget.semanticsLabel ?? 'Bouton',
-        button: true,
-        child: GestureDetector(
-          onTapDown: (_) => _controller.forward(),
-          onTapUp: (_) {
-            _controller.reverse();
-            widget.onPressed?.call();
-          },
-          onTapCancel: () => _controller.reverse(),
-          child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: Transform.rotate(
-              angle: _rotationAnimation.value,
-              child: Icon(
-                widget.icon,
-                color: widget.color ??
-                    (isDark
-                        ? AppColors.darkOnSurfaceVariant
-                        : AppColors.onSurfaceVariant),
-                size: widget.size ?? 24,
-              ),
-            ),
-          );
+      label: widget.semanticsLabel ?? 'Bouton',
+      button: true,
+      child: GestureDetector(
+        onTapDown: (_) => _controller.forward(),
+        onTapUp: (_) {
+          _controller.reverse();
+          widget.onPressed?.call();
         },
-      ),
+        onTapCancel: () => _controller.reverse(),
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: Transform.rotate(
+                angle: _rotationAnimation.value,
+                child: Icon(
+                  widget.icon,
+                  color:
+                      widget.color ??
+                      (isDark
+                          ? AppColors.darkOnSurfaceVariant
+                          : AppColors.onSurfaceVariant),
+                  size: widget.size ?? 24,
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

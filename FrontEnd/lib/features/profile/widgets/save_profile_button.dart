@@ -18,8 +18,10 @@ class SaveProfileButton extends StatelessWidget {
 
   /// Vrai si des modifications non sauvegardées existent.
   final bool hasChanges;
+
   /// Vrai si la sauvegarde est en cours.
   final bool saving;
+
   /// Callback de sauvegarde.
   final VoidCallback onSave;
 

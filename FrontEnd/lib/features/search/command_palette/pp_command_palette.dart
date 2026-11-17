@@ -24,10 +24,7 @@ class PpCommandPalette {
   ///
   /// Returns the [Future] of the pushed route so callers can `await` the
   /// user dismissing the modal if needed.
-  static Future<T?> show<T>(
-    BuildContext context, {
-    bool push = false,
-  }) {
+  static Future<T?> show<T>(BuildContext context, {bool push = false}) {
     if (push) {
       return context.push<T>(AppRoute.commandPalette.name);
     }

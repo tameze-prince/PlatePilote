@@ -26,6 +26,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
   final _instructionsController = TextEditingController();
   final _tagsController = TextEditingController();
   final _costController = TextEditingController();
+
   /// Difficulté sélectionnée.
   String _difficulty = 'Easy';
 
@@ -71,9 +72,8 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
             estimatedCost: double.tryParse(_costController.text) ?? 0,
           ),
         );
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Recipe saved!')));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Recipe saved!')));
     Navigator.of(context).pop();
   }
 

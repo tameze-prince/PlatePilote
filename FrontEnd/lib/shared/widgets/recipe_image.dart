@@ -16,12 +16,16 @@ class RecipeImage extends StatelessWidget {
 
   /// URL de l'image.
   final String? imageUrl;
+
   /// Largeur du conteneur.
   final double width;
+
   /// Hauteur du conteneur.
   final double height;
+
   /// Rayon de bordure.
   final double? borderRadius;
+
   /// Type de cuisine pour le fallback.
   final String? cuisine;
 
@@ -77,8 +81,10 @@ class RecipeHeroImage extends StatelessWidget {
 
   /// URL de l'image.
   final String? imageUrl;
+
   /// Hauteur du conteneur.
   final double height;
+
   /// Type de cuisine pour le fallback.
   final String? cuisine;
 

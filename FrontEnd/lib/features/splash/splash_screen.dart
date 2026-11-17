@@ -19,6 +19,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   /// Contrôleur d'animation pour le splash.
   late final AnimationController _controller;
+
   /// Animation d'échelle du logo.
   late final Animation<double> _scaleAnim;
 
@@ -82,9 +83,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     height: logoSize,
                     decoration: BoxDecoration(
                       color: AppColors.primaryLight,
-                      borderRadius: BorderRadius.circular(
-                        isTablet ? 36 : 28,
-                      ),
+                      borderRadius: BorderRadius.circular(isTablet ? 36 : 28),
                       boxShadow: [
                         BoxShadow(
                           color: AppColors.primaryLight.withValues(alpha: 0.26),

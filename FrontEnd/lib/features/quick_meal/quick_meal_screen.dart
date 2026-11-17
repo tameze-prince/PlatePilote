@@ -18,8 +18,10 @@ class QuickMealScreen extends ConsumerStatefulWidget {
 class _QuickMealScreenState extends ConsumerState<QuickMealScreen> {
   /// Liste des repas rapides disponibles.
   List<Map<String, dynamic>> _meals = [];
+
   /// Indique si le chargement est en cours.
   bool _isLoading = true;
+
   /// Temps maximum en minutes pour les repas.
   int _maxTime = 30;
 
@@ -78,48 +80,51 @@ class _QuickMealScreenState extends ConsumerState<QuickMealScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _meals.isEmpty
-                    ? const EmptyState(
-                        icon: Icons.restaurant,
-                        title: 'No quick meals found',
-                        message: 'Try increasing the time limit.',
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        itemCount: _meals.length,
-                        itemBuilder: (context, index) {
-                          final meal = _meals[index];
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                            child: ListTile(
-                              leading: meal['imageUrl'] != null
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(
-                                        meal['imageUrl'] as String,
-                                        width: 56,
-                                        height: 56,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, _, _) => const Icon(Icons.restaurant, size: 40),
-                                      ),
-                                    )
-                                  : const Icon(Icons.restaurant, size: 40),
-                              title: Text(meal['name'] as String? ?? 'Quick Meal'),
-                              subtitle: Text(
-                                '${meal['totalTimeMinutes'] ?? '?'} min · ${meal['cuisineType'] ?? ''}',
-                              ),
-                              trailing: meal['estimatedCost'] != null
-                                  ? Text('\$${(meal['estimatedCost'] as num).toStringAsFixed(0)}')
-                                  : null,
-                              onTap: () {
-                                final id = meal['id']?.toString();
-                                if (id != null) {
-                                  context.push('/recipe/$id');
-                                }
-                              },
-                            ),
-                          );
-                        },
-                      ),
+                ? const EmptyState(
+                    icon: Icons.restaurant,
+                    title: 'No quick meals found',
+                    message: 'Try increasing the time limit.',
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    itemCount: _meals.length,
+                    itemBuilder: (context, index) {
+                      final meal = _meals[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: ListTile(
+                          leading: meal['imageUrl'] != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    meal['imageUrl'] as String,
+                                    width: 56,
+                                    height: 56,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) =>
+                                        const Icon(Icons.restaurant, size: 40),
+                                  ),
+                                )
+                              : const Icon(Icons.restaurant, size: 40),
+                          title: Text(meal['name'] as String? ?? 'Quick Meal'),
+                          subtitle: Text(
+                            '${meal['totalTimeMinutes'] ?? '?'} min · ${meal['cuisineType'] ?? ''}',
+                          ),
+                          trailing: meal['estimatedCost'] != null
+                              ? Text(
+                                  '\$${(meal['estimatedCost'] as num).toStringAsFixed(0)}',
+                                )
+                              : null,
+                          onTap: () {
+                            final id = meal['id']?.toString();
+                            if (id != null) {
+                              context.push('/recipe/$id');
+                            }
+                          },
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),

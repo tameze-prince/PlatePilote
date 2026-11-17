@@ -22,8 +22,10 @@ class ProfileHeaderCard extends ConsumerWidget {
 
   /// Profil utilisateur observé.
   final UserProfile profile;
+
   /// État d'authentification courant.
   final AuthState authState;
+
   /// Callback invoqué au tap sur l'avatar.
   final VoidCallback onAvatarTap;
 
@@ -40,11 +42,11 @@ class ProfileHeaderCard extends ConsumerWidget {
               children: [
                 CircleAvatar(
                   radius: 32,
-                  backgroundColor: AppColors.primaryAccentGreen.withValues(alpha: 0.2),
+                  backgroundColor: AppColors.primaryAccentGreen.withValues(
+                    alpha: 0.2,
+                  ),
                   backgroundImage: profile.avatarBytes != null
-                      ? MemoryImage(
-                          base64Decode(profile.avatarBytes!),
-                        )
+                      ? MemoryImage(base64Decode(profile.avatarBytes!))
                       : null,
                   child: profile.avatarBytes == null
                       ? Icon(
@@ -64,7 +66,11 @@ class ProfileHeaderCard extends ConsumerWidget {
                       color: AppColors.primaryAccentGreen,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.edit, size: 12, color: Colors.white),
+                    child: const Icon(
+                      Icons.edit,
+                      size: 12,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ],

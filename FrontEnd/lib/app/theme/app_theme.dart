@@ -7,6 +7,7 @@ import 'light_theme.dart';
 abstract final class AppTheme {
   /// Thème clair.
   static ThemeData get light => buildLightTheme();
+
   /// Thème sombre.
   static ThemeData get dark => buildDarkTheme();
 }

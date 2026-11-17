@@ -18,10 +18,13 @@ class ProfileEditableRow extends StatelessWidget {
 
   /// Label du champ.
   final String label;
+
   /// Valeur affichée.
   final String value;
+
   /// Icône optionnelle.
   final IconData? icon;
+
   /// Callback de modification.
   final VoidCallback? onTap;
 

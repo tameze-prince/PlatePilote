@@ -453,9 +453,8 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                 Expanded(
                   child: Text(
                     'Failed to load pantry',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: Theme.of(context).textTheme.bodyLarge
+                        ?.copyWith(fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
@@ -548,10 +547,7 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return SizedBox(
-      height: height,
-      child: child,
-    );
+    return SizedBox(height: height, child: child);
   }
 
   @override
@@ -929,8 +925,9 @@ class _CustomFabLocation extends FloatingActionButtonLocation {
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     // Utilise endFloat comme base et décale vers le haut
-    final baseOffset =
-        FloatingActionButtonLocation.endFloat.getOffset(scaffoldGeometry);
+    final baseOffset = FloatingActionButtonLocation.endFloat.getOffset(
+      scaffoldGeometry,
+    );
     return Offset(baseOffset.dx, baseOffset.dy - _upOffset);
   }
 }

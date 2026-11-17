@@ -78,6 +78,7 @@ class _FitRow extends StatelessWidget {
 
   /// Libellé de la ligne.
   final String label;
+
   /// Valeur associée.
   final String value;
 

@@ -31,7 +31,8 @@ class LanguageSettingsScreen extends ConsumerWidget {
             nativeLabel: 'English',
             currentLocale: currentLocale,
             isDark: isDark,
-            onTap: () => ref.read(localeProvider.notifier).set(const Locale('en')),
+            onTap: () =>
+                ref.read(localeProvider.notifier).set(const Locale('en')),
           ),
           const SizedBox(height: AppSpacing.sm),
           _LanguageOption(
@@ -40,7 +41,8 @@ class LanguageSettingsScreen extends ConsumerWidget {
             nativeLabel: 'Français',
             currentLocale: currentLocale,
             isDark: isDark,
-            onTap: () => ref.read(localeProvider.notifier).set(const Locale('fr')),
+            onTap: () =>
+                ref.read(localeProvider.notifier).set(const Locale('fr')),
           ),
           const SizedBox(height: AppSpacing.sm),
           _LanguageOption(
@@ -49,7 +51,8 @@ class LanguageSettingsScreen extends ConsumerWidget {
             nativeLabel: 'Deutsch',
             currentLocale: currentLocale,
             isDark: isDark,
-            onTap: () => ref.read(localeProvider.notifier).set(const Locale('de')),
+            onTap: () =>
+                ref.read(localeProvider.notifier).set(const Locale('de')),
           ),
         ],
       ),
@@ -95,7 +98,9 @@ class _LanguageOption extends StatelessWidget {
             decoration: BoxDecoration(
               color: isSelected
                   ? (isDark ? AppColors.primaryLight : AppColors.primary)
-                  : (isDark ? AppColors.darkSurfaceContainerHigh : AppColors.surfaceContainerHigh),
+                  : (isDark
+                        ? AppColors.darkSurfaceContainerHigh
+                        : AppColors.surfaceContainerHigh),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -113,8 +118,12 @@ class _LanguageOption extends StatelessWidget {
                 Text(
                   nativeLabel,
                   style: AppTypography.bodyLarge.copyWith(
-                    color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: isDark
+                        ? AppColors.darkOnSurface
+                        : AppColors.onSurface,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                   ),
                 ),
                 if (label != nativeLabel)

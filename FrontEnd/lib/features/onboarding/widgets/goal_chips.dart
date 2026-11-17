@@ -20,11 +20,7 @@ final List<GoalOption> _goalOptions = [
 ];
 
 class GoalChips extends StatelessWidget {
-  const GoalChips({
-    super.key,
-    required this.state,
-    required this.notifier,
-  });
+  const GoalChips({super.key, required this.state, required this.notifier});
 
   final OnboardingState state;
   final OnboardingNotifier notifier;

@@ -19,6 +19,7 @@ class PaymentMethodScreen extends ConsumerStatefulWidget {
 class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
   /// Clé du formulaire pour la validation.
   final _formKey = GlobalKey<FormState>();
+
   /// Contrôleur du champ de carte.
   final _cardController = TextEditingController();
 
@@ -53,7 +54,9 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
               icon: Icons.check,
               onPressed: () async {
                 if (!_formKey.currentState!.validate()) return;
-                final url = await ref.read(subscriptionProvider.notifier).createCustomerPortal();
+                final url = await ref
+                    .read(subscriptionProvider.notifier)
+                    .createCustomerPortal();
                 if (url != null && context.mounted) {
                   context.pop();
                 }

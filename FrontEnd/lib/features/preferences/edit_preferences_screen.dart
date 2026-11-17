@@ -108,12 +108,16 @@ class _ChoiceSection extends StatelessWidget {
 
   /// Titre de la section.
   final String title;
+
   /// Liste des valeurs possibles.
   final List<String> values;
+
   /// Ensemble des valeurs sélectionnées.
   final Set<String> selected;
+
   /// Callback de sélection.
   final ValueChanged<String> onSelected;
+
   /// Vrai si la sélection multiple est autorisée.
   final bool multiSelect;
 

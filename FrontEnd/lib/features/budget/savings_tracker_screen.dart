@@ -21,12 +21,16 @@ class SavingsTrackerScreen extends ConsumerStatefulWidget {
 class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
   /// Montant total économisé.
   double _totalSaved = 0;
+
   /// Objectif mensuel.
   double _monthlyGoal = 0;
+
   /// Historique mensuel des économies.
   List<Map<String, dynamic>> _monthlyHistory = [];
+
   /// Sources d'économies.
   List<Map<String, dynamic>> _savingsSources = [];
+
   /// Vrai si le chargement est en cours.
   bool _isLoading = true;
 
@@ -48,7 +52,9 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
 
         final historyRaw = savings['monthlyHistory'] as List?;
         if (historyRaw != null) {
-          _monthlyHistory = historyRaw.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+          _monthlyHistory = historyRaw
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList();
         }
 
         final sourcesRaw = savings['savingsSources'] as List?;
@@ -78,201 +84,201 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Savings Tracker'),
-      ),
+      appBar: AppBar(title: const Text('Savings Tracker')),
       body: PremiumGate(
         message: 'Suivi des économies',
         child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AppCard(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(AppSpacing.sm),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryLight.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppRadius.input),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppCard(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.sm),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryLight.withValues(
+                              alpha: 0.1,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.input,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.savings,
+                            color: AppColors.primaryLight,
+                            size: 24,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.savings,
-                          color: AppColors.primaryLight,
-                          size: 24,
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Total Saved',
+                                style: context.text.bodySmall?.copyWith(
+                                  color: AppColors.onSurfaceVariant,
+                                ),
+                              ),
+                              Text(
+                                '\$${_totalSaved.toStringAsFixed(2)}',
+                                style: context.text.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primaryLight,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Total Saved',
-                              style: context.text.bodySmall?.copyWith(
-                                color: AppColors.onSurfaceVariant,
-                              ),
-                            ),
-                            Text(
-                              '\$${_totalSaved.toStringAsFixed(2)}',
-                              style: context.text.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primaryLight,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Monthly Goal',
-                              style: context.text.bodySmall?.copyWith(
-                                color: AppColors.onSurfaceVariant,
-                              ),
-                            ),
-                            Text(
-                              '\$${_monthlyGoal.toStringAsFixed(2)}',
-                              style: context.text.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Progress',
-                              style: context.text.bodySmall?.copyWith(
-                                color: AppColors.onSurfaceVariant,
-                              ),
-                            ),
-                            Text(
-                              '${((_totalSaved / _monthlyGoal) * 100).toInt()}%',
-                              style: context.text.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primaryLight,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                    child: LinearProgressIndicator(
-                      value: _totalSaved / _monthlyGoal,
-                      backgroundColor: AppColors.surfaceContainerLow,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        AppColors.primaryLight,
-                      ),
-                      minHeight: 8,
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: AppSpacing.md),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Monthly Goal',
+                                style: context.text.bodySmall?.copyWith(
+                                  color: AppColors.onSurfaceVariant,
+                                ),
+                              ),
+                              Text(
+                                '\$${_monthlyGoal.toStringAsFixed(2)}',
+                                style: context.text.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Progress',
+                                style: context.text.bodySmall?.copyWith(
+                                  color: AppColors.onSurfaceVariant,
+                                ),
+                              ),
+                              Text(
+                                '${((_totalSaved / _monthlyGoal) * 100).toInt()}%',
+                                style: context.text.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primaryLight,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      child: LinearProgressIndicator(
+                        value: _totalSaved / _monthlyGoal,
+                        backgroundColor: AppColors.surfaceContainerLow,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppColors.primaryLight,
+                        ),
+                        minHeight: 8,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppCard(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Monthly Savings Trend',
-                    style: context.text.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  SizedBox(
-                    height: 180,
-                    child: CustomPaint(
-                      size: const Size(double.infinity, 180),
-                      painter: _SavingsChartPainter(
-                        data: _monthlyHistory,
-                        barColor: AppColors.primaryLight,
-                        targetColor: AppColors.secondary,
+              const SizedBox(height: AppSpacing.md),
+              AppCard(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Monthly Savings Trend',
+                      style: context.text.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppCard(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Savings Sources',
-                    style: context.text.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+                    const SizedBox(height: AppSpacing.lg),
+                    SizedBox(
+                      height: 180,
+                      child: CustomPaint(
+                        size: const Size(double.infinity, 180),
+                        painter: _SavingsChartPainter(
+                          data: _monthlyHistory,
+                          barColor: AppColors.primaryLight,
+                          targetColor: AppColors.secondary,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  ..._savingsSources.map(
-                    (source) => _buildSourceRow(source),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppCard(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Achievements',
-                    style: context.text.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+              const SizedBox(height: AppSpacing.md),
+              AppCard(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Savings Sources',
+                      style: context.text.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  _buildAchievement(
-                    icon: Icons.emoji_events,
-                    title: 'First \$100 saved!',
-                    description: 'Reached your first savings milestone',
-                    unlocked: true,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  _buildAchievement(
-                    icon: Icons.trending_up,
-                    title: 'Consistent saver',
-                    description: 'Saved every month for 3 months',
-                    unlocked: true,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  _buildAchievement(
-                    icon: Icons.star,
-                    title: 'Goal crusher',
-                    description: 'Exceed monthly savings goal',
-                    unlocked: false,
-                  ),
-                ],
+                    const SizedBox(height: AppSpacing.md),
+                    ..._savingsSources.map((source) => _buildSourceRow(source)),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.md),
+              AppCard(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Achievements',
+                      style: context.text.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    _buildAchievement(
+                      icon: Icons.emoji_events,
+                      title: 'First \$100 saved!',
+                      description: 'Reached your first savings milestone',
+                      unlocked: true,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildAchievement(
+                      icon: Icons.trending_up,
+                      title: 'Consistent saver',
+                      description: 'Saved every month for 3 months',
+                      unlocked: true,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildAchievement(
+                      icon: Icons.star,
+                      title: 'Goal crusher',
+                      description: 'Exceed monthly savings goal',
+                      unlocked: false,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -352,9 +358,7 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
           ),
           child: Icon(
             icon,
-            color: unlocked
-                ? AppColors.secondary
-                : AppColors.onSurfaceVariant,
+            color: unlocked ? AppColors.secondary : AppColors.onSurfaceVariant,
             size: 18,
           ),
         ),
@@ -383,9 +387,7 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
         ),
         Icon(
           unlocked ? Icons.check_circle : Icons.lock_outline,
-          color: unlocked
-              ? AppColors.primaryLight
-              : AppColors.onSurfaceVariant,
+          color: unlocked ? AppColors.primaryLight : AppColors.onSurfaceVariant,
           size: 20,
         ),
       ],
@@ -397,8 +399,10 @@ class _SavingsTrackerScreenState extends ConsumerState<SavingsTrackerScreen> {
 class _SavingsChartPainter extends CustomPainter {
   /// Données mensuelles.
   final List<Map<String, dynamic>> data;
+
   /// Couleur des barres d'économies.
   final Color barColor;
+
   /// Couleur de la ligne d'objectif.
   final Color targetColor;
 
@@ -415,9 +419,8 @@ class _SavingsChartPainter extends CustomPainter {
     final maxBarHeight = size.height - 40;
     final maxValue = data.fold<double>(
       0,
-      (max, item) => (item['target'] as double) > max
-          ? item['target'] as double
-          : max,
+      (max, item) =>
+          (item['target'] as double) > max ? item['target'] as double : max,
     );
 
     for (int i = 0; i < data.length; i++) {

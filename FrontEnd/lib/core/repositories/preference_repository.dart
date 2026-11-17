@@ -59,7 +59,10 @@ class PreferenceRepository extends BaseRepository {
   /// Ajoute une préférence de cuisine.
   Future<void> addCuisinePreference(String cuisineType) async {
     try {
-      await apiClient.post('/preferences/cuisines', data: {'cuisineType': cuisineType});
+      await apiClient.post(
+        '/preferences/cuisines',
+        data: {'cuisineType': cuisineType},
+      );
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }
@@ -92,10 +95,10 @@ class PreferenceRepository extends BaseRepository {
   /// Ajoute une allergie avec une sévérité optionnelle.
   Future<void> addAllergy(String allergen, {String? severity}) async {
     try {
-      await apiClient.post('/preferences/allergies', data: {
-        'allergen': allergen,
-        'severity': ?severity,
-      });
+      await apiClient.post(
+        '/preferences/allergies',
+        data: {'allergen': allergen, 'severity': ?severity},
+      );
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);
     }

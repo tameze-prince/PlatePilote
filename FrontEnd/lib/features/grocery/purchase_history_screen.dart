@@ -17,25 +17,27 @@ class PurchaseHistoryScreen extends ConsumerWidget {
     final history = state.purchaseHistory;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Purchase History'),
-      ),
+      appBar: AppBar(title: const Text('Purchase History')),
       body: history.isEmpty
           ? Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.history,
-                      size: 48, color: AppColors.primaryAccentGreen),
+                  Icon(
+                    Icons.history,
+                    size: 48,
+                    color: AppColors.primaryAccentGreen,
+                  ),
                   const SizedBox(height: AppSpacing.md),
-                  Text('No purchases yet',
-                      style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'No purchases yet',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Mark items as bought to see history',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.onSurfaceVariant,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(color: AppColors.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -54,23 +56,22 @@ class PurchaseHistoryScreen extends ConsumerWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.check_circle,
-                                color: AppColors.primaryAccentGreen, size: 20),
+                            Icon(
+                              Icons.check_circle,
+                              color: AppColors.primaryAccentGreen,
+                              size: 20,
+                            ),
                             const SizedBox(width: AppSpacing.sm),
                             Expanded(
                               child: Text(
                                 record.formattedDate,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
+                                style: Theme.of(context).textTheme.titleMedium
                                     ?.copyWith(fontWeight: FontWeight.w600),
                               ),
                             ),
                             Text(
                               '\$${record.totalPrice.toStringAsFixed(2)}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
+                              style: Theme.of(context).textTheme.titleSmall
                                   ?.copyWith(
                                     color: AppColors.primaryAccentGreen,
                                     fontWeight: FontWeight.w700,
@@ -83,17 +84,20 @@ class PurchaseHistoryScreen extends ConsumerWidget {
                           spacing: AppSpacing.xs,
                           runSpacing: AppSpacing.xxs,
                           children: record.itemNames
-                              .map((name) => Chip(
-                                    label: Text(name,
-                                        style: const TextStyle(fontSize: 12)),
-                                    materialTapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    visualDensity: VisualDensity.compact,
-                                    backgroundColor:
-                                        AppColors.primaryAccentGreen
-                                            .withValues(alpha: 0.1),
-                                    side: BorderSide.none,
-                                  ))
+                              .map(
+                                (name) => Chip(
+                                  label: Text(
+                                    name,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  visualDensity: VisualDensity.compact,
+                                  backgroundColor: AppColors.primaryAccentGreen
+                                      .withValues(alpha: 0.1),
+                                  side: BorderSide.none,
+                                ),
+                              )
                               .toList(),
                         ),
                       ],

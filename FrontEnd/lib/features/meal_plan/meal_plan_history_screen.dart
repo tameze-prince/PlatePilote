@@ -22,8 +22,7 @@ class MealPlanHistoryScreen extends ConsumerStatefulWidget {
       _MealPlanHistoryScreenState();
 }
 
-class _MealPlanHistoryScreenState
-    extends ConsumerState<MealPlanHistoryScreen> {
+class _MealPlanHistoryScreenState extends ConsumerState<MealPlanHistoryScreen> {
   /// Liste des plans de repas historiques.
   List<MealPlan> _history = [];
 
@@ -64,25 +63,23 @@ class _MealPlanHistoryScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Plan History'),
-      ),
+      appBar: AppBar(title: const Text('Plan History')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _history.isEmpty
-              ? EmptyState(
-                  icon: Icons.history,
-                  title: 'No history yet',
-                  message: 'Your meal plan history will appear here',
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  itemCount: _history.length,
-                  itemBuilder: (context, index) {
-                    final plan = _history[index];
-                    return _buildHistoryCard(plan, index);
-                  },
-                ),
+          ? EmptyState(
+              icon: Icons.history,
+              title: 'No history yet',
+              message: 'Your meal plan history will appear here',
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              itemCount: _history.length,
+              itemBuilder: (context, index) {
+                final plan = _history[index];
+                return _buildHistoryCard(plan, index);
+              },
+            ),
     );
   }
 

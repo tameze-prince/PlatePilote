@@ -12,10 +12,12 @@ class BudgetManagementScreen extends ConsumerStatefulWidget {
   const BudgetManagementScreen({super.key});
 
   @override
-  ConsumerState<BudgetManagementScreen> createState() => _BudgetManagementScreenState();
+  ConsumerState<BudgetManagementScreen> createState() =>
+      _BudgetManagementScreenState();
 }
 
-class _BudgetManagementScreenState extends ConsumerState<BudgetManagementScreen> {
+class _BudgetManagementScreenState
+    extends ConsumerState<BudgetManagementScreen> {
   /// Évite le double appel à refresh.
   bool _didInit = false;
 
@@ -47,20 +49,34 @@ class _BudgetManagementScreenState extends ConsumerState<BudgetManagementScreen>
               FloatingHeader(title: 'Budget', subtitle: 'Weekly spending plan'),
               const SizedBox(height: AppSpacing.md),
               if (budget.isLoading)
-                ...List.generate(4, (_) => const Padding(
-                  padding: EdgeInsets.only(bottom: AppSpacing.md),
-                  child: ShimmerGlassSkeleton(width: double.infinity, height: 100),
-                ))
+                ...List.generate(
+                  4,
+                  (_) => const Padding(
+                    padding: EdgeInsets.only(bottom: AppSpacing.md),
+                    child: ShimmerGlassSkeleton(
+                      width: double.infinity,
+                      height: 100,
+                    ),
+                  ),
+                )
               else ...[
                 PremiumCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Current weekly budget',
-                        style: textTheme.bodyMedium?.copyWith(color: PremiumTheme.textSecondary(context))),
-                      Text('\$${budget.weeklyBudget.toStringAsFixed(0)}',
+                      Text(
+                        'Current weekly budget',
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: PremiumTheme.textSecondary(context),
+                        ),
+                      ),
+                      Text(
+                        '\$${budget.weeklyBudget.toStringAsFixed(0)}',
                         style: textTheme.displaySmall?.copyWith(
-                          color: AppColors.primaryAccentGreen, fontWeight: FontWeight.w800)),
+                          color: AppColors.primaryAccentGreen,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                       const SizedBox(height: AppSpacing.md),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,15 +86,23 @@ class _BudgetManagementScreenState extends ConsumerState<BudgetManagementScreen>
                             child: LinearProgressIndicator(
                               value: budget.percentUsed,
                               minHeight: 10,
-                              backgroundColor: Colors.white.withValues(alpha: 0.1),
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.1,
+                              ),
                               valueColor: AlwaysStoppedAnimation(
-                                budget.percentUsed > 0.8 ? AppColors.error : AppColors.primaryAccentGreen,
+                                budget.percentUsed > 0.8
+                                    ? AppColors.error
+                                    : AppColors.primaryAccentGreen,
                               ),
                             ),
                           ),
                           const SizedBox(height: AppSpacing.xs),
-                          Text('\$${budget.remaining.toStringAsFixed(0)} remaining - \$${budget.spentAmount.toStringAsFixed(0)} spent',
-                            style: textTheme.bodySmall?.copyWith(color: PremiumTheme.textSecondary(context))),
+                          Text(
+                            '\$${budget.remaining.toStringAsFixed(0)} remaining - \$${budget.spentAmount.toStringAsFixed(0)} spent',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: PremiumTheme.textSecondary(context),
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -89,7 +113,8 @@ class _BudgetManagementScreenState extends ConsumerState<BudgetManagementScreen>
                   children: [
                     Expanded(
                       child: GlassButton(
-                        label: '+ \$25', icon: Icons.add,
+                        label: '+ \$25',
+                        icon: Icons.add,
                         variant: GlassButtonVariant.outlined,
                         onPressed: () => notifier.increaseBudget(25),
                       ),
@@ -97,7 +122,8 @@ class _BudgetManagementScreenState extends ConsumerState<BudgetManagementScreen>
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: GlassButton(
-                        label: 'Replace', icon: Icons.edit,
+                        label: 'Replace',
+                        icon: Icons.edit,
                         variant: GlassButtonVariant.outlined,
                         onPressed: () => notifier.replaceBudget(400),
                       ),
@@ -106,20 +132,31 @@ class _BudgetManagementScreenState extends ConsumerState<BudgetManagementScreen>
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 GlassButton(
-                  label: 'Reset budget cycle', icon: Icons.restart_alt,
+                  label: 'Reset budget cycle',
+                  icon: Icons.restart_alt,
                   onPressed: notifier.resetCycle,
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                Text('Historical trends',
-                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                Text(
+                  'Historical trends',
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 const SizedBox(height: AppSpacing.md),
                 if (budget.history.isEmpty)
                   PremiumCard(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.lg,
+                      ),
                       child: Center(
-                        child: Text('No history yet. Reset a cycle to start tracking.',
-                          style: textTheme.bodyMedium?.copyWith(color: PremiumTheme.textSecondary(context))),
+                        child: Text(
+                          'No history yet. Reset a cycle to start tracking.',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: PremiumTheme.textSecondary(context),
+                          ),
+                        ),
                       ),
                     ),
                   )
@@ -129,24 +166,31 @@ class _BudgetManagementScreenState extends ConsumerState<BudgetManagementScreen>
                       height: 150,
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
-                        children: budget.history.map((value) => Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 3),
-                            child: Container(
-                              height: (value / 400 * 130).clamp(24, 130),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryAccentGreen,
-                                borderRadius: BorderRadius.circular(8),
+                        children: budget.history
+                            .map(
+                              (value) => Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 3,
+                                  ),
+                                  child: Container(
+                                    height: (value / 400 * 130).clamp(24, 130),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryAccentGreen,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        )).toList(),
+                            )
+                            .toList(),
                       ),
                     ),
                   ),
                 const SizedBox(height: AppSpacing.lg),
                 GlassButton(
-                  label: 'Create New Budget', icon: Icons.add_chart,
+                  label: 'Create New Budget',
+                  icon: Icons.add_chart,
                   onPressed: () => notifier.createBudget(amount: 400),
                 ),
               ],

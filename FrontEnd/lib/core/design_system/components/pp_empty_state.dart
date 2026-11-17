@@ -79,9 +79,7 @@ class PpEmptyState extends StatelessWidget {
                 child: Icon(icon, size: 44, color: accent),
               ),
             SizedBox(
-              height: illustration == null && icon == null
-                  ? 0
-                  : DsSpacing.lg,
+              height: illustration == null && icon == null ? 0 : DsSpacing.lg,
             ),
             Text(
               title,

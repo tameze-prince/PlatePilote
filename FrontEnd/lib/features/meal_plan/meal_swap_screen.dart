@@ -141,19 +141,24 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
     if (widget.currentEntry?.id != null && _selectedMeal!.recipeId != null) {
       try {
         final repo = ref.read(mealPlanRepositoryProvider);
-        await repo.applySwap(widget.currentEntry!.id!, _selectedMeal!.recipeId!);
-        await ref.read(mealPlanProvider.notifier).refresh();
-        ref.read(analyticsServiceProvider).trackPayload(
-          PlateEvents.mealSwapped,
-          payload: EventPayload(
-            source: 'manual',
-            meta: <String, Object>{
-              'mealType': widget.mealType,
-              'fromRecipeId': widget.currentEntry?.recipeId ?? '',
-              'toRecipeId': _selectedMeal!.recipeId ?? '',
-            },
-          ),
+        await repo.applySwap(
+          widget.currentEntry!.id!,
+          _selectedMeal!.recipeId!,
         );
+        await ref.read(mealPlanProvider.notifier).refresh();
+        ref
+            .read(analyticsServiceProvider)
+            .trackPayload(
+              PlateEvents.mealSwapped,
+              payload: EventPayload(
+                source: 'manual',
+                meta: <String, Object>{
+                  'mealType': widget.mealType,
+                  'fromRecipeId': widget.currentEntry?.recipeId ?? '',
+                  'toRecipeId': _selectedMeal!.recipeId ?? '',
+                },
+              ),
+            );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -194,7 +199,10 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.sm, AppSpacing.sm, AppSpacing.sm, 0,
+                  AppSpacing.sm,
+                  AppSpacing.sm,
+                  AppSpacing.sm,
+                  0,
                 ),
                 child: Row(
                   children: [
@@ -290,106 +298,125 @@ class _MealSwapScreenState extends ConsumerState<MealSwapScreen> {
               child: _isLoading
                   ? _buildSkeletonList()
                   : _error != null
-                      ? _SwapErrorState(
-                          onRetry: _loadAlternatives,
-                          onCancel: () => context.pop(),
-                        )
-                      : _alternatives.isEmpty
-                          ? _SwapEmptyState(
-                              onCancel: () => context.pop(),
-                              onRegenerate: _regenerateAll,
-                            )
-                          : ListView.builder(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.md,
+                  ? _SwapErrorState(
+                      onRetry: _loadAlternatives,
+                      onCancel: () => context.pop(),
+                    )
+                  : _alternatives.isEmpty
+                  ? _SwapEmptyState(
+                      onCancel: () => context.pop(),
+                      onRegenerate: _regenerateAll,
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                      ),
+                      itemCount: _alternatives.length,
+                      itemBuilder: (context, index) {
+                        final meal = _alternatives[index];
+                        final isSelected = _selectedMeal == meal;
+
+                        IconData icon = Icons.restaurant;
+                        Color tint = Colors.green;
+                        switch (widget.mealType.toLowerCase()) {
+                          case 'breakfast':
+                            icon = Icons.wb_sunny;
+                            tint = Colors.orange;
+                            break;
+                          case 'lunch':
+                            icon = Icons.lunch_dining;
+                            tint = Colors.amber;
+                            break;
+                          case 'dinner':
+                            icon = Icons.dinner_dining;
+                            tint = Colors.deepPurple;
+                            break;
+                          case 'snack':
+                            icon = Icons.cookie;
+                            tint = Colors.brown;
+                            break;
+                        }
+
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() => _selectedMeal = meal);
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(
+                              bottom: AppSpacing.sm,
+                            ),
+                            padding: const EdgeInsets.all(AppSpacing.md),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.primaryAccentGreen.withValues(
+                                      alpha: 0.12,
+                                    )
+                                  : PremiumTheme.glass(context, elevated: true),
+                              borderRadius: BorderRadius.circular(AppRadius.xl),
+                              border: Border.all(
+                                color: isSelected
+                                    ? AppColors.primaryAccentGreen
+                                    : PremiumTheme.border(context),
+                                width: isSelected ? 2 : 1,
                               ),
-                              itemCount: _alternatives.length,
-                              itemBuilder: (context, index) {
-                                final meal = _alternatives[index];
-                                final isSelected = _selectedMeal == meal;
-
-                                IconData icon = Icons.restaurant;
-                                Color tint = Colors.green;
-                                switch (widget.mealType.toLowerCase()) {
-                                  case 'breakfast':
-                                    icon = Icons.wb_sunny; tint = Colors.orange; break;
-                                  case 'lunch':
-                                    icon = Icons.lunch_dining; tint = Colors.amber; break;
-                                  case 'dinner':
-                                    icon = Icons.dinner_dining; tint = Colors.deepPurple; break;
-                                  case 'snack':
-                                    icon = Icons.cookie; tint = Colors.brown; break;
-                                }
-
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() => _selectedMeal = meal);
-                                  },
-                                  child: Container(
-                                    margin: const EdgeInsets.only(
-                                      bottom: AppSpacing.sm,
-                                    ),
-                                    padding: const EdgeInsets.all(AppSpacing.md),
-                                    decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? AppColors.primaryAccentGreen.withValues(alpha: 0.12)
-                                          : PremiumTheme.glass(context, elevated: true),
-                                      borderRadius: BorderRadius.circular(AppRadius.xl),
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? AppColors.primaryAccentGreen
-                                            : PremiumTheme.border(context),
-                                        width: isSelected ? 2 : 1,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(AppSpacing.sm),
-                                          decoration: BoxDecoration(
-                                            color: tint.withValues(alpha: 0.15),
-                                            borderRadius: BorderRadius.circular(
-                                              AppRadius.md,
-                                            ),
-                                          ),
-                                          child: Icon(icon, color: tint, size: 22),
-                                        ),
-                                        const SizedBox(width: AppSpacing.md),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                meal.name,
-                                                style: AppTypography.bodyMedium.copyWith(
-                                                  color: PremiumTheme.textPrimary(context),
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                              Text(
-                                                '${meal.minutes ?? "?"} min \u2022 ${meal.calories ?? "?"} kcal',
-                                                style: AppTypography.bodySmall.copyWith(
-                                                  color: PremiumTheme.textSecondary(context),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        if (isSelected)
-                                          const Icon(
-                                            Icons.check_circle,
-                                            color: AppColors.primaryAccentGreen,
-                                          ),
-                                      ],
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(AppSpacing.sm),
+                                  decoration: BoxDecoration(
+                                    color: tint.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.md,
                                     ),
                                   ),
-                                );
-                              },
+                                  child: Icon(icon, color: tint, size: 22),
+                                ),
+                                const SizedBox(width: AppSpacing.md),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        meal.name,
+                                        style: AppTypography.bodyMedium
+                                            .copyWith(
+                                              color: PremiumTheme.textPrimary(
+                                                context,
+                                              ),
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      Text(
+                                        '${meal.minutes ?? "?"} min \u2022 ${meal.calories ?? "?"} kcal',
+                                        style: AppTypography.bodySmall.copyWith(
+                                          color: PremiumTheme.textSecondary(
+                                            context,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (isSelected)
+                                  const Icon(
+                                    Icons.check_circle,
+                                    color: AppColors.primaryAccentGreen,
+                                  ),
+                              ],
                             ),
+                          ),
+                        );
+                      },
+                    ),
             ),
             Container(
               padding: const EdgeInsets.fromLTRB(
-                AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.xxl,
+                AppSpacing.md,
+                AppSpacing.md,
+                AppSpacing.md,
+                AppSpacing.xxl,
               ),
               child: Row(
                 children: [
@@ -456,10 +483,7 @@ class _SwapOption {
 
 /// État vide — affiché quand l'API renvoie une liste vide.
 class _SwapEmptyState extends StatelessWidget {
-  const _SwapEmptyState({
-    required this.onCancel,
-    required this.onRegenerate,
-  });
+  const _SwapEmptyState({required this.onCancel, required this.onRegenerate});
 
   final VoidCallback onCancel;
   final VoidCallback onRegenerate;
@@ -525,10 +549,7 @@ class _SwapEmptyState extends StatelessWidget {
 
 /// État d'erreur — affiché si `getSwapOptions` lève une exception.
 class _SwapErrorState extends StatelessWidget {
-  const _SwapErrorState({
-    required this.onRetry,
-    required this.onCancel,
-  });
+  const _SwapErrorState({required this.onRetry, required this.onCancel});
 
   final VoidCallback onRetry;
   final VoidCallback onCancel;
@@ -577,10 +598,7 @@ class _SwapErrorState extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
-                    child: GlassButton(
-                      label: 'Retry',
-                      onPressed: onRetry,
-                    ),
+                    child: GlassButton(label: 'Retry', onPressed: onRetry),
                   ),
                 ],
               ),

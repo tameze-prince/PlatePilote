@@ -43,7 +43,7 @@ class ModernCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       margin: margin ?? EdgeInsets.zero,
       child: Material(
@@ -59,7 +59,8 @@ class ModernCard extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppRadius.card),
               border: Border.all(
-                color: borderColor ??
+                color:
+                    borderColor ??
                     (isDark
                         ? AppColors.darkOutline.withValues(alpha: 0.5)
                         : AppColors.outline.withValues(alpha: 0.5)),
@@ -69,9 +70,15 @@ class ModernCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (title != null || leading != null || trailing != null || badge != null)
+                if (title != null ||
+                    leading != null ||
+                    trailing != null ||
+                    badge != null)
                   _buildHeader(context),
-                if (title != null || leading != null || trailing != null || badge != null)
+                if (title != null ||
+                    leading != null ||
+                    trailing != null ||
+                    badge != null)
                   const SizedBox(height: AppSpacing.sm),
                 if (subtitle != null) ...[
                   Text(
@@ -96,7 +103,7 @@ class ModernCard extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Row(
       children: [
         if (leading != null) ...[
@@ -120,10 +127,7 @@ class ModernCard extends StatelessWidget {
             ],
           ),
         ),
-        if (badge != null) ...[
-          const SizedBox(width: AppSpacing.xs),
-          badge!,
-        ],
+        if (badge != null) ...[const SizedBox(width: AppSpacing.xs), badge!],
         if (trailing != null) ...[
           const SizedBox(width: AppSpacing.xs),
           trailing!,
@@ -154,9 +158,9 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final iconColor = color ??
-        (isDark ? AppColors.primaryLight : AppColors.primary);
-    
+    final iconColor =
+        color ?? (isDark ? AppColors.primaryLight : AppColors.primary);
+
     return ModernCard(
       padding: const EdgeInsets.all(AppSpacing.md),
       onTap: onTap,
@@ -168,19 +172,13 @@ class StatCard extends StatelessWidget {
               color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 20,
-            ),
+            child: Icon(icon, color: iconColor, size: 20),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             value,
             style: AppTypography.titleSmall.copyWith(
-              color: isDark
-                  ? AppColors.darkOnSurface
-                  : AppColors.onSurface,
+              color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -223,9 +221,9 @@ class ProgressCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final progressColor = color ??
-        (isDark ? AppColors.primaryLight : AppColors.primary);
-    
+    final progressColor =
+        color ?? (isDark ? AppColors.primaryLight : AppColors.primary);
+
     return ModernCard(
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
@@ -234,11 +232,7 @@ class ProgressCard extends StatelessWidget {
           Row(
             children: [
               if (icon != null) ...[
-                Icon(
-                  icon,
-                  color: progressColor,
-                  size: 18,
-                ),
+                Icon(icon, color: progressColor, size: 18),
                 const SizedBox(width: AppSpacing.xs),
               ],
               Expanded(
@@ -313,9 +307,9 @@ class InfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final iconColor = color ??
-        (isDark ? AppColors.primaryLight : AppColors.primary);
-    
+    final iconColor =
+        color ?? (isDark ? AppColors.primaryLight : AppColors.primary);
+
     return ModernCard(
       padding: const EdgeInsets.all(AppSpacing.md),
       onTap: onTap,
@@ -327,11 +321,7 @@ class InfoCard extends StatelessWidget {
               color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 20,
-            ),
+            child: Icon(icon, color: iconColor, size: 20),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -385,29 +375,22 @@ class AlertCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     final config = _getConfig(type, isDark);
-    
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: config.backgroundColor,
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(
-          color: config.borderColor,
-          width: 1,
-        ),
+        border: Border.all(color: config.borderColor, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                config.icon,
-                color: config.iconColor,
-                size: 20,
-              ),
+              Icon(config.icon, color: config.iconColor, size: 20),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
@@ -429,10 +412,7 @@ class AlertCard extends StatelessWidget {
           ),
           if (actions != null && actions!.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: actions!,
-            ),
+            Row(mainAxisAlignment: MainAxisAlignment.end, children: actions!),
           ],
         ],
       ),
@@ -519,7 +499,7 @@ class EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
@@ -539,9 +519,7 @@ class EmptyState extends StatelessWidget {
           Text(
             title,
             style: AppTypography.headlineSmall.copyWith(
-              color: isDark
-                  ? AppColors.darkOnSurface
-                  : AppColors.onSurface,
+              color: isDark ? AppColors.darkOnSurface : AppColors.onSurface,
               fontWeight: FontWeight.w600,
             ),
             textAlign: TextAlign.center,
@@ -587,7 +565,7 @@ class LoadingSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       height: height,
       width: width,
@@ -639,11 +617,11 @@ class Badge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final badgeColor = color ??
-        (isDark ? AppColors.primaryLight : AppColors.primary);
-    final labelColor = textColor ??
-        (isDark ? AppColors.darkBackground : Colors.white);
-    
+    final badgeColor =
+        color ?? (isDark ? AppColors.primaryLight : AppColors.primary);
+    final labelColor =
+        textColor ?? (isDark ? AppColors.darkBackground : Colors.white);
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xs,
@@ -657,11 +635,7 @@ class Badge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(
-              icon,
-              color: labelColor,
-              size: 12,
-            ),
+            Icon(icon, color: labelColor, size: 12),
             const SizedBox(width: 4),
           ],
           Text(
@@ -679,12 +653,7 @@ class Badge extends StatelessWidget {
 
 /// Séparateur avec libellé optionnel au centre.
 class LabeledDivider extends StatelessWidget {
-  const LabeledDivider({
-    this.label,
-    this.color,
-    this.thickness,
-    super.key,
-  });
+  const LabeledDivider({this.label, this.color, this.thickness, super.key});
 
   final String? label;
   final Color? color;
@@ -694,17 +663,13 @@ class LabeledDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final dividerColor = color ??
-        (isDark ? AppColors.darkOutline : AppColors.outline);
-    
+    final dividerColor =
+        color ?? (isDark ? AppColors.darkOutline : AppColors.outline);
+
     if (label == null) {
-      return Divider(
-        color: dividerColor,
-        thickness: thickness ?? 1,
-        height: 1,
-      );
+      return Divider(color: dividerColor, thickness: thickness ?? 1, height: 1);
     }
-    
+
     return Row(
       children: [
         Expanded(

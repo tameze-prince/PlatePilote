@@ -87,8 +87,9 @@ class _SocialButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor =
-        context.isDark ? AppColors.darkOutline : AppColors.outline;
+    final borderColor = context.isDark
+        ? AppColors.darkOutline
+        : AppColors.outline;
     return Material(
       color: Colors.transparent,
       child: InkWell(

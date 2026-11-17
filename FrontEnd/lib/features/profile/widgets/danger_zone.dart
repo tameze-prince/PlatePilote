@@ -83,7 +83,10 @@ class DangerZoneCard extends ConsumerWidget {
           'and meal plans will be permanently deleted. Are you sure?',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),

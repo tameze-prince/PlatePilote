@@ -57,9 +57,18 @@ class ProfileThemeSelector extends ConsumerWidget {
           ),
           SegmentedButton<ThemeMode>(
             segments: const [
-              ButtonSegment(value: ThemeMode.light, icon: Icon(Icons.light_mode, size: 18)),
-              ButtonSegment(value: ThemeMode.system, icon: Icon(Icons.auto_mode, size: 18)),
-              ButtonSegment(value: ThemeMode.dark, icon: Icon(Icons.dark_mode, size: 18)),
+              ButtonSegment(
+                value: ThemeMode.light,
+                icon: Icon(Icons.light_mode, size: 18),
+              ),
+              ButtonSegment(
+                value: ThemeMode.system,
+                icon: Icon(Icons.auto_mode, size: 18),
+              ),
+              ButtonSegment(
+                value: ThemeMode.dark,
+                icon: Icon(Icons.dark_mode, size: 18),
+              ),
             ],
             selected: {themeMode},
             onSelectionChanged: (Set<ThemeMode> selection) {

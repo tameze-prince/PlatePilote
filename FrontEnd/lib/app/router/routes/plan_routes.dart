@@ -22,14 +22,14 @@ List<RouteBase> planRoutes() {
       path: '/meal-swap/:dayIndex/:mealType',
       name: AppRoute.mealSwap.name,
       builder: (context, state) {
-        final dayIndex =
-            int.parse(state.pathParameters['dayIndex'] ?? '0');
+        final dayIndex = int.parse(state.pathParameters['dayIndex'] ?? '0');
         final mealType = state.pathParameters['mealType'] ?? 'Dinner';
         final extra = state.extra;
         final Meal currentMeal;
         final MealPlanEntry? currentEntry;
         if (extra is Map<String, dynamic>) {
-          currentMeal = extra['meal'] as Meal? ??
+          currentMeal =
+              extra['meal'] as Meal? ??
               const Meal(
                 day: '',
                 type: 'Dinner',
@@ -41,7 +41,8 @@ List<RouteBase> planRoutes() {
               );
           currentEntry = extra['entry'] as MealPlanEntry?;
         } else {
-          currentMeal = extra as Meal? ??
+          currentMeal =
+              extra as Meal? ??
               const Meal(
                 day: '',
                 type: 'Dinner',
@@ -65,8 +66,8 @@ List<RouteBase> planRoutes() {
       path: '/plan-acceptance',
       name: AppRoute.planAcceptance.name,
       builder: (context, state) {
-        final plan = state.extra as MealPlan? ??
-            MealPlan(id: '', name: '', entries: []);
+        final plan =
+            state.extra as MealPlan? ?? MealPlan(id: '', name: '', entries: []);
         return PlanAcceptanceScreen(plan: plan);
       },
     ),

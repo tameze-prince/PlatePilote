@@ -38,7 +38,8 @@ class CookingTimeSegment extends StatelessWidget {
                   width: width,
                   child: _BudgetChip(
                     label: l10n.onboardingSingleTimeShort(minutes),
-                    selected: state.cookingTime == '${minutes}min' ||
+                    selected:
+                        state.cookingTime == '${minutes}min' ||
                         state.cookingTime == '$minutes min',
                     onTap: () => notifier.setCookingTime('$minutes min'),
                   ),

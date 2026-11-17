@@ -30,7 +30,8 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isAccent = color == AppColors.primaryLight ||
+    final isAccent =
+        color == AppColors.primaryLight ||
         color == context.colors.primary ||
         color == AppColors.primaryLight.withValues(alpha: 0.16) ||
         color == AppColors.primaryLight.withValues(alpha: 0.08);
@@ -39,8 +40,9 @@ class AppCard extends StatelessWidget {
       padding: padding,
       onTap: onTap,
       color: color,
-      variant:
-          isAccent ? PremiumCardVariant.accent : PremiumCardVariant.elevated,
+      variant: isAccent
+          ? PremiumCardVariant.accent
+          : PremiumCardVariant.elevated,
       borderRadius: AppRadius.card,
       child: child,
     );

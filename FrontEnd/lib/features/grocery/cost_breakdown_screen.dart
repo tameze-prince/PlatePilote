@@ -81,9 +81,7 @@ class _GroceryCostBreakdownScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cost Breakdown'),
-      ),
+      appBar: AppBar(title: const Text('Cost Breakdown')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
@@ -193,9 +191,7 @@ class _GroceryCostBreakdownScreenState
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  ..._categories.map(
-                    (cat) => _buildCategoryRow(cat),
-                  ),
+                  ..._categories.map((cat) => _buildCategoryRow(cat)),
                 ],
               ),
             ),
@@ -253,15 +249,9 @@ class _GroceryCostBreakdownScreenState
                     'Save ~\$5/week',
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  _buildTipItem(
-                    'Choose seasonal produce',
-                    'Save ~\$8/week',
-                  ),
+                  _buildTipItem('Choose seasonal produce', 'Save ~\$8/week'),
                   const SizedBox(height: AppSpacing.sm),
-                  _buildTipItem(
-                    'Use pantry items first',
-                    'Save ~\$12/week',
-                  ),
+                  _buildTipItem('Use pantry items first', 'Save ~\$12/week'),
                 ],
               ),
             ),
@@ -370,10 +360,7 @@ class _GroceryCostBreakdownScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  item['name'] as String,
-                  style: context.text.bodyMedium,
-                ),
+                Text(item['name'] as String, style: context.text.bodyMedium),
                 Text(
                   item['quantity'] as String,
                   style: context.text.bodySmall?.copyWith(
@@ -404,12 +391,7 @@ class _GroceryCostBreakdownScreenState
           size: 16,
         ),
         const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(
-            tip,
-            style: context.text.bodySmall,
-          ),
-        ),
+        Expanded(child: Text(tip, style: context.text.bodySmall)),
         Text(
           savings,
           style: context.text.bodySmall?.copyWith(

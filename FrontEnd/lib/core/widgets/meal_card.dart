@@ -83,14 +83,17 @@ class MealCard extends StatelessWidget {
               ],
             ),
           ),
-            GestureDetector(
+          GestureDetector(
             onTap: onSwap,
             child: Icon(
-            meal.locked ? Icons.lock_outline : (onSwap != null ? Icons.swap_horiz : Icons.more_vert),
-            color: meal.locked
-                ? AppColors.secondary
-                : context.text.bodyMedium?.color,
-          ),),
+              meal.locked
+                  ? Icons.lock_outline
+                  : (onSwap != null ? Icons.swap_horiz : Icons.more_vert),
+              color: meal.locked
+                  ? AppColors.secondary
+                  : context.text.bodyMedium?.color,
+            ),
+          ),
         ],
       ),
     );

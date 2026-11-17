@@ -132,9 +132,7 @@ class _OnboardingSingleScreenState
     await notifier.flush();
     await ref.read(appSessionProvider.notifier).completeOnboarding();
     await notifier.clearDraft();
-    ref
-        .read(analyticsServiceProvider)
-        .track(PlateEvents.onboardingCompleted);
+    ref.read(analyticsServiceProvider).track(PlateEvents.onboardingCompleted);
     if (!mounted) return;
     await OnboardingCompletion.commitAndGeneratePlan(
       ref: ref,
@@ -289,9 +287,8 @@ class _LivePreviewCard extends StatelessWidget {
   }
 
   int _estimateRecipes(OnboardingState state) {
-    final people = int.tryParse(
-          (state.householdSize ?? '').replaceAll('+', ''),
-        ) ??
+    final people =
+        int.tryParse((state.householdSize ?? '').replaceAll('+', '')) ??
         ((state.householdSize ?? '') == '4+' ? 5 : 2);
     final estimate = (people * 3).clamp(5, 21);
     return estimate;

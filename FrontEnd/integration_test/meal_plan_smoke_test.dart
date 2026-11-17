@@ -19,7 +19,10 @@ import 'package:plate_pilote/l10n/app_localizations.dart';
 
 class MockTokenStorage extends TokenStorage {
   @override
-  Future<void> saveTokens({required String accessToken, required String refreshToken}) async {}
+  Future<void> saveTokens({
+    required String accessToken,
+    required String refreshToken,
+  }) async {}
   @override
   Future<String?> getAccessToken() async => null;
   @override

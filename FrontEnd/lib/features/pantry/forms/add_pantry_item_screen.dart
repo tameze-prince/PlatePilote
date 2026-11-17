@@ -224,15 +224,13 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
                 : null,
           );
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Pantry item added!')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Pantry item added!')));
       context.pop();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to add item: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed to add item: $e')));
     } finally {
       if (mounted) setState(() => _saving = false);
     }

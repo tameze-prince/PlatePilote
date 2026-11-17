@@ -57,9 +57,7 @@ class PpSheet {
     Color? barrierColor,
   }) {
     final theme = Theme.of(context);
-    final radius = BorderRadius.vertical(
-      top: Radius.circular(DsRadius.xxl),
-    );
+    final radius = BorderRadius.vertical(top: Radius.circular(DsRadius.xxl));
 
     return showModalBottomSheet<T>(
       context: context,
@@ -100,11 +98,7 @@ class PpSheet {
 /// handle, and a safe content slot. Exposed so callers can compose their
 /// own sheet bodies that need to reuse the chrome.
 class PpSheetContainer extends StatelessWidget {
-  const PpSheetContainer({
-    required this.child,
-    this.padding,
-    super.key,
-  });
+  const PpSheetContainer({required this.child, this.padding, super.key});
 
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -115,7 +109,8 @@ class PpSheetContainer extends StatelessWidget {
       safeArea: false,
       padding: EdgeInsets.zero,
       child: Padding(
-        padding: padding ??
+        padding:
+            padding ??
             const EdgeInsets.symmetric(
               horizontal: DsSpacing.lg,
               vertical: DsSpacing.lg,

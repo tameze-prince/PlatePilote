@@ -83,10 +83,7 @@ class PpScaffold extends StatelessWidget {
             duration: AppMotion.medium,
             switchInCurve: AppMotion.easeOutEmphasized,
             switchOutCurve: AppMotion.easeInEmphasized,
-            child: KeyedSubtree(
-              key: ValueKey<bool>(useGlass),
-              child: content,
-            ),
+            child: KeyedSubtree(key: ValueKey<bool>(useGlass), child: content),
           ),
         ),
       ),

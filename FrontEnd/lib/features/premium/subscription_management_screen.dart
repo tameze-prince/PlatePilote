@@ -28,7 +28,10 @@ class SubscriptionManagementScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(subscription.planName, style: context.text.headlineMedium),
+                      Text(
+                        subscription.planName,
+                        style: context.text.headlineMedium,
+                      ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         subscription.isPremium
@@ -52,7 +55,9 @@ class SubscriptionManagementScreen extends ConsumerWidget {
                     label: 'Manage Billing',
                     icon: Icons.payment,
                     onPressed: () async {
-                      final url = await ref.read(subscriptionProvider.notifier).createCustomerPortal();
+                      final url = await ref
+                          .read(subscriptionProvider.notifier)
+                          .createCustomerPortal();
                       if (url != null && context.mounted) {
                         await launchUrl(Uri.parse(url));
                       }

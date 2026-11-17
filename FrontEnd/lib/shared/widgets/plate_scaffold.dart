@@ -16,10 +16,13 @@ class PlateScaffold extends StatelessWidget {
 
   /// Titre affiché dans l'en-tête.
   final String title;
+
   /// Contenu principal de la page.
   final Widget child;
+
   /// Widget optionnel à droite du titre.
   final Widget? trailing;
+
   /// Affiche le bouton retour.
   final bool showBack;
 

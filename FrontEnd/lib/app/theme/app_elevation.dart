@@ -23,24 +23,32 @@ abstract final class AppElevation {
   // Semantic elevation values
   /// Élévation des cartes.
   static const card = level1;
+
   /// Élévation des boutons.
   static const button = level2;
+
   /// Élévation du FAB.
   static const fab = level3;
+
   /// Élévation de la barre d'application.
   static const appBar = level2;
+
   /// Élévation des boîtes de dialogue.
   static const dialog = level4;
+
   /// Élévation des snackbars.
   static const snackbar = level5;
+
   /// Élévation des bottom sheets.
   static const bottomSheet = level3;
+
   /// Élévation de la barre de navigation.
   static const navigationBar = level2;
 
   // Shadow colors
   /// Couleur d'ombre.
   static const shadowColor = Color(0x1A000000);
+
   /// Couleur d'ombre claire.
   static const shadowColorLight = Color(0x0D000000);
 
@@ -61,18 +69,27 @@ abstract final class AppElevation {
 
   /// Ombre de carte.
   static List<BoxShadow> get cardShadow => shadow(elevation: card);
+
   /// Ombre de bouton.
   static List<BoxShadow> get buttonShadow => shadow(elevation: button);
+
   /// Ombre de FAB.
   static List<BoxShadow> get fabShadow => shadow(elevation: fab);
+
   /// Ombre de barre d'application.
   static List<BoxShadow> get appBarShadow => shadow(elevation: appBar);
+
   /// Ombre de dialogue.
   static List<BoxShadow> get dialogShadow => shadow(elevation: dialog);
+
   /// Ombre de snackbar.
   static List<BoxShadow> get snackbarShadow => shadow(elevation: snackbar);
+
   /// Ombre de bottom sheet.
-  static List<BoxShadow> get bottomSheetShadow => shadow(elevation: bottomSheet);
+  static List<BoxShadow> get bottomSheetShadow =>
+      shadow(elevation: bottomSheet);
+
   /// Ombre de barre de navigation.
-  static List<BoxShadow> get navigationBarShadow => shadow(elevation: navigationBar);
+  static List<BoxShadow> get navigationBarShadow =>
+      shadow(elevation: navigationBar);
 }

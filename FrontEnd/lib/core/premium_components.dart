@@ -84,7 +84,9 @@ class PremiumTheme {
         offset: const Offset(0, 16),
       ),
       BoxShadow(
-        color: AppColors.primaryAccentGreen.withValues(alpha: dark ? 0.12 : 0.08),
+        color: AppColors.primaryAccentGreen.withValues(
+          alpha: dark ? 0.12 : 0.08,
+        ),
         blurRadius: 26,
         offset: const Offset(0, 8),
       ),
@@ -106,7 +108,9 @@ class PremiumTheme {
         offset: const Offset(0, 4),
       ),
       BoxShadow(
-        color: AppColors.primaryAccentGreen.withValues(alpha: dark ? 0.15 : 0.08),
+        color: AppColors.primaryAccentGreen.withValues(
+          alpha: dark ? 0.15 : 0.08,
+        ),
         blurRadius: 20,
         spreadRadius: -2,
       ),
@@ -116,8 +120,8 @@ class PremiumTheme {
   /// Effet de lueur (glow) autour d'un élément.
   static List<BoxShadow> glow(BuildContext context, {Color? color}) => [
     BoxShadow(
-      color: (color ?? AppColors.primaryAccentGreen).withValues(alpha: 
-        isDark(context) ? 0.26 : 0.16,
+      color: (color ?? AppColors.primaryAccentGreen).withValues(
+        alpha: isDark(context) ? 0.26 : 0.16,
       ),
       blurRadius: 24,
       spreadRadius: -4,
@@ -381,8 +385,8 @@ class PremiumCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(borderRadius),
               border: Border.all(
                 color: variant == PremiumCardVariant.accent
-                    ? AppColors.primaryAccentGreen.withValues(alpha: 
-                        dark ? 0.22 : 0.18,
+                    ? AppColors.primaryAccentGreen.withValues(
+                        alpha: dark ? 0.22 : 0.18,
                       )
                     : PremiumTheme.border(context),
               ),
@@ -742,7 +746,9 @@ class GlowBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: PremiumTheme.isDark(context) ? 0.14 : 0.10),
+        color: color.withValues(
+          alpha: PremiumTheme.isDark(context) ? 0.14 : 0.10,
+        ),
         borderRadius: BorderRadius.circular(AppRadius.full),
         border: Border.all(color: color.withValues(alpha: 0.32)),
         boxShadow: PremiumTheme.glow(context, color: color),
@@ -1033,8 +1039,8 @@ class _FloatingNavItemState extends State<_FloatingNavItem> {
                   boxShadow: widget.selected
                       ? [
                           BoxShadow(
-                            color: AppColors.primaryAccentGreen.withValues(alpha: 
-                              0.35,
+                            color: AppColors.primaryAccentGreen.withValues(
+                              alpha: 0.35,
                             ),
                             blurRadius: 24,
                             spreadRadius: 0,

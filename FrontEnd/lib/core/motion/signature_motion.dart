@@ -161,10 +161,7 @@ abstract final class SignaturePageTransitions {
         begin: const Offset(0, 0.04),
         end: Offset.zero,
       ).animate(curved),
-      child: FadeTransition(
-        opacity: curved,
-        child: child,
-      ),
+      child: FadeTransition(opacity: curved, child: child),
     );
   }
 
@@ -315,10 +312,7 @@ class _ListEntryWrapperState extends State<_ListEntryWrapper>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.perItem,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.perItem);
     _animation = CurvedAnimation(parent: _controller, curve: widget.curve);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
@@ -417,8 +411,7 @@ class _WelcomeHeroInsightState extends State<WelcomeHeroInsight>
                 size: Size.square(widget.size),
                 painter: _WelcomeHeroPainter(
                   progress: reduced ? 1.0 : _controller.value,
-                  gradient: widget.gradient ??
-                      SignatureGradients.sunsetMeal,
+                  gradient: widget.gradient ?? SignatureGradients.sunsetMeal,
                 ),
               );
             },
@@ -445,10 +438,7 @@ class _WelcomeHeroInsightState extends State<WelcomeHeroInsight>
 /// Draw-in painter : trace un cercle de fond + un arc qui se dessine en
 /// `progress * 2π`.
 class _WelcomeHeroPainter extends CustomPainter {
-  _WelcomeHeroPainter({
-    required this.progress,
-    required this.gradient,
-  });
+  _WelcomeHeroPainter({required this.progress, required this.gradient});
 
   final double progress;
   final LinearGradient gradient;

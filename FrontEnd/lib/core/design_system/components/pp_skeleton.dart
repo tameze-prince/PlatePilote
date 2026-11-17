@@ -113,10 +113,7 @@ class PpSkeletonList extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           for (var i = 0; i < itemCount; i++) ...[
-            KeyedSubtree(
-              key: ValueKey<int>(i),
-              child: itemBuilder(context),
-            ),
+            KeyedSubtree(key: ValueKey<int>(i), child: itemBuilder(context)),
             if (i != itemCount - 1) SizedBox(height: spacing),
           ],
         ],

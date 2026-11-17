@@ -18,10 +18,13 @@ class ProfileNavigationCard extends StatelessWidget {
 
   /// Icône affichée à gauche.
   final IconData icon;
+
   /// Titre principal.
   final String title;
+
   /// Sous-titre descriptif.
   final String subtitle;
+
   /// Callback de navigation.
   final VoidCallback onTap;
 

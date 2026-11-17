@@ -17,22 +17,31 @@ class Meal {
 
   /// Jour de la semaine.
   final String day;
+
   /// Type de repas (Breakfast, Lunch, Dinner).
   final String type;
+
   /// Titre du repas.
   final String title;
+
   /// Temps de préparation en minutes.
   final int minutes;
+
   /// Calories du repas.
   final int kcal;
+
   /// Icône représentative.
   final IconData icon;
+
   /// Couleur d'accentuation.
   final Color tint;
+
   /// Indique si le repas est verrouillé.
   final bool locked;
+
   /// URL de l'image.
   final String? imageUrl;
+
   /// Identifiant de la recette associée.
   final String? recipeId;
 }
@@ -49,12 +58,16 @@ class GroceryItem {
 
   /// Nom de l'article.
   final String name;
+
   /// Quantité.
   final String quantity;
+
   /// Prix.
   final String price;
+
   /// Catégorie.
   final String category;
+
   /// Indique si l'article est coché.
   final bool checked;
 }
@@ -72,14 +85,19 @@ class PantryItem {
 
   /// Nom de l'article.
   final String name;
+
   /// Quantité.
   final String quantity;
+
   /// Date d'expiration.
   final String expires;
+
   /// Catégorie.
   final String category;
+
   /// Icône représentative.
   final IconData icon;
+
   /// Indique si l'article est urgent.
   final bool urgent;
 }

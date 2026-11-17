@@ -140,10 +140,7 @@ class GroceryRepository extends BaseRepository {
       final checkedUuids = checkedItemIds;
       await apiClient.post(
         '/grocery-lists/$listId/checkout',
-        data: {
-          'checkedItemIds': checkedUuids,
-          'actualPrices': ?actualPrices,
-        },
+        data: {'checkedItemIds': checkedUuids, 'actualPrices': ?actualPrices},
       );
     } on DioException catch (e) {
       throw ApiException(extractMessage(e), e.response?.statusCode);

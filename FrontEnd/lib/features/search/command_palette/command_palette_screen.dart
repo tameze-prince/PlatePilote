@@ -201,10 +201,12 @@ class _PaletteBackdropState extends State<_PaletteBackdrop>
   );
 
   late final Animation<double> _scale = Tween<double>(begin: 0.96, end: 1.0)
-      .animate(CurvedAnimation(
-    parent: _controller,
-    curve: AppAnimations.easeOutEmphasized,
-  ));
+      .animate(
+        CurvedAnimation(
+          parent: _controller,
+          curve: AppAnimations.easeOutEmphasized,
+        ),
+      );
 
   @override
   void dispose() {
@@ -238,10 +240,7 @@ class _PaletteBackdropState extends State<_PaletteBackdrop>
             ),
             child: FadeTransition(
               opacity: _fade,
-              child: ScaleTransition(
-                scale: _scale,
-                child: widget.child,
-              ),
+              child: ScaleTransition(scale: _scale, child: widget.child),
             ),
           ),
         ),
@@ -268,9 +267,7 @@ class _PalettePanel extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.xl),
         child: Container(
           decoration: BoxDecoration(
-            color: isDark
-                ? AppColors.darkElevatedSurface
-                : AppColors.surface,
+            color: isDark ? AppColors.darkElevatedSurface : AppColors.surface,
             borderRadius: BorderRadius.circular(AppRadius.xl),
             border: Border.all(color: PremiumTheme.border(context)),
           ),
@@ -305,10 +302,10 @@ class _PaletteInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final foreground =
-        isDark ? AppColors.darkOnSurface : AppColors.onSurface;
-    final secondary =
-        isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant;
+    final foreground = isDark ? AppColors.darkOnSurface : AppColors.onSurface;
+    final secondary = isDark
+        ? AppColors.darkOnSurfaceVariant
+        : AppColors.onSurfaceVariant;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -366,8 +363,9 @@ class _ShortcutChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text =
-        isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant;
+    final text = isDark
+        ? AppColors.darkOnSurfaceVariant
+        : AppColors.onSurfaceVariant;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
@@ -407,7 +405,8 @@ class _PaletteBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final hasAnySectionEntry = state.pages.isNotEmpty ||
+    final hasAnySectionEntry =
+        state.pages.isNotEmpty ||
         state.recipes.isNotEmpty ||
         state.pantry.isNotEmpty ||
         state.recipesPending ||
@@ -429,34 +428,32 @@ class _PaletteBody extends ConsumerWidget {
     var runningIndex = 0;
 
     if (state.pages.isNotEmpty) {
-      sections.add(_SectionHeader(
-        label: l10n.cmdPalettePages,
-        isDark: isDark,
-      ));
+      sections.add(_SectionHeader(label: l10n.cmdPalettePages, isDark: isDark));
       for (var i = 0; i < state.pages.length; i++) {
         final result = state.pages[i];
         final globalIndex = runningIndex + i;
-        sections.add(CommandPaletteResultItem(
-          label: result.label,
-          subtitle: result.subtitle,
-          icon: result.icon,
-          iconColor: result.iconColor,
-          category: CommandPaletteResultItemCategoryX.categoryLabelFor(
-            context,
-            result.category,
+        sections.add(
+          CommandPaletteResultItem(
+            label: result.label,
+            subtitle: result.subtitle,
+            icon: result.icon,
+            iconColor: result.iconColor,
+            category: CommandPaletteResultItemCategoryX.categoryLabelFor(
+              context,
+              result.category,
+            ),
+            onTap: () => onActivate(result),
+            highlighted: globalIndex == highlight,
           ),
-          onTap: () => onActivate(result),
-          highlighted: globalIndex == highlight,
-        ));
+        );
       }
       runningIndex += state.pages.length;
     }
 
     if (state.recipes.isNotEmpty || state.recipesPending) {
-      sections.add(_SectionHeader(
-        label: l10n.cmdPaletteRecipes,
-        isDark: isDark,
-      ));
+      sections.add(
+        _SectionHeader(label: l10n.cmdPaletteRecipes, isDark: isDark),
+      );
       if (state.recipesPending && state.recipes.isEmpty) {
         for (var i = 0; i < 3; i++) {
           sections.add(const _SkeletonRow());
@@ -465,28 +462,29 @@ class _PaletteBody extends ConsumerWidget {
         for (var i = 0; i < state.recipes.length; i++) {
           final result = state.recipes[i];
           final globalIndex = runningIndex + i;
-          sections.add(CommandPaletteResultItem(
-            label: result.label,
-            subtitle: result.subtitle,
-            icon: result.icon,
-            iconColor: result.iconColor,
-            category: CommandPaletteResultItemCategoryX.categoryLabelFor(
-              context,
-              result.category,
+          sections.add(
+            CommandPaletteResultItem(
+              label: result.label,
+              subtitle: result.subtitle,
+              icon: result.icon,
+              iconColor: result.iconColor,
+              category: CommandPaletteResultItemCategoryX.categoryLabelFor(
+                context,
+                result.category,
+              ),
+              onTap: () => onActivate(result),
+              highlighted: globalIndex == highlight,
             ),
-            onTap: () => onActivate(result),
-            highlighted: globalIndex == highlight,
-          ));
+          );
         }
       }
       runningIndex += state.recipes.length;
     }
 
     if (state.pantry.isNotEmpty || state.pantryPending) {
-      sections.add(_SectionHeader(
-        label: l10n.cmdPalettePantry,
-        isDark: isDark,
-      ));
+      sections.add(
+        _SectionHeader(label: l10n.cmdPalettePantry, isDark: isDark),
+      );
       if (state.pantryPending && state.pantry.isEmpty) {
         for (var i = 0; i < 3; i++) {
           sections.add(const _SkeletonRow());
@@ -495,18 +493,20 @@ class _PaletteBody extends ConsumerWidget {
         for (var i = 0; i < state.pantry.length; i++) {
           final result = state.pantry[i];
           final globalIndex = runningIndex + i;
-          sections.add(CommandPaletteResultItem(
-            label: result.label,
-            subtitle: result.subtitle,
-            icon: result.icon,
-            iconColor: result.iconColor,
-            category: CommandPaletteResultItemCategoryX.categoryLabelFor(
-              context,
-              result.category,
+          sections.add(
+            CommandPaletteResultItem(
+              label: result.label,
+              subtitle: result.subtitle,
+              icon: result.icon,
+              iconColor: result.iconColor,
+              category: CommandPaletteResultItemCategoryX.categoryLabelFor(
+                context,
+                result.category,
+              ),
+              onTap: () => onActivate(result),
+              highlighted: globalIndex == highlight,
             ),
-            onTap: () => onActivate(result),
-            highlighted: globalIndex == highlight,
-          ));
+          );
         }
       }
       runningIndex += state.pantry.length;
@@ -536,8 +536,9 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tint =
-        isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant;
+    final tint = isDark
+        ? AppColors.darkOnSurfaceVariant
+        : AppColors.onSurfaceVariant;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.xs,
@@ -604,10 +605,12 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tint =
-        isDark ? AppColors.darkOnSurfaceTertiary : AppColors.onSurfaceTertiary;
-    final body =
-        isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant;
+    final tint = isDark
+        ? AppColors.darkOnSurfaceTertiary
+        : AppColors.onSurfaceTertiary;
+    final body = isDark
+        ? AppColors.darkOnSurfaceVariant
+        : AppColors.onSurfaceVariant;
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 480),
       child: Padding(

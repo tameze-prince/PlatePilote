@@ -212,7 +212,9 @@ class _PaymentMethodCard extends StatelessWidget {
             Icon(
               method.icon,
               size: 24,
-              color: selected ? Colors.white : PremiumTheme.textPrimary(context),
+              color: selected
+                  ? Colors.white
+                  : PremiumTheme.textPrimary(context),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -230,7 +232,9 @@ class _PaymentMethodCard extends StatelessWidget {
             Icon(
               selected ? Icons.check_circle : Icons.radio_button_unchecked,
               size: 20,
-              color: selected ? Colors.white : PremiumTheme.textSecondary(context),
+              color: selected
+                  ? Colors.white
+                  : PremiumTheme.textSecondary(context),
             ),
           ],
         ),

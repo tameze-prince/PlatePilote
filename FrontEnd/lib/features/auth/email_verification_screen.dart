@@ -91,8 +91,9 @@ class _EmailVerificationScreenState
 
     setState(() => _isResending = true);
 
-    final success =
-        await ref.read(authProvider.notifier).resendVerification(email: email);
+    final success = await ref
+        .read(authProvider.notifier)
+        .resendVerification(email: email);
 
     if (mounted) {
       setState(() {
@@ -139,7 +140,9 @@ class _EmailVerificationScreenState
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
-                        color: AppColors.primaryAccentGreen.withValues(alpha: 0.15),
+                        color: AppColors.primaryAccentGreen.withValues(
+                          alpha: 0.15,
+                        ),
                         borderRadius: BorderRadius.circular(AppRadius.xxl),
                       ),
                       child: const Icon(
@@ -180,21 +183,25 @@ class _EmailVerificationScreenState
                           ),
                           const SizedBox(height: AppSpacing.lg),
                           GlassButton(
-                            label: _isVerifying ? 'Verifying...' : 'Verify Email',
+                            label: _isVerifying
+                                ? 'Verifying...'
+                                : 'Verify Email',
                             onPressed:
-                                (_isVerifying || _tokenController.text.trim().isEmpty)
-                                    ? null
-                                    : _verifyToken,
+                                (_isVerifying ||
+                                    _tokenController.text.trim().isEmpty)
+                                ? null
+                                : _verifyToken,
                           ),
                           const SizedBox(height: AppSpacing.md),
                           GlassButton(
                             label: _isResending
                                 ? 'Sending...'
                                 : (_resendCooldown > 0
-                                    ? 'Resend in $_resendCooldown s'
-                                    : 'Resend Verification Email'),
-                            onPressed:
-                                (_resendCooldown > 0 || _isResending) ? null : _resendCode,
+                                      ? 'Resend in $_resendCooldown s'
+                                      : 'Resend Verification Email'),
+                            onPressed: (_resendCooldown > 0 || _isResending)
+                                ? null
+                                : _resendCode,
                             variant: GlassButtonVariant.outlined,
                           ),
                         ],

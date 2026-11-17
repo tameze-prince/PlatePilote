@@ -21,22 +21,30 @@ class BudgetAnalyticsScreen extends ConsumerStatefulWidget {
 class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
   /// Budget hebdomadaire.
   double _weeklyBudget = 0;
+
   /// Montant dépensé.
   double _spentAmount = 0;
+
   /// Historique hebdomadaire des dépenses.
   List<double> _weeklyHistory = [];
+
   /// Étiquettes des semaines.
   List<String> _weekLabels = [];
+
   /// Vrai si le chargement est en cours.
   bool _isLoading = true;
 
   /// Montant restant du budget.
   double get _remaining => _weeklyBudget - _spentAmount;
+
   /// Pourcentage utilisé.
-  double get _percentUsed => _spentAmount > 0 && _weeklyBudget > 0 ? _spentAmount / _weeklyBudget : 0;
+  double get _percentUsed =>
+      _spentAmount > 0 && _weeklyBudget > 0 ? _spentAmount / _weeklyBudget : 0;
+
   /// Moyenne des dépenses hebdomadaires.
-  double get _avgWeeklySpend =>
-      _weeklyHistory.isEmpty ? 0 : _weeklyHistory.reduce((a, b) => a + b) / _weeklyHistory.length;
+  double get _avgWeeklySpend => _weeklyHistory.isEmpty
+      ? 0
+      : _weeklyHistory.reduce((a, b) => a + b) / _weeklyHistory.length;
 
   @override
   void initState() {
@@ -79,193 +87,196 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Budget Analytics'),
-      ),
+      appBar: AppBar(title: const Text('Budget Analytics')),
       body: PremiumGate(
         message: 'Analyses avancées de budget',
         child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AppCard(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(AppSpacing.sm),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryLight.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppRadius.input),
-                        ),
-                        child: const Icon(
-                          Icons.account_balance_wallet,
-                          color: AppColors.primaryLight,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Weekly Budget',
-                              style: context.text.bodySmall?.copyWith(
-                                color: AppColors.onSurfaceVariant,
-                              ),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppCard(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.sm),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryLight.withValues(
+                              alpha: 0.1,
                             ),
-                            Text(
-                              '\$${_weeklyBudget.toStringAsFixed(2)}',
-                              style: context.text.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.input,
                             ),
-                          ],
+                          ),
+                          child: const Icon(
+                            Icons.account_balance_wallet,
+                            color: AppColors.primaryLight,
+                            size: 24,
+                          ),
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                          vertical: AppSpacing.xs,
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Weekly Budget',
+                                style: context.text.bodySmall?.copyWith(
+                                  color: AppColors.onSurfaceVariant,
+                                ),
+                              ),
+                              Text(
+                                '\$${_weeklyBudget.toStringAsFixed(2)}',
+                                style: context.text.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        decoration: BoxDecoration(
-                          color: _percentUsed > 0.8
-                              ? AppColors.error.withValues(alpha: 0.1)
-                              : AppColors.primaryLight.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                        ),
-                        child: Text(
-                          '${(_percentUsed * 100).toInt()}% used',
-                          style: context.text.bodySmall?.copyWith(
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: AppSpacing.xs,
+                          ),
+                          decoration: BoxDecoration(
                             color: _percentUsed > 0.8
-                                ? AppColors.error
-                                : AppColors.primaryLight,
+                                ? AppColors.error.withValues(alpha: 0.1)
+                                : AppColors.primaryLight.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(AppRadius.sm),
+                          ),
+                          child: Text(
+                            '${(_percentUsed * 100).toInt()}% used',
+                            style: context.text.bodySmall?.copyWith(
+                              color: _percentUsed > 0.8
+                                  ? AppColors.error
+                                  : AppColors.primaryLight,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      child: LinearProgressIndicator(
+                        value: _percentUsed,
+                        backgroundColor: AppColors.surfaceContainerLow,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          _percentUsed > 0.8
+                              ? AppColors.error
+                              : AppColors.primaryLight,
+                        ),
+                        minHeight: 8,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '\$${_spentAmount.toStringAsFixed(2)} spent',
+                          style: context.text.bodySmall?.copyWith(
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                        ),
+                        Text(
+                          '\$${_remaining.toStringAsFixed(2)} remaining',
+                          style: context.text.bodySmall?.copyWith(
+                            color: AppColors.primaryLight,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                    child: LinearProgressIndicator(
-                      value: _percentUsed,
-                      backgroundColor: AppColors.surfaceContainerLow,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        _percentUsed > 0.8
-                            ? AppColors.error
-                            : AppColors.primaryLight,
-                      ),
-                      minHeight: 8,
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      icon: Icons.trending_down,
+                      label: 'Avg Weekly',
+                      value: '\$${_avgWeeklySpend.toStringAsFixed(0)}',
+                      color: AppColors.tertiary,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '\$${_spentAmount.toStringAsFixed(2)} spent',
-                        style: context.text.bodySmall?.copyWith(
-                          color: AppColors.onSurfaceVariant,
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: _buildStatCard(
+                      icon: Icons.savings,
+                      label: 'Saved',
+                      value:
+                          '\$${(_weeklyBudget - _avgWeeklySpend).toStringAsFixed(0)}',
+                      color: AppColors.primaryLight,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: _buildStatCard(
+                      icon: Icons.calendar_today,
+                      label: 'Streak',
+                      value: '4 weeks',
+                      color: AppColors.secondary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              AppCard(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Weekly Spending Trend',
+                      style: context.text.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    SizedBox(
+                      height: 200,
+                      child: CustomPaint(
+                        size: const Size(double.infinity, 200),
+                        painter: _BarChartPainter(
+                          values: _weeklyHistory,
+                          labels: _weekLabels,
+                          maxValue: _weeklyBudget,
+                          barColor: AppColors.primaryLight,
+                          budgetLine: _weeklyBudget,
                         ),
                       ),
-                      Text(
-                        '\$${_remaining.toStringAsFixed(2)} remaining',
-                        style: context.text.bodySmall?.copyWith(
-                          color: AppColors.primaryLight,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    icon: Icons.trending_down,
-                    label: 'Avg Weekly',
-                    value: '\$${_avgWeeklySpend.toStringAsFixed(0)}',
-                    color: AppColors.tertiary,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: _buildStatCard(
-                    icon: Icons.savings,
-                    label: 'Saved',
-                    value: '\$${(_weeklyBudget - _avgWeeklySpend).toStringAsFixed(0)}',
-                    color: AppColors.primaryLight,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: _buildStatCard(
-                    icon: Icons.calendar_today,
-                    label: 'Streak',
-                    value: '4 weeks',
-                    color: AppColors.secondary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppCard(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Weekly Spending Trend',
-                    style: context.text.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  SizedBox(
-                    height: 200,
-                    child: CustomPaint(
-                      size: const Size(double.infinity, 200),
-                      painter: _BarChartPainter(
-                        values: _weeklyHistory,
-                        labels: _weekLabels,
-                        maxValue: _weeklyBudget,
-                        barColor: AppColors.primaryLight,
-                        budgetLine: _weeklyBudget,
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              AppCard(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Spending by Category',
+                      style: context.text.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: AppSpacing.md),
+                    _buildCategoryBreakdown(),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppCard(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Spending by Category',
-                    style: context.text.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  _buildCategoryBreakdown(),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -369,12 +380,16 @@ class _BudgetAnalyticsScreenState extends ConsumerState<BudgetAnalyticsScreen> {
 class _BarChartPainter extends CustomPainter {
   /// Valeurs des barres.
   final List<double> values;
+
   /// Étiquettes des barres.
   final List<String> labels;
+
   /// Valeur maximale.
   final double maxValue;
+
   /// Couleur des barres.
   final Color barColor;
+
   /// Ligne du budget.
   final double budgetLine;
 

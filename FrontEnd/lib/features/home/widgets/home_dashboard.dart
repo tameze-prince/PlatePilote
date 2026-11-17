@@ -14,11 +14,7 @@ import 'home_welcome_panel.dart';
 
 /// Widget qui compose tous les panels du tableau de bord d'accueil.
 class HomeDashboard extends StatelessWidget {
-  const HomeDashboard({
-    super.key,
-    required this.state,
-    required this.isDark,
-  });
+  const HomeDashboard({super.key, required this.state, required this.isDark});
 
   final HomeState state;
   final bool isDark;
@@ -118,16 +114,10 @@ class HomeDashboard extends StatelessWidget {
         const SizedBox(height: AppSpacing.md),
         AnimatedListItem(
           delay: 5,
-          child: HomeQuickMealCard(
-            isDark: isDark,
-            quickMeals: recommendations,
-          ),
+          child: HomeQuickMealCard(isDark: isDark, quickMeals: recommendations),
         ),
         const SizedBox(height: AppSpacing.md),
-        AnimatedListItem(
-          delay: 6,
-          child: HomeQuickActions(isDark: isDark),
-        ),
+        AnimatedListItem(delay: 6, child: HomeQuickActions(isDark: isDark)),
       ],
     );
   }

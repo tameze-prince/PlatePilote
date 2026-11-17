@@ -24,11 +24,7 @@ final List<DietaryOption> _dietaryOptions = [
 ];
 
 class DietaryChips extends StatelessWidget {
-  const DietaryChips({
-    super.key,
-    required this.state,
-    required this.notifier,
-  });
+  const DietaryChips({super.key, required this.state, required this.notifier});
 
   final OnboardingState state;
   final OnboardingNotifier notifier;
@@ -44,8 +40,7 @@ class DietaryChips extends StatelessWidget {
           label: option.labelKey(context.l10n!),
           variant: PpChipVariant.filter,
           selected: selected,
-          onPressed: () =>
-              notifier.toggleDietaryPreference(option.key),
+          onPressed: () => notifier.toggleDietaryPreference(option.key),
         );
       }).toList(),
     );

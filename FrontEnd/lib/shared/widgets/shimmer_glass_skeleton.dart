@@ -14,8 +14,10 @@ class ShimmerGlassSkeleton extends StatefulWidget {
 
   /// Largeur du squelette.
   final double width;
+
   /// Hauteur du squelette.
   final double height;
+
   /// Rayon de bordure.
   final double? borderRadius;
 
@@ -27,6 +29,7 @@ class _ShimmerGlassSkeletonState extends State<ShimmerGlassSkeleton>
     with SingleTickerProviderStateMixin {
   /// Contrôleur d'animation du shimmer.
   late final AnimationController _controller;
+
   /// Animation du gradient.
   late final Animation<double> _animation;
 
@@ -57,7 +60,9 @@ class _ShimmerGlassSkeletonState extends State<ShimmerGlassSkeleton>
       builder: (context, child) {
         final value = _animation.value.clamp(0.0, 1.0);
         return ClipRRect(
-          borderRadius: BorderRadius.circular(widget.borderRadius ?? AppRadius.lg),
+          borderRadius: BorderRadius.circular(
+            widget.borderRadius ?? AppRadius.lg,
+          ),
           child: ShaderMask(
             shaderCallback: (bounds) => LinearGradient(
               begin: Alignment.centerLeft,
@@ -78,12 +83,11 @@ class _ShimmerGlassSkeletonState extends State<ShimmerGlassSkeleton>
               width: widget.width,
               height: widget.height,
               decoration: BoxDecoration(
-                borderRadius:
-                    BorderRadius.circular(widget.borderRadius ?? AppRadius.lg),
-                color: baseColor.withValues(alpha: 0.05),
-                border: Border.all(
-                  color: baseColor.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(
+                  widget.borderRadius ?? AppRadius.lg,
                 ),
+                color: baseColor.withValues(alpha: 0.05),
+                border: Border.all(color: baseColor.withValues(alpha: 0.08)),
               ),
             ),
           ),

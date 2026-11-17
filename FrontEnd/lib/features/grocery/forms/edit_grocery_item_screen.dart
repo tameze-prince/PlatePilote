@@ -157,9 +157,7 @@ class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
                         hintText: 'e.g., Organic Apples',
                         prefixIcon: const Icon(Icons.shopping_basket_outlined),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppRadius.input,
-                          ),
+                          borderRadius: BorderRadius.circular(AppRadius.input),
                         ),
                       ),
                       validator: (value) {
@@ -252,8 +250,8 @@ class _EditGroceryItemScreenState extends ConsumerState<EditGroceryItemScreen> {
                           onSelected: (selected) {
                             setState(() => _selectedCategory = category);
                           },
-                          selectedColor: AppColors.primaryLight.withValues(alpha: 
-                            0.2,
+                          selectedColor: AppColors.primaryLight.withValues(
+                            alpha: 0.2,
                           ),
                           checkmarkColor: AppColors.primaryLight,
                           labelStyle: TextStyle(

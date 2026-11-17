@@ -158,12 +158,7 @@ class AppAnimations {
     return Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: controller,
-        curve: curve,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: controller, curve: curve));
   }
 
   /// Builder de transition de page — conservé pour rétro-compat.
@@ -179,17 +174,12 @@ class AppAnimations {
         const end = Offset.zero;
         const curve = Curves.easeInOut;
 
-        var tween = Tween(begin: begin, end: end).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: curve,
-          ),
-        );
+        var tween = Tween(
+          begin: begin,
+          end: end,
+        ).animate(CurvedAnimation(parent: animation, curve: curve));
 
-        return SlideTransition(
-          position: tween,
-          child: child,
-        );
+        return SlideTransition(position: tween, child: child);
       },
       transitionDuration: pageTransition,
     );
@@ -204,19 +194,10 @@ class AppAnimations {
       settings: settings,
       pageBuilder: (context, animation, secondaryAnimation) {
         return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeInOut,
-          ),
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
           child: ScaleTransition(
-            scale: Tween<double>(
-              begin: 0.9,
-              end: 1.0,
-            ).animate(
-              CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOut,
-              ),
+            scale: Tween<double>(begin: 0.9, end: 1.0).animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOut),
             ),
             child: builder(context),
           ),

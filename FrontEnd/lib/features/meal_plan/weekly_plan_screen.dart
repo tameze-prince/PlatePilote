@@ -54,7 +54,10 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
           onRefresh: () => ref.read(mealPlanProvider.notifier).refresh(),
           child: ListView(
             padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md, AppSpacing.md, AppSpacing.md, 80,
+              AppSpacing.md,
+              AppSpacing.md,
+              AppSpacing.md,
+              80,
             ),
             children: [
               FloatingHeader(
@@ -69,13 +72,17 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
                           _WeekArrow(
                             icon: Icons.chevron_left,
                             enabled: state.hasPrevPlan,
-                            onTap: () => ref.read(mealPlanProvider.notifier).navigatePrev(),
+                            onTap: () => ref
+                                .read(mealPlanProvider.notifier)
+                                .navigatePrev(),
                           ),
                           const SizedBox(width: 4),
                           _WeekArrow(
                             icon: Icons.chevron_right,
                             enabled: state.hasNextPlan,
-                            onTap: () => ref.read(mealPlanProvider.notifier).navigateNext(),
+                            onTap: () => ref
+                                .read(mealPlanProvider.notifier)
+                                .navigateNext(),
                           ),
                         ],
                       )
@@ -125,7 +132,11 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
 
   /// Construit le sélecteur complet : Quick Filters PRD-aligned (Faster /
   /// Healthier / Cheaper) au-dessus, mode selector expert en dessous.
-  Widget _buildModeSelector(BuildContext context, WidgetRef ref, MealPlanState state) {
+  Widget _buildModeSelector(
+    BuildContext context,
+    WidgetRef ref,
+    MealPlanState state,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -140,7 +151,10 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
   /// Chaque chip déclenche la génération d'un nouveau plan avec le mode
   /// backend mappé (voir `kQuickFilters` dans meal_mode_labels.dart).
   Widget _buildQuickFilters(
-      BuildContext context, WidgetRef ref, MealPlanState state) {
+    BuildContext context,
+    WidgetRef ref,
+    MealPlanState state,
+  ) {
     final isBusy = state.isGenerating;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -153,7 +167,8 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
               enabled: !isBusy,
               isLoading: isBusy,
               onTap: () async {
-                await ref.read(mealPlanProvider.notifier)
+                await ref
+                    .read(mealPlanProvider.notifier)
                     .generateNewPlan(mode: filter.backendMode);
               },
             ),
@@ -166,7 +181,10 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
 
   /// Mode selector expert (5 modes backend) — conservé pour power users.
   Widget _buildExpertModeSelector(
-      BuildContext context, WidgetRef ref, MealPlanState state) {
+    BuildContext context,
+    WidgetRef ref,
+    MealPlanState state,
+  ) {
     final currentMode = state.currentPlan?.mode ?? 'STANDARD';
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -186,17 +204,20 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
                     await repo.setMode(planId, modeKey);
                     await ref.read(mealPlanProvider.notifier).refresh();
                   } catch (_) {
-                    await ref.read(mealPlanProvider.notifier)
+                    await ref
+                        .read(mealPlanProvider.notifier)
                         .generateNewPlan(mode: modeKey);
                   }
                 } else {
-                  await ref.read(mealPlanProvider.notifier)
+                  await ref
+                      .read(mealPlanProvider.notifier)
                       .generateNewPlan(mode: modeKey);
                 }
               },
               child: GlassContainer(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md, vertical: AppSpacing.sm,
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
                 ),
                 borderRadius: AppRadius.full,
                 elevated: isActive,
@@ -211,7 +232,9 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
                         color: isActive
                             ? AppColors.primaryAccentGreen
                             : PremiumTheme.textSecondary(context),
-                        fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: isActive
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                       ),
                     ),
                   ],
@@ -228,7 +251,9 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
   Widget _buildValueSummary(BuildContext context, MealPlanState state) {
     final cost = state.estimatedCost;
     final minutes = state.totalMinutes;
-    final avgMinutes = state.meals.isEmpty ? 0 : (minutes / state.meals.length).round();
+    final avgMinutes = state.meals.isEmpty
+        ? 0
+        : (minutes / state.meals.length).round();
 
     return PremiumCard(
       variant: PremiumCardVariant.accent,
@@ -263,13 +288,13 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
   /// Construit le squelette de chargement.
   Widget _buildGlassSkeleton() {
     return Column(
-      children: List.generate(7, (i) => Padding(
-        padding: const EdgeInsets.only(bottom: AppSpacing.md),
-        child: ShimmerGlassSkeleton(
-          width: double.infinity,
-          height: 88,
+      children: List.generate(
+        7,
+        (i) => Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+          child: ShimmerGlassSkeleton(width: double.infinity, height: 88),
         ),
-      )),
+      ),
     );
   }
 
@@ -317,7 +342,9 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
             ? () async {
                 final planId = state.currentPlan?.id;
                 if (planId != null) {
-                  await ref.read(groceryProvider.notifier).generateFromMealPlan(planId);
+                  await ref
+                      .read(groceryProvider.notifier)
+                      .generateFromMealPlan(planId);
                 }
                 if (context.mounted) context.go('/grocery');
               }
@@ -327,14 +354,16 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
 
     return Row(
       children: actions
-          .map((tile) => Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    right: actions.last == tile ? 0 : AppSpacing.sm,
-                  ),
-                  child: tile,
+          .map(
+            (tile) => Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  right: actions.last == tile ? 0 : AppSpacing.sm,
                 ),
-              ))
+                child: tile,
+              ),
+            ),
+          )
           .toList(),
     );
   }
@@ -349,8 +378,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.error_outline,
-                    color: AppColors.error, size: 20),
+                Icon(Icons.error_outline, color: AppColors.error, size: 20),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
@@ -369,8 +397,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
               child: GlassButton(
                 label: 'Retry',
                 icon: Icons.refresh,
-                onPressed: () =>
-                    ref.read(mealPlanProvider.notifier).refresh(),
+                onPressed: () => ref.read(mealPlanProvider.notifier).refresh(),
               ),
             ),
           ],
@@ -385,8 +412,11 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
       child: Column(
         children: [
-          Icon(Icons.restaurant_menu, size: 80,
-              color: PremiumTheme.textSecondary(context).withValues(alpha: 0.3)),
+          Icon(
+            Icons.restaurant_menu,
+            size: 80,
+            color: PremiumTheme.textSecondary(context).withValues(alpha: 0.3),
+          ),
           const SizedBox(height: AppSpacing.md),
           Text(
             'No meal plan yet',
@@ -426,7 +456,9 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
       grouped.putIfAbsent(entry.$2.day, () => []).add(entry);
     }
     final sortedDays = grouped.entries.toList()
-      ..sort((a, b) => dayOrder.indexOf(a.key).compareTo(dayOrder.indexOf(b.key)));
+      ..sort(
+        (a, b) => dayOrder.indexOf(a.key).compareTo(dayOrder.indexOf(b.key)),
+      );
 
     return [
       for (final dayGroup in sortedDays) ...[
@@ -457,7 +489,11 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
                   color: AppColors.error.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(AppRadius.xl),
                 ),
-                child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
+                child: const Icon(
+                  Icons.delete_outline,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
               child: MealCard(
                 meal: entry.$2,
@@ -475,14 +511,22 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
   /// Convertit un nom de jour abrégé en nom complet.
   String _fullDayName(String abbrev) {
     switch (abbrev) {
-      case 'Mon': return 'Monday';
-      case 'Tue': return 'Tuesday';
-      case 'Wed': return 'Wednesday';
-      case 'Thu': return 'Thursday';
-      case 'Fri': return 'Friday';
-      case 'Sat': return 'Saturday';
-      case 'Sun': return 'Sunday';
-      default: return abbrev;
+      case 'Mon':
+        return 'Monday';
+      case 'Tue':
+        return 'Tuesday';
+      case 'Wed':
+        return 'Wednesday';
+      case 'Thu':
+        return 'Thursday';
+      case 'Fri':
+        return 'Friday';
+      case 'Sat':
+        return 'Saturday';
+      case 'Sun':
+        return 'Sunday';
+      default:
+        return abbrev;
     }
   }
 
@@ -524,7 +568,9 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
                     onPressed: () async {
                       final planId = state.currentPlan?.id;
                       if (planId != null) {
-                        await ref.read(groceryProvider.notifier).generateFromMealPlan(planId);
+                        await ref
+                            .read(groceryProvider.notifier)
+                            .generateFromMealPlan(planId);
                       }
                       if (context.mounted) context.go('/grocery');
                     },
@@ -548,34 +594,21 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
   }
 
   /// Navigue vers le détail d'une recette.
-  void _onMealTap(
-    BuildContext context,
-    WidgetRef ref,
-    int index,
-    Meal meal,
-  ) {
+  void _onMealTap(BuildContext context, WidgetRef ref, int index, Meal meal) {
     if (meal.recipeId != null) {
       context.push('/recipe/${meal.recipeId}');
     }
   }
 
   /// Navigue vers l'écran d'échange de repas.
-  void _onMealSwap(
-    BuildContext context,
-    WidgetRef ref,
-    int index,
-    Meal meal,
-  ) {
+  void _onMealSwap(BuildContext context, WidgetRef ref, int index, Meal meal) {
     final plan = ref.read(mealPlanProvider).currentPlan;
     final entry = plan != null && plan.entries.length > index
         ? plan.entries[index]
         : null;
     context.push(
       '/meal-swap/$index/${meal.type}',
-      extra: {
-        'meal': meal,
-        'entry': entry,
-      },
+      extra: {'meal': meal, 'entry': entry},
     );
   }
 }
@@ -686,7 +719,8 @@ class _QuickFilterChip extends StatelessWidget {
         onTap: enabled ? onTap : null,
         child: GlassContainer(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md, vertical: AppSpacing.sm,
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
           ),
           borderRadius: AppRadius.full,
           borderColor: isLoading

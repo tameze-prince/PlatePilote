@@ -23,8 +23,10 @@ class FavoritesScreen extends ConsumerStatefulWidget {
 class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
   /// Liste des recettes favorites.
   List<RecipeDetail> _favorites = [];
+
   /// Vrai si le chargement est en cours.
   bool _isLoading = true;
+
   /// Message d'erreur éventuel.
   String? _error;
 
@@ -60,8 +62,9 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
 
   /// Retire une recette des favoris.
   Future<void> _removeFavorite(RecipeDetail recipe) async {
-    final success =
-        await ref.read(recipeRepositoryProvider).unfavoriteRecipe(recipe.id!);
+    final success = await ref
+        .read(recipeRepositoryProvider)
+        .unfavoriteRecipe(recipe.id!);
     if (success && mounted) {
       setState(() => _favorites.removeWhere((r) => r.id == recipe.id));
     }
@@ -70,49 +73,46 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Favorite Recipes'),
-      ),
+      appBar: AppBar(title: const Text('Favorite Recipes')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.error_outline, size: 48,
-                          color: Colors.red),
-                      const SizedBox(height: AppSpacing.md),
-                      Text(_error!),
-                      const SizedBox(height: AppSpacing.md),
-                      FilledButton(
-                        onPressed: _loadFavorites,
-                        child: const Text('Retry'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(_error!),
+                  const SizedBox(height: AppSpacing.md),
+                  FilledButton(
+                    onPressed: _loadFavorites,
+                    child: const Text('Retry'),
                   ),
-                )
-              : _favorites.isEmpty
-                  ? Builder(
-                      builder: (context) {
-                        final l10n = context.l10n!;
-                        return PpEmptyState(
-                          icon: Icons.favorite_border,
-                          title: l10n.emptyFavoritesTitle,
-                          subtitle: l10n.emptyFavoritesSubtitle,
-                          actionLabel: l10n.emptyFavoritesCta,
-                          onAction: () => context.push('/search'),
-                        );
-                      },
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      itemCount: _favorites.length,
-                      itemBuilder: (context, index) {
-                        final recipe = _favorites[index];
-                        return _buildFavoriteCard(recipe);
-                      },
-                    ),
+                ],
+              ),
+            )
+          : _favorites.isEmpty
+          ? Builder(
+              builder: (context) {
+                final l10n = context.l10n!;
+                return PpEmptyState(
+                  icon: Icons.favorite_border,
+                  title: l10n.emptyFavoritesTitle,
+                  subtitle: l10n.emptyFavoritesSubtitle,
+                  actionLabel: l10n.emptyFavoritesCta,
+                  onAction: () => context.push('/search'),
+                );
+              },
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              itemCount: _favorites.length,
+              itemBuilder: (context, index) {
+                final recipe = _favorites[index];
+                return _buildFavoriteCard(recipe);
+              },
+            ),
     );
   }
 
@@ -176,8 +176,11 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                 icon: const Icon(Icons.favorite, color: AppColors.error),
                 onPressed: () => _removeFavorite(recipe),
               ),
-              const Icon(Icons.arrow_forward_ios, size: 16,
-                  color: AppColors.onSurfaceVariant),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: AppColors.onSurfaceVariant,
+              ),
             ],
           ),
         ),

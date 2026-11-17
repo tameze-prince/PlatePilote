@@ -62,9 +62,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save: $e')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Failed to save: $e')));
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -111,7 +110,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.md, 0, AppSpacing.md, 80,
+                    AppSpacing.md,
+                    0,
+                    AppSpacing.md,
+                    80,
                   ),
                   children: [
                     const SizedBox(height: AppSpacing.md),

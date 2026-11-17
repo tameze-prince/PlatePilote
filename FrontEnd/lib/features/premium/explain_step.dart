@@ -75,9 +75,8 @@ class ExplainStep extends ConsumerWidget {
                 GlassButton(
                   label: l10n.funnelCtaPickPlan,
                   icon: Icons.arrow_forward,
-                  onPressed: () => ref
-                      .read(premiumFunnelProvider.notifier)
-                      .next(),
+                  onPressed: () =>
+                      ref.read(premiumFunnelProvider.notifier).next(),
                 ),
                 const SizedBox(height: AppSpacing.lg),
               ],
@@ -97,10 +96,7 @@ class _ExplainHero extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GlowBadge(
-          label: l10n.funnelTrialBadge,
-          icon: Icons.star,
-        ),
+        GlowBadge(label: l10n.funnelTrialBadge, icon: Icons.star),
         const SizedBox(height: AppSpacing.md),
         Text(
           l10n.funnelExplainTitle,

@@ -29,16 +29,22 @@ class SearchScreen extends ConsumerStatefulWidget {
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   /// Requête de recherche en cours.
   String query = '';
+
   /// Résultats de la recherche.
   List<RecipeDetail> _results = [];
+
   /// Indique si une recherche est en cours.
   bool _isLoading = false;
+
   /// Message d'erreur éventuel.
   String? _error;
+
   /// Timer de debounce pour éviter les appels API trop fréquents.
   Timer? _debounce;
+
   /// Mode What-If : affiche comparaison prix & impact budget.
   bool _whatIfMode = false;
+
   /// Map de savings simulés (recipe_id → WhatIfResult).
   final Map<String, WhatIfResult> _whatIfResults = {};
 
@@ -215,8 +221,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             color: isDark
                                 ? AppColors.primaryContainer
                                 : AppColors.primaryContainer,
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.badge),
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.badge,
+                            ),
                           ),
                           child: Text(
                             '${_results.length}',
@@ -282,20 +289,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     )
                   else
                     ..._results.asMap().entries.map(
-                          (entry) => AnimatedListItem(
-                            delay: entry.key,
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: AppSpacing.sm,
-                              ),
-                              child: _buildResultCard(
-                                context: context,
-                                isDark: isDark,
-                                recipe: entry.value,
-                              ),
-                            ),
+                      (entry) => AnimatedListItem(
+                        delay: entry.key,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                          child: _buildResultCard(
+                            context: context,
+                            isDark: isDark,
+                            recipe: entry.value,
                           ),
                         ),
+                      ),
+                    ),
                 ],
               ),
             ),

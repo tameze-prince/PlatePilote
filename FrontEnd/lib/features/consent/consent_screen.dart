@@ -86,13 +86,10 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                       const SizedBox(height: AppSpacing.lg),
                       CheckboxListTile(
                         value: _analyticsAccepted,
-                        onChanged: (value) => setState(
-                          () => _analyticsAccepted = value ?? false,
-                        ),
+                        onChanged: (value) =>
+                            setState(() => _analyticsAccepted = value ?? false),
                         controlAffinity: ListTileControlAffinity.leading,
-                        title: const Text(
-                          'I accept anonymized beta analytics',
-                        ),
+                        title: const Text('I accept anonymized beta analytics'),
                         subtitle: const Text(
                           'No recipes, photos, payment details, or food preferences are sold. Analytics can be revoked from Settings.',
                         ),
@@ -100,9 +97,8 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                       ),
                       CheckboxListTile(
                         value: _pushAccepted,
-                        onChanged: (value) => setState(
-                          () => _pushAccepted = value ?? false,
-                        ),
+                        onChanged: (value) =>
+                            setState(() => _pushAccepted = value ?? false),
                         controlAffinity: ListTileControlAffinity.leading,
                         title: const Text('Enable app push reminders'),
                         subtitle: const Text(
@@ -114,8 +110,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton.icon(
-                          onPressed:
-                              _analyticsAccepted && !_isSaving ? _continue : null,
+                          onPressed: _analyticsAccepted && !_isSaving
+                              ? _continue
+                              : null,
                           icon: _isSaving
                               ? const SizedBox(
                                   width: 18,
