@@ -74,7 +74,8 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          mapfile -t changed_files < <(git status --short --untracked-files=no | awk '{print $2}' | grep -E '^FrontEnd/.*\\.dart$|^FrontEnd/pubspec\\.lock
+          changed_files=$(git status --short --untracked-files=no | awk '{print $2}' | grep -E '^FrontEnd/.*\.dart$|^FrontEnd/pubspec\.lock
+        run: flutter analyze
 
       - name: Run unit tests with coverage
         run: flutter test --no-pub --coverage
@@ -142,14 +143,13 @@ jobs:
             cd FrontEnd
             flutter test integration_test/ -d emulator-5554 --dart-define=PLATEPILOT_API_BASE_URL=http://127.0.0.1:9
  || true)
-          if [ "${#changed_files[@]}" -gt 0 ]; then
-            git add -- "${changed_files[@]}"
+          if [ -n "$changed_files" ]; then
+            git add -- $changed_files
             if ! git diff --cached --quiet; then
               git commit -m "style(mobile): format Flutter sources and lock dependencies"
               git push origin HEAD:release/production-readiness
             fi
           fi
-
       - name: Static analysis
         run: flutter analyze
 
