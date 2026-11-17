@@ -193,7 +193,13 @@ class MealPlanServiceBehaviorTest {
             return saved;
         });
         when(entries.findByMealPlanId(planId))
-                .thenReturn(List.of(entry(UUID.randomUUID(), planId)));
+                .thenReturn(List.of(MealPlanEntry.builder()
+                        .mealPlanId(planId)
+                        .recipeId(recipeId)
+                        .mealDate(start)
+                        .mealType("Breakfast")
+                        .servings(2)
+                        .build()));
         when(recipes.findAllById(List.of(recipeId))).thenReturn(List.of(recipe));
 
         var response = service.generateWeeklyPlan(userId, start, MealPlanMode.FAMILY);
