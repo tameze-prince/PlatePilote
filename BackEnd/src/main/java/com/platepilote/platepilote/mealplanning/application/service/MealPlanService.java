@@ -85,7 +85,7 @@ public class MealPlanService {
      */
     @Transactional(readOnly = true)
     public MealPlanResponse getMealPlanById(UUID userId, UUID mealPlanId) {
-        MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
+        MealPlan mealPlan = findActiveMealPlan(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
 
         securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", mealPlanId.toString());
@@ -131,7 +131,7 @@ public class MealPlanService {
      * @return réponse complète du plan mis à jour
      */
     public MealPlanResponse addEntry(UUID userId, UUID mealPlanId, MealPlanEntryRequest request) {
-        MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
+        MealPlan mealPlan = findActiveMealPlan(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
 
         securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", mealPlanId.toString());
@@ -167,7 +167,7 @@ public class MealPlanService {
         MealPlanEntry entry = mealPlanEntryRepository.findById(entryId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlanEntry", "id", entryId.toString()));
 
-        MealPlan mealPlan = mealPlanRepository.findById(entry.getMealPlanId())
+        MealPlan mealPlan = findActiveMealPlan(entry.getMealPlanId())
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", entry.getMealPlanId().toString()));
 
         securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", entry.getMealPlanId().toString());
@@ -182,7 +182,7 @@ public class MealPlanService {
      * @param mealPlanId identifiant du plan à activer
      */
     public void activateMealPlan(UUID userId, UUID mealPlanId) {
-        MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
+        MealPlan mealPlan = findActiveMealPlan(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
 
         securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", mealPlanId.toString());
@@ -259,7 +259,7 @@ public class MealPlanService {
     public List<SmartSwapService.SwapOption> getSwapOptions(UUID userId, UUID entryId, int limit) {
         MealPlanEntry entry = mealPlanEntryRepository.findById(entryId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlanEntry", "id", entryId.toString()));
-        MealPlan mealPlan = mealPlanRepository.findById(entry.getMealPlanId())
+        MealPlan mealPlan = findActiveMealPlan(entry.getMealPlanId())
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", entry.getMealPlanId().toString()));
         securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", entry.getMealPlanId().toString());
         return smartSwapService.getSwapOptions(userId, entryId, limit);
@@ -280,12 +280,13 @@ public class MealPlanService {
         MealPlanEntry entry = mealPlanEntryRepository.findById(entryId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlanEntry", "id", entryId.toString()));
 
-        MealPlan mealPlan = mealPlanRepository.findById(entry.getMealPlanId())
+        MealPlan mealPlan = findActiveMealPlan(entry.getMealPlanId())
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", entry.getMealPlanId().toString()));
 
         securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", entry.getMealPlanId().toString());
 
         Recipe newRecipe = requireAccessibleRecipe(userId, newRecipeId);
+        smartSwapService.assertSwapAllowed(userId);
 
         entry.setRecipeId(newRecipeId);
         mealPlanEntryRepository.save(entry);
@@ -307,7 +308,7 @@ public class MealPlanService {
      * @return réponse complète du plan mis à jour
      */
     public MealPlanResponse setMode(UUID userId, UUID mealPlanId, MealPlanMode mode) {
-        MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
+        MealPlan mealPlan = findActiveMealPlan(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
         securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", mealPlanId.toString());
         mealPlan.setMode(mode.name());
@@ -322,13 +323,17 @@ public class MealPlanService {
      * @param mealPlanId identifiant du plan à supprimer
      */
     public void deleteMealPlan(UUID userId, UUID mealPlanId) {
-        MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
+        MealPlan mealPlan = findActiveMealPlan(mealPlanId)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlan", "id", mealPlanId.toString()));
 
         securityUtils.verifyOwnership(mealPlan.getUserId(), userId, "MealPlan", mealPlanId.toString());
 
         mealPlan.softDelete();
         mealPlanRepository.save(mealPlan);
+    }
+
+    private java.util.Optional<MealPlan> findActiveMealPlan(UUID mealPlanId) {
+        return mealPlanRepository.findById(mealPlanId).filter(mealPlan -> !mealPlan.isDeleted());
     }
 
     /**
