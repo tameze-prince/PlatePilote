@@ -791,7 +791,7 @@ class _AddPantryItemScreenState extends ConsumerState<AddPantryItemScreen> {
           ),
           const SizedBox(height: AppSpacing.md),
           DropdownButtonFormField<String>(
-            value: _category,
+            initialValue: _category,
             items: _categories
                 .map((v) => DropdownMenuItem(value: v, child: Text(v)))
                 .toList(),
