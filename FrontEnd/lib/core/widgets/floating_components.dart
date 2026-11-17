@@ -503,7 +503,7 @@ class FloatingAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
                 child: Row(
                   children: [
-                    if (leading != null) leading!,
+                    ?leading,
                     Expanded(
                       child: title ??
                           Text(
@@ -516,7 +516,7 @@ class FloatingAppBar extends StatelessWidget implements PreferredSizeWidget {
                             ),
                           ),
                     ),
-                    if (actions != null) ...actions!,
+                    ...?actions,
                   ],
                 ),
               ),

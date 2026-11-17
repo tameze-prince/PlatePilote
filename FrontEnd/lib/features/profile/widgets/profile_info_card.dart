@@ -236,19 +236,21 @@ class ProfileInfoCard extends ConsumerWidget {
   ) {
     showDialog<void>(
       context: context,
-      builder: (ctx) => SimpleDialog(
-        title: Text(title),
-        children: options.map((opt) => RadioListTile<String>(
-          title: Text(opt),
-          value: opt,
-          groupValue: current,
-          onChanged: (v) {
-            if (v != null) {
-              onSave(v);
-              Navigator.pop(ctx);
-            }
-          },
-        )).toList(),
+      builder: (ctx) => RadioGroup<String>(
+        groupValue: current,
+        onChanged: (v) {
+          if (v != null) {
+            onSave(v);
+            Navigator.pop(ctx);
+          }
+        },
+        child: SimpleDialog(
+          title: Text(title),
+          children: options.map((opt) => RadioListTile<String>(
+            title: Text(opt),
+            value: opt,
+          )).toList(),
+        ),
       ),
     );
   }
