@@ -48,7 +48,7 @@ void main() {
           sharedPreferencesProvider.overrideWithValue(prefs),
           secureStorageProvider.overrideWithValue(MockTokenStorage()),
         ],
-        child: const MaterialApp(
+        child: MaterialApp(
           locale: Locale('en'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
