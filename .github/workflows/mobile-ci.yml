@@ -116,7 +116,7 @@ jobs:
 
       - name: Build debug APKs (split per ABI)
         env:
-          PLATEPILOT_API_BASE_URL: ${{ vars.PLATEPILOT_API_BASE_URL }}
+          PLATEPILOT_API_BASE_URL: ${{ vars.PLATEPILOT_API_BASE_URL || 'http://127.0.0.1:9' }}
           FIREBASE_ANDROID_API_KEY: ${{ vars.FIREBASE_ANDROID_API_KEY }}
           FIREBASE_ANDROID_APP_ID: ${{ vars.FIREBASE_ANDROID_APP_ID }}
           FIREBASE_MESSAGING_SENDER_ID: ${{ vars.FIREBASE_MESSAGING_SENDER_ID }}
