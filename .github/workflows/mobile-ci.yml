@@ -101,7 +101,7 @@ jobs:
 
       - name: Validate debug API configuration
         env:
-          PLATEPILOT_API_BASE_URL: ${{ vars.PLATEPILOT_API_BASE_URL }}
+          PLATEPILOT_API_BASE_URL: ${{ vars.PLATEPILOT_API_BASE_URL || 'http://127.0.0.1:9' }}
         run: |
           set -euo pipefail
           python3 - <<'PY'
