@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -201,6 +202,39 @@ class GroceryServiceBehaviorTest {
                 .hasMessageContaining("Actual prices must be non-negative");
 
         verifyNoInteractions(lists, items, securityUtils, pantryItems, purchases, budgets);
+    }
+
+    @Test
+    void checkoutRejectsPricesForItemsOutsideTheSelectionBeforeLoadingTheList() {
+        UUID userId = UUID.randomUUID();
+        UUID listId = UUID.randomUUID();
+        UUID selectedItemId = UUID.randomUUID();
+        UUID unrelatedItemId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> service.checkoutList(
+                userId, listId, List.of(selectedItemId),
+                Map.of(unrelatedItemId, new BigDecimal("4.50"))))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageContaining("Actual prices must be non-negative");
+
+        verifyNoInteractions(lists, items, securityUtils, pantryItems, purchases, budgets);
+    }
+
+    @Test
+    void checkoutRejectsSelectedItemsThatDoNotBelongToTheList() {
+        UUID userId = UUID.randomUUID();
+        UUID listId = UUID.randomUUID();
+        UUID unrelatedItemId = UUID.randomUUID();
+        when(lists.findById(listId)).thenReturn(Optional.of(list(listId, userId)));
+        when(items.findByGroceryListIdOrderBySortOrderAsc(listId)).thenReturn(List.of());
+
+        assertThatThrownBy(() -> service.checkoutList(
+                userId, listId, List.of(unrelatedItemId), null))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageContaining("do not belong to this grocery list");
+
+        verify(securityUtils).verifyOwnership(userId, userId, "GroceryList", listId.toString());
+        verifyNoInteractions(pantryItems, purchases, budgets);
     }
 
     private static GroceryList list(UUID id, UUID userId) {
