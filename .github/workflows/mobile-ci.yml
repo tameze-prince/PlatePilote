@@ -186,6 +186,4 @@ jobs:
           profile: pixel_6
           emulator-boot-timeout: 900
           disable-animations: true
-          script: |
-            cd FrontEnd
-            flutter test integration_test/ -d emulator-5554 --dart-define=PLATEPILOT_API_BASE_URL=http://127.0.0.1:9
+          script: cd FrontEnd && flutter test integration_test/ -d emulator-5554 --dart-define=PLATEPILOT_API_BASE_URL=http://127.0.0.1:9
