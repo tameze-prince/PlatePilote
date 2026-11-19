@@ -1,6 +1,7 @@
 package com.platepilote.platepilote.grocery.application.service;
 
 import com.platepilote.platepilote.budget.domain.repository.BudgetRepository;
+import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
 import com.platepilote.platepilote.common.security.SecurityUtils;
 import com.platepilote.platepilote.grocery.application.dto.GroceryItemRequest;
@@ -161,6 +162,45 @@ class GroceryServiceBehaviorTest {
                 .isInstanceOf(ResourceNotFoundException.class);
 
         verifyNoInteractions(items);
+    }
+
+    @Test
+    void checkoutRejectsAnEmptySelectionBeforeLoadingTheList() {
+        UUID userId = UUID.randomUUID();
+        UUID listId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> service.checkoutList(userId, listId, List.of(), null))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageContaining("At least one valid checked item ID");
+
+        verifyNoInteractions(lists, items, securityUtils, pantryItems, purchases, budgets);
+    }
+
+    @Test
+    void checkoutRejectsDuplicateItemIdsBeforeLoadingTheList() {
+        UUID userId = UUID.randomUUID();
+        UUID listId = UUID.randomUUID();
+        UUID itemId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> service.checkoutList(userId, listId, List.of(itemId, itemId), null))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageContaining("Duplicate checked item IDs");
+
+        verifyNoInteractions(lists, items, securityUtils, pantryItems, purchases, budgets);
+    }
+
+    @Test
+    void checkoutRejectsNegativeActualPricesBeforeLoadingTheList() {
+        UUID userId = UUID.randomUUID();
+        UUID listId = UUID.randomUUID();
+        UUID itemId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> service.checkoutList(
+                userId, listId, List.of(itemId), java.util.Map.of(itemId, new BigDecimal("-0.01"))))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageContaining("Actual prices must be non-negative");
+
+        verifyNoInteractions(lists, items, securityUtils, pantryItems, purchases, budgets);
     }
 
     private static GroceryList list(UUID id, UUID userId) {
