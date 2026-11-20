@@ -251,8 +251,9 @@ class GroceryServiceBehaviorTest {
         when(lists.findById(listId)).thenReturn(Optional.of(list));
         when(items.findByGroceryListIdOrderBySortOrderAsc(listId))
                 .thenReturn(List.of(purchased), List.of());
-        when(budgets.findByUserIdAndDeletedAtIsNull(userId, org.mockito.ArgumentMatchers.any(
-                org.springframework.data.domain.Pageable.class)))
+        when(budgets.findByUserIdAndDeletedAtIsNull(
+                org.mockito.ArgumentMatchers.eq(userId),
+                org.mockito.ArgumentMatchers.any(org.springframework.data.domain.Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(budget)));
 
         var response = service.checkoutList(
