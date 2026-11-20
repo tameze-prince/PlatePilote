@@ -1,5 +1,6 @@
 package com.platepilote.platepilote.grocery.application.service;
 
+import com.platepilote.platepilote.budget.domain.entity.Budget;
 import com.platepilote.platepilote.budget.domain.repository.BudgetRepository;
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
 import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
@@ -13,6 +14,7 @@ import com.platepilote.platepilote.grocery.domain.repository.GroceryListReposito
 import com.platepilote.platepilote.grocery.domain.repository.PurchaseRecordRepository;
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanEntryRepository;
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanRepository;
+import com.platepilote.platepilote.pantry.domain.entity.PantryItem;
 import com.platepilote.platepilote.pantry.domain.repository.PantryItemRepository;
 import com.platepilote.platepilote.pricing.application.service.PricingService;
 import com.platepilote.platepilote.recipes.domain.repository.RecipeIngredientRepository;
@@ -20,6 +22,7 @@ import com.platepilote.platepilote.userprofile.domain.repository.UserProfileRepo
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -28,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.PageImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -218,6 +222,62 @@ class GroceryServiceBehaviorTest {
                 .hasMessageContaining("Actual prices must be non-negative");
 
         verifyNoInteractions(lists, items, securityUtils, pantryItems, purchases, budgets);
+    }
+
+    @Test
+    void checkoutRecordsPurchaseUpdatesPantryAndBudgetAndCompletesFullyPurchasedList() {
+        UUID userId = UUID.randomUUID();
+        UUID listId = UUID.randomUUID();
+        UUID itemId = UUID.randomUUID();
+        GroceryList list = list(listId, userId);
+        GroceryItem purchased = GroceryItem.builder()
+                .groceryListId(listId)
+                .name("Rice")
+                .category("Grains")
+                .quantity(new BigDecimal("2"))
+                .unit("kg")
+                .estimatedPrice(new BigDecimal("8.00"))
+                .checked(true)
+                .build();
+        purchased.setId(itemId);
+        Budget budget = Budget.builder()
+                .userId(userId)
+                .amount(new BigDecimal("100.00"))
+                .period("MONTHLY")
+                .startDate(java.time.LocalDate.now())
+                .spent(new BigDecimal("12.00"))
+                .build();
+
+        when(lists.findById(listId)).thenReturn(Optional.of(list));
+        when(items.findByGroceryListIdOrderBySortOrderAsc(listId))
+                .thenReturn(List.of(purchased), List.of());
+        when(budgets.findByUserIdAndDeletedAtIsNull(userId, org.mockito.ArgumentMatchers.any(
+                org.springframework.data.domain.Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(budget)));
+
+        var response = service.checkoutList(
+                userId, listId, List.of(itemId), Map.of(itemId, new BigDecimal("9.50")));
+
+        assertThat(response.totalSpent()).isEqualByComparingTo("9.50");
+        assertThat(response.purchaseRecord().itemNames()).containsExactly("Rice");
+        assertThat(response.purchaseRecord().totalPrice()).isEqualByComparingTo("9.50");
+        assertThat(response.list().status()).isEqualTo("COMPLETED");
+        assertThat(response.list().items()).isEmpty();
+        assertThat(budget.getSpent()).isEqualByComparingTo("21.50");
+
+        ArgumentCaptor<PantryItem> pantryCaptor = ArgumentCaptor.forClass(PantryItem.class);
+        verify(pantryItems).save(pantryCaptor.capture());
+        assertThat(pantryCaptor.getValue().getName()).isEqualTo("Rice");
+        assertThat(pantryCaptor.getValue().getQuantity()).isEqualByComparingTo("2");
+
+        ArgumentCaptor<com.platepilote.platepilote.grocery.domain.entity.PurchaseRecord> purchaseCaptor =
+                ArgumentCaptor.forClass(com.platepilote.platepilote.grocery.domain.entity.PurchaseRecord.class);
+        verify(purchases).save(purchaseCaptor.capture());
+        assertThat(purchaseCaptor.getValue().getTotalPrice()).isEqualByComparingTo("9.50");
+        assertThat(purchaseCaptor.getValue().getUnitPrice()).isEqualByComparingTo("4.75");
+        verify(items).delete(purchased);
+        verify(lists).save(list);
+        verify(budgets).save(budget);
     }
 
     @Test
