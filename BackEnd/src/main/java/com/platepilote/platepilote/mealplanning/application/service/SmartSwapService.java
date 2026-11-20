@@ -74,8 +74,12 @@ public class SmartSwapService {
      */
     @Transactional(readOnly = true)
     public List<SwapOption> getSwapOptions(UUID userId, UUID entryId, int limit, MealPlanMode mode) {
+        if (limit < 1) {
+            throw new BusinessRuleViolationException("Swap option limit must be at least 1");
+        }
+
         MealPlanEntry entry = mealPlanEntryRepository.findById(entryId)
-                .orElseThrow(() -> new RuntimeException("Entry not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("MealPlanEntry", "id", entryId.toString()));
 
         if (!hasSwapAllowance(userId)) {
             return List.of();
