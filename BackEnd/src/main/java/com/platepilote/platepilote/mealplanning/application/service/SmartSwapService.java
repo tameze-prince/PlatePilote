@@ -96,6 +96,8 @@ public class SmartSwapService {
         return candidates.stream()
                 .filter(r -> !List.of(alreadyUsed).contains(r.getId()))
                 .filter(r -> r.getEnabled() != null && r.getEnabled())
+                // The requested time ceiling must be enforced, not only calculated.
+                .filter(r -> r.getTotalTimeMinutes() != null && r.getTotalTimeMinutes() <= maxTime)
                 .map(r -> new SwapOption(
                         r.getId(), r.getName(), r.getDescription(),
                         r.getImageUrl(), r.getTotalTimeMinutes(),
