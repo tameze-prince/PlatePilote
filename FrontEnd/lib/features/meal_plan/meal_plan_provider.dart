@@ -91,7 +91,11 @@ class MealPlanState {
 class MealPlanNotifier extends Notifier<MealPlanState> {
   @override
   MealPlanState build() {
-    Future.microtask(() => _loadCurrentPlan());
+    Future.microtask(() {
+      if (ref.mounted) {
+        _loadCurrentPlan();
+      }
+    });
     return const MealPlanState(isLoading: true);
   }
 
@@ -183,10 +187,16 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
     try {
       final repo = ref.read(mealPlanRepositoryProvider);
       final page = await repo.listMealPlans(size: 20);
+      if (!ref.mounted) return;
+
       if (page.content.isNotEmpty) {
         final plans = page.content;
         final plan = await repo.getMealPlan(plans.first.id);
+        if (!ref.mounted) return;
+
         final meals = await _entriesToMeals(plan.entries);
+        if (!ref.mounted) return;
+
         state = MealPlanState(
           currentPlan: plan,
           meals: meals,
@@ -196,8 +206,10 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
         state = const MealPlanState();
       }
     } on ApiException catch (e) {
+      if (!ref.mounted) return;
       state = state.copyWith(isLoading: false, error: e.message);
     } catch (e) {
+      if (!ref.mounted) return;
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -369,6 +381,7 @@ class MealPlanNotifier extends Notifier<MealPlanState> {
   /// Recharge le plan de repas courant.
   Future<List<Meal>> refresh() async {
     await _loadCurrentPlan();
+    if (!ref.mounted) return const [];
     return state.meals;
   }
 }
