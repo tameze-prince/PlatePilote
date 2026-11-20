@@ -13,7 +13,13 @@ pluginManagement {
     repositories {
         google()
         mavenCentral()
-        gradlePluginPortal()
+        // Resolve Kotlin's transitive artifacts from Maven Central instead of
+        // relying on the Plugin Portal's partial Maven mirror.
+        gradlePluginPortal {
+            content {
+                excludeGroup("org.jetbrains.kotlin")
+            }
+        }
     }
 }
 
