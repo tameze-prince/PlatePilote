@@ -89,7 +89,7 @@ class SmartSwapServiceTest {
                 .extracting(SmartSwapService.SwapOption::recipeId)
                 .containsExactly(quick.getId());
         org.assertj.core.api.Assertions.assertThat(options.getFirst().compatibility())
-                .isEqualTo(2.0);
+                .isCloseTo(2.0, org.assertj.core.api.Assertions.within(1.0e-9));
         verifyNoInteractions(swapTrackingRepository);
     }
 
