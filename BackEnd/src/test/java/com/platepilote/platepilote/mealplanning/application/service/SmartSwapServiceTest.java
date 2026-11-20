@@ -1,11 +1,14 @@
 package com.platepilote.platepilote.mealplanning.application.service;
 
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
+import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanEntry;
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanEntryRepository;
 import com.platepilote.platepilote.mealplanning.domain.repository.SwapTrackingRepository;
 import com.platepilote.platepilote.authentication.domain.entity.OurUser;
 import com.platepilote.platepilote.authentication.domain.repository.UserRepository;
+import com.platepilote.platepilote.recipes.domain.entity.Recipe;
 import com.platepilote.platepilote.recipes.domain.repository.RecipeRepository;
+import org.springframework.data.domain.PageImpl;
 import com.platepilote.platepilote.recommendation.domain.service.RecommendationEngine;
 import com.platepilote.platepilote.subscription.application.service.EntitlementService;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,6 +54,58 @@ class SmartSwapServiceTest {
                 entitlementService,
                 userRepository,
                 swapTrackingRepository);
+    }
+
+    @Test
+    void quickSwapOptionsExcludeRecipesThatExceedThirtyMinutesAndAlreadyUsedRecipes() {
+        UUID userId = UUID.randomUUID();
+        UUID entryId = UUID.randomUUID();
+        UUID planId = UUID.randomUUID();
+        UUID alreadyUsedRecipeId = UUID.randomUUID();
+        MealPlanEntry entry = MealPlanEntry.builder()
+                .mealPlanId(planId)
+                .recipeId(alreadyUsedRecipeId)
+                .mealDate(LocalDate.of(2026, 11, 20))
+                .mealType("Dinner")
+                .servings(2)
+                .notes("quick meal")
+                .build();
+        Recipe quick = recipe(UUID.randomUUID(), "Quick dinner", 25, true);
+        Recipe tooSlow = recipe(UUID.randomUUID(), "Slow dinner", 45, true);
+        Recipe alreadyUsed = recipe(alreadyUsedRecipeId, "Already planned", 15, true);
+        Recipe disabled = recipe(UUID.randomUUID(), "Disabled", 10, false);
+
+        when(mealPlanEntryRepository.findById(entryId)).thenReturn(Optional.of(entry));
+        when(entitlementService.hasActiveEntitlement(
+                userId, EntitlementService.PREMIUM_ENTITLEMENT)).thenReturn(true);
+        when(recipeRepository.findByMealTypeAndIsPublicTrueAndEnabledTrueAndDeletedAtIsNull(
+                eq("Dinner"), any(org.springframework.data.domain.Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(quick, tooSlow, alreadyUsed, disabled)));
+        when(mealPlanEntryRepository.findByMealPlanId(planId)).thenReturn(List.of(entry));
+
+        var options = service.getSwapOptions(userId, entryId, 10);
+
+        org.assertj.core.api.Assertions.assertThat(options)
+                .extracting(SmartSwapService.SwapOption::recipeId)
+                .containsExactly(quick.getId());
+        org.assertj.core.api.Assertions.assertThat(options.getFirst().compatibility())
+                .isEqualTo(2.0);
+        verifyNoInteractions(swapTrackingRepository);
+    }
+
+    private static Recipe recipe(UUID id, String name, int totalTimeMinutes, boolean enabled) {
+        Recipe recipe = Recipe.builder()
+                .name(name)
+                .description(name)
+                .mealType("Dinner")
+                .totalTimeMinutes(totalTimeMinutes)
+                .estimatedCost(new BigDecimal("10.00"))
+                .imageUrl("https://example.test/recipe.jpg")
+                .confidenceScore(0.9)
+                .enabled(enabled)
+                .build();
+        recipe.setId(id);
+        return recipe;
     }
 
     @Test
