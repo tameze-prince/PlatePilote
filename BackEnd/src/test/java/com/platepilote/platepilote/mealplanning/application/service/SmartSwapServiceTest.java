@@ -1,6 +1,7 @@
 package com.platepilote.platepilote.mealplanning.application.service;
 
 import com.platepilote.platepilote.common.kernel.BusinessRuleViolationException;
+import com.platepilote.platepilote.common.kernel.ResourceNotFoundException;
 import com.platepilote.platepilote.mealplanning.domain.entity.MealPlanEntry;
 import com.platepilote.platepilote.mealplanning.domain.repository.MealPlanEntryRepository;
 import com.platepilote.platepilote.mealplanning.domain.repository.SwapTrackingRepository;
@@ -91,6 +92,33 @@ class SmartSwapServiceTest {
         org.assertj.core.api.Assertions.assertThat(options.getFirst().compatibility())
                 .isCloseTo(2.0, org.assertj.core.api.Assertions.within(1.0e-9));
         verifyNoInteractions(swapTrackingRepository);
+    }
+
+
+    @Test
+    void swapOptionsRejectNonPositiveLimitsBeforeLoadingTheEntry() {
+        UUID userId = UUID.randomUUID();
+        UUID entryId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> service.getSwapOptions(userId, entryId, 0))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageContaining("limit must be at least 1");
+
+        verifyNoInteractions(mealPlanEntryRepository, recipeRepository, entitlementService,
+                swapTrackingRepository);
+    }
+
+    @Test
+    void swapOptionsUseDomainNotFoundExceptionForMissingEntries() {
+        UUID userId = UUID.randomUUID();
+        UUID entryId = UUID.randomUUID();
+        when(mealPlanEntryRepository.findById(entryId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.getSwapOptions(userId, entryId, 5))
+                .isInstanceOf(ResourceNotFoundException.class);
+
+        verify(mealPlanEntryRepository).findById(entryId);
+        verifyNoInteractions(recipeRepository, entitlementService, swapTrackingRepository);
     }
 
     private static Recipe recipe(UUID id, String name, int totalTimeMinutes, boolean enabled) {
