@@ -1,0 +1,70 @@
+name: iOS CI (Flutter)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'FrontEnd/**'
+      - '.github/workflows/ios-ci.yml'
+  push:
+    branches: [main, release/production-readiness]
+    paths:
+      - 'FrontEnd/**'
+      - '.github/workflows/ios-ci.yml'
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: FrontEnd
+
+jobs:
+  ios-ci:
+    name: iOS simulator build and Flutter tests
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          cache: true
+
+      - name: Show toolchain versions
+        run: |
+          flutter --version
+          xcodebuild -version
+          pod --version
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Patch generated localization delegates for standalone Material UI
+        run: python3 tool/patch_generated_localizations.py
+
+      - name: Regenerate Freezed and JSON serialization sources
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Static analysis
+        run: flutter analyze
+
+      - name: Run Flutter unit and widget tests
+        run: flutter test --no-pub --coverage
+
+      - name: Build iOS simulator app (unsigned)
+        run: |
+          flutter build ios --simulator --no-codesign --debug \
+            --dart-define=PLATEPILOT_API_BASE_URL=https://api.example.invalid
+
+      - name: Upload iOS simulator build
+        uses: actions/upload-artifact@v4
+        with:
+          name: platepilote-ios-simulator-${{ github.run_id }}
+          path: FrontEnd/build/ios/iphonesimulator/Runner.app
+          if-no-files-found: error
+          retention-days: 7
